@@ -1,0 +1,24 @@
+{
+  "Name": "hmip_motion_by_reading",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_motion_by_reading",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "18c9af6c-f33f-a3da-eb8c-5ce67a1f5758",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000005:4",
+    "ccutype": "X"
+  },
+  "Readings": {
+    "1.MOTION": {
+      "Value": "true",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.AVERAGE_ILLUMINATION": {
+      "Value": "12",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

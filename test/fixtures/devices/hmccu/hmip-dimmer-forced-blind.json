@@ -1,0 +1,23 @@
+{
+  "Name": "hmip_dimmer_forced_blind",
+  "PossibleSets": "on off pct datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_dimmer_forced_blind",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "7f077849-f33f-4656-ae86-bc0b366c8da6",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000009:4",
+    "ccutype": "HmIP-BDT",
+    "ccurole": "DIMMER_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "4.LEVEL": {
+      "Value": "0.5",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "blind"
+  }
+}

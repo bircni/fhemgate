@@ -1,0 +1,20 @@
+{
+  "Name": "hmip_swdo_by_type",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_swdo_by_type",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "298af417-f33f-328c-2f4b-20d40e414eb0",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000003:4",
+    "ccutype": "HmIP-SWDO-I"
+  },
+  "Readings": {
+    "1.STATE": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

@@ -1,0 +1,25 @@
+{
+  "Name": "hmip_etrv_datapoint_only",
+  "PossibleSets": "datapoint config values",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_etrv_datapoint_only",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "a887584b-f33f-ca87-9fa6-cbcf0e8114c9",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000001:4",
+    "ccutype": "HmIP-eTRV",
+    "ccurole": "HEATING_CLIMATECONTROL_TRANSCEIVER"
+  },
+  "Readings": {
+    "1.SET_POINT_TEMPERATURE": {
+      "Value": "18.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.ACTUAL_TEMPERATURE": {
+      "Value": "17.0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

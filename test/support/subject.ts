@@ -11,6 +11,7 @@ import { CustomUUIDs } from '../../src/accessory/customCharacteristics.ts';
 import type { HistoryServiceClass } from '../../src/accessory/history.ts';
 import type { FhemPlatformConfig } from '../../src/config.ts';
 import { handleDebugRequest } from '../../src/debug/server.ts';
+import { hmccuChannel, hmccuDatapoint, hmccuMappings, hmccuReading, hmccuReadings, hmccuScalesLevel } from '../../src/devices/rules/hmccu.ts';
 import pluginInitializer from '../../src/index.ts';
 import { reading2homekit } from '../../src/mapping/toHomekit.ts';
 import type { PreparedMapping } from '../../src/mapping/types.ts';
@@ -32,6 +33,14 @@ export const sortByKey = sortListByKey as <T>(array: T[], key: string) => T[];
 
 export const color = { rgb2hex, hsv2rgb, ct2rgb, xyY2rgb, rgb2hsv };
 
+export const hmccu = {
+  readings: hmccuReadings,
+  channel: hmccuChannel,
+  reading: hmccuReading,
+  datapoint: hmccuDatapoint,
+  scalesLevel: hmccuScalesLevel,
+};
+
 export interface WorldOptions {
   /** functions a homebridgeMapping can refer to by name, as loaded from the jsFunctions file */
   jsFunctions?: Record<string, unknown>;
@@ -51,6 +60,8 @@ export interface World {
 
   /** creates the accessory for a device, as the platform does for every device fhem reports */
   accessory(device: FhemDevice, platform?: Record<string, unknown>): Accessory;
+  /** runs only the HMCCU detection */
+  hmccuMappings(device: FhemDevice, genericType?: string): { handled: boolean; accessory: Pick<Accessory, 'mappings' | 'service_name'> };
   /** creates a platform. it connects to fhem right away. */
   platform(config: PlatformConfig, api?: Record<string, unknown>): Platform;
 
@@ -124,6 +135,12 @@ export function createWorld(options: WorldOptions = {}): World {
     accessory(device, platform = {}) {
       const from = { log: logging, connection: {}, jsFunctions: options.jsFunctions, ...platform } as AccessoryPlatform;
       return new FhemAccessory(from, device, state, () => undefined) as unknown as Accessory;
+    },
+
+    hmccuMappings(device, genericType) {
+      const accessory = { log: logging, mappings: {}, service_name: genericType };
+      const handled = hmccuMappings(accessory, device, genericType);
+      return { handled, accessory: accessory };
     },
 
     platform(config, extra = {}) {

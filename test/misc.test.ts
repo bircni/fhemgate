@@ -1,7 +1,56 @@
-// smaller parts: the custom characteristics, the debug page, and loading the plugin
+// smaller parts: the HMCCU reading lookup, the custom characteristics, the debug page, and loading the plugin
 import { describe, expect, it, vi } from 'vitest';
-import { device } from './support/devices.ts';
-import { createWorld, customUUIDs, hap, initializer } from './support/subject.ts';
+import { device, hmccuDevice } from './support/devices.ts';
+import { createWorld, customUUIDs, hap, hmccu, initializer } from './support/subject.ts';
+
+describe('HMCCU datapoints', () => {
+  const d = hmccuDevice({
+    Readings: { '1.STATE': '0', '4.STATE': '1', 'ABC:4.LEVEL': '0.5', level: '1', '4.LEVEL_2': '0', WINDOW_STATE: '0' },
+    Attributes: { controldatapoint: '4.STATE', statedatapoint: 'ABC:1.LEVEL' },
+  });
+
+  it('finds the readings of a datapoint in every reading format, the least qualified first', () => {
+    expect(hmccu.readings(d, 'STATE')).toEqual(['1.STATE', '4.STATE']);
+    expect(hmccu.readings(d, 'LEVEL')).toEqual(['level', 'ABC:4.LEVEL']);
+    expect(hmccu.readings(d, 'MISSING')).toEqual([]);
+  });
+
+  it('knows the channel the control or state datapoint is pinned to', () => {
+    expect(hmccu.channel(d, 'STATE')).toBe('4');
+    expect(hmccu.channel(d, 'state')).toBe('4');
+    expect(hmccu.channel(d, 'LEVEL')).toBe('1');
+    expect(hmccu.channel(d, 'OTHER')).toBeUndefined();
+    expect(hmccu.channel(hmccuDevice({}), 'STATE')).toBeUndefined();
+  });
+
+  it('prefers the reading of the pinned channel', () => {
+    expect(hmccu.reading(d, 'STATE')).toBe('4.STATE');
+    expect(hmccu.reading(d, 'LEVEL')).toBe('level');
+    expect(hmccu.reading(d, 'LEVEL_2')).toBe('4.LEVEL_2');
+    expect(hmccu.reading(d, 'MISSING')).toBeUndefined();
+  });
+
+  it('builds the datapoint to set from the channel of the reading, or the pinned channel', () => {
+    expect(hmccu.datapoint(d, '4.STATE', 'STATE')).toBe('4.STATE');
+    expect(hmccu.datapoint(d, 'ABC:4.LEVEL', 'LEVEL')).toBe('4.LEVEL');
+    expect(hmccu.datapoint(d, 'level', 'LEVEL')).toBe('1.LEVEL');
+    expect(hmccu.datapoint(d, undefined, 'STATE')).toBe('4.STATE');
+    expect(hmccu.datapoint(d, 'WINDOW_STATE', 'WINDOW_STATE')).toBe('WINDOW_STATE');
+  });
+
+  it.each([
+    [undefined, false],
+    ['LEVEL:0:1:0:100', true],
+    ['4.LEVEL:0:1:0:100', true],
+    ['!LEVEL:0:1:0:100', true],
+    [':0:1:0:100', true],
+    ['TEMPERATURE:0:1:0:100', false],
+    ['TEMPERATURE:0:1:0:100,LEVEL:0:1:0:100', true],
+    ['LEVEL', false],
+  ])('ccuscaleval %s scales the level: %s', (ccuscaleval, scales) => {
+    expect(hmccu.scalesLevel(hmccuDevice({ Attributes: ccuscaleval === undefined ? {} : { ccuscaleval } }))).toBe(scales);
+  });
+});
 
 describe('custom characteristics', () => {
   it('have the ids eve and other apps know them by', () => {

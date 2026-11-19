@@ -1,0 +1,25 @@
+{
+  "Name": "hmip_broll_shutter",
+  "PossibleSets": "on:noArg off:noArg pct:slider,0,1,100 up down stop datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_broll_shutter",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "72468aa9-f33f-e611-721c-c4f286a30403",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000002:4",
+    "ccutype": "HmIP-BROLL",
+    "ccurole": "SHUTTER_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "4.LEVEL": {
+      "Value": "0.35",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "4.ACTIVITY_STATE": {
+      "Value": "3",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

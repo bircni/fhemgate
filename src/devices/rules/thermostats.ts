@@ -27,8 +27,8 @@ export const thermostatByType: Rule = ({ s, target, genericType }) => {
 };
 
 /** HomeMatic and Comet DECT: `set desired-temp` */
-export const desiredTemp: Rule = ({ s, target }) => {
-  const match = s.PossibleSets.match(/(^| )desired-temp(:[^\d]*([^$ ]*))?/);
+export const desiredTemp: Rule = ({ s, target, isHMCCU }) => {
+  const match = isHMCCU ? null : s.PossibleSets.match(/(^| )desired-temp(:[^\d]*([^$ ]*))?/);
   if (!match) {
     return false;
   }
@@ -76,8 +76,8 @@ export const desiredTemp: Rule = ({ s, target }) => {
 };
 
 /** MAX: `set desiredTemperature` */
-export const maxDesiredTemperature: Rule = ({ s, target }) => {
-  const match = s.PossibleSets.match(/(^| )desiredTemperature(:[^\d]*([^$ ]*))?/);
+export const maxDesiredTemperature: Rule = ({ s, target, isHMCCU }) => {
+  const match = isHMCCU ? null : s.PossibleSets.match(/(^| )desiredTemperature(:[^\d]*([^$ ]*))?/);
   if (!match) {
     return false;
   }
@@ -103,8 +103,8 @@ export const maxDesiredTemperature: Rule = ({ s, target }) => {
 };
 
 /** PID20: `set desired` */
-export const pid20Desired: Rule = ({ s, target }) => {
-  if (!s.PossibleSets.match(/(^| )desired(:[^\d]*([^$ ]*))?/)) {
+export const pid20Desired: Rule = ({ s, target, isHMCCU }) => {
+  if (isHMCCU || !s.PossibleSets.match(/(^| )desired(:[^\d]*([^$ ]*))?/)) {
     return false;
   }
 
@@ -127,11 +127,12 @@ export const pid20Desired: Rule = ({ s, target }) => {
 const valveClosed = '/^0+(\\.0+)?( |%|$)/';
 
 /**
- * A thermostat says nothing about whether it is heating. With a valve position it is heating
- * while the valve is open. Without one nothing is known, and it is shown as heating.
+ * A thermostat says nothing about whether it is heating, unless a rule before this one has
+ * found what does. With a valve position it is heating while the valve is open. Without one
+ * nothing is known, and it is shown as heating.
  */
 export const heatingStateDefault: Rule = ({ target }) => {
-  if (target.service_name !== 'thermostat') {
+  if (target.service_name !== 'thermostat' || target.mappings.CurrentHeatingCoolingState) {
     return false;
   }
 

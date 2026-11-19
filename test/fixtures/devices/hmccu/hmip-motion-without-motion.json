@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_motion_without_motion",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_motion_without_motion",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "50c53a0e-f33f-0f0f-5bca-776a1373cae2",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000004:4",
+    "ccutype": "X",
+    "ccurole": "MOTIONDETECTOR_TRANSCEIVER"
+  },
+  "Readings": {
+    "1.STATE": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

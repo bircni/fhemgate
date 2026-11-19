@@ -1,0 +1,20 @@
+{
+  "Name": "hmip_bdt_by_type",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_bdt_by_type",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "99ad797f-f33f-a30d-6fb6-0cfb3cf762b6",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000002:4",
+    "ccutype": "HmIP-BDT"
+  },
+  "Readings": {
+    "4.LEVEL": {
+      "Value": "0.2",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

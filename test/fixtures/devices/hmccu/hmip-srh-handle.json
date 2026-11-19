@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_srh_handle",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_srh_handle",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "670601db-f33f-91b3-a9a8-0369fd380487",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000004:4",
+    "ccutype": "HmIP-SRH",
+    "ccurole": "ROTARY_HANDLE_TRANSCEIVER"
+  },
+  "Readings": {
+    "1.STATE": {
+      "Value": "2",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

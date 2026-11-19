@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_ps_switch_datapoint_only",
+  "PossibleSets": "datapoint config",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_ps_switch_datapoint_only",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "0f90f507-f33f-2c0a-be80-3df1999d6886",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000009:4",
+    "ccutype": "HmIP-PS",
+    "ccurole": "SWITCH_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "3.STATE": {
+      "Value": "true",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

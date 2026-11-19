@@ -6,6 +6,7 @@ import type { PluginState } from '../state/pluginState.ts';
 import { doorState, garage, blind, hmSecWin, positionState, window } from './rules/blinds.ts';
 import { colorMode, colorTemperature, hue, milight, rgb, saturation, wifilight } from './rules/color.ts';
 import { fs20di, fs20Dimmer, homematicDimmer, hueBrightness, zwaveDimmer } from './rules/dimmers.ts';
+import { hmccuMappings } from './rules/hmccu.ts';
 import { hmSecKey, lock } from './rules/locks.ts';
 import { harmony, sonos, volume } from './rules/media.ts';
 import { current, energy, power, voltage } from './rules/power.ts';
@@ -43,6 +44,8 @@ export interface DetectionContext {
   s: Jsonlist2Device;
   /** the genericDeviceType attribute of the device, or its genericDisplayType */
   genericType: string | undefined;
+  /** the device is a HMCCU device and the HMCCU rule has mapped it */
+  isHMCCU: boolean;
   target: DetectionTarget;
   state: PluginState;
 }
@@ -143,7 +146,14 @@ export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, stat
 
   target.mappings = {};
 
-  const context: DetectionContext = { s, genericType, target, state };
+  // HMCCU devices use ccu datapoint names for their readings and none of the CUL_HM
+  // attributes the rules below rely on, so they are mapped separately.
+  let isHMCCU = false;
+  if (s.Internals.TYPE === 'HMCCUCHN' || s.Internals.TYPE === 'HMCCUDEV') {
+    isHMCCU = hmccuMappings(target, s, genericType);
+  }
+
+  const context: DetectionContext = { s, genericType, isHMCCU, target, state };
   for (const rule of rules) {
     if (rule(context) === 'stop') {
       return false;
@@ -171,11 +181,13 @@ export function reviseMappings(target: DetectionTarget, s: Jsonlist2Device): voi
   }
 
   if (target.service_name === 'thermostat') {
-    // a command with arguments, like 'datapoint 1.SET_POINT_TEMPERATURE', is not found among the set commands
+    // the cmd can carry arguments, e.g. 'datapoint 1.SET_POINT_TEMPERATURE'. only the
+    // command itself is listed in PossibleSets.
     const targetTemperature = target.mappings.TargetTemperature as Mapping | undefined;
-    const targetCmd = targetTemperature?.cmd;
+    const targetCmd = targetTemperature ? targetTemperature.cmd : undefined;
+    const targetVerb = targetCmd ? targetCmd.split(' ')[0] : undefined;
 
-    if (!targetCmd || !s.PossibleSets.match('(^| )' + targetCmd + '\\b')) {
+    if (!targetVerb || !s.PossibleSets.match('(^| )' + targetVerb + '\\b')) {
       target.log.error(s.Internals.NAME + ' is NOT a thermostat. set command for target temperature missing: ' + (targetCmd ? targetCmd : ''));
       delete target.mappings.TargetTemperature;
     }

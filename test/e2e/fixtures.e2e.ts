@@ -28,12 +28,15 @@ const jsFunctions = `module.exports = {${Object.entries(functions)
 // homebridge would refuse. it is among the fixtures above and has a test of its own below.
 const SKIPS_A_MAPPING = 'mapping/linked-services';
 
-/** the fixtures as fhem lists them */
+/** the fixtures, each with a hardware address of its own: several of the HMCCU ones share theirs */
 function devices(only?: string): FhemDevice[] {
   return fixtureDevices()
     .filter((fixture) => only === undefined || fixture.id === only)
-    .map((fixture) => {
+    .map((fixture, index) => {
       const device = fixture.load();
+      if (device.Internals.TYPE === 'HMCCUCHN' || device.Internals.TYPE === 'HMCCUDEV') {
+        device.Internals.DEF = `CCU 000E2E${String(index).padStart(8, '0')}:1`;
+      }
       return { Name: device.Internals.NAME, ...device };
     });
 }
@@ -111,7 +114,7 @@ describe.skipIf(realFhemUrl !== undefined).each(groups.map((group, index) => ({ 
       published.history = built.history ?? [];
     }
 
-    expect(Object.keys(built).length).toBeGreaterThan(50);
+    expect(Object.keys(built).length).toBeGreaterThan(60);
     expect(
       published,
       homebridge

@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_contact_without_state",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_contact_without_state",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "13aa3e29-f33f-252f-bf67-86364fc818ef",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000001:4",
+    "ccutype": "HmIP-SWDO",
+    "ccurole": "SHUTTER_CONTACT"
+  },
+  "Readings": {
+    "1.ERROR": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

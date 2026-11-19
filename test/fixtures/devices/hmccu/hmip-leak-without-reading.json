@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_leak_without_reading",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_leak_without_reading",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "43115159-f33f-e55b-f574-bf94c06dee40",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000007:4",
+    "ccutype": "X",
+    "ccurole": "WATER_DETECTION_TRANSMITTER"
+  },
+  "Readings": {
+    "1.STATE": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

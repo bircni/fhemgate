@@ -1,0 +1,24 @@
+{
+  "Name": "hmip_thermostat_by_reading",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_thermostat_by_reading",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "7fe228ee-f33f-2f46-f1c6-4a7e27ded336",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000004:4",
+    "ccutype": "HM-TC-IT"
+  },
+  "Readings": {
+    "1.SET_TEMPERATURE": {
+      "Value": "20.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.ACTUAL_TEMPERATURE": {
+      "Value": "19.0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}
