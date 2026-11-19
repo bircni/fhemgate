@@ -9,9 +9,11 @@ describe('rgb2hex', () => {
     expect(color.rgb2hex([1, 2, 3])).toBe('010203');
   });
 
-  it('does not limit components to a byte and drops a digit for a negative one', () => {
-    expect(color.rgb2hex(256, 0, 0)).toBe('000000');
-    expect(color.rgb2hex(-1, 0, 0)).toBe('f0000');
+  it('limits every component to a byte', () => {
+    expect(color.rgb2hex(256, 0, 0)).toBe('ff0000');
+    expect(color.rgb2hex(-1, 0, 0)).toBe('000000');
+    expect(color.rgb2hex([0, 300, -20])).toBe('00ff00');
+    expect(color.rgb2hex(12.4, 12.5, NaN)).toBe('0c0d00');
   });
 });
 

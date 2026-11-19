@@ -6583,19 +6583,17 @@ exports[`color/rgb-lowercase > is detected 1`] = `
 exports[`color/rgb-lowercase > sends commands 1`] = `
 {
   "Brightness": [
-    "set rgb_lowercase rgb 02f8fa <- true",
-    "set rgb_lowercase rgb 000000 <- false",
+    "set rgb_lowercase rgb 030000 <- true",
+    "set rgb_lowercase rgb 000000 <- false -90",
     "(nothing) <- 0",
     "set rgb_lowercase rgb 030303 <- 1",
     "set rgb_lowercase rgb 050505 <- 2",
     "set rgb_lowercase rgb 080808 <- 3",
     "set rgb_lowercase rgb 1a1a1a <- 10",
     "set rgb_lowercase rgb 808080 <- 50",
-    "set rgb_lowercase rgb ffffff <- 100",
+    "set rgb_lowercase rgb ffffff <- 100 359",
     "set rgb_lowercase rgb 373737 <- 21.5",
-    "set rgb_lowercase rgb a1a1b <- -90",
-    "set rgb_lowercase rgb e6e610 <- 90",
-    "set rgb_lowercase rgb 969340 <- 359",
+    "set rgb_lowercase rgb e6e6e6 <- 90",
   ],
   "Hue": [
     "set rgb_lowercase rgb ff0400 <- true 1",
@@ -6939,19 +6937,17 @@ exports[`color/rgb-uppercase > is detected 1`] = `
 exports[`color/rgb-uppercase > sends commands 1`] = `
 {
   "Brightness": [
-    "set rgb_uppercase RGB 02f8fa <- true",
-    "set rgb_uppercase RGB 000000 <- false",
+    "set rgb_uppercase RGB 030000 <- true",
+    "set rgb_uppercase RGB 000000 <- false -90",
     "(nothing) <- 0",
     "set rgb_uppercase RGB 030303 <- 1",
     "set rgb_uppercase RGB 050505 <- 2",
     "set rgb_uppercase RGB 080808 <- 3",
     "set rgb_uppercase RGB 1a1a1a <- 10",
     "set rgb_uppercase RGB 808080 <- 50",
-    "set rgb_uppercase RGB ffffff <- 100",
+    "set rgb_uppercase RGB ffffff <- 100 359",
     "set rgb_uppercase RGB 373737 <- 21.5",
-    "set rgb_uppercase RGB a1a1b <- -90",
-    "set rgb_uppercase RGB e6e610 <- 90",
-    "set rgb_uppercase RGB 969340 <- 359",
+    "set rgb_uppercase RGB e6e6e6 <- 90",
   ],
   "Hue": [
     "set rgb_uppercase RGB ff0400 <- true 1",
@@ -7296,19 +7292,17 @@ exports[`color/swap-rgb > is detected 1`] = `
 exports[`color/swap-rgb > sends commands 1`] = `
 {
   "Brightness": [
-    "set swap_rgb rgb 02f8fa <- true",
-    "set swap_rgb rgb 000000 <- false",
+    "set swap_rgb rgb 030000 <- true",
+    "set swap_rgb rgb 000000 <- false -90",
     "(nothing) <- 0",
     "set swap_rgb rgb 030303 <- 1",
     "set swap_rgb rgb 050505 <- 2",
     "set swap_rgb rgb 080808 <- 3",
     "set swap_rgb rgb 1a1a1a <- 10",
     "set swap_rgb rgb 808080 <- 50",
-    "set swap_rgb rgb ffffff <- 100",
+    "set swap_rgb rgb ffffff <- 100 359",
     "set swap_rgb rgb 373737 <- 21.5",
-    "set swap_rgb rgb a1a1b <- -90",
-    "set swap_rgb rgb e6e610 <- 90",
-    "set swap_rgb rgb 969340 <- 359",
+    "set swap_rgb rgb e6e6e6 <- 90",
   ],
   "Hue": [
     "set swap_rgb rgb ff0400 <- true 1",
@@ -8068,19 +8062,17 @@ exports[`color/wifilight-no-hsv-readings > is detected 1`] = `
 exports[`color/wifilight-no-hsv-readings > sends commands 1`] = `
 {
   "Brightness": [
-    "set wifilight_no_hsv_readings RGB 02f8fa <- true",
-    "set wifilight_no_hsv_readings RGB 000000 <- false",
+    "set wifilight_no_hsv_readings RGB 030000 <- true",
+    "set wifilight_no_hsv_readings RGB 000000 <- false -90",
     "(nothing) <- 0",
     "set wifilight_no_hsv_readings RGB 030303 <- 1",
     "set wifilight_no_hsv_readings RGB 050505 <- 2",
     "set wifilight_no_hsv_readings RGB 080808 <- 3",
     "set wifilight_no_hsv_readings RGB 1a1a1a <- 10",
     "set wifilight_no_hsv_readings RGB 808080 <- 50",
-    "set wifilight_no_hsv_readings RGB ffffff <- 100",
+    "set wifilight_no_hsv_readings RGB ffffff <- 100 359",
     "set wifilight_no_hsv_readings RGB 373737 <- 21.5",
-    "set wifilight_no_hsv_readings RGB a1a1b <- -90",
-    "set wifilight_no_hsv_readings RGB e6e610 <- 90",
-    "set wifilight_no_hsv_readings RGB 969340 <- 359",
+    "set wifilight_no_hsv_readings RGB e6e6e6 <- 90",
   ],
   "Hue": [
     "set wifilight_no_hsv_readings RGB ff0400 <- true 1",
