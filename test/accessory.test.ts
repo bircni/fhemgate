@@ -58,7 +58,8 @@ describe('reading a characteristic', () => {
     expect(read(characteristicOf(serviceOf(services, 'Switch'), Characteristic.On))).toEqual({ error: 1, value: undefined, answered: true });
   });
 
-  it('never answers when fhem does not', () => {
+  it('answers with an error after ten seconds when fhem does not answer', () => {
+    vi.useFakeTimers();
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -69,7 +70,58 @@ describe('reading a characteristic', () => {
       }),
     );
 
-    expect(read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On)).answered).toBe(false);
+    const result = read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On));
+    vi.advanceTimersByTime(9999);
+    expect(result.answered).toBe(false);
+
+    vi.advanceTimersByTime(1);
+    expect(result).toEqual({ error: hap.HAPStatus.OPERATION_TIMED_OUT, value: undefined, answered: true });
+    expect(world.log.errors()).toEqual(['error query: no answer from fhem for lamp-state within 10 seconds']);
+  });
+
+  it('answers once: an answer of fhem that comes after the ten seconds is only cached', () => {
+    vi.useFakeTimers();
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'On=state,nocache=1' },
+      }),
+    );
+    let late: ((result: string) => void) | undefined;
+    accessory.execute = (_cmd, answer) => {
+      late = answer;
+    };
+    const answered = vi.fn();
+
+    accessory.query(accessory.mappings.On as Mapping, answered);
+    vi.advanceTimersByTime(10000);
+    late?.('off');
+
+    expect(answered).toHaveBeenCalledExactlyOnceWith(hap.HAPStatus.OPERATION_TIMED_OUT);
+    expect(world.cached['lamp-state']).toBe('off');
+  });
+
+  it('does not wait for the ten seconds when fhem answers', () => {
+    vi.useFakeTimers();
+    const world = createWorld({ respond: () => 'off' });
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'On=state,nocache=1' },
+      }),
+    );
+    const answered = vi.fn();
+
+    accessory.query(accessory.mappings.On as Mapping, answered);
+    vi.advanceTimersByTime(10000);
+
+    expect(answered).toHaveBeenCalledExactlyOnceWith(undefined, false);
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('answers a mapping that has only a default with that default, without asking fhem or subscribing to a reading', () => {
