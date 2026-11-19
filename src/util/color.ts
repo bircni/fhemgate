@@ -6,14 +6,23 @@ import { looselyEqual } from './loose.ts';
 
 export type Hsv = [h: number | undefined, s: number, v: number];
 
-/** six hex digits for three components from 0 to 255, given one by one or as a list */
-export function rgb2hex(r: number | number[], g?: number, b?: number): string {
-  if (g === undefined) {
-    const rgb = r as [number, number, number];
-    return (0x1000000 + rgb[0] * 0x10000 + rgb[1] * 0x100 + rgb[2]).toString(16).substring(1);
+/** a colour component as a whole number from 0 to 255. what is no number counts as 0. */
+function toByte(component: number): number {
+  const rounded = Math.round(component);
+  if (isNaN(rounded) || rounded < 0) {
+    return 0;
   }
+  return rounded > 255 ? 255 : rounded;
+}
 
-  return (0x1000000 + (r as number) * 0x10000 + g * 0x100 + (b as number)).toString(16).substring(1);
+/**
+ * Six hex digits for three components, given one by one or as a list. A component outside of
+ * 0 to 255 is taken for the nearest of the two.
+ */
+export function rgb2hex(r: number | number[], g?: number, b?: number): string {
+  const [red, green, blue] = g === undefined ? (r as [number, number, number]) : [r as number, g, b as number];
+
+  return (0x1000000 + toByte(red) * 0x10000 + toByte(green) * 0x100 + toByte(blue)).toString(16).substring(1);
 }
 
 export function hsv2rgb(h: number, s: number, v: number): string {
