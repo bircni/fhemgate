@@ -5,8 +5,11 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     include: ['test/e2e/**/*.e2e.ts'],
+    globalSetup: ['test/e2e/globalSetup.ts'],
     testTimeout: 90_000,
     hookTimeout: 90_000,
-    fileParallelism: false,
+    // every file has a fhem and a homebridge of its own, on ports of their own, so the files
+    // run side by side
+    maxWorkers: 4,
   },
 });

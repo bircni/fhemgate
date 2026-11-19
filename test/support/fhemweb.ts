@@ -5,6 +5,8 @@ import type { AddressInfo, Socket } from 'node:net';
 import type { FhemDevice } from './types.ts';
 
 export interface FakeFhemOptions {
+  /** the port to listen on. any free one if not given. */
+  port?: number;
   /** the token FHEMWEB hands out and wants back with every command. undefined for a FHEMWEB without one. */
   csrfToken?: string;
   /** what `jsonlist2` answers, whatever the filter */
@@ -130,7 +132,8 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
 
     // the plugin builds the query by hand, so it is taken apart by hand as well
     const parameters = query.split('&');
-    const cmd = decodeURIComponent((parameters.find((parameter) => parameter.startsWith('cmd=')) ?? 'cmd=').slice(4));
+    // FHEMWEB takes a + for a blank, as in a form
+    const cmd = decodeURIComponent((parameters.find((parameter) => parameter.startsWith('cmd=')) ?? 'cmd=').slice(4).replaceAll('+', ' '));
     fhem.commands.push(cmd);
 
     const token = parameters.find((parameter) => parameter.startsWith('fwcsrf='))?.slice(7);
@@ -153,7 +156,7 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
     socket.on('close', () => sockets.delete(socket));
   });
 
-  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  await new Promise<void>((resolve) => server.listen(options.port ?? 0, '127.0.0.1', resolve));
   fhem.port = (server.address() as AddressInfo).port;
   return fhem;
 }
