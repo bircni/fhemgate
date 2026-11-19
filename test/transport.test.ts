@@ -95,9 +95,9 @@ describe('connecting', () => {
     expect(exit).not.toHaveBeenCalled();
   });
 
-  it('creates the homebridgeMapping and genericDeviceType attributes when they are missing, and ends homebridge', async () => {
-    await connect({ userattr: 'siriName' });
-    await waitFor(() => exit.mock.calls.length > 0, 'the plugin to exit');
+  it('creates the homebridgeMapping and genericDeviceType attributes when they are missing, and goes on', async () => {
+    const platform = await connect({ userattr: 'siriName', devices: [{ Name: 'lamp', ...lamp() }] });
+    await waitFor(() => world.log.errors().length > 0, 'the note about the attribute');
 
     expect(fhem.commands).toEqual(
       expect.arrayContaining([
@@ -106,8 +106,11 @@ describe('connecting', () => {
       ]),
     );
     expect(world.log.lines).toContain('info homebridgeMapping attribute created.');
-    expect(world.log.lines).toContain('warn genericDeviceType attribute was not known. please restart.');
-    expect(exit).toHaveBeenCalledWith(0);
+    expect(world.log.errors()).toEqual([
+      'error genericDeviceType attribute was not known to fhem and was created. restart homebridge after giving it to devices.',
+    ]);
+    expect(exit).not.toHaveBeenCalled();
+    expect(await accessoriesOf(platform)).toHaveLength(1);
   });
 
   it('notes its version at the siri device', async () => {
@@ -133,15 +136,19 @@ describe('connecting', () => {
     expect(exit).not.toHaveBeenCalled();
   });
 
-  it('ends homebridge when ssl is not true or false', () => {
+  it('goes on when ssl is not true or false', () => {
     fhem = { close: () => Promise.resolve() } as FakeFhem;
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     world = createWorld();
 
-    world.platform({ server: 'fhem.invalid', ssl: 'true' });
+    expect(world.platform({ server: 'fhem.invalid', ssl: 'true' }).connection?.base_url).toBe('https://fhem.invalid:8083/fhem');
+    expect(world.platform({ server: 'fhem.invalid', ssl: 'no' }).connection?.base_url).toBe('http://fhem.invalid:8083/fhem');
 
-    expect(world.log.lines).toEqual(['error config: value for ssl has to be boolean.']);
-    expect(exit).toHaveBeenCalledWith(0);
+    expect(world.log.lines).toEqual([
+      'warn config: value for ssl has to be boolean. taking "true" as true.',
+      'error config: value for ssl has to be boolean. taking "no" as false.',
+    ]);
+    expect(exit).not.toHaveBeenCalled();
   });
 
   it('does not connect without a server', async () => {
