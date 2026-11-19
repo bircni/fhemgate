@@ -1,0 +1,24 @@
+{
+  "Name": "information_and_category",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "information_and_category",
+    "TYPE": "dummy",
+    "FUUID": "745fdb07-f33f-f014-2390-e1e57009bcad",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "fw": {
+      "Value": "1.2.3",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "AccessoryCategory=FAN\nAccessoryCategory=NOPE\nSerialNumber=serial=ABC123\nManufacturer=value=ACME\nFirmwareRevision=fw"
+  }
+}

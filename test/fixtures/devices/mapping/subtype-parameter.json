@@ -1,0 +1,33 @@
+{
+  "Name": "subtype_parameter",
+  "PossibleSets": "links rechts",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "subtype_parameter",
+    "TYPE": "dummy",
+    "FUUID": "c153fe11-f33f-3906-5d42-2be41a512be3",
+    "STATE": "x"
+  },
+  "Readings": {
+    "state": {
+      "Value": "x",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "links": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "rechts": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "mitte": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "switch",
+    "homebridgeMapping": "On=links,subtype=Links,cmdOn=links+on,cmdOff=links+off\nOn=rechts,subtype=Rechts,cmdOn=rechts+on,cmdOff=rechts+off\nOn=mitte,cmdOn=mitte+on"
+  }
+}

@@ -1,10 +1,13 @@
-# homebridge-fhem
-[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
-[![npm](https://img.shields.io/npm/v/homebridge-fhem.svg?style=plastic)](https://www.npmjs.com/package/homebridge-fhem)
-[![npm](https://img.shields.io/npm/dt/homebridge-fhem.svg?style=plastic)](https://www.npmjs.com/package/homebridge-fhem)
-[![GitHub last commit](https://img.shields.io/github/last-commit/justme-1968/homebridge-fhem.svg?style=plastic)](https://github.com/justme-1968/homebridge-fhem)
+# homebridge-fhem2hb
 
-a fhem platform plugin for homebridge
+a fhem platform plugin for homebridge.
+
+this is the maintained successor of [homebridge-fhem](https://github.com/justme-1968/homebridge-fhem)
+by justme1968 and its contributors. it is built on that code and keeps its configuration: the platform
+is still called `FHEM`, and the `homebridgeMapping` and `genericDeviceType` attributes work as before.
+it replaces homebridge-fhem and can not be installed next to it.
+
+the project is under active restructuring and is not published yet.
 
 uses longpoll and an internal cache to avoid roundtrips to fhem.
 a debug browser is available at port 8282 (or 8283).
@@ -29,7 +32,6 @@ includes the devices that should be bridged to homekit.
 - CO20 and netatmo air quality sensor
 - RESIDENTS module
 - probably some more ...
-
 
 ## simple config
 for devices that are not correctly identified use the genericDeviceType attribute to configure the device type.

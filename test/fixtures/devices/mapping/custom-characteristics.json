@@ -1,0 +1,32 @@
+{
+  "Name": "custom_characteristics",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "custom_characteristics",
+    "TYPE": "dummy",
+    "FUUID": "4eee2696-f33f-dbf0-ad95-75f6b4b95dd2",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "watt": {
+      "Value": "17.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "vol": {
+      "Value": "30",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "volt": {
+      "Value": "229",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "E863F10D-079E-48FF-8F27-9C2605A29F52=watt,name=Power,format=FLOAT,unit=W\n4648454d-0101-686F-6D65-627269646765=vol,name=xVolume,format=UINT8,unit=PERCENTAGE,cmd=vol,minValue=0,maxValue=100\nVoltage=volt,format=FLOAT\nBogus=state,name=Bogus"
+  }
+}

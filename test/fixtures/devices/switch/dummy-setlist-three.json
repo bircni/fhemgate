@@ -1,0 +1,20 @@
+{
+  "Name": "dummy_setlist_three",
+  "PossibleSets": "a b c",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr setList readingList",
+  "Internals": {
+    "NAME": "dummy_setlist_three",
+    "TYPE": "dummy",
+    "FUUID": "356345b1-f33f-0719-21b1-2792c6039173",
+    "STATE": "a"
+  },
+  "Readings": {
+    "state": {
+      "Value": "a",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "setList": "a b c"
+  }
+}

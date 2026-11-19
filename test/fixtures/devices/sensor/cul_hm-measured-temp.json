@@ -1,0 +1,34 @@
+{
+  "Name": "cul_hm_measured_temp",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_hm_measured_temp",
+    "TYPE": "CUL_HM",
+    "FUUID": "7791d720-f33f-93b8-c9de-af18ff445fb3",
+    "STATE": "T: -31.5",
+    "DEF": "AA4B5C"
+  },
+  "Readings": {
+    "state": {
+      "Value": "T: -31.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "measured-temp": {
+      "Value": "-31.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temperature": {
+      "Value": "-31.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-WDS30-T-O",
+    "subType": "THSensor"
+  }
+}

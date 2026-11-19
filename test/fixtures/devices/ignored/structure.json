@@ -1,0 +1,18 @@
+{
+  "Name": "structure",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "structure",
+    "TYPE": "structure",
+    "FUUID": "0867e11a-f33f-b0b5-ca6d-efcd2fecac77",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

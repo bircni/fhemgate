@@ -1,0 +1,20 @@
+{
+  "Name": "generic_ignore",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_ignore",
+    "TYPE": "dummy",
+    "FUUID": "ff617d85-f33f-1d67-d58d-2469d59de687",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "ignore"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "Name": "factor_and_limits",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "factor_and_limits",
+    "TYPE": "dummy",
+    "FUUID": "55493007-f33f-686a-65b7-9465bce7dcad",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temp": {
+      "Value": "215",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "level": {
+      "Value": "128",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "light",
+    "homebridgeMapping": "CurrentTemperature=temp,factor=0.1,minValue=-20,maxValue=60,minStep=0.5\nBrightness=level,max=255,maxValue=100,cmd=level,delay=750"
+  }
+}

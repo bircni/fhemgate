@@ -1,0 +1,42 @@
+{
+  "Name": "cul_hm_rt",
+  "PossibleSets": "desired-temp:slider,4.5,0.5,30.5 controlMode:auto,manual,boost,day,night on:noArg off:noArg",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_hm_rt",
+    "TYPE": "CUL_HM",
+    "FUUID": "a783ae2a-f33f-f9d9-2c3d-f0295f28f105",
+    "STATE": "T: 19.0 desired: 20.0 valve: 15",
+    "DEF": "3A4B5C04"
+  },
+  "Readings": {
+    "state": {
+      "Value": "T: 19.0 desired: 20.0 valve: 15",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "desired-temp": {
+      "Value": "20.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "measured-temp": {
+      "Value": "19.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "actuator": {
+      "Value": "15",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "controlMode": {
+      "Value": "auto",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-CC-RT-DN",
+    "subType": "thermostat"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "Name": "cul_hm_rt_valve_closed",
+  "PossibleSets": "desired-temp:slider,4.5,0.5,30.5 on:noArg off:noArg",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_hm_rt_valve_closed",
+    "TYPE": "CUL_HM",
+    "FUUID": "6b9c1894-f33f-7e45-b029-1dedb9c34e64",
+    "STATE": "T: 22.0 desired: off valve: 0",
+    "DEF": "3A4B5D04"
+  },
+  "Readings": {
+    "state": {
+      "Value": "T: 22.0 desired: off valve: 0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "desired-temp": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "measured-temp": {
+      "Value": "22.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "actuator": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-CC-RT-DN",
+    "subType": "thermostat"
+  }
+}

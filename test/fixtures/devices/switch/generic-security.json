@@ -1,0 +1,20 @@
+{
+  "Name": "generic_security",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_security",
+    "TYPE": "dummy",
+    "FUUID": "58dbb7a0-f33f-3367-706f-6221c5118611",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "security"
+  }
+}

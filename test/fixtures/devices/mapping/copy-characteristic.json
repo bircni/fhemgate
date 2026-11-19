@@ -1,0 +1,29 @@
+{
+  "Name": "copy_characteristic",
+  "PossibleSets": "pos",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "copy_characteristic",
+    "TYPE": "dummy",
+    "FUUID": "d0b9f45e-f33f-baa5-95ab-dc9d2d412656",
+    "STATE": "10"
+  },
+  "Readings": {
+    "state": {
+      "Value": "10",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "level": {
+      "Value": "10",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pct": {
+      "Value": "10",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "blind",
+    "homebridgeMapping": "TargetPosition=CurrentPosition,cmd=pos\nCurrentPosition=level"
+  }
+}

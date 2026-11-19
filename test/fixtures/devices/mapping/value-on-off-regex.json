@@ -1,0 +1,28 @@
+{
+  "Name": "value_on_off_regex",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "value_on_off_regex",
+    "TYPE": "dummy",
+    "FUUID": "87715e5d-f33f-924e-6a4d-14b247e9e309",
+    "STATE": "dim50"
+  },
+  "Readings": {
+    "state": {
+      "Value": "dim50",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "tuer": {
+      "Value": "zu",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "bewegung": {
+      "Value": "vielleicht",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "On=state,valueOn=/^(on|dim)/,cmdOn=on,cmdOff=off\nContactSensorState=tuer,valueOff=/zu/\nMotionDetected=bewegung,valueOn=ja,valueOff=nein"
+  }
+}

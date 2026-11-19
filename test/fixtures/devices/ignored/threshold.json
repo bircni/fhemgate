@@ -1,0 +1,22 @@
+{
+  "Name": "threshold",
+  "PossibleSets": "desired",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "threshold",
+    "TYPE": "THRESHOLD",
+    "FUUID": "b084f8f9-f33f-1336-41bd-d1696289ff65",
+    "STATE": "off"
+  },
+  "Readings": {
+    "state": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "desired": {
+      "Value": "20",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

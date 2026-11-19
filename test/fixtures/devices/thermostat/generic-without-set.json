@@ -1,0 +1,24 @@
+{
+  "Name": "generic_without_set",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_without_set",
+    "TYPE": "dummy",
+    "FUUID": "cf98bd9e-f33f-8f13-b0b9-14e58b5b053c",
+    "STATE": "20"
+  },
+  "Readings": {
+    "state": {
+      "Value": "20",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temperature": {
+      "Value": "20.0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "thermostat"
+  }
+}

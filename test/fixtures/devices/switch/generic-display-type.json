@@ -1,0 +1,20 @@
+{
+  "Name": "generic_display_type",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_display_type",
+    "TYPE": "dummy",
+    "FUUID": "c6cabd1e-f33f-1aae-061f-434562d60c94",
+    "STATE": "off"
+  },
+  "Readings": {
+    "state": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDisplayType": "outlet"
+  }
+}

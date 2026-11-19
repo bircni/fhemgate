@@ -1,0 +1,20 @@
+{
+  "Name": "nocache",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "nocache",
+    "TYPE": "dummy",
+    "FUUID": "2e5c7fa9-f33f-e088-bded-b0238ee0c406",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "On=state,nocache=1,cmdOn=on,cmdOff=off"
+  }
+}

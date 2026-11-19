@@ -1,0 +1,35 @@
+{
+  "Name": "milight_rgbw",
+  "PossibleSets": "on:noArg off:noArg toggle:noArg dim:slider,0,1,100 hue:slider,0,1,360 saturation:slider,0,100,100 rgb:colorpicker,RGB hsv",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "milight_rgbw",
+    "TYPE": "MilightDevice",
+    "FUUID": "64c3c8bc-f33f-0f64-d6f3-7f186d346899",
+    "STATE": "on",
+    "DEF": "RGBW bridge 1"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "brightness": {
+      "Value": "100",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "hue": {
+      "Value": "120",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "saturation": {
+      "Value": "100",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "rgb": {
+      "Value": "00FF00",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

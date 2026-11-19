@@ -1,0 +1,82 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "env": {
+    "node": true,
+    "es2022": true
+  },
+  "ignorePatterns": ["dist", "coverage"],
+  "rules": {
+    "eqeqeq": ["error", "smart"],
+    "curly": ["error", "all"],
+    "no-var": "error",
+    "prefer-const": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/no-unused-vars": ["error", { "caughtErrors": "none", "argsIgnorePattern": "^_" }],
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/await-thenable": "error",
+    "typescript/no-unsafe-assignment": "error",
+    "typescript/no-unsafe-member-access": "error",
+    "typescript/no-unsafe-call": "error",
+    "typescript/no-unsafe-argument": "error",
+    "typescript/no-unsafe-return": "error",
+    "typescript/no-unnecessary-condition": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/unbound-method": "error",
+    "typescript/no-base-to-string": "error",
+    "typescript/restrict-template-expressions": ["error", { "allowNumber": true, "allowBoolean": true }],
+
+    // log lines are put together with +, from text, numbers and values that may be missing
+    "typescript/restrict-plus-operands": [
+      "error",
+      { "allowAny": false, "allowBoolean": true, "allowNullish": true, "allowNumberAndString": true, "allowRegExp": false }
+    ],
+    // what fhem and the homebridgeMapping attribute deliver is typed where it enters, with
+    // assertions, as nothing is known about it before run time
+    "typescript/no-unsafe-type-assertion": "off",
+    // `||` and `??` differ for '' and 0, which readings and values are all the time. the
+    // operator is chosen per case and not by rule.
+    "typescript/prefer-nullish-coalescing": "off",
+    // mappings, the reading cache and the subscriptions are dictionaries entries are removed from
+    "typescript/no-dynamic-delete": "off",
+    // lists are sorted in place on purpose, and toSorted is not in the ES2022 library the code is checked against
+    "unicorn/no-array-sort": "off",
+    "unicorn/consistent-function-scoping": "off",
+    // `_isInformation` is a property of mappings that existing homebridgeMapping attributes can carry
+    "no-underscore-dangle": ["error", { "allow": ["_isInformation"] }],
+    "vitest/require-mock-type-parameters": "off",
+    // the second argument is the message vitest shows when the expectation fails
+    "vitest/valid-expect": ["error", { "maxArgs": 2 }],
+    "vitest/expect-expect": ["error", { "assertFunctionNames": ["expect", "check", "command", "waitFor", "eventually", "becomes", "fhem.wasSet"] }],
+    // String.match fails for a value that is not text where RegExp.exec would convert it.
+    // readings are matched with the former, and which of the two happens is behaviour.
+    "typescript/prefer-regexp-exec": "off"
+  },
+  "overrides": [
+    {
+      // tests wait for things in loops and build small lists without a care for speed
+      "files": ["test/**/*.ts", "src/**/*.test.ts"],
+      "rules": {
+        "no-await-in-loop": "off",
+        "oxc/no-map-spread": "off"
+      }
+    },
+    {
+      // these suites were taken over from homebridge-fhem. their checks are written against
+      // mappings that are assumed to exist, which is what they assert.
+      "files": ["test/hmccu/**/*.ts"],
+      "rules": {
+        "typescript/no-unnecessary-condition": "off",
+        "typescript/prefer-optional-chain": "off",
+        "typescript/no-unnecessary-boolean-literal-compare": "off"
+      }
+    }
+  ]
+}

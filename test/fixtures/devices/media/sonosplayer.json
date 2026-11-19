@@ -1,0 +1,28 @@
+{
+  "Name": "sonosplayer",
+  "PossibleSets": "Play Pause Stop Volume:slider,0,1,100 Mute",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "sonosplayer",
+    "TYPE": "SONOSPLAYER",
+    "FUUID": "65af8524-f33f-7ad8-1ec7-87c39a0da6fd",
+    "STATE": "PLAYING",
+    "DEF": "RINCON_000E58000001_MR",
+    "UDN": "RINCON_000E58000001_MR"
+  },
+  "Readings": {
+    "state": {
+      "Value": "PLAYING",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "transportState": {
+      "Value": "PLAYING",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "Volume": {
+      "Value": "18",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

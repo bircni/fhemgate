@@ -1,0 +1,22 @@
+{
+  "Name": "rgb_uppercase",
+  "PossibleSets": "on off RGB:colorpicker,RGB",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "rgb_uppercase",
+    "TYPE": "WS2812FX",
+    "FUUID": "be7fe7d8-f33f-8416-8680-1ca1e52d54c7",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "RGB": {
+      "Value": "0000FF",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

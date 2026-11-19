@@ -1,0 +1,27 @@
+{
+  "Name": "internals_type_blind",
+  "PossibleSets": "pct:slider,0,10,100 open closed stop",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "internals_type_blind",
+    "TYPE": "ROLLO",
+    "FUUID": "7ec597d3-f33f-2305-a2bf-98c8dc39a234",
+    "STATE": "open",
+    "type": "blind"
+  },
+  "Readings": {
+    "state": {
+      "Value": "open",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pct": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "direction": {
+      "Value": "closing",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

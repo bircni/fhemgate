@@ -1,0 +1,23 @@
+{
+  "Name": "zwave_dimmer",
+  "PossibleSets": "dim:slider,0,1,99 on:noArg off:noArg neighborUpdate",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "zwave_dimmer",
+    "TYPE": "ZWave",
+    "FUUID": "f2d15cd6-f33f-cfe5-8f57-afafa426bc19",
+    "STATE": "dim 50",
+    "DEF": "c1e2f3a4 5"
+  },
+  "Readings": {
+    "state": {
+      "Value": "dim 50",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "model": {
+      "Value": "FIBARO System FGD212 Dimmer 2",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

@@ -1,0 +1,18 @@
+{
+  "Name": "nothing_detected",
+  "PossibleSets": "modifyTimeSpec",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "nothing_detected",
+    "TYPE": "at",
+    "FUUID": "d748039e-f33f-5603-ca95-df352ad10fbb",
+    "STATE": "Next: 08:00:00"
+  },
+  "Readings": {
+    "state": {
+      "Value": "Next: 08:00:00",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

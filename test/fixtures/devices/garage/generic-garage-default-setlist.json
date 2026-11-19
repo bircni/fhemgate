@@ -1,0 +1,24 @@
+{
+  "Name": "generic_garage_default_setlist",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr setList readingList",
+  "Internals": {
+    "NAME": "generic_garage_default_setlist",
+    "TYPE": "dummy",
+    "FUUID": "b3e8aad0-f33f-7cee-ecfd-6cb39e767da2",
+    "STATE": "off"
+  },
+  "Readings": {
+    "state": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "doorState": {
+      "Value": "closed",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "garage"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "Name": "harmony_hub",
+  "PossibleSets": "activity:TV,Musik,PowerOff off:noArg hidDevice",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "harmony_hub",
+    "TYPE": "harmony",
+    "FUUID": "390374ea-f33f-52af-9db9-828abbb7bec9",
+    "STATE": "TV",
+    "DEF": "192.0.2.30"
+  },
+  "Readings": {
+    "state": {
+      "Value": "TV",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "activity": {
+      "Value": "TV",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "currentActivity": {
+      "Value": "TV",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

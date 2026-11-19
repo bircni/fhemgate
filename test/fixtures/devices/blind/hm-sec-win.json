@@ -1,0 +1,26 @@
+{
+  "Name": "hm_sec_win",
+  "PossibleSets": "0 10 20 30 40 50 60 70 80 90 100 lock stop",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hm_sec_win",
+    "TYPE": "CUL_HM",
+    "FUUID": "ff1c0572-f33f-2e32-860d-9398a09f0e63",
+    "STATE": "50",
+    "DEF": "7A4B5C"
+  },
+  "Readings": {
+    "state": {
+      "Value": "50",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "direction": {
+      "Value": "opening",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-SEC-WIN",
+    "subType": "winMatic"
+  }
+}

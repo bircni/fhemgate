@@ -1,0 +1,28 @@
+{
+  "Name": "bool_factor_and_invert",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "bool_factor_and_invert",
+    "TYPE": "dummy",
+    "FUUID": "c40a87f5-f33f-2341-c430-2e3e722a219a",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "bewegung": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "aktiv": {
+      "Value": "ja",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "MotionDetected=bewegung,invert=1\nOn=state,factor=2,cmdOn=on,cmdOff=off\nStatusActive=aktiv,invert=1,valueOn=ja"
+  }
+}

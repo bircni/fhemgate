@@ -1,0 +1,20 @@
+{
+  "Name": "dummy_setlist",
+  "PossibleSets": "an aus",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr setList readingList",
+  "Internals": {
+    "NAME": "dummy_setlist",
+    "TYPE": "dummy",
+    "FUUID": "3d0f0eac-f33f-f814-1369-3b7f5598e3ec",
+    "STATE": "an"
+  },
+  "Readings": {
+    "state": {
+      "Value": "an",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "setList": "an aus"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "Name": "zwave_firmware",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "zwave_firmware",
+    "TYPE": "ZWave",
+    "FUUID": "35b4f745-f33f-b58b-f01c-e40452ad49c4",
+    "STATE": "on",
+    "DEF": "c1e2f3a4 12"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "firmware": {
+      "Value": "3.2",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

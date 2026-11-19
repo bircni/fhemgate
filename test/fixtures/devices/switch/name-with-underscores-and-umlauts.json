@@ -1,0 +1,20 @@
+{
+  "Name": "EG_Kueche_Licht_1",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "EG_Kueche_Licht_1",
+    "TYPE": "dummy",
+    "FUUID": "7ebbab78-f33f-6064-c473-34bcfe2f1a53",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "alias": "Küche_Spüle"
+  }
+}

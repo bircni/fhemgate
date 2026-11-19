@@ -1,0 +1,21 @@
+{
+  "Name": "threshold_and_part",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "threshold_and_part",
+    "TYPE": "dummy",
+    "FUUID": "cad3429a-f33f-ce31-fab3-1a2ea93bcd8e",
+    "STATE": "motion 7 T: 21.5"
+  },
+  "Readings": {
+    "state": {
+      "Value": "motion 7 T: 21.5",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "MotionSensor",
+    "homebridgeMapping": "MotionDetected=state,part=1,threshold=5\nCurrentTemperature=state,part=3"
+  }
+}

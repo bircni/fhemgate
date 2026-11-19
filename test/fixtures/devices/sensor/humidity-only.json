@@ -1,0 +1,22 @@
+{
+  "Name": "humidity_only",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "humidity_only",
+    "TYPE": "dummy",
+    "FUUID": "23d2ba69-f33f-02c2-c5d8-af3b99cdc5c7",
+    "STATE": "48"
+  },
+  "Readings": {
+    "state": {
+      "Value": "48",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "humidity": {
+      "Value": "48.6",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

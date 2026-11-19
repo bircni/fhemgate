@@ -1,0 +1,23 @@
+{
+  "Name": "reachable",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "reachable",
+    "TYPE": "HUEDevice",
+    "FUUID": "b2d92e29-f33f-496f-59c8-bada9d948edf",
+    "STATE": "on",
+    "DEF": "9 IODev=bridge"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "reachable": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

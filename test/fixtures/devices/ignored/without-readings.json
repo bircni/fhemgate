@@ -1,0 +1,12 @@
+{
+  "Name": "without_readings",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "without_readings",
+    "TYPE": "dummy",
+    "FUUID": "d37527a4-f33f-6570-fe7c-242488b29b4d",
+    "STATE": "???"
+  },
+  "Attributes": {}
+}

@@ -1,0 +1,24 @@
+{
+  "Name": "generic_blind_pct",
+  "PossibleSets": "pct:slider,0,1,100",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_blind_pct",
+    "TYPE": "dummy",
+    "FUUID": "637e8a66-f33f-bbb6-4f2a-18945f907fba",
+    "STATE": "70"
+  },
+  "Readings": {
+    "state": {
+      "Value": "70",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pct": {
+      "Value": "70",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "blind"
+  }
+}

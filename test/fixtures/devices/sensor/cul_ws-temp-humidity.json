@@ -1,0 +1,27 @@
+{
+  "Name": "cul_ws_temp_humidity",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_ws_temp_humidity",
+    "TYPE": "CUL_WS",
+    "FUUID": "b25dbbb1-f33f-9486-5fcc-369331e8e24e",
+    "STATE": "T: 21.3 H: 55",
+    "DEF": "3"
+  },
+  "Readings": {
+    "state": {
+      "Value": "T: 21.3 H: 55",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temperature": {
+      "Value": "21.3",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "humidity": {
+      "Value": "55",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

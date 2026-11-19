@@ -1,0 +1,25 @@
+{
+  "Name": "values_numeric_and_hash",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "values_numeric_and_hash",
+    "TYPE": "dummy",
+    "FUUID": "f568453e-f33f-ae49-a27a-b2d8a1355b9c",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "speed": {
+      "Value": "mid",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "Fan",
+    "homebridgeMapping": "RotationSpeed=speed,values=low:25;mid:50;high:100;/\\d+/:#,cmds=25:speed+low;50:speed+mid;/.*/:speed+high"
+  }
+}

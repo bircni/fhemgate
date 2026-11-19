@@ -1,0 +1,26 @@
+{
+  "Name": "illuminance",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "illuminance",
+    "TYPE": "XiaomiDevice",
+    "FUUID": "cb44cf51-f33f-959c-db0e-bef1ee78e0cc",
+    "STATE": "ok"
+  },
+  "Readings": {
+    "state": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "illuminance": {
+      "Value": "350",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "15",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

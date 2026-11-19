@@ -1,0 +1,29 @@
+{
+  "Name": "json",
+  "PossibleSets": "ein aus helligkeit",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "json",
+    "TYPE": "dummy",
+    "FUUID": "69cc6625-f33f-4497-4a9c-c71ebf2eef5f",
+    "STATE": "x"
+  },
+  "Readings": {
+    "state": {
+      "Value": "x",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "schalter": {
+      "Value": "ein",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "helligkeit": {
+      "Value": "128",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "light",
+    "homebridgeMapping": "{\"On\": {\"reading\": \"schalter\", \"valueOn\": \"ein\", \"cmdOn\": \"ein\", \"cmdOff\": \"aus\"}, \"Brightness\": {\"reading\": \"helligkeit\", \"cmd\": \"helligkeit\", \"delay\": true, \"reading2homekit\": \"{return Math.round(orig/2.55)}\", \"homekit2reading\": \"{return Math.round(orig*2.55)}\"}}"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "Name": "svg",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "svg",
+    "TYPE": "SVG",
+    "FUUID": "781b6f0f-f33f-0173-3cab-1d889a296321",
+    "STATE": "initialized"
+  },
+  "Readings": {
+    "state": {
+      "Value": "initialized",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

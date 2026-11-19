@@ -1,0 +1,26 @@
+{
+  "Name": "somfy_inverse",
+  "PossibleSets": "position:slider,0,10,100 pos:slider,0,10,100 on off stop",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "somfy_inverse",
+    "TYPE": "SOMFY",
+    "FUUID": "d45f32ed-f33f-30d2-7a0e-e765471d04f3",
+    "STATE": "closed",
+    "DEF": "000002 AC 0001"
+  },
+  "Readings": {
+    "state": {
+      "Value": "closed",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "position": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "blind",
+    "positionInverse": "1"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "Name": "hm_sec_win_locked",
+  "PossibleSets": "lock stop",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hm_sec_win_locked",
+    "TYPE": "CUL_HM",
+    "FUUID": "7a8d42ed-f33f-5e67-1d1c-453ca48cc675",
+    "STATE": "locked",
+    "DEF": "7A4B5D"
+  },
+  "Readings": {
+    "state": {
+      "Value": "locked",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-SEC-WIN",
+    "subType": "winMatic"
+  }
+}

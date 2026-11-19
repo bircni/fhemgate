@@ -1,0 +1,43 @@
+{
+  "Name": "zwave_multisensor",
+  "PossibleSets": "configDefault",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "zwave_multisensor",
+    "TYPE": "ZWave",
+    "FUUID": "26eb0761-f33f-0953-b43b-4e10398ac6cf",
+    "STATE": "open",
+    "DEF": "c1e2f3a4 9"
+  },
+  "Readings": {
+    "state": {
+      "Value": "open",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "luminance": {
+      "Value": "120 Lux",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temperature": {
+      "Value": "22.4 C",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "humidity": {
+      "Value": "41 %",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "85 %",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "model": {
+      "Value": "Aeotec MultiSensor 6",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "firmware": {
+      "Value": "1.10",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

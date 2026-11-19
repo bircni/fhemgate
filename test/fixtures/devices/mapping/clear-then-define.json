@@ -1,0 +1,28 @@
+{
+  "Name": "clear_then_define",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "clear_then_define",
+    "TYPE": "dummy",
+    "FUUID": "805a9600-f33f-f35a-9f8b-c79ec9ac0522",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "relay": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temperature": {
+      "Value": "20",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "clear On=relay,valueOff=0,cmdOn=relay+1,cmdOff=relay+0"
+  }
+}

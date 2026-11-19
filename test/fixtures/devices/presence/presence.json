@@ -1,0 +1,23 @@
+{
+  "Name": "presence",
+  "PossibleSets": "statusRequest",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "presence",
+    "TYPE": "PRESENCE",
+    "FUUID": "6e5ef491-f33f-56f0-6304-3d7ca4500ad3",
+    "STATE": "present",
+    "DEF": "lan-ping 192.0.2.20"
+  },
+  "Readings": {
+    "state": {
+      "Value": "present",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "presence": {
+      "Value": "present",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

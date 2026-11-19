@@ -1,0 +1,20 @@
+{
+  "Name": "serial_from_value",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "serial_from_value",
+    "TYPE": "dummy",
+    "FUUID": "47386ffe-f33f-5ffe-5c1f-1168d00e7173",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "SerialNumber=value=XYZ789"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "Name": "rgb_lowercase",
+  "PossibleSets": "on off rgb:colorpicker,RGB",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "rgb_lowercase",
+    "TYPE": "ESPEasy",
+    "FUUID": "b477ace6-f33f-eb33-c292-832a2ab5c692",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "rgb": {
+      "Value": "ff8000",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

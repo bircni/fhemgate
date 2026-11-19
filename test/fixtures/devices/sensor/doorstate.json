@@ -1,0 +1,24 @@
+{
+  "Name": "doorstate",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "doorstate",
+    "TYPE": "TUL",
+    "FUUID": "b75b9616-f33f-ffce-39af-05ae4c418211",
+    "STATE": "open"
+  },
+  "Readings": {
+    "state": {
+      "Value": "open",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "doorState": {
+      "Value": "open",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "contact"
+  }
+}

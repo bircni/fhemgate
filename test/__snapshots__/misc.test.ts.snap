@@ -1,0 +1,29 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`debug page > lists the connections and what is cached for every subscribed reading 1`] = `
+[
+  "<a href="/">home</a>",
+  "",
+  "http://fhem:8083/fhem",
+  "&nbsp;&nbsp;connected: true; connects: 2",
+  "&nbsp;&nbsp;received: 10; received total: 30",
+  "&nbsp;&nbsp;last event: Sun Aug 16 2026 12:00:00 GMT+0000 (UTC)",
+  "http://other:8083/fhem",
+  "&nbsp;&nbsp;connected: false; connects: 1",
+  "&nbsp;&nbsp;received: 0; received total: 0",
+  "",
+  "valve-desired-temp: 20.0",
+  "&nbsp;&nbsp;TargetTemperature: 20 (number)",
+  "",
+  "valve-mode: auto",
+  "&nbsp;&nbsp;TargetHeatingCoolingState: 3 (number; means AUTO)",
+  "",
+  "valve-measured-temp: 19.0",
+  "&nbsp;&nbsp;CurrentTemperature: 19 (number)",
+  "",
+  "valve-undefined: undefined",
+  "&nbsp;&nbsp;CurrentHeatingCoolingState: 1 (number; means HEAT)",
+  "",
+  "",
+]
+`;

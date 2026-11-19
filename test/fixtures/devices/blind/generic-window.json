@@ -1,0 +1,20 @@
+{
+  "Name": "generic_window",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_window",
+    "TYPE": "dummy",
+    "FUUID": "80ddb699-f33f-d392-0a5b-61fe2b16fd75",
+    "STATE": "0"
+  },
+  "Readings": {
+    "state": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "window"
+  }
+}

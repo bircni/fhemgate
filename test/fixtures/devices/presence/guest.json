@@ -1,0 +1,22 @@
+{
+  "Name": "guest",
+  "PossibleSets": "state:home,gotosleep,asleep,awoken,absent,gone,none",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "guest",
+    "TYPE": "GUEST",
+    "FUUID": "ba096036-f33f-a12d-9d40-454c5f26fb80",
+    "STATE": "none"
+  },
+  "Readings": {
+    "state": {
+      "Value": "none",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "presence": {
+      "Value": "absent",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

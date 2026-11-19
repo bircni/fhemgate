@@ -1,0 +1,35 @@
+{
+  "Name": "thermostat_states",
+  "PossibleSets": "desired-temp:slider,4.5,0.5,30.5 mode",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "thermostat_states",
+    "TYPE": "CUL_HM",
+    "FUUID": "fc363283-f33f-5232-8ef2-46f2c352fb0d",
+    "STATE": "x",
+    "DEF": "DA4B5C"
+  },
+  "Readings": {
+    "state": {
+      "Value": "x",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "desired-temp": {
+      "Value": "20",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "measured-temp": {
+      "Value": "19",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "mode": {
+      "Value": "x",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-CC-RT-DN",
+    "subType": "thermostat",
+    "homebridgeMapping": "TargetHeatingCoolingState=mode,values=/.*/:HEAT,cmds=HEAT:mode+manual;OFF:off"
+  }
+}

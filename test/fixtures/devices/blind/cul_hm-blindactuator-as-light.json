@@ -1,0 +1,27 @@
+{
+  "Name": "cul_hm_blindactuator_as_light",
+  "PossibleSets": "on:noArg off:noArg pct:slider,0,1,100",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_hm_blindactuator_as_light",
+    "TYPE": "CUL_HM",
+    "FUUID": "92a59891-f33f-5b73-a03a-baad3e638f9f",
+    "STATE": "40",
+    "DEF": "6A4B5E"
+  },
+  "Readings": {
+    "state": {
+      "Value": "40",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pct": {
+      "Value": "40",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-LC-BL1-FM",
+    "subType": "blindActuator",
+    "genericDeviceType": "light"
+  }
+}

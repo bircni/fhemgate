@@ -1,0 +1,30 @@
+{
+  "Name": "hm_sec_key",
+  "PossibleSets": "lock:noArg unlock:noArg open:noArg statusRequest",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hm_sec_key",
+    "TYPE": "CUL_HM",
+    "FUUID": "ad2ec3a0-f33f-5eb2-49cd-a8d4b5e65a44",
+    "STATE": "locked",
+    "DEF": "8A4B5C"
+  },
+  "Readings": {
+    "state": {
+      "Value": "locked",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "lock": {
+      "Value": "locked",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-SEC-KEY",
+    "subType": "keyMatic"
+  }
+}

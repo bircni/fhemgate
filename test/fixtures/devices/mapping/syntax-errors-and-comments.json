@@ -1,0 +1,28 @@
+{
+  "Name": "syntax_errors_and_comments",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "syntax_errors_and_comments",
+    "TYPE": "dummy",
+    "FUUID": "39160131-f33f-13cc-6b07-5781a9ee81cf",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "level": {
+      "Value": "10",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temp": {
+      "Value": "19",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "#Brightness=level On On= =x Brightness=level,a=b=c\n\nCurrentTemperature:temp"
+  }
+}
