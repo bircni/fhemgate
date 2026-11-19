@@ -1,0 +1,20 @@
+{
+  "Name": "hmip_broll_by_type",
+  "PossibleSets": "pct datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_broll_by_type",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "6563d079-f33f-6cea-1f29-e9e3ab1f867b",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000001:4",
+    "ccutype": "HmIP-BROLL"
+  },
+  "Readings": {
+    "4.LEVEL": {
+      "Value": "0.2",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

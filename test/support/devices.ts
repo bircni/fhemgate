@@ -28,6 +28,11 @@ export function device(options: DeviceOptions): FhemDevice {
   };
 }
 
+/** a HMCCU channel device */
+export function hmccuDevice(options: DeviceOptions): FhemDevice {
+  return device({ ...options, Internals: { TYPE: 'HMCCUCHN', DEF: 'CCU 000ABC:4', ...options.Internals } });
+}
+
 export interface Fixture {
   /** family/name, without the extension */
   id: string;

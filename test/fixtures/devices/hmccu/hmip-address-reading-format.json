@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_address_reading_format",
+  "PossibleSets": "on off datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_address_reading_format",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "bd442261-f33f-7766-9a08-84cc8ccc2c28",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000002:4",
+    "ccutype": "HmIP-PS",
+    "ccurole": "SWITCH_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "000E1A2B3C4D5E:3.STATE": {
+      "Value": "false",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

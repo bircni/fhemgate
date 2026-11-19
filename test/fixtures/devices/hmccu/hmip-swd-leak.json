@@ -1,0 +1,29 @@
+{
+  "Name": "hmip_swd_leak",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_swd_leak",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "8bb00504-f33f-d890-60b9-51a512036a84",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000008:4",
+    "ccutype": "HmIP-SWD",
+    "ccurole": "WATER_DETECTION_TRANSMITTER"
+  },
+  "Readings": {
+    "1.WATERLEVEL_DETECTED": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.MOISTURE_DETECTED": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "0.LOWBAT": {
+      "Value": "true",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

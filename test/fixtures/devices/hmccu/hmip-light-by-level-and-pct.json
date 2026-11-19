@@ -1,0 +1,20 @@
+{
+  "Name": "hmip_light_by_level_and_pct",
+  "PossibleSets": "pct datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_light_by_level_and_pct",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "4b537ef0-f33f-7e11-a61f-ca40365ad232",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000009:4",
+    "ccutype": "X"
+  },
+  "Readings": {
+    "1.LEVEL": {
+      "Value": "0.4",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

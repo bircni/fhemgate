@@ -1,0 +1,20 @@
+{
+  "Name": "hmip_switch_by_state_and_on_off",
+  "PossibleSets": "on off datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_switch_by_state_and_on_off",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "359b5a8f-f33f-06b9-7593-73bb70cd5118",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000000:4",
+    "ccutype": "X"
+  },
+  "Readings": {
+    "1.STATE": {
+      "Value": "true",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

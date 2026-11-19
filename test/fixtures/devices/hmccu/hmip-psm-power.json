@@ -1,0 +1,37 @@
+{
+  "Name": "hmip_psm_power",
+  "PossibleSets": "on:noArg off:noArg datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_psm_power",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "cd09a025-f33f-5744-eb25-ad6787cf780c",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000000:4",
+    "ccutype": "HmIP-PSM",
+    "ccurole": "SWITCH_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "STATE": {
+      "Value": "true",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "POWER": {
+      "Value": "42.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "CURRENT": {
+      "Value": "190.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "VOLTAGE": {
+      "Value": "231.2",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "ENERGY_COUNTER": {
+      "Value": "1234.0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

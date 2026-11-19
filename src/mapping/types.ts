@@ -82,6 +82,11 @@ export interface Mapping {
   reading2homekit?: Converter | string;
   homekit2reading?: Converter | string;
 
+  // ---- set by the HMCCU detection for its converters
+
+  levelFactor?: number;
+  levelWriteFactor?: number;
+
   /** belongs to the accessory information and gets no characteristic of its own */
   _isInformation?: boolean;
 

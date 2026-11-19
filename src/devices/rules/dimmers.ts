@@ -52,8 +52,8 @@ function hueBri2percent(_mapping: Mapping, orig: string): number {
 }
 
 /** HomeMatic: `set pct <0-100>` */
-export const homematicDimmer: Rule = ({ s, target }) => {
-  if (!s.PossibleSets.match(/(^| )pct\b/)) {
+export const homematicDimmer: Rule = ({ s, target, isHMCCU }) => {
+  if (isHMCCU || !s.PossibleSets.match(/(^| )pct\b/)) {
     return false;
   }
 

@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_broll_datapoint_only",
+  "PossibleSets": "datapoint config",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_broll_datapoint_only",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "d28ab2e4-f33f-88eb-c52a-d0bbf16cbc91",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000004:4",
+    "ccutype": "HmIP-BROLL",
+    "ccurole": "SHUTTER_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "4.LEVEL": {
+      "Value": "0.5",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

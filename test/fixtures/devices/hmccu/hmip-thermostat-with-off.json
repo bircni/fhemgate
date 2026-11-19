@@ -1,0 +1,31 @@
+{
+  "Name": "hmip_thermostat_with_off",
+  "PossibleSets": "desired-temp auto manu off datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_thermostat_with_off",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "3304eb44-f33f-017c-864b-7939cc9e8035",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000008:4",
+    "ccutype": "HM-CC-RT-DN",
+    "ccurole": "CLIMATECONTROL_RT_TRANSCEIVER"
+  },
+  "Readings": {
+    "1.SET_POINT_TEMPERATURE": {
+      "Value": "22.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.CONTROL_MODE": {
+      "Value": "AUTO-MODE",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.LEVEL": {
+      "Value": "0.0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "ccuscaleval": "!LEVEL:0:1:0:100"
+  }
+}

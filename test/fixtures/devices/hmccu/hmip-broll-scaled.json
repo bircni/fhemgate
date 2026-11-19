@@ -1,0 +1,27 @@
+{
+  "Name": "hmip_broll_scaled",
+  "PossibleSets": "pct:slider,0,1,100 up down stop datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_broll_scaled",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "14fe1496-f33f-f84e-90ce-3f180e25ecc5",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000003:4",
+    "ccutype": "HmIP-BROLL",
+    "ccurole": "SHUTTER_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "4.LEVEL": {
+      "Value": "35",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "4.ACTIVITY_STATE": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "ccuscaleval": "LEVEL:0:1:0:100"
+  }
+}
