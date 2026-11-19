@@ -54,6 +54,22 @@ describe('prepareMappings', () => {
     expect(mapping.homekit2cmd_re).toEqual([{ re: '1|4', to: 'zu' }]);
   });
 
+  it('names a value that is given as its number, and nothing the class only inherits', () => {
+    const mapping: Mapping = { values: ['zu:0', 'auf:1', 'halb:7', 'leer:'] };
+
+    prepare({ CurrentHeatingCoolingState: mapping });
+
+    expect(mapping.homekit2name).toEqual({ 0: 'OFF', 1: 'HEAT' });
+  });
+
+  it('replaces the names in a list of valid values by their numbers and keeps the numbers', () => {
+    const mapping: Mapping = { valid: ['OFF', 'HEAT', '3'] };
+
+    prepare({ TargetHeatingCoolingState: mapping });
+
+    expect(mapping.valid).toEqual([0, 1, 3]);
+  });
+
   it('takes the first value from the reading of the device and notes when it last changed', () => {
     const mapping: Mapping = { reading: 'level' };
 
