@@ -1,7 +1,9 @@
+import type { Server } from 'node:http';
 import { createRequire } from 'node:module';
 import type { AccessoryPlugin, API, Logging, StaticPlatformPlugin } from 'homebridge';
 import { FhemAccessory } from './accessory/accessory.ts';
 import { baseUrl, loadJsFunctions, type FhemPlatformConfig } from './config.ts';
+import { DEFAULT_DEBUG_PORT, FALLBACK_DEBUG_PORT, debugPortOf, handleDebugRequest, startDebugServer } from './debug/server.ts';
 import type { Jsonlist2Device } from './devices/types.ts';
 import { describeError, execute, fetchDevices, type FhemConnection } from './fhem/client.ts';
 import { startLongpoll } from './fhem/eventStream.ts';
@@ -18,6 +20,8 @@ export interface Plugin {
   state: PluginState;
   /** the directory homebridge keeps its configuration in */
   storagePath(): string;
+  /** the debug servers that were started, by the port the configuration asked for */
+  debugServers: Map<number, Server>;
 }
 
 /** sorts the list by the key, in place */
@@ -70,6 +74,8 @@ export class FhemPlatform implements StaticPlatformPlugin {
 
     this.scope = config.scope;
 
+    this.#startDebugServer();
+
     if (this.server === undefined) {
       log.error('incomplete configuration ');
       return;
@@ -91,8 +97,44 @@ export class FhemPlatform implements StaticPlatformPlugin {
     });
   }
 
-  /** homebridge is shutting down: the histories are written to disk */
+  /**
+   * Starts the debug server, unless the configuration switches it off or another platform
+   * already started one for the port. Without a port in the configuration it is the default
+   * port, or the one after it when that is taken.
+   */
+  #startDebugServer(): void {
+    const port = debugPortOf(this.config.debugPort);
+    if (port === 'off') {
+      return;
+    }
+    if (port === undefined) {
+      this.log.error('config: value for debugPort has to be a port number or false. the debug server is not started.');
+      return;
+    }
+
+    const host = typeof this.config.debugHost === 'string' && this.config.debugHost !== '' ? this.config.debugHost : undefined;
+    const fallbackPort = this.config.debugPort === undefined && port === DEFAULT_DEBUG_PORT ? FALLBACK_DEBUG_PORT : undefined;
+
+    const { state, debugServers } = this.#plugin;
+    if (!debugServers.has(port)) {
+      const server = startDebugServer(
+        { port, host, fallbackPort },
+        (request, response) => {
+          handleDebugRequest(request, response, state, state.longpoll);
+        },
+        this.log,
+      );
+      debugServers.set(port, server);
+    }
+  }
+
+  /** homebridge is shutting down: the histories are written to disk and the debug servers stop listening */
   shutdown(): void {
+    for (const [port, server] of this.#plugin.debugServers) {
+      server.close();
+      this.#plugin.debugServers.delete(port);
+    }
+
     for (const subscriptions of Object.values(this.#plugin.state.subscriptions.byInformId)) {
       for (const subscription of subscriptions ?? []) {
         const accessory = subscription.accessory;

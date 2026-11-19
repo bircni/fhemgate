@@ -24,6 +24,13 @@ export interface FhemPlatformConfig extends PlatformConfig {
   scope?: unknown;
   /** keep trying to reach fhem for ever instead of giving up after the fourth failed attempt */
   neverTimeout?: boolean;
+  /**
+   * The port of a web page that shows what the plugin has cached and who is subscribed to what.
+   * 8282 if not given, or 8283 when that is taken. There is no such page with false or 0.
+   */
+  debugPort?: number | false;
+  /** the address the debug page is served on, e.g. `127.0.0.1` for this machine only. all addresses of the machine if not given. */
+  debugHost?: string;
 }
 
 /**

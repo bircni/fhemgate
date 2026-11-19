@@ -2,7 +2,6 @@ import { createRequire } from 'node:module';
 import type { API, Logging } from 'homebridge';
 import type { HistoryServiceClass } from './accessory/history.ts';
 import type { FhemPlatformConfig } from './config.ts';
-import { startDebugServer, handleDebugRequest } from './debug/server.ts';
 import { FhemPlatform, version, type Plugin } from './platform.ts';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.ts';
 import { PluginState } from './state/pluginState.ts';
@@ -26,7 +25,7 @@ export function createPlugin(homebridge: API): Plugin & { Platform: new (log: Lo
     console.log('error: fakegato-history not installed');
   }
 
-  const plugin: Plugin = { state, storagePath: () => homebridge.user.storagePath() };
+  const plugin: Plugin = { state, storagePath: () => homebridge.user.storagePath(), debugServers: new Map() };
 
   return {
     ...plugin,
@@ -44,13 +43,6 @@ export default function (homebridge: API): void {
   console.info('this is ' + PLUGIN_NAME + ' ' + version);
 
   const plugin = createPlugin(homebridge);
-
-  // the tests load the plugin many times in parallel and switch the debug server off
-  if (process.env.FHEM2HB_DEBUG_SERVER !== 'off') {
-    startDebugServer((request, response) => {
-      handleDebugRequest(request, response, plugin.state, plugin.state.longpoll);
-    });
-  }
 
   homebridge.registerPlatform(PLATFORM_NAME, plugin.Platform);
 }

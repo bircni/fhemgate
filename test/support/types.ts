@@ -86,6 +86,8 @@ export interface PlatformConfig {
   jsFunctions?: string;
   scope?: unknown;
   neverTimeout?: boolean;
+  debugPort?: unknown;
+  debugHost?: string;
   auth?: { user: string; pass: string; sendImmediately?: boolean };
 }
 

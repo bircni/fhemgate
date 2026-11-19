@@ -4,9 +4,8 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts', 'test/**/*.test.ts'],
     env: {
-      // reading timestamps from fhem carry no time zone, and the debug server would be started by every test file
+      // reading timestamps from fhem carry no time zone
       TZ: 'UTC',
-      FHEM2HB_DEBUG_SERVER: 'off',
     },
     setupFiles: ['test/support/setup.ts'],
     coverage: {
