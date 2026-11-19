@@ -258,10 +258,25 @@ export class FhemPlatform implements StaticPlatformPlugin {
       if (!err && response?.statusCode === 200 && json) {
         this.log.info('got: ' + json.totalResultsReturned + ' results');
         if (json.totalResultsReturned) {
-          for (const s of sortByKey<Jsonlist2Device>(json.Results, 'Name')) {
-            const accessory = new FhemAccessory(this, s, state, (log, target, cmd, answer) => {
-              execute(state, log, target as FhemConnection, cmd, answer);
-            });
+          // an entry that is no device, which no fhem should send, sorts first and is reported below
+          const results = json.Results.map((s) => s as Jsonlist2Device | null).sort((a, b) => {
+            const x = a?.Name ?? '';
+            const y = b?.Name ?? '';
+            return x < y ? -1 : x > y ? 1 : 0;
+          });
+          for (const s of results) {
+            // a device the plugin fails on is left out and the others are published: an error that
+            // gets out of here ends homebridge, and with it every accessory of every plugin
+            let accessory: FhemAccessory;
+            try {
+              accessory = new FhemAccessory(this, s as Jsonlist2Device, state, (log, target, cmd, answer) => {
+                execute(state, log, target as FhemConnection, cmd, answer);
+              });
+            } catch (error) {
+              this.log.error('no accessory created for ' + (s?.Name ?? 'a device without a name') + ': ' + String(error));
+              continue;
+            }
+
             if (accessory.service_name) {
               accessory.fhem = this;
 
@@ -270,9 +285,18 @@ export class FhemPlatform implements StaticPlatformPlugin {
                 continue;
               }
 
+              // the services are built here and not when homebridge asks for them, where an error could not be caught
+              try {
+                accessory.prepareServices();
+              } catch (error) {
+                this.log.error('no accessory created for ' + s?.Name + ': ' + String(error));
+                accessory.unsubscribe();
+                continue;
+              }
+
               foundAccessories.push(accessory);
             } else {
-              this.log.info('no accessory created for ' + s.Internals.NAME + ' (' + s.Internals.TYPE + ')');
+              this.log.info('no accessory created for ' + s?.Internals.NAME + ' (' + s?.Internals.TYPE + ')');
             }
           }
         }

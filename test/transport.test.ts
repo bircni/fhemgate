@@ -10,7 +10,7 @@ import { startFakeFhem, waitFor, type FakeFhem, type FakeFhemOptions } from './s
 import { characteristicOf, serviceOf } from './support/homekit.ts';
 import { createWorld, hap, type World, type WorldOptions } from './support/subject.ts';
 import { selfSignedCertificate } from './support/tls.ts';
-import type { Accessory, Platform, PlatformConfig } from './support/types.ts';
+import type { Accessory, FhemDevice, Platform, PlatformConfig } from './support/types.ts';
 
 let fhem: FakeFhem;
 let world: World;
@@ -304,12 +304,75 @@ describe('devices', () => {
       'log lamp_a is switch',
       'log lamp_a has',
       'log   On [state;on,off]',
+      'log creating services for lamp-a',
+      'log   information service for lamp-a',
+      'log     manufacturer, model and serial number characteristics for lamp-a',
+      'log     name (siriName) characteristic for lamp-a',
+      'log   Switch service for lamp-a',
+      'log     On characteristic for lamp_a:state',
       'log lamp_b is switch',
       'log lamp_b has',
       'log   On [state;on,off]',
+      'log creating services for lamp-b',
+      'log   information service for lamp-b',
+      'log     manufacturer, model and serial number characteristics for lamp-b',
+      'log     name (siriName) characteristic for lamp-b',
+      'log   Switch service for lamp-b',
+      'log     On characteristic for lamp_b:state',
       'error timer: no service type detected',
       'info no accessory created for timer (at)',
     ]);
+  });
+
+  it('leaves out a device it can not make an accessory of, says which, and publishes the others', async () => {
+    const platform = await connect({
+      devices: [
+        { Name: 'lamp_a', ...device({ Internals: { NAME: 'lamp_a' }, Readings: { state: 'on' }, PossibleSets: 'on off' }) },
+        // what no fhem should report, and what must not stop the platform if one does
+        { Name: 'lamp_b', Readings: {}, Attributes: {} } as unknown as FhemDevice,
+        null as unknown as FhemDevice,
+        { Name: 'lamp_c', ...device({ Internals: { NAME: 'lamp_c' }, Readings: { state: 'on' }, PossibleSets: 'on off' }) },
+      ],
+    });
+    world.log.clear();
+
+    const accessories = await accessoriesOf(platform);
+
+    expect(accessories.map((accessory) => accessory.name)).toEqual(['lamp-a', 'lamp-c']);
+    expect(world.log.errors()).toEqual([
+      "error no accessory created for a device without a name: TypeError: Cannot read properties of null (reading 'Internals')",
+      "error no accessory created for lamp_b: TypeError: Cannot read properties of undefined (reading 'NAME')",
+    ]);
+  });
+
+  it('leaves out a device whose services can not be built, says which, and publishes the others', async () => {
+    const dimmer = (name: string, homebridgeMapping?: string) => ({
+      Name: name,
+      ...device({
+        Internals: { NAME: name },
+        Readings: { state: 'on', pct: '40' },
+        PossibleSets: 'on off pct:slider,0,1,100',
+        Attributes: homebridgeMapping ? { homebridgeMapping } : {},
+      }),
+    });
+    const platform = await connect({
+      // HAP-NodeJS refuses a range that ends before it starts
+      devices: [dimmer('dimmer_a'), dimmer('dimmer_b', 'Brightness=pct,cmd=pct,minValue=60,maxValue=40'), dimmer('dimmer_c')],
+    });
+    world.log.clear();
+
+    const accessories = await accessoriesOf(platform);
+
+    expect(accessories.map((accessory) => accessory.name)).toEqual(['dimmer-a', 'dimmer-c']);
+    expect(world.log.errors()).toEqual([
+      "error no accessory created for dimmer_b: Error: Error setting CharacteristicsProps for 'Brightness': 'minValue' cannot be greater or equal the 'maxValue'!",
+    ]);
+    // the device that was left out listens to nothing, and can be published once its mapping is corrected
+    expect(Object.keys(world.subscriptions).filter((informId) => informId.startsWith('dimmer_b-'))).toEqual([]);
+    // homebridge is handed the services that were built, and no second set
+    const [first] = accessories;
+    expect(first?.getServices()).toBe(first?.getServices());
+    expect(first?.getServices().map((service) => service.constructor.name)).toEqual(['AccessoryInformation', 'Lightbulb']);
   });
 
   it('asks for all devices without a filter', async () => {
@@ -842,7 +905,8 @@ describe('commands', () => {
     await waitFor(() => world.cached['aussen-temperature'] === '7.5', 'the reading');
 
     expect(fhem.commands.at(-1)).toBe('{ReadingsVal("aussen","temperature","")}');
-    expect((accessory.mappings.CurrentTemperature as { cached?: unknown }).cached).toBeUndefined();
+    // the services exist by then, so the answer reaches the mapping
+    expect((accessory.mappings.CurrentTemperature as { cached?: unknown }).cached).toBe(7.5);
   });
 });
 
