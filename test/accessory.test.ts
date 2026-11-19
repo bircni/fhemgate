@@ -603,6 +603,70 @@ describe('javascript in a mapping', () => {
   });
 });
 
+describe('services of the same type', () => {
+  const kinds = (services: { constructor: { name: string }; subtype?: string }[]) =>
+    services.map((service) => `${service.constructor.name}(${service.subtype ?? ''})`);
+
+  it('are told apart by their subtypes', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'strip' },
+        Readings: { a: 'on', b: 'off' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'clear Outlet(a)#On=a Outlet(b)#On=b' },
+      }),
+    );
+
+    expect(kinds(accessory.getServices())).toEqual(['AccessoryInformation()', 'Switch()', 'Outlet(a)', 'Outlet(b)']);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('are not created twice without a subtype: the mapping that asks for it is skipped and the others stay', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'strip' },
+        Readings: { a: 'on', b: 'off', c: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'clear Outlet(a)#On=a Outlet#OutletInUse=b Lightbulb#On=c' },
+      }),
+    );
+
+    const services = accessory.getServices();
+
+    expect(kinds(services)).toEqual(['AccessoryInformation()', 'Switch()', 'Outlet(a)', 'Lightbulb()']);
+    expect(world.log.errors()).toEqual([
+      'error strip: Outlet#OutletInUse needs another Outlet service without a subtype. give it a subtype of its own. the mapping is skipped.',
+    ]);
+    expect(characteristicOf(serviceOf(services, 'Lightbulb'), Characteristic.On).value).toBe(true);
+    // what homebridge does with the services: it takes them all
+    const published = new hap.Accessory('strip', hap.uuid.generate('strip'));
+    expect(() => {
+      for (const service of services.slice(1)) {
+        published.addService(service);
+      }
+    }).not.toThrow();
+  });
+
+  it('are not created twice with the same subtype under two names of the service', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'strip' },
+        Readings: { a: 'on', b: 'off' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'clear outlet(a)#On=a Outlet(a)#OutletInUse=b' },
+      }),
+    );
+
+    expect(kinds(accessory.getServices())).toEqual(['AccessoryInformation()', 'Switch()', 'Outlet(a)']);
+    expect(world.log.errors()).toEqual([
+      'error strip: Outlet(a)#OutletInUse needs another Outlet service with the subtype a, which another one has. give it a subtype of its own. the mapping is skipped.',
+    ]);
+  });
+});
+
 describe('rooms, types and scopes', () => {
   const inRooms = (room?: string) =>
     createWorld().accessory(

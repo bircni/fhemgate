@@ -24,14 +24,14 @@ const jsFunctions = `module.exports = {${Object.entries(functions)
   .map(([name, body]) => `${name}: ${body.toString()}`)
   .join(',\n')}};`;
 
-// this fixture ends up with two services of the same type and subtype, which homebridge refuses.
-// it has a test of its own below.
-const REFUSED = 'mapping/linked-services';
+// the mappings of this fixture ask for a second service of a type without a subtype, which
+// homebridge would refuse. it is among the fixtures above and has a test of its own below.
+const SKIPS_A_MAPPING = 'mapping/linked-services';
 
 /** the fixtures as fhem lists them */
 function devices(only?: string): FhemDevice[] {
   return fixtureDevices()
-    .filter((fixture) => (only ? fixture.id === only : fixture.id !== REFUSED))
+    .filter((fixture) => only === undefined || fixture.id === only)
     .map((fixture) => {
       const device = fixture.load();
       return { Name: device.Internals.NAME, ...device };
@@ -133,18 +133,20 @@ describe.skipIf(realFhemUrl !== undefined)('a device whose mappings give two ser
     await fhem?.close();
   });
 
-  it('keeps homebridge from publishing any device of the platform', async () => {
+  it('is published without the mapping that asks for it, like the other devices of the platform', async () => {
     const lamp = devices('switch/dummy-on-off');
-    fhem = await startFakeFhemWith([...devices(REFUSED), ...lamp]);
+    fhem = await startFakeFhemWith([...devices(SKIPS_A_MAPPING), ...lamp]);
     homebridge = await startHomebridge(fhem.platformConfig);
 
     const deadline = Date.now() + 60_000;
-    while (!homebridge.output().includes('Cannot add a Service with the same UUID') && Date.now() < deadline) {
+    let names: string[] = [];
+    while (names.length < 2 && Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, 250));
+      names = (await homebridge.accessories().catch(() => [])).map((accessory) => accessory.name).sort();
     }
 
-    expect(homebridge.output()).toContain('Cannot add a Service with the same UUID');
-    expect(homebridge.output()).toContain('dummy_on_off is switch');
-    expect(await homebridge.accessories().catch(() => [])).toEqual([]);
+    expect(names).toEqual(['Stehlampe Wohnzimmer', 'linked_services']);
+    expect(homebridge.output()).not.toContain('Cannot add a Service with the same UUID');
+    expect(homebridge.output()).toContain('needs another InputSource service without a subtype. give it a subtype of its own. the mapping is skipped.');
   });
 });
