@@ -3,8 +3,9 @@ import type { AccessoryPlugin, API, Logging, StaticPlatformPlugin } from 'homebr
 import { FhemAccessory } from './accessory/accessory.ts';
 import { baseUrl, loadJsFunctions, type FhemPlatformConfig } from './config.ts';
 import type { Jsonlist2Device } from './devices/types.ts';
-import { execute, fetchDevices, type FhemConnection } from './fhem/client.ts';
+import { describeError, execute, fetchDevices, type FhemConnection } from './fhem/client.ts';
 import { startLongpoll } from './fhem/eventStream.ts';
+import { retryDelayAfterError } from './fhem/protocol.ts';
 import type { PluginState } from './state/pluginState.ts';
 
 const require = createRequire(import.meta.url);
@@ -159,10 +160,17 @@ export class FhemPlatform implements StaticPlatformPlugin {
   /**
    * Hands homebridge the accessories for the devices of the filter, sorted by name.
    *
-   * Waits for the long poll to have reached fhem first. The callback is never called when fhem
-   * then refuses to list the devices, which leaves homebridge waiting.
+   * Waits for the long poll to have reached fhem first. When fhem then does not list the
+   * devices it is asked again, after a pause that grows like the one of the long poll. homebridge
+   * is not handed an empty list instead: HomeKit would take every accessory for removed and
+   * forget its room and its automations.
    */
   accessories(callback: (foundAccessories: AccessoryPlugin[]) => void): void {
+    this.#fetchAccessories(callback, 0);
+  }
+
+  /** @param failures how often fhem did not list the devices so far */
+  #fetchAccessories(callback: (foundAccessories: AccessoryPlugin[]) => void, failures: number): void {
     const state = this.#plugin.state;
     const foundAccessories: FhemAccessory[] = [];
     const done = (): void => {
@@ -188,7 +196,7 @@ export class FhemPlatform implements StaticPlatformPlugin {
       }
       this.log.debug('FHEM csrfToken missing, retry in: ' + timeout + 'msec');
       setTimeout(() => {
-        this.accessories(callback);
+        this.#fetchAccessories(callback, failures);
       }, timeout);
       return;
     }
@@ -221,9 +229,20 @@ export class FhemPlatform implements StaticPlatformPlugin {
         done();
       } else {
         this.log.error('There was a problem connecting to FHEM');
-        if (response) {
-          this.log.error('  ' + response.statusCode + ': ' + response.statusMessage);
+        if (err) {
+          this.log.error('  ' + describeError(err));
+        } else if (response?.statusCode !== 200) {
+          this.log.error('  ' + response?.statusCode + ': ' + response?.statusMessage);
+        } else {
+          this.log.error('  the answer is no list of devices');
         }
+
+        const attempt = failures + 1;
+        const pause = retryDelayAfterError(attempt);
+        this.log.error('fetching the devices failed for the ' + attempt + '. time, trying again in: ' + pause + 'msec');
+        setTimeout(() => {
+          this.#fetchAccessories(callback, attempt);
+        }, pause);
       }
     });
   }

@@ -31,6 +31,9 @@ export interface AccessoryPlatform {
   jsFunctions?: unknown;
 }
 
+/** milliseconds fhem has to answer a read of a characteristic, after which HomeKit is told that it failed */
+const QUERY_TIMEOUT = 10000;
+
 /** a service with the name it was created under, which the plugin keeps at the service */
 export type NamedService = Service & { service_name?: string };
 
@@ -327,13 +330,24 @@ export class FhemAccessory {
 
     const cmd = '{ReadingsVal("' + device + '","' + reading + '","")}';
 
+    // HomeKit is not left without an answer when fhem gives none
+    let timedOut = false;
+    const timer =
+      callback &&
+      setTimeout(() => {
+        timedOut = true;
+        this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
+        callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
+      }, QUERY_TIMEOUT);
+
     this.execute(cmd, (result) => {
+      clearTimeout(timer);
       const value = result.replace(/[\r\n]/g, '');
       this.log.info('  value: ' + value);
 
       this.#state.update(informId, value, true);
 
-      if (callback !== undefined) {
+      if (callback !== undefined && !timedOut) {
         // without a mapping there is nothing to convert the reading with
         const converted = mapping ? reading2homekit(mapping, value) : value;
         if (converted === undefined) {

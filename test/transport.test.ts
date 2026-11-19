@@ -247,15 +247,68 @@ describe('devices', () => {
     expect(world.log.lines.at(-1)).toBe('info ignoring lamp for siri');
   });
 
-  it('never answers when fhem refuses the request', async () => {
-    const platform = await connect({ answer: (cmd) => (cmd === 'jsonlist2' ? { status: 500, body: 'no' } : undefined) });
+  it('asks again, with a growing pause, until fhem lists the devices, and hands over no empty list meanwhile', async () => {
+    let refuse = true;
+    const platform = await connect({
+      devices: [{ Name: 'lamp', ...lamp() }],
+      answer: (cmd) => (cmd === 'jsonlist2' && refuse ? { status: 500, body: 'no' } : undefined),
+    });
     const answered = vi.fn();
+    const requests = () => fhem.commands.filter((cmd) => cmd === 'jsonlist2').length;
+    world.log.clear();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
     platform.accessories(answered);
-    await waitFor(() => world.log.errors().length > 0, 'the error');
-
-    expect(world.log.lines.slice(-2)).toEqual(['error There was a problem connecting to FHEM', 'error   500: Internal Server Error']);
+    await waitFor(() => world.log.errors().length === 3, 'the first failure');
+    vi.advanceTimersByTime(2999);
+    expect(requests()).toBe(1);
+    vi.advanceTimersByTime(1);
+    await waitFor(() => world.log.errors().length === 6, 'the second failure');
+    vi.advanceTimersByTime(5999);
+    expect(requests()).toBe(2);
     expect(answered).not.toHaveBeenCalled();
+
+    refuse = false;
+    vi.advanceTimersByTime(1);
+    await waitFor(() => answered.mock.calls.length > 0, 'the accessories');
+
+    expect(world.log.errors()).toEqual([
+      'error There was a problem connecting to FHEM',
+      'error   500: Internal Server Error',
+      'error fetching the devices failed for the 1. time, trying again in: 3000msec',
+      'error There was a problem connecting to FHEM',
+      'error   500: Internal Server Error',
+      'error fetching the devices failed for the 2. time, trying again in: 6000msec',
+    ]);
+    expect(requests()).toBe(3);
+    expect(answered).toHaveBeenCalledOnce();
+    expect(answered.mock.calls[0]?.[0]).toMatchObject([{ name: 'lamp' }]);
+  });
+
+  it('asks again when the answer of fhem is no list of devices', async () => {
+    let broken = true;
+    const platform = await connect({
+      devices: [{ Name: 'lamp', ...lamp() }],
+      answer: (cmd) => (cmd === 'jsonlist2' && broken ? { body: '<html>Unknown command</html>' } : undefined),
+    });
+    const answered = vi.fn();
+    world.log.clear();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+    platform.accessories(answered);
+    await waitFor(() => world.log.errors().length === 3, 'the failure');
+
+    expect(world.log.errors()).toEqual([
+      'error There was a problem connecting to FHEM',
+      'error   the answer is no list of devices',
+      'error fetching the devices failed for the 1. time, trying again in: 3000msec',
+    ]);
+    expect(answered).not.toHaveBeenCalled();
+
+    broken = false;
+    vi.advanceTimersByTime(3000);
+    await waitFor(() => answered.mock.calls.length > 0, 'the accessories');
+    expect(answered.mock.calls[0]?.[0]).toHaveLength(1);
   });
 
   it('waits for the csrf token before it asks', async () => {

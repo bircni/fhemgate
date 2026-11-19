@@ -73,8 +73,8 @@ export function execute(state: PluginState, log: Logging, connection: FhemConnec
 }
 
 /**
- * Asks fhem for the devices of the filter. The callback gets the response and what fhem
- * answered: the list of devices, or the text if it was no JSON.
+ * Asks fhem for the devices of the filter. The callback gets the response and the list of
+ * devices, or no list when fhem answered something else.
  */
 export function fetchDevices(
   state: PluginState,
@@ -87,13 +87,16 @@ export function fetchDevices(
   log.info('fetching: ' + url);
 
   getText(url, { ...requestOptions(connection), gzip: true }, (err, response, body) => {
-    let devices: unknown = body;
+    let devices: DeviceList | undefined;
     try {
-      devices = JSON.parse(body as string);
+      const answer = JSON.parse(body as string) as Partial<DeviceList> | null;
+      if (Array.isArray(answer?.Results)) {
+        devices = answer as DeviceList;
+      }
     } catch {
-      // handed on as text
+      // no JSON: an error page, or nothing at all
     }
-    callback(err, response, devices as DeviceList | undefined);
+    callback(err, response, devices);
   });
 }
 
