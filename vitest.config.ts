@@ -11,7 +11,7 @@ export default defineConfig({
     setupFiles: ['test/support/setup.ts'],
     coverage: {
       provider: 'v8',
-      include: ['index.cjs', 'src/**/*.ts'],
+      include: ['src/**/*.ts'],
       exclude: ['src/**/*.test.ts'],
       reporter: ['text-summary', 'json-summary', 'html'],
       thresholds: {

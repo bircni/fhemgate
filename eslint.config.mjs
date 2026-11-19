@@ -11,10 +11,11 @@ export default defineConfig(
   // the code this project is built from. it is only checked for real errors, and this
   // block goes away once everything has moved into src/.
   {
-    files: ['index.cjs', 'lib/**/*.cjs'],
+    files: ['src/legacy.ts'],
     languageOptions: {
+      parser: tseslint.parser,
       ecmaVersion: 2022,
-      sourceType: 'commonjs',
+      sourceType: 'module',
       globals: { ...globals.node },
     },
     rules: {
@@ -32,6 +33,7 @@ export default defineConfig(
 
   {
     files: ['**/*.ts', '**/*.mjs'],
+    ignores: ['src/legacy.ts'],
     extends: [
       eslint.configs.recommended,
       tseslint.configs.strictTypeChecked,

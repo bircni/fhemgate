@@ -19,10 +19,8 @@
     "fhem"
   ],
   "type": "module",
-  "main": "index.cjs",
+  "main": "dist/index.js",
   "files": [
-    "index.cjs",
-    "lib",
     "dist",
     "config.schema.json",
     "LICENSE",

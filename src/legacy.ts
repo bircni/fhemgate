@@ -15,24 +15,20 @@
 //         "filter": "room=xyz"
 //     }
 // ],
-'use strict';
+// @ts-nocheck -- the code taken over from homebridge-fhem. it shrinks as its parts move into typed modules.
+import { createRequire } from 'node:module';
+import util from 'node:util';
+import events from 'node:events';
+import http from 'node:http';
 
-var version = require('./lib/version.cjs');
-//var FHEM = require('./lib/fhem').FHEM;
+const require = createRequire(import.meta.url);
 
-function getLine(offset) {
-var stack = new Error().stack.split('\n'),
-      line = stack[(offset || 1) + 1].split(':');
-return parseInt(line[line.length - 2], 10);
-}
-global.__defineGetter__('__LINE__', function () {
-return getLine(2);
-});
+var version = require('../package.json').version;
 
 
 var User;
 var Accessory, Service, Characteristic, Units, Formats, Perms, UUIDGen, FakeGatoHistoryService;
-module.exports = function(homebridge){
+export default function(homebridge){
   console.log('homebridge API version: ' + homebridge.version);
   console.info( 'this is homebridge-fhem '+ version );
 
@@ -59,9 +55,6 @@ module.exports = function(homebridge){
   homebridge.registerPlatform('homebridge-fhem', 'FHEM', FHEMPlatform);
 }
 
-
-var util = require('util');
-var events = require('events');
 
 // subscriptions to fhem longpoll events
 var FHEM_subscriptions = {};
@@ -3753,7 +3746,6 @@ FHEMAccessory.prototype = {
 
 
 //http server for debugging
-var http = require('http');
 
 var FHEMdebug_PORT=8282;
 
@@ -3830,7 +3822,7 @@ FHEMdebug_server.listen(FHEMdebug_PORT, function(){
 });
 
 // the plugin does not export its internals. the tests reach them through this.
-module.exports.__internals = {
+export const __internals = {
   useHap: function(hap) {
     Accessory = hap.Accessory; Service = hap.Service; Characteristic = hap.Characteristic; UUIDGen = hap.uuid;
     Units = hap.Units; Formats = hap.Formats; Perms = hap.Perms;

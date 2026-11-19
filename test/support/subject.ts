@@ -1,7 +1,7 @@
 // the one place that knows where the code under test lives. every test goes through this
 // file, so the same tests keep running while the code moves from index.cjs into src/.
-import { createRequire } from 'node:module';
 import * as hap from '@homebridge/hap-nodejs';
+import * as legacy from '../../src/legacy.ts';
 import { createLog, type CapturedLog } from './log.ts';
 import type { Accessory, FhemDevice, Mapping, Platform, PlatformConfig, Subscription } from './types.ts';
 
@@ -45,11 +45,8 @@ interface Internals {
   FHEMdebug_handleRequest: (request: { url: string }, response: { write(chunk: string): void; end(chunk: string): void }) => void;
 }
 
-type Initializer = ((homebridge: unknown) => void) & { __internals: Internals };
-
-const require = createRequire(import.meta.url);
-const plugin = require('../../index.cjs') as Initializer;
-const internals = plugin.__internals;
+const internals = legacy.__internals as unknown as Internals;
+const plugin = legacy.default as (homebridge: unknown) => void;
 internals.useHap(hap);
 
 export { hap };
