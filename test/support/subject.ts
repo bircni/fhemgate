@@ -12,7 +12,7 @@ interface Internals {
   useUser: (user: { storagePath(): string }) => void;
   useFakeGato: (service: unknown) => void;
 
-  FHEMPlatform: new (log: CapturedLog, config: PlatformConfig, api: unknown) => Platform;
+  FHEMPlatform: (new (log: CapturedLog, config: PlatformConfig, api: unknown) => Platform) & { prototype: unknown };
   FHEMAccessory: (new (platform: unknown, device: FhemDevice) => Accessory) & { prototype: { execute: Executor } };
 
   FHEM_subscriptions: Record<string, Subscription[] | undefined>;
@@ -113,6 +113,9 @@ export interface World {
   longpoll: Record<string, Record<string, unknown> | undefined>;
   csrfToken: Record<string, string | undefined>;
 
+  /** homebridge is shutting down */
+  shutdown(): void;
+
   /** the debug page of the plugin for the url */
   debugPage(url: string): string;
 }
@@ -176,6 +179,10 @@ export function createWorld(options: WorldOptions = {}): World {
     subscriptions: internals.FHEM_subscriptions,
     longpoll: internals.FHEM_longpoll,
     csrfToken: internals.FHEM_csrfToken,
+
+    shutdown() {
+      (internals.FHEMPlatform.prototype as Platform).shutdown.call({ log });
+    },
 
     debugPage(url) {
       let page = '';

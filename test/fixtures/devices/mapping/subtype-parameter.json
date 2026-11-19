@@ -27,6 +27,7 @@
     }
   },
   "Attributes": {
+    "genericDeviceType": "switch",
     "homebridgeMapping": "On=links,subtype=Links,cmdOn=links+on,cmdOff=links+off\nOn=rechts,subtype=Rechts,cmdOn=rechts+on,cmdOff=rechts+off\nOn=mitte,cmdOn=mitte+on"
   }
 }
