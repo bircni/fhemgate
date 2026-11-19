@@ -561,6 +561,48 @@ describe('commands', () => {
   });
 });
 
+describe('javascript in a mapping', () => {
+  const doubled = () =>
+    device({
+      Internals: { NAME: 'd' },
+      Readings: { a: '4', b: '4' },
+      PossibleSets: 'a b',
+      Attributes: {
+        genericDeviceType: 'light',
+        homebridgeMapping: 'Brightness=a,cmd=a,reading2homekit={return+orig*2},homekit2reading={return+orig/2}\nSaturation=b,cmd=b,reading2homekit=twice',
+      },
+    });
+  const jsFunctions = { twice: (_mapping: Mapping, orig: string) => Number(orig) * 2 };
+
+  it('is run unless the platform says otherwise', () => {
+    const world = createWorld({ jsFunctions });
+    const accessory = world.accessory(doubled());
+
+    expect((accessory.mappings.Brightness as Mapping).cached).toBe(8);
+    accessory.command(accessory.mappings.Brightness as Mapping, 50);
+    expect(world.sent).toEqual(['set d a 25']);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('is refused when the platform does not allow it, while the rest of the mapping and the named functions go on working', () => {
+    const world = createWorld({ jsFunctions });
+    const accessory = world.accessory(doubled(), { allowInlineFunctions: false });
+
+    expect(world.log.errors()).toEqual([
+      'error   reading2homekit: JavaScript in a mapping is refused, as allowInlineFunctions is false for this platform',
+      'error   reading2homekit disabled.',
+      'error   homekit2reading: JavaScript in a mapping is refused, as allowInlineFunctions is false for this platform',
+      'error   homekit2reading disabled.',
+    ]);
+    expect(accessory.mappings.Brightness).not.toHaveProperty('reading2homekit');
+    expect(accessory.mappings.Brightness).not.toHaveProperty('homekit2reading');
+    expect((accessory.mappings.Brightness as Mapping).cached).toBe(4);
+    expect((accessory.mappings.Saturation as Mapping).cached).toBe(8);
+    accessory.command(accessory.mappings.Brightness as Mapping, 50);
+    expect(world.sent).toEqual(['set d a 50']);
+  });
+});
+
 describe('rooms, types and scopes', () => {
   const inRooms = (room?: string) =>
     createWorld().accessory(

@@ -3,9 +3,9 @@ import { createLog } from '../../test/support/log.ts';
 import type { Mapping } from './types.ts';
 import { resolveConverter } from './userFunctions.ts';
 
-function resolve(mapping: Mapping, parameter: 'reading2homekit' | 'homekit2reading', jsFunctions?: unknown) {
+function resolve(mapping: Mapping, parameter: 'reading2homekit' | 'homekit2reading', jsFunctions?: unknown, allowInline?: boolean) {
   const log = createLog();
-  resolveConverter(mapping, parameter, jsFunctions, log as unknown as Parameters<typeof resolveConverter>[3]);
+  resolveConverter(mapping, parameter, jsFunctions, log as unknown as Parameters<typeof resolveConverter>[3], allowInline);
   return log.lines;
 }
 
@@ -15,6 +15,24 @@ describe('resolveConverter', () => {
 
     expect(resolve(mapping, 'reading2homekit')).toEqual([]);
     expect((mapping.reading2homekit as (value: number) => unknown)(2)).toBe(6);
+  });
+
+  it('refuses source between braces when it is not allowed, and does not run it', () => {
+    const mapping: Mapping = { reading: 'state', reading2homekit: '{globalThis.fhem2hbTestRan = true; return 1}' };
+
+    expect(resolve(mapping, 'reading2homekit', undefined, false)).toEqual([
+      'error   reading2homekit: JavaScript in a mapping is refused, as allowInlineFunctions is false for this platform',
+      'error   reading2homekit disabled.',
+    ]);
+    expect(mapping).toEqual({ reading: 'state' });
+    expect(globalThis).not.toHaveProperty('fhem2hbTestRan');
+  });
+
+  it('still takes a function of the jsFunctions file by name when source between braces is not allowed', () => {
+    const mapping: Mapping = { homekit2reading: 'triple' };
+
+    expect(resolve(mapping, 'homekit2reading', { triple: (_m: Mapping, value: number) => value * 3 }, false)).toEqual([]);
+    expect((mapping.homekit2reading as (value: number) => unknown)(2)).toBe(6);
   });
 
   it('takes a function of the jsFunctions file by name', () => {

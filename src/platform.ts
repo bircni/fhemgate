@@ -2,7 +2,7 @@ import type { Server } from 'node:http';
 import { createRequire } from 'node:module';
 import type { AccessoryPlugin, API, Logging, StaticPlatformPlugin } from 'homebridge';
 import { FhemAccessory } from './accessory/accessory.ts';
-import { baseUrl, loadJsFunctions, type FhemPlatformConfig } from './config.ts';
+import { baseUrl, isSwitchedOff, loadJsFunctions, type FhemPlatformConfig } from './config.ts';
 import { DEFAULT_DEBUG_PORT, FALLBACK_DEBUG_PORT, debugPortOf, handleDebugRequest, startDebugServer } from './debug/server.ts';
 import type { Jsonlist2Device } from './devices/types.ts';
 import { describeError, execute, fetchDevices, type FhemConnection } from './fhem/client.ts';
@@ -50,6 +50,8 @@ export class FhemPlatform implements StaticPlatformPlugin {
   /** the functions of the jsFunctions file, or its name while it is not loaded */
   jsFunctions?: unknown;
   readonly scope: unknown;
+  /** false if mappings must not carry JavaScript */
+  readonly allowInlineFunctions: boolean;
 
   /** not there for a platform without a server */
   declare connection?: FhemConnection;
@@ -73,6 +75,7 @@ export class FhemPlatform implements StaticPlatformPlugin {
     this.jsFunctions = config.jsFunctions;
 
     this.scope = config.scope;
+    this.allowInlineFunctions = !isSwitchedOff(config.allowInlineFunctions);
 
     this.#startDebugServer();
 

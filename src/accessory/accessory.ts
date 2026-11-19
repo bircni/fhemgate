@@ -29,6 +29,8 @@ export interface AccessoryPlatform {
   connection?: unknown;
   /** the functions of the jsFunctions file */
   jsFunctions?: unknown;
+  /** false if mappings must not carry JavaScript */
+  allowInlineFunctions?: boolean;
 }
 
 /** milliseconds fhem has to answer a read of a characteristic, after which HomeKit is told that it failed */
@@ -150,6 +152,7 @@ export class FhemAccessory {
         state.update(informId, value);
       },
       reading2homekit: reading2homekit,
+      allowInlineFunctions: platform.allowInlineFunctions,
     });
   }
 

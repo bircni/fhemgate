@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import type { Logging } from 'homebridge';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLog } from '../test/support/log.ts';
-import { baseUrl, loadJsFunctions } from './config.ts';
+import { baseUrl, isSwitchedOff, loadJsFunctions } from './config.ts';
 
 const logging = () => {
   const log = createLog();
@@ -51,6 +51,16 @@ describe('baseUrl', () => {
 
     expect(baseUrl({ platform: 'FHEM', server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('http://fhem:8083/fhem');
     expect(log.lines).toEqual([]);
+  });
+});
+
+describe('isSwitchedOff', () => {
+  it.each([false, 'false', ' FALSE ', 0, '0'])('takes %j for off', (value) => {
+    expect(isSwitchedOff(value)).toBe(true);
+  });
+
+  it.each([undefined, null, true, 'true', 1, '', 'no', {}])('leaves an option on for %j', (value) => {
+    expect(isSwitchedOff(value)).toBe(false);
   });
 });
 

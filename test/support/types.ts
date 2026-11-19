@@ -88,6 +88,7 @@ export interface PlatformConfig {
   neverTimeout?: boolean;
   debugPort?: unknown;
   debugHost?: string;
+  allowInlineFunctions?: unknown;
   auth?: { user: string; pass: string; sendImmediately?: boolean };
 }
 
