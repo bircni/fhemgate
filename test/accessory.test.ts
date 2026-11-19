@@ -355,7 +355,7 @@ describe('the heating state of a thermostat', () => {
 });
 
 describe('readings without a value in the values list', () => {
-  it('are reported as an error every time they arrive', async () => {
+  it('are reported once as a warning, however often they arrive', async () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -372,7 +372,7 @@ describe('readings without a value in the values list', () => {
     world.update('door-state', 'tilted');
     await settle();
 
-    expect(world.log.errors()).toEqual(['error door-state value tilted not handled in values', 'error door-state value tilted not handled in values']);
+    expect(world.log.lines.filter((line) => !line.startsWith('info '))).toEqual(['warn door-state value tilted not handled in values']);
     expect(sensor.value).toBe(0);
   });
 });
