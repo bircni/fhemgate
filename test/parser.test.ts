@@ -204,9 +204,21 @@ describe('json', () => {
     expect(log[0]).toMatch(/^error {3}fromHomebridgeMapping JSON.parse: SyntaxError/);
   });
 
-  it('is only recognised on a single line', () => {
+  it('is recognised on several lines as well', () => {
     const { mappings, log } = parse('{"On":\n{"reading":"a"}}');
 
-    expect({ mappings, log }).toMatchSnapshot();
+    expect(mappings).toEqual({ On: { reading: 'a' } });
+    expect(log).toEqual([]);
+  });
+
+  it('is recognised as fhem stores an attribute that was typed into its editor', () => {
+    const { mappings, log } = parse('\n{\n  "On": {\n    "reading": "a",\n    "cmdOn": "an"\n  }\n}\n', { Brightness: { reading: 'pct' } });
+
+    expect(mappings).toEqual({ On: { reading: 'a', cmdOn: 'an' } });
+    expect(log).toEqual([]);
+  });
+
+  it('leaves entries alone that only have braces in them', () => {
+    expect(parse('On=state,reading2homekit={return+orig}').mappings).toEqual({ On: { reading: 'state', reading2homekit: '{return orig}' } });
   });
 });
