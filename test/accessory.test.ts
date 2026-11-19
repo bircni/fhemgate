@@ -72,7 +72,7 @@ describe('reading a characteristic', () => {
     expect(read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On)).answered).toBe(false);
   });
 
-  it('answers a mapping that has only a default with that default, kept under a reading named undefined', () => {
+  it('answers a mapping that has only a default with that default, without asking fhem or subscribing to a reading', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -89,8 +89,9 @@ describe('reading a characteristic', () => {
 
     expect(result).toEqual({ error: undefined, value: 1, answered: true });
     expect(world.sent).toEqual([]);
-    expect((accessory.mappings.StatusActive as Mapping).informId).toBe('lamp-undefined');
-    expect(Object.keys(world.subscriptions)).toContain('lamp-undefined');
+    expect(accessory.mappings.StatusActive as Mapping).not.toHaveProperty('informId');
+    expect(Object.keys(world.subscriptions)).toEqual(['lamp-state']);
+    expect(world.log.lines).toContain('log   StatusActive [default 1]');
   });
 
   it('answers normally for a device that is not reachable, as homekit has no Reachable characteristic any more', () => {

@@ -10853,7 +10853,6 @@ exports[`lock/generic-lock > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "generic_lock-": 1,
     "generic_lock-state": 2,
   },
 }
@@ -10872,7 +10871,6 @@ exports[`lock/generic-lock > is detected 1`] = `
     "log   TargetDoorState []",
     "log   LockCurrentState [state]",
     "log   LockTargetState [state]",
-    "info     caching: TargetDoorState: 1 (as number; means CLOSED; from 'mapping.default')",
     "info     caching: LockCurrentState: 0 (as number; means UNSECURED; from 'unlocked')",
     "info     caching: LockTargetState: 0 (as number; means UNSECURED; from 'unlocked')",
   ],
@@ -10949,7 +10947,6 @@ exports[`lock/generic-lock > is detected 1`] = `
       ],
     },
     "TargetDoorState": {
-      "cached": 1,
       "characteristic": "class TargetDoorState",
       "characteristic_type": "TargetDoorState",
       "cmds": [
@@ -10964,7 +10961,6 @@ exports[`lock/generic-lock > is detected 1`] = `
       "homekit2name": {
         "1": "CLOSED",
       },
-      "informId": "generic_lock-",
       "reading": "",
       "timeout": 500,
     },
@@ -11022,10 +11018,6 @@ exports[`lock/generic-lock > sends commands 1`] = `
 
 exports[`lock/generic-lock > updates characteristics 1`] = `
 {
-  "generic_lock-": [
-    "Target Door State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "Target Door State=0 <- "0"",
-  ],
   "generic_lock-state": [
     "Lock Current State=0 Lock Target State=0 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
@@ -11256,7 +11248,6 @@ exports[`lock/hm-sec-key > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hm_sec_key-": 1,
     "hm_sec_key-battery": 1,
     "hm_sec_key-lock": 2,
   },
@@ -11278,7 +11269,6 @@ exports[`lock/hm-sec-key > is detected 1`] = `
     "log   LockCurrentState [lock]",
     "log   LockTargetState [lock]",
     "info     caching: StatusLowBattery: 0 (as number; means BATTERY_LEVEL_NORMAL; from 'ok')",
-    "info     caching: TargetDoorState: 1 (as number; means CLOSED; from 'mapping.default')",
     "info     caching: LockCurrentState: 1 (as number; means SECURED; from 'locked')",
     "info     caching: LockTargetState: 1 (as number; means SECURED; from 'locked')",
   ],
@@ -11381,7 +11371,6 @@ exports[`lock/hm-sec-key > is detected 1`] = `
       ],
     },
     "TargetDoorState": {
-      "cached": 1,
       "characteristic": "class TargetDoorState",
       "characteristic_type": "TargetDoorState",
       "cmds": [
@@ -11396,7 +11385,6 @@ exports[`lock/hm-sec-key > is detected 1`] = `
       "homekit2name": {
         "1": "CLOSED",
       },
-      "informId": "hm_sec_key-",
       "reading": "",
       "timeout": 500,
     },
@@ -11457,10 +11445,6 @@ exports[`lock/hm-sec-key > sends commands 1`] = `
 
 exports[`lock/hm-sec-key > updates characteristics 1`] = `
 {
-  "hm_sec_key-": [
-    "Target Door State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "Target Door State=0 <- "0"",
-  ],
   "hm_sec_key-battery": [
     "Status Low Battery=1 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
@@ -11669,7 +11653,6 @@ exports[`lock/hm-sec-key-uncertain > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hm_sec_key_uncertain-": 1,
     "hm_sec_key_uncertain-lock": 2,
   },
 }
@@ -11688,7 +11671,6 @@ exports[`lock/hm-sec-key-uncertain > is detected 1`] = `
     "log   TargetDoorState []",
     "log   LockCurrentState [lock]",
     "log   LockTargetState [lock]",
-    "info     caching: TargetDoorState: 1 (as number; means CLOSED; from 'mapping.default')",
     "info     caching: LockCurrentState: 3 (as number; means UNKNOWN; from 'unlocked (uncertain)')",
     "info     caching: LockTargetState: 0 (as number; means UNSECURED; from 'unlocked (uncertain)')",
   ],
@@ -11765,7 +11747,6 @@ exports[`lock/hm-sec-key-uncertain > is detected 1`] = `
       ],
     },
     "TargetDoorState": {
-      "cached": 1,
       "characteristic": "class TargetDoorState",
       "characteristic_type": "TargetDoorState",
       "cmds": [
@@ -11780,7 +11761,6 @@ exports[`lock/hm-sec-key-uncertain > is detected 1`] = `
       "homekit2name": {
         "1": "CLOSED",
       },
-      "informId": "hm_sec_key_uncertain-",
       "reading": "",
       "timeout": 500,
     },
@@ -11838,10 +11818,6 @@ exports[`lock/hm-sec-key-uncertain > sends commands 1`] = `
 
 exports[`lock/hm-sec-key-uncertain > updates characteristics 1`] = `
 {
-  "hm_sec_key_uncertain-": [
-    "Target Door State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "Target Door State=0 <- "0"",
-  ],
   "hm_sec_key_uncertain-lock": [
     "Lock Current State=0 Lock Target State=0 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
@@ -13997,7 +13973,6 @@ exports[`mapping/default-only > gets its services 1`] = `
   ],
   "subscriptions": {
     "default_only-state": 1,
-    "default_only-undefined": 1,
   },
 }
 `;
@@ -14014,9 +13989,8 @@ exports[`mapping/default-only > is detected 1`] = `
     "log default_only is switch",
     "log default_only has",
     "log   On [state;on,off]",
-    "log   StatusActive [undefined]",
+    "log   StatusActive [default 1]",
     "info     caching: On: true (as boolean; from 'on')",
-    "info     caching: StatusActive: 1 (as number; from 'mapping.default')",
   ],
   "mappings": {
     "On": {
@@ -14032,12 +14006,10 @@ exports[`mapping/default-only > is detected 1`] = `
       "valueOff": "/off|A0|000000/",
     },
     "StatusActive": {
-      "cached": 1,
       "characteristic": "class StatusActive",
       "characteristic_type": "StatusActive",
       "default": 1,
       "device": "default_only",
-      "informId": "default_only-undefined",
     },
   },
   "model": "<unknown>",
@@ -14079,10 +14051,6 @@ exports[`mapping/default-only > updates characteristics 1`] = `
   "default_only-state": [
     "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=false <- "off"",
-  ],
-  "default_only-undefined": [
-    "Status Active=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "Status Active=true <- "1"",
   ],
 }
 `;
@@ -18441,7 +18409,6 @@ exports[`mapping/linked-services > gets its services 1`] = `
   "subscriptions": {
     "linked_services-input": 1,
     "linked_services-power": 1,
-    "linked_services-undefined": 2,
   },
 }
 `;
@@ -18467,25 +18434,21 @@ Speaker#linkedTo=Lightbulb",
     "log linked_services has",
     "log   Television#Active [power]",
     "log   Television#ActiveIdentifier [input]",
-    "log   InputSource(hdmi1)#Identifier [undefined]",
+    "log   InputSource(hdmi1)#Identifier [default 1]",
     "log   InputSource(hdmi1)#linkedTo [Television]",
-    "log   InputSource(hdmi2)#Identifier [undefined]",
+    "log   InputSource(hdmi2)#Identifier [default 2]",
     "log   InputSource(hdmi2)#linkedTo [Television]",
     "log   InputSource(hdmi2)#linkedTo [InputSource]",
     "log   Speaker#linkedTo [Lightbulb]",
     "error linked_services-power not a number: on",
     "info     caching: Television#ActiveIdentifier: 2 (as number; from 'hdmi2')",
-    "info     caching: InputSource(hdmi1)#Identifier: 1 (as number; from 'mapping.default')",
-    "info     caching: InputSource(hdmi2)#Identifier: 2 (as number; from 'mapping.default')",
   ],
   "mappings": {
     "InputSource(hdmi1)#Identifier": {
-      "cached": 1,
       "characteristic": "class Identifier",
       "characteristic_type": "InputSource(hdmi1)#Identifier",
       "default": 1,
       "device": "linked_services",
-      "informId": "linked_services-undefined",
     },
     "InputSource(hdmi1)#linkedTo": {
       "characteristic": undefined,
@@ -18495,12 +18458,10 @@ Speaker#linkedTo=Lightbulb",
       "reading": "Television",
     },
     "InputSource(hdmi2)#Identifier": {
-      "cached": 2,
       "characteristic": "class Identifier",
       "characteristic_type": "InputSource(hdmi2)#Identifier",
       "default": 2,
       "device": "linked_services",
-      "informId": "linked_services-undefined",
     },
     "InputSource(hdmi2)#linkedTo": [
       {
@@ -18636,14 +18597,6 @@ exports[`mapping/linked-services > updates characteristics 1`] = `
   "linked_services-power": [
     "Active=0 <- "on" "off" "0"",
     "Active=1 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "linked_services-undefined": [
-    "Identifier=1 Identifier=2 <- "on" "off"",
-    "Identifier=0 Identifier=0 <- "0"",
-    "Identifier=1 Identifier=1 <- "1"",
-    "Identifier=50 Identifier=50 <- "50"",
-    "Identifier=100 Identifier=100 <- "100"",
-    "Identifier=21 Identifier=21 <- "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -21351,7 +21304,6 @@ exports[`mapping/thermostat-states > gets its services 1`] = `
     "thermostat_states-desired-temp": 1,
     "thermostat_states-measured-temp": 1,
     "thermostat_states-mode": 1,
-    "thermostat_states-undefined": 1,
   },
 }
 `;
@@ -21370,15 +21322,13 @@ exports[`mapping/thermostat-states > is detected 1`] = `
     "log   TargetTemperature [desired-temp]",
     "log   TargetHeatingCoolingState [mode]",
     "log   CurrentTemperature [measured-temp]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: TargetTemperature: 20 (as number; from '20')",
     "info     caching: TargetHeatingCoolingState: 1 (as number; means HEAT; from 'x')",
     "info     caching: CurrentTemperature: 19 (as number; from '19')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -21386,7 +21336,6 @@ exports[`mapping/thermostat-states > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "thermostat_states-undefined",
     },
     "CurrentTemperature": {
       "cached": 19,
@@ -21516,11 +21465,6 @@ exports[`mapping/thermostat-states > updates characteristics 1`] = `
   ],
   "thermostat_states-mode": [
     "Target Heating Cooling State=1 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "thermostat_states-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -22117,7 +22061,6 @@ exports[`mapping/valid-numbers > gets its services 1`] = `
   "subscriptions": {
     "valid_numbers-desired-temp": 1,
     "valid_numbers-mode": 1,
-    "valid_numbers-undefined": 1,
   },
 }
 `;
@@ -22135,15 +22078,13 @@ exports[`mapping/valid-numbers > is detected 1`] = `
     "log valid_numbers has",
     "log   TargetTemperature [desired-temp]",
     "log   TargetHeatingCoolingState [mode]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: TargetTemperature: 21 (as number; from '21')",
     "error valid: x is neither a number nor the name of a value of TargetHeatingCoolingState",
     "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'auto')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -22151,7 +22092,6 @@ exports[`mapping/valid-numbers > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "valid_numbers-undefined",
     },
     "TargetHeatingCoolingState": {
       "cached": 3,
@@ -22268,11 +22208,6 @@ exports[`mapping/valid-numbers > updates characteristics 1`] = `
   ],
   "valid_numbers-mode": [
     "Target Heating Cooling State=0 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "valid_numbers-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -22558,7 +22493,6 @@ exports[`mapping/valid-values > gets its services 1`] = `
   "subscriptions": {
     "valid_values-desired-temp": 1,
     "valid_values-mode": 1,
-    "valid_values-undefined": 1,
   },
 }
 `;
@@ -22576,14 +22510,12 @@ exports[`mapping/valid-values > is detected 1`] = `
     "log valid_values has",
     "log   TargetTemperature [desired-temp]",
     "log   TargetHeatingCoolingState [mode]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: TargetTemperature: 21 (as number; from '21')",
     "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'auto')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -22591,7 +22523,6 @@ exports[`mapping/valid-values > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "valid_values-undefined",
     },
     "TargetHeatingCoolingState": {
       "cached": 3,
@@ -22708,11 +22639,6 @@ exports[`mapping/valid-values > updates characteristics 1`] = `
   "valid_values-mode": [
     "Target Heating Cooling State=3 <- "on"",
     "Target Heating Cooling State=0 <- "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "valid_values-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -36176,7 +36102,6 @@ exports[`thermostat/comet-dect > gets its services 1`] = `
   "subscriptions": {
     "comet_dect-battery": 2,
     "comet_dect-temperature": 2,
-    "comet_dect-undefined": 1,
   },
 }
 `;
@@ -36195,12 +36120,11 @@ exports[`thermostat/comet-dect > is detected 1`] = `
     "log   StatusLowBattery [battery]",
     "log   TargetTemperature [temperature]",
     "log   CurrentTemperature [temperature]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: BatteryLevel: 80 (as number; from '80')",
     "info     caching: StatusLowBattery: 0 (as number; means BATTERY_LEVEL_NORMAL; from '80')",
     "info     caching: TargetTemperature: 21.5 (as number; from '21.5')",
     "info     caching: CurrentTemperature: 21.5 (as number; from '21.5')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "BatteryLevel": {
@@ -36213,7 +36137,6 @@ exports[`thermostat/comet-dect > is detected 1`] = `
       "reading": "battery",
     },
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -36221,7 +36144,6 @@ exports[`thermostat/comet-dect > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "comet_dect-undefined",
     },
     "CurrentTemperature": {
       "cached": 21.5,
@@ -36335,11 +36257,6 @@ exports[`thermostat/comet-dect > updates characteristics 1`] = `
     "Target Temperature=28 Current Temperature=50 <- "50"",
     "Target Temperature=28 Current Temperature=100 <- "100"",
     "Target Temperature=21.5 Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
-  ],
-  "comet_dect-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -36683,7 +36600,6 @@ exports[`thermostat/cul_hm-rt > gets its services 1`] = `
     "cul_hm_rt-battery": 1,
     "cul_hm_rt-desired-temp": 1,
     "cul_hm_rt-measured-temp": 1,
-    "cul_hm_rt-undefined": 1,
   },
 }
 `;
@@ -36702,16 +36618,14 @@ exports[`thermostat/cul_hm-rt > is detected 1`] = `
     "log   TargetTemperature [desired-temp]",
     "log   Custom Actuation [actuator]",
     "log   CurrentTemperature [measured-temp]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: StatusLowBattery: 0 (as number; means BATTERY_LEVEL_NORMAL; from 'ok')",
     "info     caching: TargetTemperature: 20 (as number; from '20.0')",
     "info     caching: Actuation: 15 (as number; from '15')",
     "info     caching: CurrentTemperature: 19 (as number; from '19.0')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -36719,7 +36633,6 @@ exports[`thermostat/cul_hm-rt > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "cul_hm_rt-undefined",
     },
     "CurrentTemperature": {
       "cached": 19,
@@ -36858,11 +36771,6 @@ exports[`thermostat/cul_hm-rt > updates characteristics 1`] = `
     "Current Temperature=50 <- "50"",
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
-  ],
-  "cul_hm_rt-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -37180,7 +37088,6 @@ exports[`thermostat/cul_hm-rt-valve-closed > gets its services 1`] = `
     "cul_hm_rt_valve_closed-actuator": 1,
     "cul_hm_rt_valve_closed-desired-temp": 1,
     "cul_hm_rt_valve_closed-measured-temp": 1,
-    "cul_hm_rt_valve_closed-undefined": 1,
   },
 }
 `;
@@ -37198,15 +37105,13 @@ exports[`thermostat/cul_hm-rt-valve-closed > is detected 1`] = `
     "log   TargetTemperature [desired-temp]",
     "log   Custom Actuation [actuator]",
     "log   CurrentTemperature [measured-temp]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: TargetTemperature: 4.5 (as number; from 'off')",
     "info     caching: Actuation: 0 (as number; from '0')",
     "info     caching: CurrentTemperature: 22 (as number; from '22.0')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -37214,7 +37119,6 @@ exports[`thermostat/cul_hm-rt-valve-closed > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "cul_hm_rt_valve_closed-undefined",
     },
     "CurrentTemperature": {
       "cached": 22,
@@ -37320,11 +37224,6 @@ exports[`thermostat/cul_hm-rt-valve-closed > updates characteristics 1`] = `
     "Current Temperature=50 <- "50"",
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
-  ],
-  "cul_hm_rt_valve_closed-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -37708,7 +37607,6 @@ exports[`thermostat/cul_hm-tc > gets its services 1`] = `
     "cul_hm_tc-humidity": 1,
     "cul_hm_tc-measured-temp": 1,
     "cul_hm_tc-mode": 1,
-    "cul_hm_tc-undefined": 1,
   },
 }
 `;
@@ -37729,18 +37627,16 @@ exports[`thermostat/cul_hm-tc > is detected 1`] = `
     "log   TargetHeatingCoolingState [mode]",
     "log   CurrentTemperature [measured-temp]",
     "log   CurrentRelativeHumidity [humidity]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: StatusLowBattery: 1 (as number; means BATTERY_LEVEL_LOW; from 'low')",
     "info     caching: TargetTemperature: 21 (as number; from '21.0')",
     "info     caching: Actuation: 30 (as number; from '30')",
     "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'auto')",
     "info     caching: CurrentTemperature: 20.5 (as number; from '20.5')",
     "info     caching: CurrentRelativeHumidity: 45 (as number; from '45')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -37748,7 +37644,6 @@ exports[`thermostat/cul_hm-tc > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "cul_hm_tc-undefined",
     },
     "CurrentRelativeHumidity": {
       "cached": 45,
@@ -37971,11 +37866,6 @@ exports[`thermostat/cul_hm-tc > updates characteristics 1`] = `
   ],
   "cul_hm_tc-mode": [
     "Target Heating Cooling State=1 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "cul_hm_tc-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -38254,7 +38144,6 @@ exports[`thermostat/generic-without-set > gets its services 1`] = `
   ],
   "subscriptions": {
     "generic_without_set-temperature": 1,
-    "generic_without_set-undefined": 1,
   },
 }
 `;
@@ -38271,13 +38160,11 @@ exports[`thermostat/generic-without-set > is detected 1`] = `
     "error generic_without_set is NOT a thermostat. set command for target temperature missing: ",
     "log generic_without_set has",
     "log   CurrentTemperature [temperature]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: CurrentTemperature: 20 (as number; from '20.0')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -38285,7 +38172,6 @@ exports[`thermostat/generic-without-set > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "generic_without_set-undefined",
     },
     "CurrentTemperature": {
       "cached": 20,
@@ -38332,11 +38218,6 @@ exports[`thermostat/generic-without-set > updates characteristics 1`] = `
     "Current Temperature=50 <- "50"",
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
-  ],
-  "generic_without_set-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -38679,7 +38560,6 @@ exports[`thermostat/max-heating > gets its services 1`] = `
     "max_heating-battery": 1,
     "max_heating-desiredTemperature": 1,
     "max_heating-temperature": 1,
-    "max_heating-undefined": 1,
     "max_heating-valveposition": 1,
   },
 }
@@ -38699,16 +38579,14 @@ exports[`thermostat/max-heating > is detected 1`] = `
     "log   TargetTemperature [desiredTemperature]",
     "log   Custom Actuation [valveposition]",
     "log   CurrentTemperature [temperature]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: StatusLowBattery: 0 (as number; means BATTERY_LEVEL_NORMAL; from 'ok')",
     "info     caching: TargetTemperature: 21 (as number; from '21.0')",
     "info     caching: Actuation: 42 (as number; from '42')",
     "info     caching: CurrentTemperature: 20.3 (as number; from '20.3')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -38716,7 +38594,6 @@ exports[`thermostat/max-heating > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "max_heating-undefined",
     },
     "CurrentTemperature": {
       "cached": 20.3,
@@ -38847,11 +38724,6 @@ exports[`thermostat/max-heating > updates characteristics 1`] = `
     "Current Temperature=50 <- "50"",
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
-  ],
-  "max_heating-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
   "max_heating-valveposition": [
     "Actuation=42 <- "on" "off"",
@@ -39189,7 +39061,6 @@ exports[`thermostat/pid20 > gets its services 1`] = `
     "pid20-actuation": 1,
     "pid20-desired": 1,
     "pid20-measured": 1,
-    "pid20-undefined": 1,
   },
 }
 `;
@@ -39207,15 +39078,13 @@ exports[`thermostat/pid20 > is detected 1`] = `
     "log   TargetTemperature [desired]",
     "log   Custom Actuation [actuation]",
     "log   CurrentTemperature [measured]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: TargetTemperature: 21.5 (as number; from '21.5')",
     "info     caching: Actuation: 37 (as number; from '37')",
     "info     caching: CurrentTemperature: 20.9 (as number; from '20.9')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -39223,7 +39092,6 @@ exports[`thermostat/pid20 > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "pid20-undefined",
     },
     "CurrentTemperature": {
       "cached": 20.9,
@@ -39327,11 +39195,6 @@ exports[`thermostat/pid20 > updates characteristics 1`] = `
     "Current Temperature=50 <- "50"",
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
-  ],
-  "pid20-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -39610,7 +39473,6 @@ exports[`thermostat/subtype-with-measured > gets its services 1`] = `
   ],
   "subscriptions": {
     "subtype_with_measured-measured-temp": 1,
-    "subtype_with_measured-undefined": 1,
   },
 }
 `;
@@ -39627,13 +39489,11 @@ exports[`thermostat/subtype-with-measured > is detected 1`] = `
     "error subtype_with_measured is NOT a thermostat. set command for target temperature missing: ",
     "log subtype_with_measured has",
     "log   CurrentTemperature [measured-temp]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: CurrentTemperature: 18.2 (as number; from '18.2')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -39641,7 +39501,6 @@ exports[`thermostat/subtype-with-measured > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "subtype_with_measured-undefined",
     },
     "CurrentTemperature": {
       "cached": 18.2,
@@ -39688,11 +39547,6 @@ exports[`thermostat/subtype-with-measured > updates characteristics 1`] = `
     "Current Temperature=50 <- "50"",
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
-  ],
-  "subtype_with_measured-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;

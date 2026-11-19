@@ -157,7 +157,10 @@ export class FhemAccessory {
       const mappings = (Array.isArray(entry) ? entry : [entry]) as Mapping[];
 
       for (const mapping of mappings) {
-        const reading = (mapping.device ? mapping.device + '.' : '') + mapping.reading;
+        let reading = (mapping.device ? mapping.device + '.' : '') + mapping.reading;
+        if (mapping.reading === undefined && mapping.default !== undefined) {
+          reading = 'default ' + mapping.default;
+        }
         if (characteristic_type === 'On') {
           this.log('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmdOn + ',' + mapping.cmdOff + ']');
         } else if (characteristic_type === 'Hue' || characteristic_type === 'Saturation') {
@@ -189,7 +192,10 @@ export class FhemAccessory {
         (characteristic as MappedCharacteristic).FHEM_mapping = mapping;
       }
 
-      this.#state.subscriptions.subscribe(this, mapping.informId as string, characteristic, mapping);
+      // a mapping with only a default has no reading to follow
+      if (mapping.informId !== undefined) {
+        this.#state.subscriptions.subscribe(this, mapping.informId, characteristic, mapping);
+      }
     } else {
       this.#state.subscriptions.subscribe(this, mapping as string, characteristic);
     }
@@ -282,6 +288,15 @@ export class FhemAccessory {
         callback(1);
       }
       return undefined;
+    }
+
+    if (reading === undefined) {
+      // only a default: there is no reading to ask fhem for
+      const value = mapping.cached ?? mapping.default;
+      if (callback !== undefined) {
+        callback(undefined, value);
+      }
+      return value;
     }
 
     this.log.info('query: ' + (mapping.name ? mapping.name : mapping.characteristic_type) + ' for ' + mapping.informId);

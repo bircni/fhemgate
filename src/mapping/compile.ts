@@ -69,7 +69,7 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       }
 
       mapping.characteristic = owner.characteristicOfName(characteristic_type);
-      // for a mapping with only a default this ends in `-undefined`.
+      // a mapping with only a default has no reading to hear from. its id is removed again below.
       mapping.informId = device + '-' + mapping.reading;
       mapping.characteristic_type = characteristic_type;
       mapping.log = owner.log;
@@ -229,10 +229,7 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         orig = s.Readings[reading].Value;
       }
 
-      // meant for a mapping with only a default, but the default is looked for at the list of
-      // mappings, where there is none. so such a mapping keeps an id that ends in `-undefined`
-      // and starts with its default as value.
-      if (orig === undefined && device === owner.device && (mappings as { default?: unknown }).default !== undefined) {
+      if (orig === undefined && device === owner.device && mapping.default !== undefined) {
         delete mapping.informId;
       } else {
         const informId = mapping.informId;

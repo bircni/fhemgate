@@ -21,9 +21,6 @@ exports[`debug page > lists the connections and what is cached for every subscri
   "valve-measured-temp: 19.0",
   "&nbsp;&nbsp;CurrentTemperature: 19 (number)",
   "",
-  "valve-undefined: undefined",
-  "&nbsp;&nbsp;CurrentHeatingCoolingState: 1 (number; means HEAT)",
-  "",
   "",
 ]
 `;

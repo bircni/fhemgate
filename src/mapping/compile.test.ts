@@ -101,15 +101,14 @@ describe('prepareMappings', () => {
     expect(mapping.informId).toBe('other-level');
   });
 
-  it('gives a mapping with only a default an id for a reading named undefined, and its default as first value', () => {
+  it('gives a mapping with only a default no id for events', () => {
     const mapping: Mapping = { default: 'CLOSED' };
 
     const { environment } = prepare({ TargetDoorState: mapping });
 
     expect(mapping.default).toBe(1);
-    expect(mapping.informId).toBe('dev-undefined');
-    expect(environment.update).not.toHaveBeenCalled();
-    expect(environment.reading2homekit).toHaveBeenCalledWith(mapping, undefined);
+    expect(mapping).not.toHaveProperty('informId');
+    expect(environment.reading2homekit).not.toHaveBeenCalled();
   });
 
   it('collects the events that mean on or off from the eventMap attribute', () => {
