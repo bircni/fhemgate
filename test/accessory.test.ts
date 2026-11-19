@@ -256,6 +256,23 @@ describe('reading a characteristic', () => {
     expect(world.sent).toEqual([]);
   });
 
+  it('shows manufacturer, model and serial number as their mappings give them: as text, a default or a reading', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'plug' },
+        Readings: { state: 'on', typ: 'P-100' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'Manufacturer=value=ACME+Corp Model=typ SerialNumber=default=4711' },
+      }),
+    );
+    const information = serviceOf(accessory.getServices(), 'AccessoryInformation');
+
+    expect(characteristicOf(information, Characteristic.Manufacturer).value).toBe('ACME Corp');
+    expect(characteristicOf(information, Characteristic.Model).value).toBe('P-100');
+    expect(characteristicOf(information, Characteristic.SerialNumber).value).toBe('4711');
+  });
+
   it('answers the firmware revision from its reading', () => {
     const world = createWorld();
     const accessory = world.accessory(
