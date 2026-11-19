@@ -1,5 +1,6 @@
 import type { Characteristic } from '@homebridge/hap-nodejs';
 import type { HAP } from 'homebridge';
+import { acceptableValue } from '../accessory/acceptable.ts';
 import { recordHistory, type HistoryServiceClass } from '../accessory/history.ts';
 import type { ConnectionStatus } from '../fhem/client.ts';
 import { reading2homekit } from '../mapping/toHomekit.ts';
@@ -82,13 +83,16 @@ export class PluginState {
         }
 
         if (!noUpdate && characteristic) {
-          if (eventOnly) {
+          const accepted = acceptableValue(characteristic, value);
+          if (accepted === undefined) {
+            mapping.log.debug(informId + ': ' + String(value) + ' is no value for ' + characteristic.displayName + ', which keeps the one it has');
+          } else if (eventOnly) {
             // announced also when the value is the one before: two presses in a row are two events
-            characteristic.sendEventNotification(value);
+            characteristic.sendEventNotification(accepted);
           } else {
             // updateValue tells the HomeKit controllers that are subscribed to the characteristic, and
             // does not run its set handler: the value is not sent back to fhem
-            characteristic.updateValue(value);
+            characteristic.updateValue(accepted);
           }
         }
       });

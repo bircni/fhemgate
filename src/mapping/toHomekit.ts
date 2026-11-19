@@ -114,6 +114,15 @@ function convert(mapping: PreparedMapping, orig: unknown): unknown {
     return orig;
   }
 
+  // readings are text, and everything below treats the value as text. what the plugin derives
+  // itself, or a function of the user hands back, can be a number or a boolean.
+  if (value === null) {
+    return undefined;
+  }
+  if (typeof value !== 'string') {
+    value = String(value);
+  }
+
   if (
     reading === 'temperature' ||
     reading === 'measured' ||
