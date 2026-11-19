@@ -83,8 +83,16 @@ describe('reading2homekit', () => {
     expect(log.lines).toEqual(["info     caching: Custom: 3 (as number; from 'mapping.default')"]);
   });
 
-  it('fails for a value that is not text', () => {
-    expect(() => reading2homekit(prepared({ reading: 'r', format: 'int' }).mapping, 5)).toThrow(TypeError);
+  it('converts a value that is not text like the text for it', () => {
+    expect(reading2homekit(prepared({ reading: 'r', format: 'int' }).mapping, 5)).toBe(5);
+    expect(reading2homekit(prepared({ reading: 'r', format: 'bool' }).mapping, 1)).toBe(true);
+    expect(reading2homekit(prepared({ reading: 'r', format: 'bool' }).mapping, false)).toBe(false);
+    expect(reading2homekit(prepared({ reading: 'state', On: true }).mapping, 0)).toBe(1);
+    expect(reading2homekit(prepared({ reading: 'r', format: 'int', value2homekit: { 1: 3 }, value2homekit_re: [] }).mapping, 1)).toBe(3);
+  });
+
+  it('has no value for a reading that is null', () => {
+    expect(reading2homekit(prepared({ reading: 'r', format: 'int' }).mapping, null)).toBeUndefined();
   });
 
   it('fails for a mapping that can not log', () => {

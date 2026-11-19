@@ -3,10 +3,11 @@
 import util from 'node:util';
 import type { Characteristic, CharacteristicSetCallback, CharacteristicValue, Service } from '@homebridge/hap-nodejs';
 import { reading2homekit } from '../mapping/toHomekit.ts';
-import type { CharacteristicClass, Mapping, PreparedMapping } from '../mapping/types.ts';
+import type { CharacteristicClass, HomekitValue, Mapping, PreparedMapping } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import { ct2rgb, rgb2hsv, xyY2rgb, type Hsv } from '../util/color.ts';
 import type { FhemAccessory, NamedService, QueryCallback } from './accessory.ts';
+import { acceptableValue } from './acceptable.ts';
 import { CustomUUIDs } from './customCharacteristics.ts';
 import { addEveCharacteristics, addHistoryService } from './history.ts';
 
@@ -19,6 +20,8 @@ export type CustomCharacteristicClass = new (name: string, uuid: string) => Char
 const setQuietly = (characteristic: Characteristic, value: unknown): void => {
   characteristic.value = value as CharacteristicValue;
 };
+
+const numericFormats = new Set(['int', 'float', 'uint8', 'uint16', 'uint32', 'uint64']);
 
 /** `; means <name>` for a value that stands for a named HomeKit value, for the log */
 function meaning(mapping: Mapping, value: unknown): string {
@@ -319,17 +322,29 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
         const unit = units[each.unit];
         characteristic.setProps({ unit: unit ? unit : each.unit });
       }
-      if (each.minValue !== undefined) {
-        characteristic.setProps({ minValue: each.minValue });
+      // only a number has a range, steps and a list of valid values. the conversion gives an
+      // inverted on/off value the limits 0 and 1, which are no properties of a boolean.
+      if (numericFormats.has(characteristic.props.format)) {
+        if (each.minValue !== undefined) {
+          characteristic.setProps({ minValue: each.minValue });
+        }
+        if (each.maxValue !== undefined) {
+          characteristic.setProps({ maxValue: each.maxValue });
+        }
+        if (each.minStep !== undefined) {
+          characteristic.setProps({ minStep: each.minStep });
+        }
+        if (each.valid !== undefined) {
+          characteristic.setProps({ validValues: each.valid as number[] });
+        }
       }
-      if (each.maxValue !== undefined) {
-        characteristic.setProps({ maxValue: each.maxValue });
-      }
-      if (each.minStep !== undefined) {
-        characteristic.setProps({ minStep: each.minStep });
-      }
-      if (each.valid !== undefined) {
-        characteristic.setProps({ validValues: each.valid as number[] });
+
+      // the value the characteristic starts with has to fit what was just said about it
+      const initial = acceptableValue(characteristic, characteristic.value);
+      if (initial !== undefined && initial !== characteristic.value) {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string -- logged as it comes
+        log.debug('      initial value ' + String(characteristic.value) + ' is not accepted by HomeKit, using ' + String(initial));
+        setQuietly(characteristic, initial);
       }
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- a characteristic created from a uuid has no properties yet
@@ -365,7 +380,14 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
           if (single('Reachable')?.cached === false) {
             (callback as QueryCallback)('unreachable');
           } else {
-            accessory.query(each, callback as QueryCallback);
+            accessory.query(each, (error, value) => {
+              if (error !== undefined) {
+                (callback as QueryCallback)(error);
+              } else {
+                // a value HomeKit would reject is answered with the one the characteristic has
+                (callback as QueryCallback)(undefined, acceptableValue(characteristic, value) ?? (characteristic.value as HomekitValue));
+              }
+            });
           }
         });
     }
