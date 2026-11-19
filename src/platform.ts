@@ -2,7 +2,7 @@ import type { Server } from 'node:http';
 import { createRequire } from 'node:module';
 import type { AccessoryPlugin, API, Logging, StaticPlatformPlugin } from 'homebridge';
 import { FhemAccessory } from './accessory/accessory.ts';
-import { baseUrl, isSwitchedOff, loadJsFunctions, type FhemPlatformConfig } from './config.ts';
+import { baseUrl, isSwitchedOff, loadJsFunctions, optionalSwitch, type FhemPlatformConfig } from './config.ts';
 import { DEFAULT_DEBUG_PORT, FALLBACK_DEBUG_PORT, debugPortOf, handleDebugRequest, startDebugServer } from './debug/server.ts';
 import type { Jsonlist2Device } from './devices/types.ts';
 import { describeError, execute, fetchDevices, type FhemConnection } from './fhem/client.ts';
@@ -93,7 +93,13 @@ export class FhemPlatform implements StaticPlatformPlugin {
       }
     }
 
-    this.connection = { base_url: baseUrl(config, log), auth: config.auth, log: log, neverTimeout: config.neverTimeout };
+    this.connection = {
+      base_url: baseUrl(config, log),
+      auth: config.auth,
+      log: log,
+      neverTimeout: config.neverTimeout,
+      rejectUnauthorized: optionalSwitch(config.rejectUnauthorized),
+    };
 
     startLongpoll(plugin.state, this.connection, () => {
       this.checkAndSetGenericDeviceType();

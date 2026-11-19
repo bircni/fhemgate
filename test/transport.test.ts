@@ -1,5 +1,7 @@
 // how the plugin talks to fhem: the long poll for events, and the commands it sends
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import https from 'node:https';
+import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
@@ -7,6 +9,7 @@ import { device } from './support/devices.ts';
 import { startFakeFhem, waitFor, type FakeFhem, type FakeFhemOptions } from './support/fhemweb.ts';
 import { characteristicOf, serviceOf } from './support/homekit.ts';
 import { createWorld, hap, type World, type WorldOptions } from './support/subject.ts';
+import { selfSignedCertificate } from './support/tls.ts';
 import type { Accessory, Platform, PlatformConfig } from './support/types.ts';
 
 let fhem: FakeFhem;
@@ -169,6 +172,19 @@ describe('connecting', () => {
       'error config: value for ssl has to be boolean. taking "no" as false.',
     ]);
     expect(exit).not.toHaveBeenCalled();
+  });
+
+  it('takes from the config whether the certificate of fhem is checked, and leaves it open without a word', () => {
+    fhem = { close: () => Promise.resolve() } as FakeFhem;
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    world = createWorld();
+    const auth = { user: 'fhem', pass: 'secret' };
+
+    expect(world.platform({ server: 'fhem.invalid', ssl: true }).connection?.rejectUnauthorized).toBeUndefined();
+    expect(world.platform({ server: 'fhem.invalid', ssl: true, auth }).connection?.rejectUnauthorized).toBeUndefined();
+    expect(world.platform({ server: 'fhem.invalid', ssl: true, auth, rejectUnauthorized: true }).connection?.rejectUnauthorized).toBe(true);
+    expect(world.platform({ server: 'fhem.invalid', ssl: true, auth, rejectUnauthorized: false }).connection?.rejectUnauthorized).toBe(false);
+    expect(world.platform({ server: 'fhem.invalid', ssl: true, rejectUnauthorized: 'false' }).connection?.rejectUnauthorized).toBe(false);
   });
 
   it('does not connect without a server', async () => {
@@ -612,6 +628,34 @@ describe('reconnecting', () => {
     ]);
     expect(platform.connection?.dead).toBe(true);
     expect(await accessoriesOf(platform)).toEqual([]);
+  });
+
+  it('does not give up on a fhem whose certificate it does not trust, and says what to do', async () => {
+    const server = https.createServer(selfSignedCertificate(), (_request, response) => response.end());
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    fhem = {
+      close: () => {
+        server.closeAllConnections();
+        return new Promise<void>((resolve) => server.close(() => resolve()));
+      },
+    } as FakeFhem;
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    world = createWorld();
+
+    const platform = world.platform({ server: '127.0.0.1', port: (server.address() as AddressInfo).port, ssl: true, rejectUnauthorized: true });
+    for (const attempt of [1, 2, 3, 4, 5]) {
+      await waitFor(() => world.log.errors().length === attempt, `attempt ${attempt}`);
+      vi.runOnlyPendingTimers();
+    }
+
+    expect(world.log.errors().map((line) => line.replace(/self-signed certificate.*? \(/, 'self-signed certificate ('))).toEqual(
+      [3000, 6000, 9000, 12000, 15000].map(
+        (pause) =>
+          'error longpoll error: Error: self-signed certificate (the certificate of fhem is not trusted. make node trust it, ' +
+          `or set rejectUnauthorized to false for the platform), retry in: ${pause}msec`,
+      ),
+    );
+    expect(platform.connection?.dead).toBeUndefined();
   });
 
   it('keeps trying with neverTimeout', async () => {

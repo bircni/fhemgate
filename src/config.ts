@@ -18,6 +18,12 @@ export interface FhemPlatformConfig extends PlatformConfig {
   webname?: string;
   /** user and password of FHEMWEB */
   auth?: HttpAuth;
+  /**
+   * Whether the certificate of a FHEMWEB that is reached with https has to be one Node trusts:
+   * true for always, false for never. If not given, it has to without `auth` and does not have
+   * to with `auth`, as it was in homebridge-fhem.
+   */
+  rejectUnauthorized?: boolean;
   /** a file with functions that mappings can name, absolute or relative to the storage directory of homebridge */
   jsFunctions?: string;
   /** the scopes this platform serves, separated by commas or as a list. devices are published unless scopes are given and `siri` is not one of them. */
@@ -42,6 +48,14 @@ export interface FhemPlatformConfig extends PlatformConfig {
 /** whether an option that is on unless the configuration says otherwise was switched off: with false, or with text or a number that says so */
 export function isSwitchedOff(value: unknown): boolean {
   return value === false || value === 0 || (typeof value === 'string' && ['false', '0'].includes(value.trim().toLowerCase()));
+}
+
+/** an option that is true, false or not given, with text and numbers that say false taken as false and anything else as true */
+export function optionalSwitch(value: unknown): boolean | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  return !isSwitchedOff(value);
 }
 
 /**

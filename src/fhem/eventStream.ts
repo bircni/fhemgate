@@ -1,7 +1,7 @@
 // the long poll: one request to fhem that stays open and carries every event as a line
 import type { PluginState } from '../state/pluginState.ts';
 import { ct2rgb, rgb2hsv, xyY2rgb, type Hsv } from '../util/color.ts';
-import { describeError, requestOptions, type ConnectionStatus, type FhemConnection } from './client.ts';
+import { describeError, isCertificateError, requestOptions, type ConnectionStatus, type FhemConnection } from './client.ts';
 import { get, type HttpResponse } from './http.ts';
 import { longpollUrl, parseEventLine, reconnectDelayAfterEnd, retryDelayAfterError } from './protocol.ts';
 
@@ -9,7 +9,8 @@ import { longpollUrl, parseEventLine, reconnectDelayAfterEnd, retryDelayAfterErr
  * Opens the long poll to the fhem of the connection, unless there is one already, and keeps it
  * open: when it ends or fails it is opened again after a pause that grows with every attempt.
  * A fhem that was never reached is given up after the fourth failure, unless the connection
- * says never to. A fhem that refuses user and password is tried again for as long as it does.
+ * says never to. A fhem that refuses user and password, or whose certificate is not accepted,
+ * is tried again for as long as that is so.
  *
  * @param onConnected called every time FHEMWEB has answered the request
  */
@@ -163,7 +164,9 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
       status.disconnects++;
       const timeout = retryDelayAfterError(status.disconnects);
 
-      if (!connection.neverTimeout && timeout > 10000 && !state.csrfToken[connection.base_url]) {
+      // a certificate that is not accepted is no reason to give up: the platform would hand
+      // homebridge no accessories, and HomeKit would forget the ones it has
+      if (!connection.neverTimeout && timeout > 10000 && !state.csrfToken[connection.base_url] && !isCertificateError(err)) {
         connection.log.error('longpoll error: ' + describeError(err) + ', retrys exhausted');
         connection.dead = true;
         return;
