@@ -138,7 +138,7 @@ describe('a contact sensor with history', () => {
     expect(w.log.lines).toContain('log query Custom LastActivation for door:state: 600');
   });
 
-  it('starts the history with the current state when it is empty, and then has no last activation', () => {
+  it('starts the history with the current state when it is empty, and answers 0 as the last activation', () => {
     FakeHistory.initialTime = undefined;
     const w = world();
     const sensor = serviceOf(w.accessory(contact()).getServices(), 'ContactSensor');
@@ -146,7 +146,7 @@ describe('a contact sensor with history', () => {
     const result = read(characteristicOf(sensor, 'LastActivation'));
 
     expect(FakeHistory.instances[0]?.entries).toEqual([{ time: 1786881600, status: 0 }]);
-    expect(result).toEqual({ error: null, value: NaN, answered: true });
+    expect(result).toEqual({ error: null, value: 0, answered: true });
   });
 
   it('resets the counter', () => {

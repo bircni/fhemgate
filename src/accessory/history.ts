@@ -301,15 +301,17 @@ export function addEveCharacteristics(
         return;
       }
 
-      // an empty history is started with the current state. the time is then still asked from
-      // the history, which answers nothing.
+      // an empty history is started with the current state
       if (historyService.getInitialTime() === undefined) {
         const entry = { time: mapping.last_update, status: mapping.cached };
         mapping.log.info('      adding history entry ' + util.inspect(entry));
         historyService.addEntry(entry);
       }
 
-      const time = mapping.last_update - (historyService.getInitialTime() as number);
+      // the history may only know its start once the entry was written. until then the
+      // last change is its start.
+      const initialTime = historyService.getInitialTime();
+      const time = initialTime === undefined ? 0 : mapping.last_update - initialTime;
 
       log('query Custom LastActivation for ' + from + ': ' + time);
       callback(null, time);
