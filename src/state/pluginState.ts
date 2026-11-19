@@ -1,5 +1,5 @@
 import type { HAP } from 'homebridge';
-import { recordHistory } from '../accessory/history.ts';
+import { recordHistory, type HistoryServiceClass } from '../accessory/history.ts';
 import { reading2homekit } from '../mapping/toHomekit.ts';
 import { toInt } from '../util/loose.ts';
 import { ReadingCache } from './readingCache.ts';
@@ -17,6 +17,9 @@ const tzoffset = (new Date()).getTimezoneOffset() * 60000;
 export class PluginState {
   readonly cache = new ReadingCache();
   readonly subscriptions = new Subscriptions();
+
+  /** the history service of the fakegato-history package for this homebridge, if the package is installed */
+  historyServiceClass?: HistoryServiceClass;
 
   constructor(readonly hap: HAP) {}
 

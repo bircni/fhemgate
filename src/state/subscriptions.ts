@@ -1,6 +1,6 @@
 import type { Characteristic } from '@homebridge/hap-nodejs';
 import type { HistoryService } from '../accessory/history.ts';
-import type { Mappings, PreparedMapping } from '../mapping/types.ts';
+import type { Mapping, Mappings, PreparedMapping } from '../mapping/types.ts';
 
 /** what the plugin needs to know of an accessory that listens to readings */
 export interface SubscribedAccessory {
@@ -12,9 +12,12 @@ export interface SubscribedAccessory {
   shutdown?: boolean;
 }
 
+/** a characteristic, with the mapping it was subscribed with kept at it for the debug page */
+export type MappedCharacteristic = Characteristic & { FHEM_mapping?: Mapping };
+
 export interface Subscription {
   accessory: SubscribedAccessory;
-  characteristic?: Characteristic;
+  characteristic?: MappedCharacteristic;
   /** missing for a subscription that only keeps a reading in the cache */
   mapping?: PreparedMapping;
 }

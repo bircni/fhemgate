@@ -67,7 +67,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 - [x] **M3.2** `mapping/compile`, `mapping/toHomekit`, `mapping/toFhem`, `mapping/userFunctions`
 - [x] **M3.3** `state/*`, `devices/identity`, `accessory/customCharacteristics`
 - [x] **M3.4** `devices/detect` + `devices/rules/*`
-- [ ] **M3.5** `accessory/*` (accessory, services, history), `debug/server`
+- [x] **M3.5** `accessory/*` (accessory, services, history), `debug/server`
 - [ ] **M3.6** `fhem/*` on native `fetch`, drop `postman-request` (transport snapshots may change)
 - [ ] **M3.7** `platform`, `config`, `index.ts`; delete `index.js` and legacy lint tier; final verify
 - [ ] **M3.8** end-to-end test (added by the owner on 2026-11-19, while M3.4 was in progress):

@@ -5,7 +5,7 @@ import util from 'node:util';
 import type { Logging } from 'homebridge';
 import type { Jsonlist2Device } from '../devices/types.ts';
 import { looselyEqual, toInt } from '../util/loose.ts';
-import type { CharacteristicClass, HomekitValue, Mapping, Mappings, PreparedMapping } from './types.ts';
+import type { CharacteristicClass, HomekitValue, Mappings, PreparedMapping } from './types.ts';
 import { resolveConverter } from './userFunctions.ts';
 
 /** the accessory the mappings belong to */
@@ -17,7 +17,7 @@ export interface MappingOwner {
   jsFunctions?: unknown;
   mappings: Mappings;
   /** asks fhem for the reading of a mapping */
-  query: (mapping: Mapping) => unknown;
+  query: (mapping: PreparedMapping) => unknown;
   characteristicOfName: (name: string) => CharacteristicClass | undefined;
 }
 
