@@ -102,14 +102,13 @@ export async function startHomebridge(platform: Record<string, unknown>, files: 
     join(storage, 'config.json'),
     JSON.stringify({
       bridge: { name: 'fhem2hb e2e', username: '0E:2E:2E:2E:2E:01', port, pin },
-      platforms: [{ platform: 'FHEM', name: 'FHEM', ...platform }],
+      // the debug page of the plugin would take a fixed port of this machine
+      platforms: [{ platform: 'FHEM', name: 'FHEM', debugPort: false, ...platform }],
     }),
   );
 
   let output = '';
   const child: ChildProcess = spawn(process.execPath, [homebridgeBin, '-I', '-Q', '-U', storage, '-P', root, '--strict-plugin-resolution'], {
-    // the debug server of the plugin would take a fixed port of this machine
-    env: { ...process.env, FHEM2HB_DEBUG_SERVER: 'off' },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
   child.stdout?.on('data', (chunk: Buffer) => {

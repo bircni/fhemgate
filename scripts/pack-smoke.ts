@@ -21,8 +21,7 @@ try {
   writeFileSync(join(work, 'package.json'), JSON.stringify({ name: 'pack-smoke', private: true }));
   execFileSync('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error', join(work, tarball)], { cwd: work, stdio: 'inherit' });
 
-  // the plugin has to export the function homebridge calls to register it. the process is
-  // ended explicitly because loading the plugin may leave a server listening.
+  // the plugin has to export the function homebridge calls to register it
   const check = `
     const plugin = await import(${JSON.stringify(name)});
     const initializer = typeof plugin.default === 'function' ? plugin.default : plugin.default?.default;

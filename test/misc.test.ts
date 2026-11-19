@@ -55,8 +55,26 @@ describe('debug page', () => {
     const page = world.debugPage('/subscriptions');
 
     expect(page).toMatch(/^<a href="\/">home<\/a><br><br><pre>subscriptions: \{/);
-    expect(page).toContain("'lamp-state': [");
+    expect(page).toContain('&#39;lamp-state&#39;: [');
     expect(page).toMatch(/<\/pre>$/);
+  });
+
+  it('shows what comes from fhem as text, whatever it looks like', () => {
+    const world = createWorld();
+    const lamp = device({ Internals: { NAME: 'lamp' }, Readings: { state: '<script>alert("x")</script>' }, PossibleSets: 'on off' });
+    lamp.Attributes.homebridgeMapping = 'On=state,values=/script/:1 <b>Hue</b>=state';
+    world.accessory(lamp).getServices();
+    world.subscriptions['<img src=x>'] = world.subscriptions['lamp-state'];
+    world.longpoll['http://<i>fhem</i>:8083/fhem'] = { connected: true, connects: 1, received: 0, received_total: 0 };
+
+    const cached = world.debugPage('/cached');
+    const subscriptions = world.debugPage('/subscriptions');
+
+    expect(cached).toContain('lamp-state: &#60;script&#62;alert(&#34;x&#34;)&#60;/script&#62;<br>');
+    expect(cached).toContain('&#60;img src=x&#62;: undefined<br>');
+    expect(cached).toContain('http://&#60;i&#62;fhem&#60;/i&#62;:8083/fhem<br>');
+    expect(cached.replaceAll(/<\/?a[^>]*>|<br>/g, '')).not.toMatch(/[<>]/);
+    expect(subscriptions.replaceAll(/<\/?a[^>]*>|<br>|<\/?pre>/g, '')).not.toMatch(/[<>]/);
   });
 });
 

@@ -10,10 +10,28 @@ it replaces homebridge-fhem and can not be installed next to it.
 the project is under active restructuring and is not published yet.
 
 uses longpoll and an internal cache to avoid roundtrips to fhem.
-a debug browser is available at port 8282 (or 8283).
 
 add one (or more) FHEM platforms to config.json and set the filter(s) to a fhem devspec that
 includes the devices that should be bridged to homekit.
+
+## platform config
+```
+{ "platform": "FHEM", "name": "FHEM", "server": "127.0.0.1", "port": 8083, "filter": "room=HomeKit" }
+```
+- server: host name or address of fhem
+- port: the port of FHEMWEB, 8083 if not given
+- filter: the fhem devspec of the devices to bridge. all devices if not given
+- ssl: true to talk https to FHEMWEB
+- webname: the webname of the FHEMWEB instance, fhem if not given
+- auth: user and password of FHEMWEB: `{ "user": "...", "pass": "..." }`
+- jsFunctions: a file with functions for reading2homekit and homekit2reading, see below
+- neverTimeout: true to keep trying for ever when fhem can not be reached while homebridge starts
+- debugPort: the port of the debug browser, which shows the cached readings and the subscriptions
+  of all FHEM platforms. 8282 if not given, or 8283 when that is taken. false or 0 switches the
+  debug browser off
+- debugHost: the address the debug browser listens on. all addresses of the machine if not given,
+  so that **anybody who reaches the port can read the names and readings of the devices**. set it
+  to `127.0.0.1` to reach it from the machine homebridge runs on only
 
 ## directly (automatically) supports:
 - switches (devices with set on and set off commands)

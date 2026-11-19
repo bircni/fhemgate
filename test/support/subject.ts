@@ -77,7 +77,7 @@ const realExecute = FhemAccessory.prototype.execute;
 export function createWorld(options: WorldOptions = {}): World {
   const state = new PluginState(hap);
   state.historyServiceClass = options.fakeGato as HistoryServiceClass | undefined;
-  const plugin: Plugin = { state, storagePath: () => options.storagePath ?? '/nonexistent' };
+  const plugin: Plugin = { state, storagePath: () => options.storagePath ?? '/nonexistent', debugServers: new Map() };
 
   const log = createLog();
   const logging = log as unknown as Logging;
@@ -106,7 +106,8 @@ export function createWorld(options: WorldOptions = {}): World {
     platform(config, extra = {}) {
       FhemAccessory.prototype.execute = realExecute;
       // the tests also hand in what a config.json could wrongly contain
-      return new FhemPlatform(logging, { platform: 'FHEM', ...config } as FhemPlatformConfig, api(extra), plugin) as unknown as Platform;
+      // without a word in the config the debug page would take its default port on this machine
+      return new FhemPlatform(logging, { platform: 'FHEM', debugPort: false, ...config } as FhemPlatformConfig, api(extra), plugin) as unknown as Platform;
     },
 
     update: (informId, value, noUpdate) => {
@@ -122,7 +123,7 @@ export function createWorld(options: WorldOptions = {}): World {
 
     shutdown() {
       // any platform does: they all save the histories of the one state
-      new FhemPlatform(createLog() as unknown as Logging, { platform: 'FHEM' }, api({}), plugin).shutdown();
+      new FhemPlatform(createLog() as unknown as Logging, { platform: 'FHEM', debugPort: false }, api({}), plugin).shutdown();
     },
 
     debugPage(url) {
