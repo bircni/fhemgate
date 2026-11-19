@@ -54,7 +54,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 
 **Milestones** (each = one or more commits on branch `baseline`, each ends green):
 
-- [ ] **M0** Phase 0 — import, licence, package identity, dead code removed
+- [x] **M0** Phase 0 — import, licence, package identity, dead code removed
 - [ ] **M1** Phase 1 — bun, TypeScript, ESLint, Vitest, `verify` script, CI workflow, repo docs
 - [ ] **M2.1** test seam + real HAP types + ported harness and HMCCU suites
 - [ ] **M2.2** device fixtures for every detection branch
