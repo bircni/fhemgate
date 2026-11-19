@@ -4,6 +4,7 @@ import type { Characteristic, CharacteristicValue, Service } from '@homebridge/h
 import type { HomekitValue, Mapping, PreparedMapping } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import type { SubscribedAccessory } from '../state/subscriptions.ts';
+import { toFloat } from '../util/loose.ts';
 import type { FhemAccessory, NamedService } from './accessory.ts';
 import { CustomUUIDs, EveUUIDs } from './customCharacteristics.ts';
 import type { CustomCharacteristicClass } from './services.ts';
@@ -93,8 +94,14 @@ export function recordHistory(
     } else if (mapping.characteristic_type === 'CurrentRelativeHumidity') {
       entry.humidity = value;
     } else if (mapping.characteristic_type === 'AirQuality') {
-      // the level of the air quality, not a concentration.
-      entry.ppm = value;
+      // the value is the level of the air quality. the history takes the concentration it was
+      // judged from, which is the reading itself.
+      const ppm = toFloat(state.cache.values[mapping.informId as string]);
+      if (isNaN(ppm)) {
+        entry = undefined;
+      } else {
+        entry.ppm = ppm;
+      }
     } else if (mapping.characteristic_type === CustomUUIDs.AirPressure) {
       entry.pressure = value;
     } else if (mapping.characteristic_type === CustomUUIDs.Power) {
