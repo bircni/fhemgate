@@ -27,6 +27,10 @@ export function reading2homekit(mapping: PreparedMapping, reading: unknown): Hom
     value = convert(mapping, orig);
   }
 
+  if (value !== undefined && mapping.characteristic_type === 'FirmwareRevision') {
+    value = firmwareVersion(value);
+  }
+
   if (value === undefined) {
     if (mapping.default !== undefined) {
       orig = 'mapping.default';
@@ -59,6 +63,18 @@ export function reading2homekit(mapping: PreparedMapping, reading: unknown): Hom
   mapping.cached = value as HomekitValue;
 
   return value as HomekitValue;
+}
+
+/**
+ * HomeKit takes a firmware revision only as up to three numbers with dots between them, and
+ * drops an accessory that reports anything else. Readings say things like `V1.2.3-beta`, so the
+ * first part that looks like a version is taken. Undefined if there is none.
+ */
+export function firmwareVersion(reading: unknown): string | undefined {
+  if (typeof reading !== 'string' && typeof reading !== 'number') {
+    return undefined;
+  }
+  return /\d+(\.\d+){0,2}/.exec(String(reading))?.[0];
 }
 
 // the values each mapping was already warned about, so that a reading that keeps reporting one
