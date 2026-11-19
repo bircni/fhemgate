@@ -101,12 +101,18 @@ export function ct2rgb(ct: number | string): string {
     g = 255;
   }
 
-  // blue for temperatures below 5600 K was calculated with a function that does not exist, which
-  // ended the conversion with this error.
-  if (temp < 66) {
-    throw new ReferenceError('log is not defined');
+  let b = 255;
+  if (temp <= 19) {
+    b = 0;
+  } else if (temp < 66) {
+    b = 138.5177312231 * Math.log(temp - 10) - 305.0447927307;
   }
-  const b = 255;
+  if (b < 0) {
+    b = 0;
+  }
+  if (b > 255) {
+    b = 255;
+  }
 
   return rgb2hex(Math.round(r), Math.round(g), Math.round(b));
 }
