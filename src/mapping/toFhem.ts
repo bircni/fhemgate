@@ -33,16 +33,17 @@ export function commandFor(source: CommandSource, target: PreparedMapping | stri
   const mapping = target as PreparedMapping;
   let value: any = valueFromHomekit;
 
-  if (mapping.readOnly) {
-    // the command is not known yet at this point and a blank is missing.
-    source.log.info(source.name + ' NOT sending command ' + undefined + ' with value ' + value + 'for readOnly characteristic');
-    return undefined;
-  }
-
   let c: any = target;
   if (typeof target === 'object') {
     c = target.cmd;
-  } else {
+  }
+
+  if (mapping.readOnly) {
+    source.log.info(source.name + ' NOT sending command ' + c + ' with value ' + value + ' for readOnly characteristic');
+    return undefined;
+  }
+
+  if (typeof target !== 'object') {
     source.log.info(source.name + ' sending command ' + c + ' with value ' + value);
   }
 
