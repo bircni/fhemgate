@@ -40,8 +40,6 @@ describe('commandFor', () => {
     const from = source();
 
     expect(commandFor(from, prepared({ cmd: 'x', readOnly: '1' }), 1)).toBeUndefined();
-    expect((from.log as unknown as ReturnType<typeof createLog>).lines).toEqual([
-      'info acc NOT sending command undefined with value 1for readOnly characteristic',
-    ]);
+    expect((from.log as unknown as ReturnType<typeof createLog>).lines).toEqual(['info acc NOT sending command x with value 1 for readOnly characteristic']);
   });
 });
