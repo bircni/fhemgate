@@ -23,6 +23,11 @@ export function commandUrl(baseUrl: string, cmd: string, csrfToken: string | und
   return baseUrl + '?cmd=' + query;
 }
 
+/** the url as it may be logged: the csrf token lets whoever has it run commands in fhem, so it is left out */
+export function withoutToken(url: string): string {
+  return url.replace(/([?&]fwcsrf=)[^&#]*/, '$1***');
+}
+
 /** the url that lists the devices of a devspec with everything fhem knows about them. all devices without a filter. */
 export function devicesUrl(baseUrl: string, filter: string | undefined, csrfToken: string | undefined): string {
   let cmd = 'jsonlist2';

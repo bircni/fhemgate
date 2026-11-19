@@ -3,7 +3,7 @@ import type { Logging } from 'homebridge';
 import type { Jsonlist2Device } from '../devices/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import { getText, type GetOptions, type HttpAuth, type HttpResponse } from './http.ts';
-import { commandUrl, devicesUrl } from './protocol.ts';
+import { commandUrl, devicesUrl, withoutToken } from './protocol.ts';
 
 /** where one fhem is reached and how */
 export interface FhemConnection {
@@ -51,8 +51,8 @@ export function requestOptions(connection: FhemConnection): GetOptions {
  */
 export function execute(state: PluginState, log: Logging, connection: FhemConnection, cmd: string, callback?: (result: string) => void): void {
   const url = commandUrl(connection.base_url, cmd, state.csrfToken[connection.base_url]);
-  // the url carries the csrf token into the log.
-  log.info('  executing: ' + url);
+  const shown = withoutToken(url);
+  log.info('  executing: ' + shown);
 
   getText(url, { ...requestOptions(connection), gzip: true }, (err, response, result) => {
     if (!err && response?.statusCode === 200) {
@@ -60,14 +60,14 @@ export function execute(state: PluginState, log: Logging, connection: FhemConnec
         callback((result as string).replace(/[\r\n]/g, ''));
       }
     } else {
-      log('There was a problem connecting to FHEM (' + url + ').');
+      log('There was a problem connecting to FHEM (' + shown + ').');
       if (response) {
         log('  ' + response.statusCode + ': ' + response.statusMessage);
       }
     }
 
     if (err) {
-      log('There was a problem connecting to FHEM (' + url + '):' + describeError(err));
+      log('There was a problem connecting to FHEM (' + shown + '):' + describeError(err));
     }
   });
 }
@@ -84,7 +84,7 @@ export function fetchDevices(
   callback: (error: Error | undefined, response?: HttpResponse, devices?: DeviceList) => void,
 ): void {
   const url = devicesUrl(connection.base_url, filter, state.csrfToken[connection.base_url]);
-  log.info('fetching: ' + url);
+  log.info('fetching: ' + withoutToken(url));
 
   getText(url, { ...requestOptions(connection), gzip: true }, (err, response, body) => {
     let devices: DeviceList | undefined;
