@@ -162,23 +162,24 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
 
       if (typeof mapping.valid === 'object') {
         owner.log.debug('valid: ' + util.inspect(mapping.valid));
-        const valid: (string | number)[] = [];
-        for (let value of mapping.valid) {
+        const valid: number[] = [];
+        for (const value of mapping.valid) {
           // HomeKit takes numbers only: a name is replaced by its number
           const named = names?.[value];
           if (typeof named === 'number') {
             owner.log.debug('  ' + value + ' -> ' + named);
-            value = named;
-          } else {
-            value = toInt(value);
+            valid.push(named);
+            continue;
           }
 
-          valid.push(value);
+          const number = toInt(value);
+          if (isNaN(number)) {
+            owner.log.error('valid: ' + value + ' is neither a number nor the name of a value of ' + characteristic_type);
+            continue;
+          }
+          valid.push(number);
         }
-        // sorted as text.
-
-        // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
-        mapping.valid = valid.sort();
+        mapping.valid = valid.sort((a, b) => a - b);
 
         owner.log.debug('valid: ' + util.inspect(mapping.valid));
       }

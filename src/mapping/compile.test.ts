@@ -70,6 +70,18 @@ describe('prepareMappings', () => {
     expect(mapping.valid).toEqual([0, 1, 3]);
   });
 
+  it('leaves out a valid value that is neither a name nor a number, and sorts the others as numbers', () => {
+    const mapping: Mapping = { valid: ['10', 'x', '9', 'ARMED'] };
+
+    const { log } = prepare({ SecuritySystemTargetState: mapping });
+
+    expect(mapping.valid).toEqual([9, 10]);
+    expect(log).toEqual([
+      'error valid: x is neither a number nor the name of a value of SecuritySystemTargetState',
+      'error valid: ARMED is neither a number nor the name of a value of SecuritySystemTargetState',
+    ]);
+  });
+
   it('takes the first value from the reading of the device and notes when it last changed', () => {
     const mapping: Mapping = { reading: 'level' };
 
