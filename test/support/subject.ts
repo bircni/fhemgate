@@ -1,75 +1,41 @@
 // the one place that knows where the code under test lives. every test goes through this
-// file, so the same tests keep running while the code moves from index.cjs into src/.
+// file, so the same tests kept running while the code moved out of the file taken over from
+// homebridge-fhem into the modules under src/.
 import * as hap from '@homebridge/hap-nodejs';
-import * as legacy from '../../src/legacy.ts';
-import type { PluginState } from '../../src/state/pluginState.ts';
+import type { API, Logging } from 'homebridge';
+import { FhemAccessory, type AccessoryPlatform } from '../../src/accessory/accessory.ts';
+import { CustomUUIDs } from '../../src/accessory/customCharacteristics.ts';
+import type { HistoryServiceClass } from '../../src/accessory/history.ts';
+import type { FhemPlatformConfig } from '../../src/config.ts';
+import { handleDebugRequest } from '../../src/debug/server.ts';
+import { hmccuChannel, hmccuDatapoint, hmccuMappings, hmccuReading, hmccuReadings, hmccuScalesLevel } from '../../src/devices/rules/hmccu.ts';
+import pluginInitializer from '../../src/index.ts';
+import { reading2homekit } from '../../src/mapping/toHomekit.ts';
+import type { PreparedMapping } from '../../src/mapping/types.ts';
+import { FhemPlatform, sortByKey as sortListByKey, type Plugin } from '../../src/platform.ts';
+import { PluginState } from '../../src/state/pluginState.ts';
+import { ct2rgb, hsv2rgb, rgb2hex, rgb2hsv, xyY2rgb } from '../../src/util/color.ts';
+import { sanitizeHapName as sanitize } from '../../src/util/names.ts';
 import { createLog, type CapturedLog } from './log.ts';
 import type { Accessory, FhemDevice, Mapping, Platform, PlatformConfig, Subscription } from './types.ts';
-
-type Executor = (cmd: string, callback?: (result: string) => void) => void;
-
-interface Internals {
-  /** takes the hap classes and starts with an empty state, which is returned */
-  useHap: (api: unknown) => PluginState;
-  useUser: (user: { storagePath(): string }) => void;
-  useFakeGato: (service: unknown) => void;
-
-  FHEMPlatform: (new (log: CapturedLog, config: PlatformConfig, api: unknown) => Platform) & { prototype: unknown };
-  FHEMAccessory: (new (platform: unknown, device: FhemDevice) => Accessory) & { prototype: { execute: Executor } };
-
-  FHEM_platforms: Platform[];
-
-  FHEM_isPublished: (device: string) => Accessory | null;
-  FHEM_update: (informId: string, value: unknown, noUpdate?: boolean) => void;
-  FHEM_reading2homekit: (mapping: Mapping, value: unknown) => unknown;
-
-  FHEM_sortByKey: <T>(array: T[], key: string) => T[];
-  FHEM_rgb2hex: (r: number | number[], g?: number, b?: number) => string;
-  FHEM_hsv2rgb: (h: number, s: number, v: number) => string;
-  FHEM_ct2rgb: (ct: number | string) => string;
-  FHEM_xyY2rgb: (x: number | string, y: number | string, Y: number) => string;
-  FHEM_rgb2hsv: (r?: number | string, g?: number, b?: number) => [number | undefined, number, number] | undefined;
-
-  CustomUUIDs: Record<'xVolume' | 'CT' | 'Volume' | 'Voltage' | 'Current' | 'Power' | 'Energy' | 'AirPressure' | 'Actuation', string>;
-  sanitizeHapName: (name: string | number | null | undefined) => string;
-
-  FHEM_hmccuReadings: (device: FhemDevice, datapoint: string) => string[];
-  FHEM_hmccuChannel: (device: FhemDevice, datapoint: string) => string | undefined;
-  FHEM_hmccuReading: (device: FhemDevice, datapoint: string) => string | undefined;
-  FHEM_hmccuDatapoint: (device: FhemDevice, reading: string | undefined, datapoint: string) => string;
-  FHEM_hmccuScalesLevel: (device: FhemDevice) => boolean;
-  FHEM_hmccuMappings: (accessory: Pick<Accessory, 'mappings' | 'service_name'> & { log: CapturedLog }, device: FhemDevice, genericType?: string) => boolean;
-
-  FHEMdebug_handleRequest: (request: { url: string }, response: { write(chunk: string): void; end(chunk: string): void }) => void;
-}
-
-const internals = legacy.__internals as unknown as Internals;
-const plugin = legacy.default as (homebridge: unknown) => void;
-internals.useHap(hap);
 
 export { hap };
 
 /** the function homebridge calls to load the plugin */
-export const initializer: (homebridge: unknown) => void = plugin;
+export const initializer = pluginInitializer as (homebridge: unknown) => void;
 
-export const customUUIDs = internals.CustomUUIDs;
-export const sanitizeHapName = internals.sanitizeHapName;
-export const sortByKey = internals.FHEM_sortByKey;
+export const customUUIDs = CustomUUIDs;
+export const sanitizeHapName = sanitize;
+export const sortByKey = sortListByKey as <T>(array: T[], key: string) => T[];
 
-export const color = {
-  rgb2hex: internals.FHEM_rgb2hex,
-  hsv2rgb: internals.FHEM_hsv2rgb,
-  ct2rgb: internals.FHEM_ct2rgb,
-  xyY2rgb: internals.FHEM_xyY2rgb,
-  rgb2hsv: internals.FHEM_rgb2hsv,
-};
+export const color = { rgb2hex, hsv2rgb, ct2rgb, xyY2rgb, rgb2hsv };
 
 export const hmccu = {
-  readings: internals.FHEM_hmccuReadings,
-  channel: internals.FHEM_hmccuChannel,
-  reading: internals.FHEM_hmccuReading,
-  datapoint: internals.FHEM_hmccuDatapoint,
-  scalesLevel: internals.FHEM_hmccuScalesLevel,
+  readings: hmccuReadings,
+  channel: hmccuChannel,
+  reading: hmccuReading,
+  datapoint: hmccuDatapoint,
+  scalesLevel: hmccuScalesLevel,
 };
 
 export interface WorldOptions {
@@ -115,21 +81,21 @@ export interface World {
   debugPage(url: string): string;
 }
 
-const realExecute = internals.FHEMAccessory.prototype.execute;
+// eslint-disable-next-line @typescript-eslint/unbound-method -- kept to put it back
+const realExecute = FhemAccessory.prototype.execute;
 
-/** starts from an empty plugin state. there is only one state at a time. */
+/** starts from an empty plugin state */
 export function createWorld(options: WorldOptions = {}): World {
-  const state = internals.useHap(hap);
-  internals.FHEM_platforms.length = 0;
-
-  internals.useUser({ storagePath: () => options.storagePath ?? '/nonexistent' });
-  internals.useFakeGato(options.fakeGato);
+  const state = new PluginState(hap);
+  state.historyServiceClass = options.fakeGato as HistoryServiceClass | undefined;
+  const plugin: Plugin = { state, storagePath: () => options.storagePath ?? '/nonexistent' };
 
   const log = createLog();
+  const logging = log as unknown as Logging;
   const sent: string[] = [];
 
   // commands are recorded where the accessory hands them over to be sent
-  internals.FHEMAccessory.prototype.execute = function (cmd, callback) {
+  FhemAccessory.prototype.execute = function (cmd, callback) {
     sent.push(cmd);
     const result = options.respond?.(cmd);
     if (result !== undefined && callback) {
@@ -137,28 +103,34 @@ export function createWorld(options: WorldOptions = {}): World {
     }
   };
 
+  const api = (extra: Record<string, unknown>) => ({ hap, on: () => undefined, ...extra }) as unknown as API;
+
   return {
     log,
     sent,
 
     accessory(device, platform = {}) {
-      return new internals.FHEMAccessory({ log, connection: {}, jsFunctions: options.jsFunctions, ...platform }, device);
+      const from = { log: logging, connection: {}, jsFunctions: options.jsFunctions, ...platform } as AccessoryPlatform;
+      return new FhemAccessory(from, device, state, () => undefined) as unknown as Accessory;
     },
 
     hmccuMappings(device, genericType) {
-      const accessory = { log, mappings: {}, service_name: genericType };
-      const handled = internals.FHEM_hmccuMappings(accessory, device, genericType);
-      return { handled, accessory };
+      const accessory = { log: logging, mappings: {}, service_name: genericType };
+      const handled = hmccuMappings(accessory, device, genericType);
+      return { handled, accessory: accessory };
     },
 
-    platform(config, api = {}) {
-      internals.FHEMAccessory.prototype.execute = realExecute;
-      return new internals.FHEMPlatform(log, config, { hap, on: () => undefined, ...api });
+    platform(config, extra = {}) {
+      FhemAccessory.prototype.execute = realExecute;
+      // the tests also hand in what a config.json could wrongly contain
+      return new FhemPlatform(logging, { platform: 'FHEM', ...config } as FhemPlatformConfig, api(extra), plugin) as unknown as Platform;
     },
 
-    update: internals.FHEM_update,
-    toHomekit: internals.FHEM_reading2homekit,
-    published: internals.FHEM_isPublished,
+    update: (informId, value, noUpdate) => {
+      state.update(informId, value, noUpdate);
+    },
+    toHomekit: (mapping, value) => reading2homekit(mapping as PreparedMapping, value),
+    published: (device) => state.subscriptions.publishedAccessory(device) as Accessory | null,
 
     cached: state.cache.values,
     subscriptions: state.subscriptions.byInformId as Record<string, Subscription[] | undefined>,
@@ -166,19 +138,20 @@ export function createWorld(options: WorldOptions = {}): World {
     csrfToken: state.csrfToken,
 
     shutdown() {
-      (internals.FHEMPlatform.prototype as Platform).shutdown.call({ log });
+      // any platform does: they all save the histories of the one state
+      new FhemPlatform(createLog() as unknown as Logging, { platform: 'FHEM' }, api({}), plugin).shutdown();
     },
 
     debugPage(url) {
       let page = '';
-      internals.FHEMdebug_handleRequest({ url }, {
+      handleDebugRequest({ url }, {
         write: (chunk) => {
           page += chunk;
         },
         end: (chunk) => {
           page += chunk;
         },
-      });
+      }, state, state.longpoll);
       return page;
     },
   };

@@ -22,6 +22,19 @@ check that the packed plugin installs with npm and loads.
 | `bun run build` | compiles `src` to `dist` |
 | `bun run pack-smoke` | packs, installs and loads the plugin |
 
+## Layout
+
+| Directory | Holds |
+|---|---|
+| `src/devices` | the detection: what a fhem device is and how its readings map to HomeKit, one rule module per device family under `rules/` |
+| `src/mapping` | mappings between a reading and a characteristic: the `homebridgeMapping` parser, and the conversion of values in both directions |
+| `src/accessory` | the accessory homebridge sees, its services and the Eve history |
+| `src/fhem` | the connection to FHEMWEB: the long poll for events and the commands |
+| `src/state` | the readings the plugin has seen and who is subscribed to them |
+| `test` | the suites that run whole devices through the plugin, their fixtures and a stand-in FHEMWEB |
+
+Unit tests sit next to the module they test, as `*.test.ts`.
+
 ## Behaviour is pinned by tests
 
 The plugin knows the quirks of many fhem device types, and nobody owns hardware for all of them.

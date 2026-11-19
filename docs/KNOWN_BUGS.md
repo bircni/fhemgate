@@ -4,7 +4,9 @@ Behaviour that the tests record although it is wrong. The restructuring moves th
 changing what it does, so these travel with it. Each is to be fixed on its own, in a change that
 also changes the test named here.
 
-Line numbers refer to `index.cjs` as of the tag `baseline-m2`.
+Line numbers refer to `index.cjs` as of the tag `baseline-m2`, the last state of the code as one
+file. In the modules under `src/` each of these has a comment that names its number here:
+`grep -rn "KNOWN_BUGS.md, 14" src` finds number 14.
 
 | # | What happens | Where | Pinned by |
 |---|---|---|---|
@@ -44,11 +46,13 @@ Line numbers refer to `index.cjs` as of the tag `baseline-m2`.
 
 These are known from reading the code, and no test runs them:
 
-- TLS certificates are not checked when `auth` is configured (line 865). The tests do not run a TLS server.
-- The debug server listens on all interfaces on port 8282 or 8283 as soon as the plugin is loaded
-  (line 3826). The tests switch it off.
-- Code that can not be reached: the handling of `global` events in the long poll (646–706), the
-  second `CurrentHeatingCoolingState` conversion (250–256), the conversion of `state` for mappings
-  with an `On` property (317–339), the service type logging after the detection (2416–2430, which
-  also calls a function that does not exist), and merging a JSON mapping into the detected ones
-  (2810–2815).
+- TLS certificates are not checked when `auth` is configured (`requestOptions` in
+  `src/fhem/client.ts`). The tests do not run a TLS server.
+- The debug server listens on all interfaces on port 8282 or 8283 as soon as homebridge has
+  loaded the plugin (`startDebugServer` in `src/debug/server.ts`). The tests switch it off.
+
+Code that could not be reached was left behind when the code moved into `src/`: the handling of
+`global` events in the long poll, a second conversion of the heating state, the service type
+logging after the detection, which called a function that did not exist, and merging a JSON
+mapping into the detected ones. The conversion of `state` for mappings with an `On` parameter was
+kept, as a `homebridgeMapping` can reach it.

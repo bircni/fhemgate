@@ -69,7 +69,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 - [x] **M3.4** `devices/detect` + `devices/rules/*`
 - [x] **M3.5** `accessory/*` (accessory, services, history), `debug/server`
 - [x] **M3.6** `fhem/*` on native `fetch`, drop `postman-request` (transport snapshots may change)
-- [ ] **M3.7** `platform`, `config`, `index.ts`; delete `index.js` and legacy lint tier; final verify
+- [x] **M3.7** `platform`, `config`, `index.ts`; delete `index.js` and legacy lint tier; final verify
 - [ ] **M3.8** end-to-end test (added by the owner on 2026-11-19, while M3.4 was in progress):
   a real Homebridge process loads the built plugin from `dist/`, configured against the stand-in
   FHEMWEB of the tests. The test reads the published accessories over HAP, writes a
@@ -121,6 +121,13 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
   instead of only after FHEMWEB answered 401. Digest authentication, which the old library
   could do, is no longer possible. The snapshot files under `test/` are unchanged since
   `baseline-m2`.
+- M3.7 as built: `src/index.ts` creates one `PluginState` per homebridge and registers a platform
+  class bound to it, with the two-argument `registerPlatform('FHEM', …)`. The plugin announces
+  itself as `homebridge-fhem2hb` on the console. `config.ts` keeps the `process.exit` for a
+  non-boolean `ssl`: it is number 21 in `docs/KNOWN_BUGS.md` and bugs are not fixed in the
+  baseline, although the module list below says otherwise. The debug server is started by the
+  initializer instead of at import. `src/legacy.ts` and the lenient lint tier are gone.
+  Coverage of `src/`: 96.9 % of lines.
 
 **Blocked / needs owner:** *(filled in during execution)*
 

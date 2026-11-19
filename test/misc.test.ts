@@ -106,7 +106,7 @@ describe('loading the plugin', () => {
     initializer({ version: 2.7, user: { storagePath: () => '/nonexistent' }, hap, registerPlatform });
 
     expect(registerPlatform).toHaveBeenCalledOnce();
-    expect(registerPlatform.mock.calls[0]?.slice(0, 2)).toEqual(['homebridge-fhem', 'FHEM']);
-    expect(registerPlatform.mock.calls[0]?.[2]).toBeTypeOf('function');
+    expect(registerPlatform.mock.calls[0]?.[0]).toBe('FHEM');
+    expect(registerPlatform.mock.calls[0]?.[1]).toBeTypeOf('function');
   });
 });
