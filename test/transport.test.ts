@@ -385,21 +385,24 @@ describe('events', () => {
     expect(world.log.errors()).toEqual([]);
   });
 
-  it('reports an event it can not read and holds back the rest of what arrived with it', async () => {
+  it('reports an event it can not read and goes on with what arrived with it', async () => {
     const { accessory } = await published({ devices: [{ Name: 'lamp', ...lamp() }] });
     accessory.getServices();
     world.log.clear();
 
     // a value that is no text
-    fhem.send('["lamp-state",1,"x"]\n["lamp-state","off","x"]\n');
-    await waitFor(() => world.log.errors().length > 0, 'the error');
+    fhem.send('["lamp-state",1,"x"]\n["lamp-state","off","x"]\n["lamp-state",2,"x"]\n["lamp-state","on","x"]\n');
+    await waitFor(() => world.log.errors().length > 1, 'the errors');
 
-    expect(world.log.errors()).toEqual(['error   error in longpoll connection: TypeError: value.match is not a function']);
-    // what arrived together with the failing event is only looked at when more arrives
+    expect(world.log.errors()).toEqual([
+      'error   error in longpoll connection: TypeError: value.match is not a function',
+      'error   error in longpoll connection: TypeError: value.match is not a function',
+    ]);
+    expect(world.log.lines.filter((line) => line.includes('caching: On'))).toEqual([
+      "info     caching: On: false (as boolean; from 'off')",
+      "info     caching: On: true (as boolean; from 'on')",
+    ]);
     expect(world.cached['lamp-state']).toBe('on');
-
-    fhem.send('\n');
-    await waitFor(() => world.cached['lamp-state'] === 'off', 'the next event');
   });
 });
 
