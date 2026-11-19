@@ -62,9 +62,8 @@ export function commandFor(source: CommandSource, target: PreparedMapping | stri
     command = 'set ' + saturation.device + ' sat ' + value;
   } else {
     if (mapping.characteristic_type === 'On' && value) {
-      // meant to skip switching on while a delayed command is waiting, but the timers are kept
-      // in an object, which has no length.
-      if (source.delayed_timers?.length) {
+      // a delayed command that is waiting, like a new brightness, switches the device on itself
+      if (source.delayed_timers && Object.keys(source.delayed_timers).length) {
         mapping.log.info(source.name + ': skipping set cmd for ' + mapping.characteristic_type + ' with value ' + value);
         return undefined;
       }

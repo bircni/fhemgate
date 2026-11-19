@@ -276,7 +276,7 @@ describe('writing a characteristic', () => {
     expect(world.sent).toEqual(['set d a 5', 'set d b 6']);
   });
 
-  it('still sends On while a delayed command is waiting', () => {
+  it('does not switch on while a delayed command is waiting, but does switch off', () => {
     vi.useFakeTimers();
     const world = createWorld();
     const accessory = world.accessory(
@@ -289,9 +289,19 @@ describe('writing a characteristic', () => {
     const service = serviceOf(accessory.getServices(), 'Lightbulb');
 
     write(characteristicOf(service, Characteristic.Brightness), 20);
-    write(characteristicOf(service, Characteristic.On), true);
+    expect(write(characteristicOf(service, Characteristic.On), true).answered).toBe(true);
 
-    expect(world.sent).toEqual(['set dimmer on']);
+    expect(world.sent).toEqual([]);
+    expect(world.log.lines.at(-1)).toBe('info dimmer: skipping set cmd for On with value true');
+
+    vi.advanceTimersByTime(1000);
+    expect(world.sent).toEqual(['set dimmer pct 20']);
+
+    // nothing is waiting any more
+    write(characteristicOf(service, Characteristic.On), true);
+    write(characteristicOf(service, Characteristic.Brightness), 30);
+    write(characteristicOf(service, Characteristic.On), false);
+    expect(world.sent).toEqual(['set dimmer pct 20', 'set dimmer on', 'set dimmer off']);
   });
 
   it('falls back to the default after the timeout of a push button', async () => {
