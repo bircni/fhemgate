@@ -145,8 +145,8 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
 }
 
 /** waits until the condition holds. setImmediate is used so that it also works while timers are faked. */
-export async function waitFor(condition: () => boolean, what = 'the condition'): Promise<void> {
-  const deadline = performance.now() + 3000;
+export async function waitFor(condition: () => boolean, what = 'the condition', milliseconds = 3000): Promise<void> {
+  const deadline = performance.now() + milliseconds;
   while (!condition()) {
     if (performance.now() > deadline) {
       throw new Error(`timed out waiting for ${what}`);

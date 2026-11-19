@@ -30,6 +30,9 @@ function meaning(mapping: Mapping, value: unknown): string {
 /**
  * The services of the accessory: the accessory information, one service for the device, more
  * for mappings that name another service or a subtype, and the history if the device has one.
+ *
+ * Nothing keeps two services of the same type from getting the same subtype, which homebridge
+ * refuses for the whole platform. See docs/KNOWN_BUGS.md, 32.
  */
 export function createServices(accessory: FhemAccessory, state: PluginState): Service[] {
   const { Service, Characteristic, Perms } = state.hap;

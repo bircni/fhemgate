@@ -70,7 +70,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 - [x] **M3.5** `accessory/*` (accessory, services, history), `debug/server`
 - [x] **M3.6** `fhem/*` on native `fetch`, drop `postman-request` (transport snapshots may change)
 - [x] **M3.7** `platform`, `config`, `index.ts`; delete `index.js` and legacy lint tier; final verify
-- [ ] **M3.8** end-to-end test (added by the owner on 2026-11-19, while M3.4 was in progress):
+- [x] **M3.8** end-to-end test (added by the owner on 2026-11-19, while M3.4 was in progress):
   a real Homebridge process loads the built plugin from `dist/`, configured against the stand-in
   FHEMWEB of the tests. The test reads the published accessories over HAP, writes a
   characteristic and checks the command that reaches fhem, and sends an event and checks the
@@ -129,7 +129,31 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
   initializer instead of at import. `src/legacy.ts` and the lenient lint tier are gone.
   Coverage of `src/`: 96.9 % of lines.
 
-**Blocked / needs owner:** *(filled in during execution)*
+- M3.8 as built, widened on the owner's word that it should cover as much as possible of
+  fhem -> plugin -> homebridge. `test/e2e/fixtures.e2e.ts` serves all device fixtures from the
+  stand-in fhem to two real homebridge processes (a bridge takes 149 accessories) and compares,
+  for every published accessory, the services and characteristics read over HAP with what the
+  plugin builds in-process. `test/e2e/scenarios.e2e.ts` runs nine dummy devices of the common
+  kinds: what is published, the first values, eight writes from HomeKit to fhem including the
+  delayed ones, thirteen changes from fhem to HomeKit, and a reconnect of the long poll. The
+  scenarios use only dummy devices, so the CI job `e2e-fhem` runs them unchanged against a real
+  fhem container. 42 checks, about 30 seconds, part of `bun run verify`.
+- Found by M3.8: a device whose mappings give two services of the same type and subtype makes
+  homebridge refuse all accessories of the platform (`docs/KNOWN_BUGS.md`, 32). The fixture
+  `mapping/linked-services` does that. It is taken out of the comparison and has a test of its
+  own. Also seen there: HomeKit is told the siriName as the name of an accessory, not the name
+  homebridge logs for it.
+
+**Blocked / needs owner:**
+
+- CI has never run: nothing is pushed and there is no remote for this repository. The workflow
+  passes `actionlint`. Unverified until it runs: the test matrix on Node 22 and 24 (only Node 26
+  is installed here), and the job `e2e-fhem` against `ghcr.io/fhem/fhem-minimal-docker:5-bookworm`
+  (no container runtime was used here; the image name is from the README of fhem-docker).
+- The device fixtures are written from the detection code. Real `jsonlist2` output of the
+  owner's devices would make them trustworthy; see `test/fixtures/devices/README.md`.
+- An ISC `LICENSE` was added on the strength of the licence tag in upstream's `package.json`.
+  Asking upstream to add a LICENSE file is drafted nowhere and posted nowhere.
 
 ---
 

@@ -41,6 +41,7 @@ file. In the modules under `src/` each of these has a comment that names its num
 | 29 | A `homebridgeMapping` in JSON is only recognised when it is on a single line. | 2798 | `test/parser.test.ts`: is only recognised on a single line |
 | 30 | The debug page shows cached values and device names to anyone who can reach the port, and writes them into the page unescaped. | 3760 | `test/misc.test.ts`: lists the connections and what is cached for every subscribed reading |
 | 31 | A `homebridgeMapping` in JSON can carry JavaScript that the plugin runs. Whoever can set attributes in fhem can run code in homebridge. | 2691, 2712 | `test/devices.test.ts`: `mapping/json` > converts readings |
+| 32 | A device whose mappings give two services of the same type and subtype makes homebridge fail while it loads the accessories. None of the devices of the platform is published then, also not the ones that are fine. Found by the end-to-end test, after the single file was gone, so there is no line for it. | `createServices` in `src/accessory/services.ts` | `test/e2e/fixtures.e2e.ts`: a device whose mappings give two services of the same type and subtype |
 
 ## Not recorded by a test
 

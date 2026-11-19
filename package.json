@@ -34,8 +34,9 @@
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "pack-smoke": "node scripts/pack-smoke.ts",
-    "verify": "bun install --frozen-lockfile && bun run lint && bun run typecheck && bun run coverage && bun run build && bun run pack-smoke",
-    "prepublishOnly": "bun run verify"
+    "verify": "bun install --frozen-lockfile && bun run lint && bun run typecheck && bun run coverage && bun run build && bun run pack-smoke && vitest run --config vitest.e2e.config.ts",
+    "prepublishOnly": "bun run verify",
+    "test:e2e": "bun run build && vitest run --config vitest.e2e.config.ts"
   },
   "engines": {
     "node": "^22.12.0 || ^24.0.0 || ^26.0.0",

@@ -10,8 +10,9 @@ bun install
 bun run verify
 ```
 
-`bun run verify` runs everything CI runs: lint, typecheck, tests with coverage, build, and a
-check that the packed plugin installs with npm and loads.
+`bun run verify` runs everything CI runs, except the job against a real fhem: lint, typecheck,
+tests with coverage, build, a check that the packed plugin installs with npm and loads, and the
+end-to-end tests.
 
 | Script | Does |
 |---|---|
@@ -21,6 +22,7 @@ check that the packed plugin installs with npm and loads.
 | `bun run coverage` | all tests with a coverage report in `coverage/` |
 | `bun run build` | compiles `src` to `dist` |
 | `bun run pack-smoke` | packs, installs and loads the plugin |
+| `bun run test:e2e` | builds, then runs a real homebridge with the plugin against the stand-in fhem |
 
 ## Layout
 
@@ -34,6 +36,14 @@ check that the packed plugin installs with npm and loads.
 | `test` | the suites that run whole devices through the plugin, their fixtures and a stand-in FHEMWEB |
 
 Unit tests sit next to the module they test, as `*.test.ts`.
+
+The end-to-end tests in `test/e2e` start a real homebridge that loads the built plugin and read
+and write its accessories the way a HomeKit controller does. `fixtures.e2e.ts` serves every device
+fixture and compares what homebridge publishes with what the plugin builds. `scenarios.e2e.ts`
+sends values both ways for one device of every common kind. With `E2E_FHEM_URL` set to the url of
+a FHEMWEB, the scenarios run against that fhem instead of the stand-in. They define dummy devices
+named `e2e_*` there and overwrite the `userattr` attribute of `global`, so only point it at a fhem
+that is there to be tested with.
 
 ## Behaviour is pinned by tests
 
