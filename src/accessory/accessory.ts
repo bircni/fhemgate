@@ -382,9 +382,8 @@ export class FhemAccessory {
       return true;
     }
 
-    if (typeof scopes === 'object') {
-      // a list has no grep, so this fails.
-      if ((scopes as { grep(scope: string): number }).grep(scope) !== -1) {
+    if (Array.isArray(scopes)) {
+      if (scopes.includes(scope)) {
         return true;
       }
     } else {
