@@ -82,17 +82,18 @@ describe('xyY2rgb', () => {
 describe('ct2rgb', () => {
   it('converts a colour temperature at or above 5600 kelvin', () => {
     expect(color.ct2rgb(5600)).toBe('ffffff');
-    expect(color.ct2rgb(6500)).toBe('e6ffff');
-    expect(color.ct2rgb(9000)).toBe('caffff');
+    expect(color.ct2rgb(6500)).toBe('e6ebff');
+    expect(color.ct2rgb(9000)).toBe('cadaff');
   });
 
   it('takes values up to 1000 as mired', () => {
-    expect(color.ct2rgb(153)).toBe('e5ffff');
-    expect(color.ct2rgb(178)).toBe('ffffff');
+    expect(color.ct2rgb(153)).toBe('e5eaff');
+    expect(color.ct2rgb(178)).toBe('fffbff');
   });
 
-  it('always answers full green', () => {
-    expect(color.ct2rgb(10000)).toBe('c4ffff');
+  it('takes green away as the light gets colder', () => {
+    expect(color.ct2rgb(10000)).toBe('c4d6ff');
+    expect(color.ct2rgb(20000)).toBe('a9c5ff');
   });
 
   it('fails for every colour temperature below 5600 kelvin', () => {
