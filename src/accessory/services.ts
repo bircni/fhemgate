@@ -29,6 +29,16 @@ function meaning(mapping: Mapping, value: unknown): string {
 }
 
 /**
+ * The text a mapping for the accessory information stands for: what the mapping itself says with
+ * `value`, `serial` or `default`, or else the reading it names. Nothing without any of them.
+ */
+function informationText(entry: Mapping | Mapping[] | undefined): string | undefined {
+  const mapping = Array.isArray(entry) ? entry[0] : entry;
+  const text = mapping?.value ?? mapping?.serial ?? mapping?.default ?? mapping?.cached;
+  return text === undefined || text === '' ? undefined : String(text);
+}
+
+/**
  * The services of the accessory: the accessory information, one service for the device, more
  * for mappings that name another service or a subtype, and the history if the device has one.
  *
@@ -51,18 +61,11 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   const informationService = new Service.AccessoryInformation();
   services.push(informationService);
 
-  // a mapping for one of these three is handed to HomeKit as it is, which is no text.
   log('    manufacturer, model and serial number characteristics for ' + accessory.name);
   informationService
-    .setCharacteristic(Characteristic.Manufacturer, (accessory.mappings.Manufacturer ? accessory.mappings.Manufacturer : 'FHEM:' + accessory.type) as string)
-    .setCharacteristic(
-      Characteristic.Model,
-      (accessory.mappings.Model ? accessory.mappings.Model : 'FHEM:' + (accessory.model ? accessory.model : '<unknown>')) as string,
-    )
-    .setCharacteristic(
-      Characteristic.SerialNumber,
-      (accessory.mappings.SerialNumber ? accessory.mappings.SerialNumber : accessory.serial ? accessory.serial : '<unknown>') as string,
-    );
+    .setCharacteristic(Characteristic.Manufacturer, informationText(accessory.mappings.Manufacturer) ?? 'FHEM:' + accessory.type)
+    .setCharacteristic(Characteristic.Model, informationText(accessory.mappings.Model) ?? 'FHEM:' + (accessory.model ? accessory.model : '<unknown>'))
+    .setCharacteristic(Characteristic.SerialNumber, informationText(accessory.mappings.SerialNumber) ?? (accessory.serial ? accessory.serial : '<unknown>'));
 
   const firmwareRevision = single('FirmwareRevision');
   if (firmwareRevision) {
