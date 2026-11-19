@@ -67,9 +67,9 @@ describe('a contact sensor with history', () => {
 
     expect(services.map(describeService)).toMatchSnapshot();
     expect(FakeHistory.instances).toHaveLength(1);
-    expect(FakeHistory.instances[0].type).toBe('door');
-    expect(FakeHistory.instances[0].accessory).toBe(accessory);
-    expect(FakeHistory.instances[0].options).toEqual({ size: '2048', storage: 'fs' });
+    expect(FakeHistory.instances[0]?.type).toBe('door');
+    expect(FakeHistory.instances[0]?.accessory).toBe(accessory);
+    expect(FakeHistory.instances[0]?.options).toEqual({ size: '2048', storage: 'fs' });
   });
 
   it('takes over the number of times it was opened from the persisted history', () => {
@@ -88,12 +88,12 @@ describe('a contact sensor with history', () => {
     w.update('door-state', 'open');
     await vi.advanceTimersByTimeAsync(0);
 
-    expect(history.entries).toEqual([{ time: 1786882200, status: 1 }]);
+    expect(history?.entries).toEqual([{ time: 1786882200, status: 1 }]);
     expect(w.cached['door-EVE-TimesOpened']).toBe(4);
     expect(characteristicOf(serviceOf(services, 'ContactSensor'), 'TimesOpened').value).toBe(4);
 
     w.update('door-state', 'closed');
-    expect(history.entries).toEqual([{ time: 1786882200, status: 1 }, { time: 1786882200, status: 0 }]);
+    expect(history?.entries).toEqual([{ time: 1786882200, status: 1 }, { time: 1786882200, status: 0 }]);
     expect(w.cached['door-EVE-TimesOpened']).toBe(4);
   });
 
@@ -121,7 +121,7 @@ describe('a contact sensor with history', () => {
 
     const result = read(characteristicOf(sensor, 'LastActivation'));
 
-    expect(FakeHistory.instances[0].entries).toEqual([{ time: 1786881600, status: undefined }]);
+    expect(FakeHistory.instances[0]?.entries).toEqual([{ time: 1786881600, status: undefined }]);
     expect(result).toEqual({ error: null, value: NaN, answered: true });
   });
 
@@ -129,6 +129,9 @@ describe('a contact sensor with history', () => {
     const w = world();
     w.accessory(contact()).getServices();
     const history = FakeHistory.instances[0];
+    if (!history) {
+      throw new Error('no history service');
+    }
     const reset = characteristicOf(history, 'Reset');
 
     expect(read(reset)).toEqual({ error: null, value: 0, answered: true });
@@ -186,7 +189,7 @@ describe('a contact sensor with history', () => {
     w.shutdown();
     w.shutdown();
 
-    expect(FakeHistory.instances[0].saved).toBe(1);
+    expect(FakeHistory.instances[0]?.saved).toBe(1);
   });
 });
 
@@ -201,8 +204,8 @@ describe('the kind of history', () => {
       Internals: { NAME: 'd' }, Readings: { state: '1' }, Attributes: { genericDeviceType, homebridgeMapping: 'history=size=10' },
     })).getServices();
 
-    expect(FakeHistory.instances[0].type).toBe(type);
-    expect(FakeHistory.instances[0].options).toEqual({ size: '10', storage: 'fs' });
+    expect(FakeHistory.instances[0]?.type).toBe(type);
+    expect(FakeHistory.instances[0]?.options).toEqual({ size: '10', storage: 'fs' });
   });
 
   it('can be given, and has a size of 1024 entries unless told otherwise', () => {
@@ -210,8 +213,8 @@ describe('the kind of history', () => {
       Internals: { NAME: 'd' }, Readings: { state: 'on' }, PossibleSets: 'on off', Attributes: { homebridgeMapping: 'history=type=energy' },
     })).getServices();
 
-    expect(FakeHistory.instances[0].type).toBe('energy');
-    expect(FakeHistory.instances[0].options).toEqual({ size: 1024, storage: 'fs' });
+    expect(FakeHistory.instances[0]?.type).toBe('energy');
+    expect(FakeHistory.instances[0]?.options).toEqual({ size: 1024, storage: 'fs' });
   });
 
   it('is unknown for other services', () => {
@@ -241,7 +244,7 @@ describe('history entries', () => {
     w.update('valve-actuator', '40');
     await vi.advanceTimersByTimeAsync(0);
 
-    expect(history.entries).toEqual([
+    expect(history?.entries).toEqual([
       { time: 1786882200, setTemp: 20, currentTemp: 19.5, valvePosition: 15 },
       { time: 1786882200, setTemp: 21, currentTemp: 19.5, valvePosition: 15 },
       { time: 1786882200, setTemp: 21, currentTemp: 19.5, valvePosition: 40 },
@@ -267,8 +270,8 @@ describe('history entries', () => {
     w.update('wetter-bewegung', '0');
     await vi.advanceTimersByTimeAsync(0);
 
-    expect(history.type).toBe('room');
-    expect(history.entries).toEqual([
+    expect(history?.type).toBe('room');
+    expect(history?.entries).toEqual([
       { time: 1786882200, temp: 21.5 },
       { time: 1786882200, humidity: 55 },
       // the air quality level, not the co2 concentration
@@ -290,6 +293,6 @@ describe('history entries', () => {
     w.update('wetter-battery', '70');
     await vi.advanceTimersByTimeAsync(0);
 
-    expect(FakeHistory.instances[0].entries).toEqual([]);
+    expect(FakeHistory.instances[0]?.entries).toEqual([]);
   });
 });

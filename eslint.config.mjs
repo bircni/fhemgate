@@ -59,6 +59,14 @@ export default defineConfig(
       'max-len': ['error', { code: 160 }],
       '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none', argsIgnorePattern: '^_' }],
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true, allowBoolean: true }],
+
+      // `||` and `??` differ for '' and 0, which readings and values are all the time. the
+      // operator is chosen per case and not by rule.
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      // mappings, the reading cache and the subscriptions are dictionaries entries are removed from
+      '@typescript-eslint/no-dynamic-delete': 'off',
+      // asks for the `!` that no-non-null-assertion forbids
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off',
     },
   },
 

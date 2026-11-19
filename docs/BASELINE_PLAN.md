@@ -61,7 +61,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 - [x] **M2.3** suites 1–6 and 8 (detection, services, to-HomeKit, to-FHEM, parser, colour, identity)
 - [x] **M2.4** fake FHEMWEB + transport suite
 - [x] **M2.5** `KNOWN_BUGS.md`, coverage threshold set, mutation spot-check done, tag `baseline-m2`
-- [ ] **M3.1** `util/*`, `mapping/types`, `mapping/parser`
+- [x] **M3.1** `util/*`, `mapping/types`, `mapping/parser`
 - [ ] **M3.2** `mapping/compile`, `mapping/toHomekit`, `mapping/toFhem`, `mapping/userFunctions`
 - [ ] **M3.3** `state/*`, `devices/identity`, `accessory/customCharacteristics`
 - [ ] **M3.4** `devices/detect` + `devices/rules/*`

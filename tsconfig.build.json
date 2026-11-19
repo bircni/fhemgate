@@ -5,8 +5,7 @@
     "rootDir": "src",
     "outDir": "dist",
     "declaration": true,
-    "sourceMap": true,
-    "noUncheckedIndexedAccess": true
+    "sourceMap": true
   },
   "include": [
     "src"

@@ -17,7 +17,8 @@
     "noEmit": true,
     "allowJs": false,
     "rewriteRelativeImportExtensions": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noUncheckedIndexedAccess": true
   },
   "include": [
     "src",

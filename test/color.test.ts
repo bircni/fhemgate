@@ -44,7 +44,7 @@ describe('rgb2hsv', () => {
     ['ff8000', [0.0837, 1, 1]],
     ['ff0080', [0.9163, 1, 1]],
     ['336699', [0.5833, 0.6667, 0.6]],
-  ])('%s', (hex, [h, s, v]) => {
+  ] as [string, [number, number, number]][])('%s', (hex, [h, s, v]) => {
     const hsv = color.rgb2hsv(hex);
 
     expect(hsv?.[0]).toBeCloseTo(h, 4);

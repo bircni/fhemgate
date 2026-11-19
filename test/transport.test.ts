@@ -31,6 +31,14 @@ function accessoriesOf(platform: Platform): Promise<Accessory[]> {
   });
 }
 
+async function firstAccessoryOf(platform: Platform): Promise<Accessory> {
+  const [accessory] = await accessoriesOf(platform);
+  if (!accessory) {
+    throw new Error('the platform has no accessory');
+  }
+  return accessory;
+}
+
 const baseUrl = () => `http://127.0.0.1:${fhem.port}/fhem`;
 const withoutPort = (text: string) => text.replaceAll(String(fhem.port), 'PORT').replace(/timestamp=\d+/, 'timestamp=NOW');
 
@@ -200,7 +208,7 @@ describe('devices', () => {
     const accessories = await accessoriesOf(platform);
 
     expect(accessories.map((accessory) => accessory.name)).toEqual(['lamp-a', 'lamp-b']);
-    expect(accessories[0].fhem).toBe(platform);
+    expect(accessories[0]?.fhem).toBe(platform);
     expect(fhem.commands.at(-1)).toBe('jsonlist2 room=Wohnzimmer,Küche&x');
     expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=jsonlist2%20room%3DWohnzimmer%2CK%C3%BCche%26x&fwcsrf=csrf_fake_token&XHR=1');
     expect(world.log.lines.filter((line) => !line.includes('caching')).map(withoutPort)).toEqual([
@@ -259,7 +267,7 @@ describe('devices', () => {
 describe('events', () => {
   async function published(options: FakeFhemOptions = {}): Promise<{ platform: Platform; accessory: Accessory }> {
     const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }], ...options });
-    const [accessory] = await accessoriesOf(platform);
+    const accessory = await firstAccessoryOf(platform);
     return { platform, accessory };
   }
 
@@ -383,7 +391,7 @@ describe('events', () => {
 describe('reconnecting', () => {
   it('reconnects 200 milliseconds after the stream ended and asks for the events since the last one', async () => {
     const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }] });
-    (await accessoriesOf(platform))[0].getServices();
+    (await firstAccessoryOf(platform)).getServices();
     fhem.event('lamp-state', 'off');
     await waitFor(() => world.cached['lamp-state'] === 'off', 'the event');
     const lastEvent = world.longpoll[baseUrl()]?.last_event_time as number;
@@ -450,7 +458,7 @@ describe('reconnecting', () => {
 describe('commands', () => {
   it('sends the command of a characteristic to fhem', async () => {
     const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }] });
-    const [accessory] = await accessoriesOf(platform);
+    const accessory = await firstAccessoryOf(platform);
     accessory.getServices();
     world.log.clear();
 
@@ -509,7 +517,7 @@ describe('commands', () => {
       }) }],
     });
 
-    const [accessory] = await accessoriesOf(platform);
+    const accessory = await firstAccessoryOf(platform);
     await waitFor(() => world.cached['aussen-temperature'] === '7.5', 'the reading');
 
     expect(fhem.commands.at(-1)).toBe('{ReadingsVal("aussen","temperature","")}');
@@ -537,7 +545,7 @@ describe('jsFunctions', () => {
         Attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=level,reading2homekit=half' },
       }) }],
     }, { jsFunctions: 'functions.cjs' }, { storagePath: storage });
-    const [accessory] = await accessoriesOf(platform);
+    const accessory = await firstAccessoryOf(platform);
 
     expect((accessory.mappings.Brightness as { cached?: unknown }).cached).toBe(40);
   });

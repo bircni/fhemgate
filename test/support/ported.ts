@@ -23,7 +23,28 @@ export interface PortedMapping {
   homekit2reading(value: unknown): unknown;
 }
 
-export type PortedMappings = Record<string, PortedMapping>;
+/** the characteristics the suites look at, and the custom ones by their uuid */
+export interface PortedMappings {
+  On: PortedMapping;
+  Brightness: PortedMapping;
+  CurrentPosition: PortedMapping;
+  TargetPosition: PortedMapping;
+  PositionState: PortedMapping;
+  CurrentHorizontalTiltAngle: PortedMapping;
+  TargetHorizontalTiltAngle: PortedMapping;
+  TargetTemperature: PortedMapping;
+  CurrentTemperature: PortedMapping;
+  CurrentRelativeHumidity: PortedMapping;
+  CurrentHeatingCoolingState: PortedMapping;
+  TargetHeatingCoolingState: PortedMapping;
+  StatusLowBattery: PortedMapping;
+  ContactSensorState: PortedMapping;
+  CurrentDoorState: PortedMapping;
+  MotionDetected: PortedMapping;
+  SmokeDetected: PortedMapping;
+  'LightSensor#CurrentAmbientLightLevel': PortedMapping;
+  [uuid: string]: PortedMapping;
+}
 
 export interface PortedAccessory extends Omit<Accessory, 'mappings'> {
   mappings: PortedMappings;

@@ -37,8 +37,8 @@ describe('names', () => {
   it('names the services after the siriName, without replacing anything', () => {
     const services = accessoryFor({ Internals: { NAME: 'EG_Licht' }, Attributes: { siriName: 'Licht_1' } }).getServices();
 
-    expect(services[1].displayName).toBe('Licht_1');
-    expect(services[1].getCharacteristic(hap.Characteristic.Name).value).toBe('Licht_1');
+    expect(services[1]?.displayName).toBe('Licht_1');
+    expect(services[1]?.getCharacteristic(hap.Characteristic.Name).value).toBe('Licht_1');
   });
 });
 
@@ -113,14 +113,14 @@ describe('information service', () => {
   it('names fhem and the device type as manufacturer and model', () => {
     const information = accessoryFor({ Internals: { TYPE: 'FS20', DEF: '1234 01' }, Attributes: { model: 'fs20st' } }).getServices()[0];
 
-    expect(information.getCharacteristic(hap.Characteristic.Manufacturer).value).toBe('FHEM:FS20');
-    expect(information.getCharacteristic(hap.Characteristic.Model).value).toBe('FHEM:fs20st');
-    expect(information.getCharacteristic(hap.Characteristic.SerialNumber).value).toBe('FS20.1234 01');
+    expect(information?.getCharacteristic(hap.Characteristic.Manufacturer).value).toBe('FHEM:FS20');
+    expect(information?.getCharacteristic(hap.Characteristic.Model).value).toBe('FHEM:fs20st');
+    expect(information?.getCharacteristic(hap.Characteristic.SerialNumber).value).toBe('FS20.1234 01');
   });
 
   it('says unknown for a device without serial number', () => {
     const information = accessoryFor({ Internals: { FUUID: undefined as unknown as string } }).getServices()[0];
 
-    expect(information.getCharacteristic(hap.Characteristic.SerialNumber).value).toBe('<unknown>');
+    expect(information?.getCharacteristic(hap.Characteristic.SerialNumber).value).toBe('<unknown>');
   });
 });

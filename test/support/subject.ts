@@ -32,8 +32,8 @@ interface Internals {
   FHEM_xyY2rgb: (x: number | string, y: number | string, Y: number) => string;
   FHEM_rgb2hsv: (r?: number | string, g?: number, b?: number) => [number | undefined, number, number] | undefined;
 
-  CustomUUIDs: Record<string, string>;
-  sanitizeHapName: (name: unknown) => string;
+  CustomUUIDs: Record<'xVolume' | 'CT' | 'Volume' | 'Voltage' | 'Current' | 'Power' | 'Energy' | 'AirPressure' | 'Actuation', string>;
+  sanitizeHapName: (name: string | number | null | undefined) => string;
 
   FHEM_hmccuReadings: (device: FhemDevice, datapoint: string) => string[];
   FHEM_hmccuChannel: (device: FhemDevice, datapoint: string) => string | undefined;
@@ -119,7 +119,6 @@ export interface World {
 
 function clear(object: Record<string, unknown>): void {
   for (const key of Object.keys(object)) {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- the plugin keeps its state in module level objects
     delete object[key];
   }
 }

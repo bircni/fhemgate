@@ -25,9 +25,9 @@ describe('datapoint lookup and service type detection for HMCCUCHN/HMCCUDEV devi
     }));
     const m = r.accessory.mappings;
     check('On reads STATE', m.On.reading === 'STATE', m.On.reading);
-    check('power mapped', m[customUUIDs.Power] && m[customUUIDs.Power].reading === 'POWER');
-    check('current scaled mA to A', m[customUUIDs.Current] && m[customUUIDs.Current].factor === 0.001);
-    check('energy scaled Wh to kWh', m[customUUIDs.Energy] && m[customUUIDs.Energy].factor === 0.001);
+    check('power mapped', m[customUUIDs.Power]?.reading === 'POWER');
+    check('current scaled mA to A', m[customUUIDs.Current]?.factor === 0.001);
+    check('energy scaled Wh to kWh', m[customUUIDs.Energy]?.factor === 0.001);
   });
 
   it('HmIP-BROLL shutter, LEVEL is 0.0-1.0', () => {
@@ -127,8 +127,8 @@ describe('datapoint lookup and service type detection for HMCCUCHN/HMCCUDEV devi
     check('current reads the actual temperature', m.CurrentTemperature.reading === '1.ACTUAL_TEMPERATURE');
     check('valve drives the heating state', !!m.CurrentHeatingCoolingState);
     check('mode drives the target state', !!m.TargetHeatingCoolingState);
-    check('valve 0.25 becomes 25%', m[customUUIDs.Actuation].reading2homekit('0.25') === 25,
-           m[customUUIDs.Actuation].reading2homekit('0.25'));
+    check('valve 0.25 becomes 25%', m[customUUIDs.Actuation]?.reading2homekit('0.25') === 25,
+           m[customUUIDs.Actuation]?.reading2homekit('0.25'));
   });
 
   it('HmIP-WTH-2 wall thermostat', () => {
