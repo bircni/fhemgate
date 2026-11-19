@@ -42,8 +42,9 @@ function informationText(entry: Mapping | Mapping[] | undefined): string | undef
  * The services of the accessory: the accessory information, one service for the device, more
  * for mappings that name another service or a subtype, and the history if the device has one.
  *
- * Nothing keeps two services of the same type from getting the same subtype, which homebridge
- * refuses for the whole platform.
+ * HomeKit tells services of the same type apart by their subtype. A mapping that would need a
+ * second service of a type without a subtype of its own is skipped: homebridge refuses such an
+ * accessory, and with it every other accessory of the platform.
  */
 export function createServices(accessory: FhemAccessory, state: PluginState): Service[] {
   const { Service, Characteristic, Perms } = state.hap;
@@ -211,7 +212,22 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
       if (known) {
         controlService = known;
       } else {
-        controlService = accessory.createDeviceService(service_name, each.subtype);
+        const created = accessory.createDeviceService(service_name, each.subtype);
+        if (services.some((existing) => existing.UUID === created.UUID && (!created.subtype || existing.subtype === created.subtype))) {
+          log.error(
+            accessory.name +
+              ': ' +
+              (each.characteristic_type ?? characteristic_type) +
+              ' needs another ' +
+              service_name +
+              ' service ' +
+              (created.subtype ? 'with the subtype ' + created.subtype + ', which another one has' : 'without a subtype') +
+              '. give it a subtype of its own. the mapping is skipped.',
+          );
+          continue;
+        }
+
+        controlService = created;
         services.push(controlService);
         services_hash[service_name + '#' + each.subtype] = controlService;
       }
