@@ -3487,6 +3487,8 @@ exports[`color/hue-color-ct > gets its services 1`] = `
     "log   information service for hue-color-ct",
     "log     manufacturer, model and serial number characteristics for hue-color-ct",
     "log     name (siriName) characteristic for hue-color-ct",
+    "info   hue_color_ct has reachability [reachable]",
+    "info     caching: Reachable: true (as boolean; from '1')",
     "log   Lightbulb service for hue-color-ct",
     "log     On characteristic for hue_color_ct:onoff",
     "log     Brightness characteristic for hue_color_ct:bri",
@@ -3657,6 +3659,7 @@ exports[`color/hue-color-ct > gets its services 1`] = `
     "hue_color_ct-colormode": 1,
     "hue_color_ct-hue": 1,
     "hue_color_ct-onoff": 1,
+    "hue_color_ct-reachable": 1,
     "hue_color_ct-sat": 1,
     "hue_color_ct-xy": 1,
   },
@@ -3865,6 +3868,9 @@ exports[`color/hue-color-ct > updates characteristics 1`] = `
     "On=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=true <- "1"",
   ],
+  "hue_color_ct-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
   "hue_color_ct-sat": [
     "Saturation=55 <- "on" "off"",
     "Saturation=0 <- "0" "1"",
@@ -3982,6 +3988,8 @@ exports[`color/hue-color-hs-off > gets its services 1`] = `
     "log   information service for hue-color-hs-off",
     "log     manufacturer, model and serial number characteristics for hue-color-hs-off",
     "log     name (siriName) characteristic for hue-color-hs-off",
+    "info   hue_color_hs_off has reachability [reachable]",
+    "info     caching: Reachable: false (as boolean; from '0')",
     "log   Lightbulb service for hue-color-hs-off",
     "log     On characteristic for hue_color_hs_off:onoff",
     "log     Brightness characteristic for hue_color_hs_off:bri",
@@ -4151,6 +4159,7 @@ exports[`color/hue-color-hs-off > gets its services 1`] = `
     "hue_color_hs_off-bri": 1,
     "hue_color_hs_off-hue": 1,
     "hue_color_hs_off-onoff": 1,
+    "hue_color_hs_off-reachable": 1,
     "hue_color_hs_off-sat": 1,
   },
 }
@@ -4342,6 +4351,9 @@ exports[`color/hue-color-hs-off > updates characteristics 1`] = `
     "On=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=true <- "1"",
   ],
+  "hue_color_hs_off-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
   "hue_color_hs_off-sat": [
     "Saturation=100 <- "on" "off"",
     "Saturation=0 <- "0" "1"",
@@ -4501,6 +4513,8 @@ exports[`color/hue-color-xy > gets its services 1`] = `
     "log   information service for hue-color-xy",
     "log     manufacturer, model and serial number characteristics for hue-color-xy",
     "log     name (siriName) characteristic for hue-color-xy",
+    "info   hue_color_xy has reachability [reachable]",
+    "info     caching: Reachable: true (as boolean; from '1')",
     "log   Lightbulb service for hue-color-xy",
     "log     On characteristic for hue_color_xy:onoff",
     "log     Brightness characteristic for hue_color_xy:bri",
@@ -4671,6 +4685,7 @@ exports[`color/hue-color-xy > gets its services 1`] = `
     "hue_color_xy-colormode": 1,
     "hue_color_xy-hue": 1,
     "hue_color_xy-onoff": 1,
+    "hue_color_xy-reachable": 1,
     "hue_color_xy-sat": 1,
     "hue_color_xy-xy": 1,
   },
@@ -4878,6 +4893,9 @@ exports[`color/hue-color-xy > updates characteristics 1`] = `
   "hue_color_xy-onoff": [
     "On=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=true <- "1"",
+  ],
+  "hue_color_xy-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
   "hue_color_xy-sat": [
     "Saturation=55 <- "on" "off"",
@@ -5351,6 +5369,8 @@ exports[`color/hue-white > gets its services 1`] = `
     "log   information service for hue-white",
     "log     manufacturer, model and serial number characteristics for hue-white",
     "log     name (siriName) characteristic for hue-white",
+    "info   hue_white has reachability [reachable]",
+    "info     caching: Reachable: true (as boolean; from '1')",
     "log   Lightbulb service for hue-white",
     "log     On characteristic for hue_white:onoff",
     "log     Brightness characteristic for hue_white:bri",
@@ -5483,6 +5503,7 @@ exports[`color/hue-white > gets its services 1`] = `
   "subscriptions": {
     "hue_white-bri": 1,
     "hue_white-onoff": 1,
+    "hue_white-reachable": 1,
   },
 }
 `;
@@ -5598,6 +5619,9 @@ exports[`color/hue-white > updates characteristics 1`] = `
   "hue_white-onoff": [
     "On=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=true <- "1"",
+  ],
+  "hue_white-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -34871,6 +34895,8 @@ exports[`switch/reachable > gets its services 1`] = `
     "log   information service for reachable",
     "log     manufacturer, model and serial number characteristics for reachable",
     "log     name (siriName) characteristic for reachable",
+    "info   reachable has reachability [reachable]",
+    "info     caching: Reachable: false (as boolean; from '0')",
     "log   Switch service for reachable",
     "log     On characteristic for reachable:state",
   ],
@@ -34983,6 +35009,7 @@ exports[`switch/reachable > gets its services 1`] = `
     },
   ],
   "subscriptions": {
+    "reachable-reachable": 1,
     "reachable-state": 1,
   },
 }
@@ -35060,6 +35087,9 @@ exports[`switch/reachable > sends commands 1`] = `
 
 exports[`switch/reachable > updates characteristics 1`] = `
 {
+  "reachable-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
   "reachable-state": [
     "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=false <- "off"",
