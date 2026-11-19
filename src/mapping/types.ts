@@ -116,6 +116,12 @@ export interface Mapping {
   [parameter: string]: unknown;
 }
 
+/**
+ * Puts text where a mapping declares a number, as it happens for values taken from the set
+ * commands or the attributes of a device. See the note at the top of this file.
+ */
+export const numberAsText = (text: string | undefined): number => text as unknown as number;
+
 /** a mapping of an accessory, which can log. every mapping is one once its accessory was created. */
 export type PreparedMapping = Mapping & { log: Logging };
 

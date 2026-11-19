@@ -30,6 +30,8 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 7. `docs/KNOWN_BUGS.md` exists and every entry names the test that pins it.
 8. `.github/workflows/ci.yml` exists and passes `actionlint` (run via `bunx`); every milestone
    below is ticked.
+10. `bun run test:e2e` passes: Homebridge 2.x on the local Node 26 publishes the accessories of the
+    stand-in fhem, a write reaches fhem and an event reaches HomeKit.
 9. `git log --format='%ae%n%ce' | sort -u` contains only the public git identity already used on `main` (never the owner's private address), and no commit made
    during the goal carries a `Co-Authored-By` trailer.
 
@@ -64,10 +66,19 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 - [x] **M3.1** `util/*`, `mapping/types`, `mapping/parser`
 - [x] **M3.2** `mapping/compile`, `mapping/toHomekit`, `mapping/toFhem`, `mapping/userFunctions`
 - [x] **M3.3** `state/*`, `devices/identity`, `accessory/customCharacteristics`
-- [ ] **M3.4** `devices/detect` + `devices/rules/*`
+- [x] **M3.4** `devices/detect` + `devices/rules/*`
 - [ ] **M3.5** `accessory/*` (accessory, services, history), `debug/server`
 - [ ] **M3.6** `fhem/*` on native `fetch`, drop `postman-request` (transport snapshots may change)
 - [ ] **M3.7** `platform`, `config`, `index.ts`; delete `index.js` and legacy lint tier; final verify
+- [ ] **M3.8** end-to-end test (added by the owner on 2026-11-19, while M3.4 was in progress):
+  a real Homebridge process loads the built plugin from `dist/`, configured against the stand-in
+  FHEMWEB of the tests. The test reads the published accessories over HAP, writes a
+  characteristic and checks the command that reaches fhem, and sends an event and checks the
+  value HomeKit sees. Runs locally as `bun run test:e2e` and is part of `bun run verify` and of
+  CI. In addition a CI-only job runs the same checks against a real fhem in a container
+  (`ghcr.io/fhem/fhem-docker`) with a few dummy devices. That job can not be verified here:
+  nothing is pushed and no container runtime is assumed locally, so it is checked with
+  `actionlint` only and listed under "Blocked / needs owner" until CI has run once.
 
 **Progress log:**
 
