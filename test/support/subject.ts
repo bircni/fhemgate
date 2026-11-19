@@ -1,6 +1,9 @@
 // the one place that knows where the code under test lives. every test goes through this
 // file, so the same tests kept running while the code moved out of the file taken over from
 // homebridge-fhem into the modules under src/.
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import * as hap from '@homebridge/hap-nodejs';
 import type { API, Logging } from 'homebridge';
 import { FhemAccessory, type AccessoryPlatform } from '../../src/accessory/accessory.ts';
@@ -70,6 +73,14 @@ export interface World {
   debugPage(url: string): string;
 }
 
+// the storage directories that were made for a test, removed when the tests of the file are done
+const temporary: string[] = [];
+process.on('exit', () => {
+  for (const directory of temporary) {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 // eslint-disable-next-line @typescript-eslint/unbound-method -- kept to put it back
 const realExecute = FhemAccessory.prototype.execute;
 
@@ -77,7 +88,19 @@ const realExecute = FhemAccessory.prototype.execute;
 export function createWorld(options: WorldOptions = {}): World {
   const state = new PluginState(hap);
   state.historyServiceClass = options.fakeGato as HistoryServiceClass | undefined;
-  const plugin: Plugin = { state, storagePath: () => options.storagePath ?? '/nonexistent', debugServers: new Map() };
+  // the plugin keeps a file in the storage directory, so there is one, made when it is first asked for
+  let storage = options.storagePath;
+  const plugin: Plugin = {
+    state,
+    storagePath: () => {
+      if (storage === undefined) {
+        storage = mkdtempSync(join(tmpdir(), 'fhem2hb-test-'));
+        temporary.push(storage);
+      }
+      return storage;
+    },
+    debugServers: new Map(),
+  };
 
   const log = createLog();
   const logging = log as unknown as Logging;

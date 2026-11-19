@@ -4,6 +4,7 @@ import type { AccessoryPlugin, API, Logging, StaticPlatformPlugin } from 'homebr
 import { FhemAccessory } from './accessory/accessory.ts';
 import { baseUrl, isSwitchedOff, loadJsFunctions, optionalSwitch, type FhemPlatformConfig } from './config.ts';
 import { DEFAULT_DEBUG_PORT, FALLBACK_DEBUG_PORT, debugPortOf, handleDebugRequest, startDebugServer } from './debug/server.ts';
+import { IdentityStore } from './devices/identityStore.ts';
 import type { Jsonlist2Device } from './devices/types.ts';
 import { describeError, execute, fetchDevices, type FhemConnection } from './fhem/client.ts';
 import { startLongpoll } from './fhem/eventStream.ts';
@@ -28,6 +29,8 @@ export interface Plugin {
   storagePath(): string;
   /** the debug servers that were started, by the port the configuration asked for */
   debugServers: Map<number, Server>;
+  /** what each device was first published as */
+  identities?: IdentityStore;
 }
 
 /** sorts the list by the key, in place */
@@ -65,6 +68,11 @@ export class FhemPlatform implements StaticPlatformPlugin {
   declare siri_device?: string;
 
   readonly #plugin: Plugin;
+
+  /** what each device was first published as, kept in the storage directory of homebridge */
+  get identities(): IdentityStore {
+    return (this.#plugin.identities ??= new IdentityStore(this.#plugin.storagePath()));
+  }
 
   constructor(log: Logging, config: FhemPlatformConfig, api: API, plugin: Plugin) {
     this.#plugin = plugin;
@@ -306,6 +314,8 @@ export class FhemPlatform implements StaticPlatformPlugin {
             }
           }
         }
+
+        this.identities.save(this.log);
 
         if (foundAccessories.length > MAX_BRIDGED_ACCESSORIES) {
           this.log.warn(
