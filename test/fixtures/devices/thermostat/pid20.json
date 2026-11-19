@@ -1,0 +1,31 @@
+{
+  "Name": "pid20",
+  "PossibleSets": "desired start stop restart",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "pid20",
+    "TYPE": "PID20",
+    "FUUID": "b530f179-f33f-6ccf-132d-83804a4815ac",
+    "STATE": "processing",
+    "DEF": "sensor:temperature actor:pct"
+  },
+  "Readings": {
+    "state": {
+      "Value": "processing",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "desired": {
+      "Value": "21.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "measured": {
+      "Value": "20.9",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "actuation": {
+      "Value": "37",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

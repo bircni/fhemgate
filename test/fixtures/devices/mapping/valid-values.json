@@ -1,0 +1,28 @@
+{
+  "Name": "valid_values",
+  "PossibleSets": "desired-temp mode",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "valid_values",
+    "TYPE": "dummy",
+    "FUUID": "d8ed5405-f33f-0385-282b-605d236e8913",
+    "STATE": "x"
+  },
+  "Readings": {
+    "state": {
+      "Value": "x",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "desired-temp": {
+      "Value": "21",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "mode": {
+      "Value": "auto",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "TargetHeatingCoolingState=mode,valid=OFF;HEAT;3,values=auto:AUTO;manual:HEAT;off:OFF,cmds=AUTO:mode+auto;HEAT:mode+manual;OFF:mode+off"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "Name": "generic_unknown_service_name",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_unknown_service_name",
+    "TYPE": "dummy",
+    "FUUID": "b1af4f7f-f33f-e2d9-b6a5-05f3a7aa1dde",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "scene"
+  }
+}

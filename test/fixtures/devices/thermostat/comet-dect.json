@@ -1,0 +1,26 @@
+{
+  "Name": "comet_dect",
+  "PossibleSets": "desired-temp:slider,8,0.5,28 on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "comet_dect",
+    "TYPE": "CometDECT",
+    "FUUID": "31556388-f33f-3788-2598-ff04f667ed88",
+    "STATE": "T: 21.5"
+  },
+  "Readings": {
+    "state": {
+      "Value": "T: 21.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temperature": {
+      "Value": "21.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "80",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

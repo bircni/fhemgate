@@ -1,0 +1,20 @@
+{
+  "Name": "json_broken_functions",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "json_broken_functions",
+    "TYPE": "dummy",
+    "FUUID": "c08ca233-f33f-5499-689d-94ece188daec",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "{\"On\": {\"reading\": \"state\", \"reading2homekit\": \"{return (}\", \"homekit2reading\": \"doesNotExist\", \"cmdOn\": \"on\", \"cmdOff\": \"off\"}}"
+  }
+}

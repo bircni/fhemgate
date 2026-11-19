@@ -1,0 +1,21 @@
+{
+  "Name": "generic_lock",
+  "PossibleSets": "lock:locked,unlocked",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr setList readingList",
+  "Internals": {
+    "NAME": "generic_lock",
+    "TYPE": "dummy",
+    "FUUID": "324fed39-f33f-35e6-3cf4-178c55acbbb4",
+    "STATE": "unlocked"
+  },
+  "Readings": {
+    "state": {
+      "Value": "unlocked",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "lock",
+    "setList": "lock:locked,unlocked"
+  }
+}

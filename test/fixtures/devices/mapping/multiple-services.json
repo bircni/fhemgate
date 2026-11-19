@@ -1,0 +1,33 @@
+{
+  "Name": "multiple_services",
+  "PossibleSets": "links rechts dose",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "multiple_services",
+    "TYPE": "dummy",
+    "FUUID": "b15e4105-f33f-535f-7bf1-176616f59998",
+    "STATE": "x"
+  },
+  "Readings": {
+    "state": {
+      "Value": "x",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "links": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "rechts": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "dose": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "switch",
+    "homebridgeMapping": "Switch(Links)#On=links,cmdOn=links+on,cmdOff=links+off\nSwitch(Rechts)#On=rechts,cmdOn=rechts+on,cmdOff=rechts+off\nOutlet#On=dose,cmdOn=dose+on,cmdOff=dose+off"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "Name": "sonosplayer_volume_events",
+  "PossibleSets": "Play Pause Stop Volume:slider,0,1,100",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "sonosplayer_volume_events",
+    "TYPE": "SONOSPLAYER",
+    "FUUID": "717fe3dc-f33f-1d65-a164-444ff5667e40",
+    "STATE": "STOPPED",
+    "DEF": "RINCON_000E58000002_MR",
+    "UDN": "RINCON_000E58000002_MR"
+  },
+  "Readings": {
+    "state": {
+      "Value": "STOPPED",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "transportState": {
+      "Value": "STOPPED",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "Volume": {
+      "Value": "5",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "generateVolumeEvent": "1"
+  }
+}

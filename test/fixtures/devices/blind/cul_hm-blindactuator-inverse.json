@@ -1,0 +1,31 @@
+{
+  "Name": "cul_hm_blindactuator_inverse",
+  "PossibleSets": "on:noArg off:noArg pct:slider,0,1,100 stop:noArg",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_hm_blindactuator_inverse",
+    "TYPE": "CUL_HM",
+    "FUUID": "1cbcd573-f33f-7ba9-5156-566a9260d028",
+    "STATE": "40",
+    "DEF": "6A4B5D"
+  },
+  "Readings": {
+    "state": {
+      "Value": "40",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pct": {
+      "Value": "40",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "motor": {
+      "Value": "up:on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-LC-BL1-FM",
+    "subType": "blindActuator",
+    "param": "levelInverse"
+  }
+}

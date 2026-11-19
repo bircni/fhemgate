@@ -1,0 +1,39 @@
+{
+  "Name": "netatmo_co2",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "netatmo_co2",
+    "TYPE": "netatmo",
+    "FUUID": "f7eec99b-f33f-9e0e-0447-4fd9e73b4ed7",
+    "STATE": "ok",
+    "DEF": "MODULE 70:ee:50:00:00:01"
+  },
+  "Readings": {
+    "state": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "co2": {
+      "Value": "1250",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temperature": {
+      "Value": "21.9",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "humidity": {
+      "Value": "47",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pressure": {
+      "Value": "1013.2",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "noise": {
+      "Value": "38",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

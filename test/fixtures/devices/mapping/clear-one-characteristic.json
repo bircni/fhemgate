@@ -1,0 +1,28 @@
+{
+  "Name": "clear_one_characteristic",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "clear_one_characteristic",
+    "TYPE": "dummy",
+    "FUUID": "d5b8d5ff-f33f-6c1b-7b4c-a56f7e71c613",
+    "STATE": "x"
+  },
+  "Readings": {
+    "state": {
+      "Value": "x",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temperature": {
+      "Value": "20",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "humidity": {
+      "Value": "50",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "CurrentRelativeHumidity=clear"
+  }
+}

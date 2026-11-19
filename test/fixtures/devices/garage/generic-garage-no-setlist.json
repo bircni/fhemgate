@@ -1,0 +1,24 @@
+{
+  "Name": "generic_garage_no_setlist",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_garage_no_setlist",
+    "TYPE": "MQTT_DEVICE",
+    "FUUID": "71e8df31-f33f-aa26-102f-24113159b85d",
+    "STATE": "closed"
+  },
+  "Readings": {
+    "state": {
+      "Value": "closed",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "doorState": {
+      "Value": "opening",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "garage"
+  }
+}

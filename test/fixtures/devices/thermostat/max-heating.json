@@ -1,0 +1,41 @@
+{
+  "Name": "max_heating",
+  "PossibleSets": "desiredTemperature:eco,comfort,boost,auto,off,5.0,5.5,6.0,29.5,30.0,on wakeUp factoryReset",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "max_heating",
+    "TYPE": "MAX",
+    "FUUID": "c3d47328-f33f-7c4f-3de9-5090ace4f1d2",
+    "STATE": "21.0 °C",
+    "DEF": "HeatingThermostat 0a1b2c",
+    "type": "HeatingThermostat",
+    "addr": "0a1b2c"
+  },
+  "Readings": {
+    "state": {
+      "Value": "21.0 °C",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "desiredTemperature": {
+      "Value": "21.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temperature": {
+      "Value": "20.3",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "valveposition": {
+      "Value": "42",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "mode": {
+      "Value": "auto",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

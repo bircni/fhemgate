@@ -1,0 +1,22 @@
+{
+  "Name": "avr_volume",
+  "PossibleSets": "on off volume:slider,0,1,100 input",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "avr_volume",
+    "TYPE": "YAMAHA_AVR",
+    "FUUID": "cd19cb0b-f33f-99a5-0403-6d700e0dd5e2",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "volume": {
+      "Value": "35",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

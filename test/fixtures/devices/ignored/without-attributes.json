@@ -1,0 +1,17 @@
+{
+  "Name": "without_attributes",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "without_attributes",
+    "TYPE": "dummy",
+    "FUUID": "9ce1b998-f33f-3191-9e07-3fc563613471",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_bdt_dimmer",
+  "PossibleSets": "on:noArg off:noArg pct:slider,0,1,100 datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_bdt_dimmer",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "25523772-f33f-7d93-6c1a-205bedde5e7e",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000007:4",
+    "ccutype": "HmIP-BDT",
+    "ccurole": "DIMMER_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "4.LEVEL": {
+      "Value": "0.6",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

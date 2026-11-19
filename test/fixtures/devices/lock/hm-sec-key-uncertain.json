@@ -1,0 +1,26 @@
+{
+  "Name": "hm_sec_key_uncertain",
+  "PossibleSets": "lock:noArg unlock:noArg open:noArg",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hm_sec_key_uncertain",
+    "TYPE": "CUL_HM",
+    "FUUID": "beed1353-f33f-6d9c-1598-007134b5539e",
+    "STATE": "unlocked (uncertain)",
+    "DEF": "8A4B5D"
+  },
+  "Readings": {
+    "state": {
+      "Value": "unlocked (uncertain)",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "lock": {
+      "Value": "unlocked (uncertain)",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-SEC-KEY-S",
+    "subType": "keyMatic"
+  }
+}

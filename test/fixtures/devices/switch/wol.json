@@ -1,0 +1,20 @@
+{
+  "Name": "wol",
+  "PossibleSets": "on off refresh",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "wol",
+    "TYPE": "WOL",
+    "FUUID": "40d03ec9-f33f-e54e-2bf6-86ca4288836f",
+    "STATE": "off",
+    "DEF": "00:11:22:33:44:55 192.0.2.40",
+    "MAC": "00:11:22:33:44:55"
+  },
+  "Readings": {
+    "state": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

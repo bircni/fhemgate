@@ -1,0 +1,22 @@
+{
+  "Name": "dummy_on_off",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "dummy_on_off",
+    "TYPE": "dummy",
+    "FUUID": "537fdc54-f33f-3d7b-b1ec-bab99a600c81",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "room": "Wohnzimmer,Licht",
+    "alias": "Stehlampe",
+    "siriName": "Stehlampe Wohnzimmer"
+  }
+}

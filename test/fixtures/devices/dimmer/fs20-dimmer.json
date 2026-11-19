@@ -1,0 +1,21 @@
+{
+  "Name": "fs20_dimmer",
+  "PossibleSets": "dim06% dim12% dim18% dim25% dim31% dim37% dim43% dim50% dim56% dim62% dim68% dim75% dim81% dim87% dim93% dim100% dimdown dimup off on toggle",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "fs20_dimmer",
+    "TYPE": "FS20",
+    "FUUID": "a6722b23-f33f-2a15-37ee-55aed03d8b8d",
+    "STATE": "dim50%",
+    "DEF": "1234 01"
+  },
+  "Readings": {
+    "state": {
+      "Value": "dim50%",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "fs20du"
+  }
+}

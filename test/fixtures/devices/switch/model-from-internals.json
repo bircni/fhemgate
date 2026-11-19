@@ -1,0 +1,19 @@
+{
+  "Name": "model_from_internals",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "model_from_internals",
+    "TYPE": "TRADFRI",
+    "FUUID": "e4f93e3e-f33f-498e-cdcd-fff62b71bce0",
+    "STATE": "on",
+    "model": "TRADFRI control outlet"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

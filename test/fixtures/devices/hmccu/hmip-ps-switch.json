@@ -1,0 +1,29 @@
+{
+  "Name": "hmip_ps_switch",
+  "PossibleSets": "on:noArg off:noArg toggle:noArg datapoint on-for-timer",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_ps_switch",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "dce921cc-f33f-0667-3d18-f4ef2caa32ff",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000008:4",
+    "ccutype": "HmIP-PS",
+    "ccurole": "SWITCH_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "3.STATE": {
+      "Value": "false",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "0.UNREACH": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "0.LOW_BAT": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

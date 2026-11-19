@@ -1,0 +1,19 @@
+{
+  "Name": "zwave_dimmer_off",
+  "PossibleSets": "dim:slider,0,1,99 on:noArg off:noArg",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "zwave_dimmer_off",
+    "TYPE": "ZWave",
+    "FUUID": "e9d6163e-f33f-5595-7873-cc6c8397d543",
+    "STATE": "off",
+    "DEF": "c1e2f3a4 6"
+  },
+  "Readings": {
+    "state": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

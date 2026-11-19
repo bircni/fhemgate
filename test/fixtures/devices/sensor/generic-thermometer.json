@@ -1,0 +1,20 @@
+{
+  "Name": "generic_thermometer",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_thermometer",
+    "TYPE": "dummy",
+    "FUUID": "a257e22d-f33f-b52e-3f1d-e883076a697c",
+    "STATE": "5.5"
+  },
+  "Readings": {
+    "state": {
+      "Value": "5.5",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "thermometer"
+  }
+}

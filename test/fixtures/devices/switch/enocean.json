@@ -1,0 +1,19 @@
+{
+  "Name": "enocean",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "enocean",
+    "TYPE": "EnOcean",
+    "FUUID": "c18ff65d-f33f-71f7-062d-4425fd2e42a5",
+    "STATE": "on",
+    "DEF": "0180ABCD"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

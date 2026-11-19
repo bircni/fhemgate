@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_broll_not_controllable",
+  "PossibleSets": "config",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_broll_not_controllable",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "a6c0d55b-f33f-a9c0-23d7-b13dcfbd7f85",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000005:4",
+    "ccutype": "HmIP-BROLL",
+    "ccurole": "SHUTTER_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "4.LEVEL": {
+      "Value": "0.5",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

@@ -1,0 +1,21 @@
+{
+  "Name": "history",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "history",
+    "TYPE": "dummy",
+    "FUUID": "76fec140-f33f-cb26-eb35-d2c990118a82",
+    "STATE": "closed"
+  },
+  "Readings": {
+    "state": {
+      "Value": "closed",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "ContactSensor",
+    "homebridgeMapping": "history=size=2048"
+  }
+}

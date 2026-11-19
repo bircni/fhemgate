@@ -1,0 +1,21 @@
+{
+  "Name": "default_and_timeout",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "default_and_timeout",
+    "TYPE": "dummy",
+    "FUUID": "18e4af06-f33f-19e7-10a9-07f3c84728ed",
+    "STATE": "short"
+  },
+  "Readings": {
+    "state": {
+      "Value": "short",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "StatelessProgrammableSwitch",
+    "homebridgeMapping": "ProgrammableSwitchEvent=state,values=short:SINGLE_PRESS;long:LONG_PRESS,default=0,timeout=500"
+  }
+}

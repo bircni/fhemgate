@@ -1,0 +1,38 @@
+{
+  "Name": "hue_white",
+  "PossibleSets": "on:noArg off:noArg toggle:noArg alert:none,select,lselect bri:slider,0,1,254 pct:slider,0,1,100",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hue_white",
+    "TYPE": "HUEDevice",
+    "FUUID": "973586f1-f33f-0ad2-c01c-07dab4e07944",
+    "STATE": "pct 60",
+    "DEF": "6 IODev=bridge",
+    "uniqueid": "ff:ff:ff:ff:ff:ff:ff:ff-0b"
+  },
+  "Readings": {
+    "state": {
+      "Value": "pct 60",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "onoff": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "bri": {
+      "Value": "153",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pct": {
+      "Value": "60",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "reachable": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "subType": "dimmer"
+  }
+}

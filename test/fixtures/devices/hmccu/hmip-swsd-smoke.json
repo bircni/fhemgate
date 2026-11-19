@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_swsd_smoke",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_swsd_smoke",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "5be0bb34-f33f-f15d-75d2-7a8bf130716e",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000007:4",
+    "ccutype": "HmIP-SWSD",
+    "ccurole": "SMOKE_DETECTOR"
+  },
+  "Readings": {
+    "1.SMOKE_DETECTOR_ALARM_STATUS": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

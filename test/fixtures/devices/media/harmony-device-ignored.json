@@ -1,0 +1,24 @@
+{
+  "Name": "harmony_device_ignored",
+  "PossibleSets": "command",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "harmony_device_ignored",
+    "TYPE": "harmony",
+    "FUUID": "88320d1c-f33f-f1ac-ded7-ef3797654692",
+    "STATE": "on",
+    "DEF": "hub DEVICE 12345679",
+    "id": "12345679"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "power": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

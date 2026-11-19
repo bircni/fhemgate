@@ -1,0 +1,19 @@
+{
+  "Name": "fs20_code_a0",
+  "PossibleSets": "off on toggle",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "fs20_code_a0",
+    "TYPE": "FS20",
+    "FUUID": "84824687-f33f-b5e3-8f7e-44be41312af1",
+    "STATE": "A0",
+    "DEF": "1234 06"
+  },
+  "Readings": {
+    "state": {
+      "Value": "A0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

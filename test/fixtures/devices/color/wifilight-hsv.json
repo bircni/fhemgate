@@ -1,0 +1,35 @@
+{
+  "Name": "wifilight_hsv",
+  "PossibleSets": "on:noArg off:noArg HSV RGB:colorpicker,RGB dim:slider,0,1,100 dimup dimdown",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "wifilight_hsv",
+    "TYPE": "WifiLight",
+    "FUUID": "954b31c6-f33f-5ada-8c79-84da0b73ac16",
+    "STATE": "on",
+    "DEF": "RGBW LW12 192.0.2.10"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "hue": {
+      "Value": "240",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "saturation": {
+      "Value": "80",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "brightness": {
+      "Value": "60",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "RGB": {
+      "Value": "1F1F99",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

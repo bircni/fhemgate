@@ -1,0 +1,46 @@
+{
+  "Name": "cul_hm_tc",
+  "PossibleSets": "desired-temp:6.0,6.5,7.0,7.5,8.0,8.5,9.0,29.0,29.5,30.0 mode day-temp night-temp",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_hm_tc",
+    "TYPE": "CUL_HM",
+    "FUUID": "02b5bb1e-f33f-5d6a-b605-64cb1c537f0f",
+    "STATE": "T: 20.5 H: 45",
+    "DEF": "4A4B5C02"
+  },
+  "Readings": {
+    "state": {
+      "Value": "T: 20.5 H: 45",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "desired-temp": {
+      "Value": "21.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "measured-temp": {
+      "Value": "20.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "humidity": {
+      "Value": "45",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "ValvePosition": {
+      "Value": "30",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "mode": {
+      "Value": "auto",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "low",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-CC-TC",
+    "subType": "thermostat"
+  }
+}

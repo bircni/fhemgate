@@ -1,0 +1,29 @@
+{
+  "Name": "max_shuttercontact",
+  "PossibleSets": "wakeUp",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "max_shuttercontact",
+    "TYPE": "MAX",
+    "FUUID": "e8270505-f33f-f7fb-9939-8baac63efe81",
+    "STATE": "closed",
+    "DEF": "ShutterContact 0d1e2f",
+    "type": "ShutterContact",
+    "addr": "0d1e2f"
+  },
+  "Readings": {
+    "state": {
+      "Value": "closed",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "onoff": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "low",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

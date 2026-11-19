@@ -1,0 +1,25 @@
+{
+  "Name": "somfy",
+  "PossibleSets": "position:slider,0,10,100 pos:slider,0,10,100 on off stop go-my",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "somfy",
+    "TYPE": "SOMFY",
+    "FUUID": "e1052784-f33f-f817-89cd-6a2dcc346953",
+    "STATE": "open",
+    "DEF": "000001 AC 0001"
+  },
+  "Readings": {
+    "state": {
+      "Value": "open",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "position": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "blind"
+  }
+}

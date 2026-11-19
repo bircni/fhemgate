@@ -1,0 +1,30 @@
+{
+  "Name": "cul_hm_threestate",
+  "PossibleSets": "statusRequest",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_hm_threestate",
+    "TYPE": "CUL_HM",
+    "FUUID": "f90750a6-f33f-f5ea-f973-9966f53b51ef",
+    "STATE": "open",
+    "DEF": "9A4B5C"
+  },
+  "Readings": {
+    "state": {
+      "Value": "open",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "contact": {
+      "Value": "open (to VCCU)",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-SEC-SC-2",
+    "subType": "threeStateSensor"
+  }
+}

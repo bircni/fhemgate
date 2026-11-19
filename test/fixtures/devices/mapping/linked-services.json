@@ -1,0 +1,29 @@
+{
+  "Name": "linked_services",
+  "PossibleSets": "on off input",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "linked_services",
+    "TYPE": "dummy",
+    "FUUID": "c3cff952-f33f-d844-9365-8141a9a27271",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "power": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "input": {
+      "Value": "hdmi2",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "Television",
+    "homebridgeMapping": "clear\nTelevision#Active=power,valueOn=on,cmdOn=on,cmdOff=off\nActiveIdentifier=input,values=hdmi1:1;hdmi2:2,cmds=1:input+hdmi1;2:input+hdmi2\nInputSource(hdmi1)#Identifier=default=1\nlinkedTo=Television\nInputSource(hdmi2)#Identifier=default=2\nlinkedTo=Television\nInputSource(hdmi2)#linkedTo=InputSource\nSpeaker#linkedTo=Lightbulb"
+  }
+}

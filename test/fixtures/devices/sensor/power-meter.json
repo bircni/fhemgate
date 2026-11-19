@@ -1,0 +1,38 @@
+{
+  "Name": "power_meter",
+  "PossibleSets": "on:noArg off:noArg toggle:noArg",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "power_meter",
+    "TYPE": "CUL_HM",
+    "FUUID": "738f5950-f33f-cb61-0134-433ce45915ab",
+    "STATE": "on",
+    "DEF": "CA4B5C01"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "power": {
+      "Value": "42.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "current": {
+      "Value": "185",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "voltage": {
+      "Value": "231.2",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "energy": {
+      "Value": "1234.5",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-ES-PMSw1-Pl",
+    "subType": "powerMeter"
+  }
+}

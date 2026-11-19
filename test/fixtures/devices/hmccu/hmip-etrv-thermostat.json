@@ -1,0 +1,37 @@
+{
+  "Name": "hmip_etrv_thermostat",
+  "PossibleSets": "desired-temp:slider,4.5,0.5,30.5 auto manu boost on off datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_etrv_thermostat",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "45b6368c-f33f-9cb3-1c71-68b9b7cb7391",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000000:4",
+    "ccutype": "HmIP-eTRV-2",
+    "ccurole": "HEATING_CLIMATECONTROL_TRANSCEIVER"
+  },
+  "Readings": {
+    "1.SET_POINT_TEMPERATURE": {
+      "Value": "21.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.ACTUAL_TEMPERATURE": {
+      "Value": "19.4",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.LEVEL": {
+      "Value": "0.25",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.SET_POINT_MODE": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "0.LOW_BAT": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

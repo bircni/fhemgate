@@ -1,0 +1,23 @@
+{
+  "Name": "co20_voc",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "co20_voc",
+    "TYPE": "CO20",
+    "FUUID": "35c74cc6-f33f-3e15-aae3-dddc5eb8fe0a",
+    "STATE": "voc: 900",
+    "DEF": "1:5"
+  },
+  "Readings": {
+    "state": {
+      "Value": "voc: 900",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "voc": {
+      "Value": "900",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_dimmer_datapoint_only",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_dimmer_datapoint_only",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "9f2d61e8-f33f-e7fd-d62a-2f370672624b",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000008:4",
+    "ccutype": "HmIP-PDT",
+    "ccurole": ""
+  },
+  "Readings": {
+    "4.LEVEL": {
+      "Value": "0.0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

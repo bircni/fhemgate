@@ -1,0 +1,50 @@
+{
+  "Name": "hue_color_hs_off",
+  "PossibleSets": "on:noArg off:noArg toggle:noArg statusRequest:noArg alert:none,select,lselect bri:colorpicker,BRI,0,1,254 pct:colorpicker,BRI,0,1,100 rgb:colorpicker,RGB hue:colorpicker,HUE,0,1,65535 sat:slider,0,1,254 xy ct:colorpicker,CT,153,1,500 effect:none,colorloop",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hue_color_hs_off",
+    "TYPE": "HUEDevice",
+    "FUUID": "b6823fde-f33f-1765-9240-489485150058",
+    "STATE": "off",
+    "DEF": "5 IODev=bridge",
+    "uniqueid": "00:17:88:01:02:03:04:07-0b"
+  },
+  "Readings": {
+    "state": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "onoff": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "bri": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pct": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "hue": {
+      "Value": "65535",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "sat": {
+      "Value": "254",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "colormode": {
+      "Value": "hs",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "reachable": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "subType": "colordimmer"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "Name": "cul_hm_dimmer",
+  "PossibleSets": "on:noArg off:noArg pct:slider,0,1,100 toggle:noArg statusRequest:noArg",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_hm_dimmer",
+    "TYPE": "CUL_HM",
+    "FUUID": "e4d88505-f33f-93e9-6f81-e6b7bdf9648c",
+    "STATE": "40",
+    "DEF": "2A3B4C"
+  },
+  "Readings": {
+    "state": {
+      "Value": "40",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pct": {
+      "Value": "40",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "D-serialNr": {
+      "Value": "LEQ0123456",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "D-firmware": {
+      "Value": "2.9",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-LC-DIM1T-FM",
+    "subType": "dimmer"
+  }
+}

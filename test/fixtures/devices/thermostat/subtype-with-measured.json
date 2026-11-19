@@ -1,0 +1,26 @@
+{
+  "Name": "subtype_with_measured",
+  "PossibleSets": "statusRequest",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "subtype_with_measured",
+    "TYPE": "CUL_HM",
+    "FUUID": "f248bcdf-f33f-5181-30ca-6b5911cf3c6b",
+    "STATE": "T: 18.2",
+    "DEF": "5A4B5C01"
+  },
+  "Readings": {
+    "state": {
+      "Value": "T: 18.2",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "measured-temp": {
+      "Value": "18.2",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-TC-IT-WM-W-EU",
+    "subType": "thermostat"
+  }
+}

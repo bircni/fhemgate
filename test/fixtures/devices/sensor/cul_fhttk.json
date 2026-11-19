@@ -1,0 +1,27 @@
+{
+  "Name": "cul_fhttk",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "cul_fhttk",
+    "TYPE": "CUL_FHTTK",
+    "FUUID": "c8ed3fc9-f33f-59ec-74be-c13668fc19f7",
+    "STATE": "Closed",
+    "DEF": "9a8b7c"
+  },
+  "Readings": {
+    "state": {
+      "Value": "Closed",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "Window": {
+      "Value": "Closed",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "Battery": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

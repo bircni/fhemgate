@@ -1,0 +1,20 @@
+{
+  "Name": "generic_hap_service_name",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "generic_hap_service_name",
+    "TYPE": "dummy",
+    "FUUID": "ce880e1a-f33f-53c7-10f9-0742d0156650",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "Fan"
+  }
+}

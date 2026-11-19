@@ -1,0 +1,22 @@
+{
+  "Name": "fs20_eventmap",
+  "PossibleSets": "off on toggle dimup dimdown",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "fs20_eventmap",
+    "TYPE": "FS20",
+    "FUUID": "c797044a-f33f-b4fd-21fe-0451f214c785",
+    "STATE": "B0",
+    "DEF": "1234 05"
+  },
+  "Readings": {
+    "state": {
+      "Value": "B0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "fs20st",
+    "eventMap": "BI:on B0:off B1:toggle"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "Name": "hmip_wth_wall_thermostat",
+  "PossibleSets": "desired-temp auto manu datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_wth_wall_thermostat",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "ed54968a-f33f-a0d6-f2ba-5f8eb6827297",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000002:4",
+    "ccutype": "HmIP-WTH-2",
+    "ccurole": "HEATING_CLIMATECONTROL_TRANSCEIVER"
+  },
+  "Readings": {
+    "1.SET_POINT_TEMPERATURE": {
+      "Value": "22.0",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.ACTUAL_TEMPERATURE": {
+      "Value": "21.1",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.HUMIDITY": {
+      "Value": "48",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "1.CONTROL_MODE": {
+      "Value": "MANU",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

@@ -1,0 +1,19 @@
+{
+  "Name": "it_switch",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "it_switch",
+    "TYPE": "IT",
+    "FUUID": "ad08499d-f33f-a27c-dfd9-f2d50d2fcfee",
+    "STATE": "off",
+    "DEF": "0F0F0F0F0F FF F0"
+  },
+  "Readings": {
+    "state": {
+      "Value": "off",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

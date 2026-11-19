@@ -1,0 +1,23 @@
+{
+  "Name": "milight_white",
+  "PossibleSets": "on:noArg off:noArg toggle:noArg dim:slider,0,1,100 dimup dimdown",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "milight_white",
+    "TYPE": "MilightDevice",
+    "FUUID": "93c0680c-f33f-53d0-1521-b43d8f0ea4fe",
+    "STATE": "on",
+    "DEF": "White bridge 2"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "brightness": {
+      "Value": "75",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

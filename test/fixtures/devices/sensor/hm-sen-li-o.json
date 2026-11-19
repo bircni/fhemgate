@@ -1,0 +1,30 @@
+{
+  "Name": "hm_sen_li_o",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hm_sen_li_o",
+    "TYPE": "CUL_HM",
+    "FUUID": "c93cb6c6-f33f-b24e-2aa2-08d52cc1149f",
+    "STATE": "1200.5",
+    "DEF": "BA4B5C"
+  },
+  "Readings": {
+    "state": {
+      "Value": "1200.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "brightness": {
+      "Value": "1200.5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "model": "HM-Sen-LI-O",
+    "subType": "sensor"
+  }
+}

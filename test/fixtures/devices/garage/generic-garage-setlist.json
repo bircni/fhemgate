@@ -1,0 +1,21 @@
+{
+  "Name": "generic_garage_setlist",
+  "PossibleSets": "auf zu",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr setList readingList",
+  "Internals": {
+    "NAME": "generic_garage_setlist",
+    "TYPE": "dummy",
+    "FUUID": "eb20dc22-f33f-d632-c863-6d23df767762",
+    "STATE": "auf"
+  },
+  "Readings": {
+    "state": {
+      "Value": "auf",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "garage",
+    "setList": "auf zu"
+  }
+}

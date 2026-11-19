@@ -1,0 +1,30 @@
+{
+  "Name": "duofern",
+  "PossibleSets": "position:slider,0,1,100 up:noArg down:noArg stop:noArg",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "duofern",
+    "TYPE": "DUOFERN",
+    "FUUID": "d730155d-f33f-66e2-35d0-464234bf4b8f",
+    "STATE": "30",
+    "DEF": "40ABCD",
+    "SUBTYPE": "RolloTron Standard"
+  },
+  "Readings": {
+    "state": {
+      "Value": "30",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "position": {
+      "Value": "30",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "moving": {
+      "Value": "stop",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "blind"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "Name": "luminosity",
+  "PossibleSets": "",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "luminosity",
+    "TYPE": "LUXTRONIK",
+    "FUUID": "53b1adea-f33f-9b8f-aede-8d464683df00",
+    "STATE": "ok"
+  },
+  "Readings": {
+    "state": {
+      "Value": "ok",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "luminosity": {
+      "Value": "53",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

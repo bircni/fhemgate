@@ -1,0 +1,37 @@
+{
+  "Name": "js_functions_by_name",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "js_functions_by_name",
+    "TYPE": "dummy",
+    "FUUID": "e25aff73-f33f-2168-53bc-d05cdfb02547",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "level": {
+      "Value": "128",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "temp": {
+      "Value": "20",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "hum": {
+      "Value": "50",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "sat": {
+      "Value": "50",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "light",
+    "homebridgeMapping": "Brightness=level,cmd=level,reading2homekit=byteToPercent,homekit2reading=percentToByte\nCurrentTemperature=temp,reading2homekit=throws\nCurrentRelativeHumidity=hum,reading2homekit=notANumber\nSaturation=sat,reading2homekit=missing"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "Name": "swap_rgb",
+  "PossibleSets": "on off rgb:colorpicker,RGB hue sat",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "swap_rgb",
+    "TYPE": "SWAP_0000002200000003",
+    "FUUID": "b16efaeb-f33f-a7da-4e35-db1282010962",
+    "STATE": "on",
+    "DEF": "05 0B"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "0B-RGBlevel": {
+      "Value": "00FF8040",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "hue": {
+      "Value": "10",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "sat": {
+      "Value": "20",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

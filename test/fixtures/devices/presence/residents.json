@@ -1,0 +1,18 @@
+{
+  "Name": "residents",
+  "PossibleSets": "state:home,gotosleep,asleep,awoken,absent,gone addRoommate",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "residents",
+    "TYPE": "RESIDENTS",
+    "FUUID": "de581840-f33f-20d3-6ffc-ec5889d3e8b0",
+    "STATE": "gotosleep"
+  },
+  "Readings": {
+    "state": {
+      "Value": "gotosleep",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

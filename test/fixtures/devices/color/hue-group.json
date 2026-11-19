@@ -1,0 +1,35 @@
+{
+  "Name": "hue_group",
+  "PossibleSets": "on:noArg off:noArg bri pct hue sat",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hue_group",
+    "TYPE": "HUEDevice",
+    "FUUID": "209c4057-f33f-704c-a9a1-3732f8338dd5",
+    "STATE": "on",
+    "DEF": "group 1 IODev=bridge"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "onoff": {
+      "Value": "1",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "bri": {
+      "Value": "200",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "hue": {
+      "Value": "100",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "sat": {
+      "Value": "50",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

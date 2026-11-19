@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_bare_level",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_bare_level",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "aa5e5d1a-f33f-64e0-79d3-15e08591b2f2",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000000:4",
+    "ccutype": "HmIP-XYZ",
+    "ccurole": "SOMETHING_ELSE"
+  },
+  "Readings": {
+    "1.LEVEL": {
+      "Value": "0.4",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}
