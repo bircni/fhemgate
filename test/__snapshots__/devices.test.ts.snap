@@ -22049,7 +22049,6 @@ exports[`mapping/valid-numbers > gets its services 1`] = `
               0,
               1,
               7,
-              null,
             ],
           },
           "uuid": "00000033-0000-1000-8000-0026BB765291",
@@ -22138,6 +22137,7 @@ exports[`mapping/valid-numbers > is detected 1`] = `
     "log   TargetHeatingCoolingState [mode]",
     "log   CurrentHeatingCoolingState [undefined]",
     "info     caching: TargetTemperature: 21 (as number; from '21')",
+    "error valid: x is neither a number nor the name of a value of TargetHeatingCoolingState",
     "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'auto')",
     "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
@@ -22183,7 +22183,6 @@ exports[`mapping/valid-numbers > is detected 1`] = `
         0,
         1,
         7,
-        NaN,
       ],
       "value2homekit": {
         "auto": 3,
