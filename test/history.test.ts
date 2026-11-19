@@ -83,7 +83,7 @@ describe('a contact sensor with history', () => {
     w.accessory(contact()).getServices();
 
     expect(w.cached['door-EVE-TimesOpened']).toBe(3);
-    expect(w.log.lines).toContain('log door: FakeGatoHistory extra persisted data loaded');
+    expect(w.log.debugLines).toContain('door: FakeGatoHistory extra persisted data loaded');
   });
 
   it('adds an entry and counts when it is opened', async () => {
@@ -134,8 +134,8 @@ describe('a contact sensor with history', () => {
     // on the service of the contact, not on the switch that came last
     expect(serviceOf(services, 'Switch').characteristics.map((characteristic) => characteristic.displayName)).toEqual(['Name', 'On']);
     expect(read(characteristicOf(sensor, 'LastActivation'))).toEqual({ error: null, value: 600, answered: true });
-    expect(w.log.lines).toContain('log     Custom LastActivation characteristic door:state');
-    expect(w.log.lines).toContain('log query Custom LastActivation for door:state: 600');
+    expect(w.log.debugLines).toContain('    Custom LastActivation characteristic door:state');
+    expect(w.log.debugLines).toContain('query Custom LastActivation for door:state: 600');
   });
 
   it('starts the history with the current state when it is empty, and answers 0 as the last activation', () => {
@@ -184,7 +184,7 @@ describe('a contact sensor with history', () => {
     const w = world();
     w.accessory(contact()).getServices();
 
-    expect(w.log.lines).toContain('log door: FakeGatoHistory extra persisted data is empty');
+    expect(w.log.debugLines).toContain('door: FakeGatoHistory extra persisted data is empty');
   });
 
   it('leaves out the door state, which the detection may have added', () => {

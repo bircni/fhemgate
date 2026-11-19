@@ -32,7 +32,7 @@ export function parseHomebridgeMapping(
     return;
   }
 
-  target.log.info('homebridgeMapping: ' + homebridgeMapping);
+  target.log.debug('homebridgeMapping: ' + homebridgeMapping);
 
   // an object, on one line or on many
   if (/^\s*\{[\s\S]*\}\s*$/.test(homebridgeMapping)) {

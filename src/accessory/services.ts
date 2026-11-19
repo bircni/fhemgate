@@ -62,13 +62,13 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
 
   const services: Service[] = [];
 
-  log('creating services for ' + accessory.name);
+  log.debug('creating services for ' + accessory.name);
 
-  log('  information service for ' + accessory.name);
+  log.debug('  information service for ' + accessory.name);
   const informationService = new Service.AccessoryInformation();
   services.push(informationService);
 
-  log('    manufacturer, model and serial number characteristics for ' + accessory.name);
+  log.debug('    manufacturer, model and serial number characteristics for ' + accessory.name);
   informationService
     .setCharacteristic(Characteristic.Manufacturer, informationText(accessory.mappings.Manufacturer) ?? 'FHEM:' + accessory.type)
     .setCharacteristic(Characteristic.Model, informationText(accessory.mappings.Model) ?? 'FHEM:' + (accessory.model ? accessory.model : '<unknown>'))
@@ -81,7 +81,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
     const reading = String(cached[firmwareRevision.informId as string] ?? '');
     log.warn(accessory.name + ': the firmware reading "' + reading + '" holds no version number. HomeKit is not told a firmware revision.');
   } else if (firmwareRevision) {
-    log('    firmware revision characteristic for ' + accessory.name);
+    log.debug('    firmware revision characteristic for ' + accessory.name);
 
     // getCharacteristic only adds what the service knows as optional. the types say it always answers.
     /* eslint-disable @typescript-eslint/no-unnecessary-condition */
@@ -102,7 +102,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   const nameCharacteristic = informationService.getCharacteristic(Characteristic.Name);
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- as it was
   if (nameCharacteristic) {
-    log('    name (siriName) characteristic for ' + accessory.name);
+    log.debug('    name (siriName) characteristic for ' + accessory.name);
     nameCharacteristic
       .on('set', (_value, callback) => {
         // a new name from HomeKit is accepted and not written back to fhem
@@ -117,7 +117,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   // all the same: while it says no, reads of the other characteristics are answered with an error.
   const reachable = single('Reachable');
   if (reachable) {
-    log.info('  ' + accessory.device + ' has reachability [' + reachable.reading + ']');
+    log.debug('  ' + accessory.device + ' has reachability [' + reachable.reading + ']');
     accessory.subscribe(reachable);
     reading2homekit(reachable, cached[reachable.informId as string]);
   }
@@ -262,7 +262,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
           log.error(accessory.name + ": can't link " + each.reading + ' service to itself');
         } else {
           service.addLinkedService(controlService);
-          log('    linked to ' + service.service_name);
+          log.debug('    linked to ' + service.service_name);
         }
 
         continue;
@@ -299,7 +299,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
 
       seen[service_name + '#' + characteristic_type] = true;
 
-      log('    ' + (each.name ? each.name : each.characteristic_type) + ' characteristic for ' + each.device + ':' + each.reading);
+      log.debug('    ' + (each.name ? each.name : each.characteristic_type) + ' characteristic for ' + each.device + ':' + each.reading);
 
       accessory.subscribe(each, characteristic);
 

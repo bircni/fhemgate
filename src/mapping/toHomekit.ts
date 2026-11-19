@@ -48,7 +48,7 @@ export function reading2homekit(mapping: PreparedMapping, reading: unknown): Hom
     }
   }
 
-  mapping.log.info(
+  mapping.log.debug(
     '    caching: ' +
       (mapping.name ? mapping.name : mapping.characteristic_type) +
       ': ' +

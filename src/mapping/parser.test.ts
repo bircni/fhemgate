@@ -7,7 +7,7 @@ function parse(homebridgeMapping: string, mappings: Mappings = {}, categories?: 
   const log = createLog();
   const target: MappingTarget = { mappings, log: log as unknown as MappingTarget['log'] };
   parseHomebridgeMapping(target, homebridgeMapping, categories);
-  return { target, log: log.lines.slice(1) };
+  return { target, log: log.lines, debug: log.debugLines };
 }
 
 describe('parseHomebridgeMapping', () => {

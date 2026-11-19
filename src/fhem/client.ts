@@ -70,7 +70,7 @@ export function requestOptions(connection: FhemConnection): GetOptions {
 export function execute(state: PluginState, log: Logging, connection: FhemConnection, cmd: string, callback?: (result: string) => void): void {
   const url = commandUrl(connection.base_url, cmd, state.csrfToken[connection.base_url]);
   const shown = withoutToken(url);
-  log.info('  executing: ' + shown);
+  log.debug('  executing: ' + shown);
 
   getText(url, { ...requestOptions(connection), gzip: true }, (err, response, result) => {
     if (!err && response?.statusCode === 200) {
