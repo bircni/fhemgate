@@ -35,6 +35,20 @@ export interface PrepareEnvironment {
 
 type ValueNames = Record<string, unknown> | undefined;
 
+/** the name a characteristic class gives one of its values, e.g. `HEAT` for 1 */
+function nameOfValue(names: Record<string, unknown>, value: string | number): string | undefined {
+  if (value === '') {
+    return undefined;
+  }
+  // the values are the numbers the class itself defines. what it inherits is none of them.
+  for (const [name, defined] of Object.entries(names)) {
+    if (typeof defined === 'number' && looselyEqual(value, defined)) {
+      return name;
+    }
+  }
+  return undefined;
+}
+
 export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environment: PrepareEnvironment): void {
   // the key changes within a list of mappings: the first mapping of a list is stored under
   // `<service>#<characteristic>`, the following ones only see the characteristic.
@@ -118,12 +132,10 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
             mapping.homekit2name[names[to] as string] = to;
             to = names[to] as HomekitValue;
           } else if (names) {
-            // walks over everything the class has, also what every class inherits. a number
-            // that matches such a property gets its name.
-            for (const defined in names) {
-              if (looselyEqual(to, names[defined])) {
-                mapping.homekit2name[to] = defined;
-              }
+            // a value given as its number gets its name for the log
+            const name = nameOfValue(names, to);
+            if (name !== undefined) {
+              mapping.homekit2name[to] = name;
             }
           }
 
@@ -152,22 +164,11 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         owner.log.debug('valid: ' + util.inspect(mapping.valid));
         const valid: (string | number)[] = [];
         for (let value of mapping.valid) {
-          let mapped: string | number | undefined = undefined;
-          if (names?.[value] !== undefined) {
-            mapped = names[value] as number;
-          } else if (names) {
-            // a number is replaced by the name of the first property with that value.
-            for (const defined in names) {
-              if (looselyEqual(value, names[defined])) {
-                mapped = defined;
-                break;
-              }
-            }
-          }
-
-          if (mapped !== undefined) {
-            owner.log.debug('  ' + value + ' -> ' + mapped);
-            value = mapped;
+          // HomeKit takes numbers only: a name is replaced by its number
+          const named = names?.[value];
+          if (typeof named === 'number') {
+            owner.log.debug('  ' + value + ' -> ' + named);
+            value = named;
           } else {
             value = toInt(value);
           }

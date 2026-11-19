@@ -22046,14 +22046,14 @@ exports[`mapping/valid-numbers > gets its services 1`] = `
               "pw",
             ],
             "validValues": [
+              0,
+              1,
               7,
-              "HEAT",
               null,
-              "OFF",
             ],
           },
           "uuid": "00000033-0000-1000-8000-0026BB765291",
-          "value": 7,
+          "value": 0,
         },
         {
           "name": "Current Temperature",
@@ -22180,10 +22180,10 @@ exports[`mapping/valid-numbers > is detected 1`] = `
       "last_update": 1786881600,
       "reading": "mode",
       "valid": [
+        0,
+        1,
         7,
-        "HEAT",
         NaN,
-        "OFF",
       ],
       "value2homekit": {
         "auto": 3,
@@ -22268,7 +22268,7 @@ exports[`mapping/valid-numbers > updates characteristics 1`] = `
     "Target Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "valid_numbers-mode": [
-    "Target Heating Cooling State=7 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Target Heating Cooling State=0 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
   "valid_numbers-undefined": [
     "Current Heating Cooling State=1 <- "on" "off" "1"",
@@ -22490,11 +22490,11 @@ exports[`mapping/valid-values > gets its services 1`] = `
             "validValues": [
               0,
               1,
-              "AUTO",
+              3,
             ],
           },
           "uuid": "00000033-0000-1000-8000-0026BB765291",
-          "value": 0,
+          "value": 3,
         },
         {
           "name": "Current Temperature",
@@ -22621,7 +22621,7 @@ exports[`mapping/valid-values > is detected 1`] = `
       "valid": [
         0,
         1,
-        "AUTO",
+        3,
       ],
       "value2homekit": {
         "auto": 3,
@@ -22707,7 +22707,8 @@ exports[`mapping/valid-values > updates characteristics 1`] = `
     "Target Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "valid_values-mode": [
-    "Target Heating Cooling State=0 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Target Heating Cooling State=3 <- "on"",
+    "Target Heating Cooling State=0 <- "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
   "valid_values-undefined": [
     "Current Heating Cooling State=1 <- "on" "off" "1"",
@@ -23744,7 +23745,7 @@ TargetHeatingCoolingState=mode,values=auto:3;manual:1,cmds=3:mode+auto;1:mode+ma
       "default": 1,
       "device": "values_as_numbers",
       "homekit2name": {
-        "0": "captureRejections",
+        "0": "OFF",
         "1": "HEAT",
       },
       "informId": "values_as_numbers-valve",
