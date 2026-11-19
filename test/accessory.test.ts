@@ -14,14 +14,67 @@ afterEach(() => {
 });
 
 describe('reading a characteristic', () => {
-  it('answers with the value cached from the reading', () => {
+  it('answers with the value cached from the reading at once, and asks fhem for it in the background', () => {
     const world = createWorld();
     const services = world.accessory(lamp()).getServices();
 
     const result = read(characteristicOf(serviceOf(services, 'Switch'), Characteristic.On));
 
     expect(result).toEqual({ error: undefined, value: true, answered: true });
-    expect(world.sent).toEqual([]);
+    expect(world.sent).toEqual(['{ReadingsVal("lamp","state","")}']);
+  });
+
+  it('asks fhem in the background at most once a minute for a reading, however often HomeKit reads it', () => {
+    vi.useFakeTimers();
+    const world = createWorld();
+    const on = characteristicOf(serviceOf(world.accessory(lamp()).getServices(), 'Switch'), Characteristic.On);
+
+    read(on);
+    read(on);
+    vi.advanceTimersByTime(59_999);
+    read(on);
+    expect(world.sent).toHaveLength(1);
+
+    vi.advanceTimersByTime(1);
+    read(on);
+    expect(world.sent).toHaveLength(2);
+  });
+
+  it('takes over what fhem answers in the background when the cache missed a change', () => {
+    const world = createWorld({ respond: () => 'off' });
+    const on = characteristicOf(serviceOf(world.accessory(lamp()).getServices(), 'Switch'), Characteristic.On);
+
+    // the read itself is answered from the cache
+    expect(read(on).value).toBe(true);
+
+    expect(world.cached['lamp-state']).toBe('off');
+    expect(on.value).toBe(false);
+  });
+
+  it('keeps the cached value when fhem answers in the background with nothing, as it does for a reading it does not have', () => {
+    const world = createWorld({ respond: () => '' });
+    const on = characteristicOf(serviceOf(world.accessory(lamp()).getServices(), 'Switch'), Characteristic.On);
+
+    read(on);
+
+    expect(world.cached['lamp-state']).toBe('on');
+    expect(on.value).toBe(true);
+  });
+
+  it('drops the answer to a background question when an event arrived meanwhile, which is newer', () => {
+    const world = createWorld();
+    const accessory = world.accessory(lamp());
+    const on = characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On);
+    let answer: ((result: string) => void) | undefined;
+    accessory.execute = (_cmd, callback) => {
+      answer = callback;
+    };
+
+    read(on);
+    world.update('lamp-state', 'standby');
+    answer?.('on');
+
+    expect(world.cached['lamp-state']).toBe('standby');
   });
 
   it('asks fhem when the mapping is not cached', () => {
@@ -58,38 +111,53 @@ describe('reading a characteristic', () => {
     expect(read(characteristicOf(serviceOf(services, 'Switch'), Characteristic.On))).toEqual({ error: 1, value: undefined, answered: true });
   });
 
-  it('answers with an error after ten seconds when fhem does not answer', () => {
+  const uncached = () =>
+    device({
+      Internals: { NAME: 'lamp' },
+      Readings: { state: 'on' },
+      PossibleSets: 'on off',
+      Attributes: { homebridgeMapping: 'On=state,nocache=1' },
+    });
+
+  it('answers with the last value after two seconds when fhem does not answer, well before homebridge calls the plugin slow', () => {
+    vi.useFakeTimers();
+    const world = createWorld();
+    const accessory = world.accessory(uncached());
+
+    const result = read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On));
+    vi.advanceTimersByTime(1999);
+    expect(result.answered).toBe(false);
+
+    vi.advanceTimersByTime(1);
+    expect(result).toEqual({ error: undefined, value: true, answered: true });
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('answers with an error after two seconds when fhem does not answer and there never was a value', () => {
     vi.useFakeTimers();
     const world = createWorld();
     const accessory = world.accessory(
       device({
-        Internals: { NAME: 'lamp' },
-        Readings: { state: 'on' },
-        PossibleSets: 'on off',
-        Attributes: { homebridgeMapping: 'On=state,nocache=1' },
+        Internals: { NAME: 'sensor' },
+        Readings: { state: 'ok' },
+        Attributes: { genericDeviceType: 'thermometer', homebridgeMapping: 'CurrentTemperature=temp' },
       }),
     );
 
-    const result = read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On));
-    vi.advanceTimersByTime(9999);
+    const result = read(characteristicOf(serviceOf(accessory.getServices(), 'TemperatureSensor'), Characteristic.CurrentTemperature));
+    vi.advanceTimersByTime(1999);
     expect(result.answered).toBe(false);
 
     vi.advanceTimersByTime(1);
     expect(result).toEqual({ error: hap.HAPStatus.OPERATION_TIMED_OUT, value: undefined, answered: true });
-    expect(world.log.errors()).toEqual(['error query: no answer from fhem for lamp-state within 10 seconds']);
+    expect(world.log.errors()).toEqual(['error query: no answer from fhem for sensor-temp within 2 seconds']);
   });
 
-  it('answers once: an answer of fhem that comes after the ten seconds is only cached', () => {
+  it('answers once: an answer of fhem that comes after the two seconds is published as a change', () => {
     vi.useFakeTimers();
     const world = createWorld();
-    const accessory = world.accessory(
-      device({
-        Internals: { NAME: 'lamp' },
-        Readings: { state: 'on' },
-        PossibleSets: 'on off',
-        Attributes: { homebridgeMapping: 'On=state,nocache=1' },
-      }),
-    );
+    const accessory = world.accessory(uncached());
+    const on = characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On);
     let late: ((result: string) => void) | undefined;
     accessory.execute = (_cmd, answer) => {
       late = answer;
@@ -97,14 +165,15 @@ describe('reading a characteristic', () => {
     const answered = vi.fn();
 
     accessory.query(accessory.mappings.On as Mapping, answered);
-    vi.advanceTimersByTime(10000);
+    vi.advanceTimersByTime(2000);
     late?.('off');
 
-    expect(answered).toHaveBeenCalledExactlyOnceWith(hap.HAPStatus.OPERATION_TIMED_OUT);
+    expect(answered).toHaveBeenCalledExactlyOnceWith(undefined, true);
     expect(world.cached['lamp-state']).toBe('off');
+    expect(on.value).toBe(false);
   });
 
-  it('does not wait for the ten seconds when fhem answers', () => {
+  it('does not wait for the two seconds when fhem answers', () => {
     vi.useFakeTimers();
     const world = createWorld({ respond: () => 'off' });
     const accessory = world.accessory(
