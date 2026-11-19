@@ -41,11 +41,18 @@ describe('resolveConverter', () => {
     expect(mapping).toEqual({});
   });
 
-  it('removes reading2homekit too when homekit2reading can not be resolved, and keeps the text', () => {
+  it('removes homekit2reading when it can not be resolved, and leaves reading2homekit alone', () => {
     const read = () => 1;
     const mapping: Mapping = { reading2homekit: read, homekit2reading: 'name' };
 
     expect(resolve(mapping, 'homekit2reading', {})).toEqual(['error   homekit2reading: no function named name in {}', 'error   homekit2reading disabled.']);
-    expect(mapping).toEqual({ homekit2reading: 'name' });
+    expect(mapping).toEqual({ reading2homekit: read });
+  });
+
+  it('removes source that does not compile', () => {
+    const mapping: Mapping = { homekit2reading: '{return (}' };
+
+    expect(resolve(mapping, 'homekit2reading').at(-1)).toBe('error   homekit2reading disabled.');
+    expect(mapping).toEqual({});
   });
 });
