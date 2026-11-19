@@ -212,7 +212,7 @@ describe('reading a characteristic', () => {
     expect(world.sent).toEqual([]);
     expect(accessory.mappings.StatusActive as Mapping).not.toHaveProperty('informId');
     expect(Object.keys(world.subscriptions)).toEqual(['lamp-state']);
-    expect(world.log.lines).toContain('log   StatusActive [default 1]');
+    expect(world.log.debugLines).toContain('  StatusActive [default 1]');
   });
 
   it('answers unreachable for a device that is not reachable, and normally once it is again', () => {
@@ -278,7 +278,8 @@ describe('reading a characteristic', () => {
     world.log.clear();
 
     expect(read(characteristicOf(sensor, Characteristic.ContactSensorState)).value).toBe(1);
-    expect(world.log.lines).toEqual(['info query: ContactSensorState for door-Window', 'info   cached: 1 (as number; means CONTACT_NOT_DETECTED)']);
+    expect(world.log.lines).toEqual([]);
+    expect(world.log.debugLines).toEqual(['query: ContactSensorState for door-Window', '  cached: 1 (as number; means CONTACT_NOT_DETECTED)']);
   });
 
   it('asks fhem for a reading given by its name and answers its text', () => {
@@ -293,7 +294,8 @@ describe('reading a characteristic', () => {
     expect(answered).toHaveBeenCalledExactlyOnceWith(undefined, '42');
     expect(world.cached['lamp-level']).toBe('42');
     expect(world.cached).not.toHaveProperty('undefined');
-    expect(world.log.lines).toEqual(['info query: level for lamp-level', 'info   not cached', 'info   value: 42']);
+    expect(world.log.lines).toEqual([]);
+    expect(world.log.debugLines).toEqual(['query: level for lamp-level', '  not cached', '  value: 42']);
   });
 
   it('answers 1 as error when there is neither a reading nor a default', () => {

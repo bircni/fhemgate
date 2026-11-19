@@ -8,10 +8,6 @@ import { toInt } from '../util/loose.ts';
 import { ReadingCache } from './readingCache.ts';
 import { Subscriptions } from './subscriptions.ts';
 
-// offset in milliseconds, for the time in the log. worked out once, so it is off after a change
-// to or from daylight saving time until homebridge is started again.
-const tzoffset = new Date().getTimezoneOffset() * 60000;
-
 /**
  * What the plugin knows while it runs: the readings it has seen and who listens to them.
  * There is one for all FHEM platforms of a homebridge, so a device is only published once even
@@ -52,9 +48,9 @@ export class PluginState {
 
     if (!repeated) {
       this.cache.values[informId] = orig;
-      const date = new Date(Date.now() - tzoffset).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+      // logged where the first characteristic that follows the reading logs
       // eslint-disable-next-line @typescript-eslint/no-base-to-string -- readings are text. what else is cached is printed as it comes.
-      console.log('  ' + date + ' caching: ' + informId + ': ' + String(orig));
+      subscriptions?.find((subscription) => subscription.mapping)?.mapping?.log.debug('caching: ' + informId + ': ' + String(orig));
     }
 
     if (subscriptions) {

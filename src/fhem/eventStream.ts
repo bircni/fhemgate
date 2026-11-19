@@ -56,7 +56,7 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
   status.connected = true;
 
   const url = longpollUrl(connection.base_url, status.last_event_time, Date.now());
-  console.log('starting longpoll: ' + url);
+  connection.log.debug('starting longpoll: ' + url);
 
   let offset = 0;
   let input = '';
@@ -64,7 +64,7 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
 
   /** takes one line of the stream to the characteristics that are subscribed to its reading */
   const handleLine = (line: string, lastEventTime: number): void => {
-    const event = parseEventLine(line);
+    const event = parseEventLine(line, connection.log);
     if (!event) {
       return;
     }

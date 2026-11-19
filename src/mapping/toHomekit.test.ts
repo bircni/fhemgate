@@ -62,7 +62,8 @@ describe('reading2homekit', () => {
 
     expect(reading2homekit(mapping, '41.6')).toBe(42);
     expect(mapping.cached).toBe(42);
-    expect(log.lines).toEqual(["info     caching: Brightness: 42 (as number; from '41.6')"]);
+    expect(log.lines).toEqual([]);
+    expect(log.debugLines).toEqual(["    caching: Brightness: 42 (as number; from '41.6')"]);
   });
 
   it('answers the reading as it is for a mapping without format', () => {
@@ -80,7 +81,7 @@ describe('reading2homekit', () => {
     const { mapping, log } = prepared({ reading2homekit: () => undefined, default: 3, name: 'Custom' });
 
     expect(reading2homekit(mapping, 'x')).toBe(3);
-    expect(log.lines).toEqual(["info     caching: Custom: 3 (as number; from 'mapping.default')"]);
+    expect(log.debugLines).toEqual(["    caching: Custom: 3 (as number; from 'mapping.default')"]);
   });
 
   it('converts a value that is not text like the text for it', () => {

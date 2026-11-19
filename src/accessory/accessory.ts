@@ -173,6 +173,7 @@ export class FhemAccessory {
     this.fromHomebridgeMapping(s.Attributes.homebridgeMapping);
     this.log.debug('mappings for ' + s.Internals.NAME + ': ' + util.inspect(this.mappings));
 
+    // the one line every device gets at the usual log level. the rest is there with debug logging.
     this.log(s.Internals.NAME + ' is ' + this.service_name);
 
     reviseMappings(this, s);
@@ -193,7 +194,7 @@ export class FhemAccessory {
   }
 
   #logMappings(s: Jsonlist2Device): void {
-    this.log(s.Internals.NAME + ' has');
+    this.log.debug(s.Internals.NAME + ' has');
     for (const characteristic_type in this.mappings) {
       const entry = this.mappings[characteristic_type];
       const mappings = (Array.isArray(entry) ? entry : [entry]) as Mapping[];
@@ -204,19 +205,19 @@ export class FhemAccessory {
           reading = 'default ' + mapping.default;
         }
         if (characteristic_type === 'On') {
-          this.log('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmdOn + ',' + mapping.cmdOff + ']');
+          this.log.debug('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmdOn + ',' + mapping.cmdOff + ']');
         } else if (characteristic_type === 'Hue' || characteristic_type === 'Saturation') {
-          this.log('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmd + ';0-' + mapping.max + ']');
+          this.log.debug('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmd + ';0-' + mapping.max + ']');
         } else if (characteristic_type === 'history') {
-          this.log('  ' + characteristic_type + ' [' + (mapping.type ? mapping.type : 'thermo') + ';' + (mapping.size ? mapping.size : 1024) + ']');
+          this.log.debug('  ' + characteristic_type + ' [' + (mapping.type ? mapping.type : 'thermo') + ';' + (mapping.size ? mapping.size : 1024) + ']');
         } else if (mapping.name) {
           if (characteristic_type === CustomUUIDs.Volume) {
-            this.log('  Custom ' + mapping.name + ' [' + reading + ';' + (mapping.nocache ? 'not cached' : 'cached') + ']');
+            this.log.debug('  Custom ' + mapping.name + ' [' + reading + ';' + (mapping.nocache ? 'not cached' : 'cached') + ']');
           } else {
-            this.log('  Custom ' + mapping.name + ' [' + reading + ']');
+            this.log.debug('  Custom ' + mapping.name + ' [' + reading + ']');
           }
         } else {
-          this.log('  ' + characteristic_type + ' [' + reading + ']');
+          this.log.debug('  ' + characteristic_type + ' [' + reading + ']');
         }
       }
     }
@@ -347,7 +348,7 @@ export class FhemAccessory {
 
     const informId = mapping ? (mapping.informId as string) : device + '-' + reading;
 
-    this.log.info('query: ' + (mapping ? (mapping.name ? mapping.name : mapping.characteristic_type) : reading) + ' for ' + informId);
+    this.log.debug('query: ' + (mapping ? (mapping.name ? mapping.name : mapping.characteristic_type) : reading) + ' for ' + informId);
     const cached = mapping?.cached;
     const cmd = '{ReadingsVal("' + device + '","' + reading + '","")}';
 
@@ -360,7 +361,7 @@ export class FhemAccessory {
         }
       }
 
-      mapping.log.info('  cached: ' + cached + ' (as ' + typeof cached + (defined ? '; means ' + defined : '') + ')');
+      mapping.log.debug('  cached: ' + cached + ' (as ' + typeof cached + (defined ? '; means ' + defined : '') + ')');
 
       if (callback !== undefined) {
         callback(undefined, cached);
@@ -368,7 +369,7 @@ export class FhemAccessory {
       }
       return cached;
     } else {
-      this.log.info('  not cached');
+      this.log.debug('  not cached');
     }
 
     // HomeKit is not left waiting when fhem takes its time: it gets the value last seen, or an
@@ -390,7 +391,7 @@ export class FhemAccessory {
     this.execute(cmd, (result) => {
       clearTimeout(timer);
       const value = result.replace(/[\r\n]/g, '');
-      this.log.info('  value: ' + value);
+      this.log.debug('  value: ' + value);
 
       // the read that waited gets the value as its answer. one that was answered meanwhile is
       // told with an update like any change in fhem.
@@ -496,7 +497,7 @@ export class FhemAccessory {
         name = subtype + ' - ' + this.siriName;
       }
 
-      this.log('  ' + serviceName + ' service for ' + this.name + (subtype ? ' (' + subtype + ')' : ''));
+      this.log.debug('  ' + serviceName + ' service for ' + this.name + (subtype ? ' (' + subtype + ')' : ''));
       const service = new (serviceClass as new (name?: string, subtype?: string) => NamedService)(name, subtype ? subtype : '');
       service.service_name = serviceName;
       return service;
@@ -535,7 +536,7 @@ export class FhemAccessory {
       return service;
     }
 
-    this.log('  switch service (default) for ' + this.name + ' (' + subtype + ')');
+    this.log.debug('  switch service (default) for ' + this.name + ' (' + subtype + ')');
     return new this.#state.hap.Service.Switch(name, subtype);
   }
 
