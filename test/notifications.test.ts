@@ -83,3 +83,64 @@ describe('a value HomeKit writes', () => {
     expect(changes.map((change) => change.reason)).toEqual(['write', 'update']);
   });
 });
+
+describe('an event with the value the reading already has', () => {
+  const button = () =>
+    device({
+      Internals: { NAME: 'button' },
+      Readings: { click: 'single' },
+      Attributes: {
+        genericDeviceType: 'StatelessProgrammableSwitch',
+        homebridgeMapping: 'clear ProgrammableSwitchEvent=click,values=single:SINGLE_PRESS;double:DOUBLE_PRESS;long:LONG_PRESS',
+      },
+    });
+
+  it('is a new press of a button: every event is published', () => {
+    const world = createWorld();
+    const services = world.accessory(button()).getServices();
+    const pressed = characteristicOf(serviceOf(services, 'StatelessProgrammableSwitch'), Characteristic.ProgrammableSwitchEvent);
+    const changes = published(services, pressed);
+
+    for (const click of ['single', 'single', 'double', 'double', 'double']) {
+      world.update('button-click', click);
+    }
+
+    expect(changes.map(({ newValue, reason }) => [newValue, reason])).toEqual([
+      [0, 'event'],
+      [0, 'event'],
+      [1, 'event'],
+      [1, 'event'],
+      [1, 'event'],
+    ]);
+  });
+
+  it('reaches a mapping that is not cached', () => {
+    const world = createWorld();
+    const services = world
+      .accessory(
+        device({ Internals: { NAME: 'lamp' }, Readings: { state: 'on' }, PossibleSets: 'on off', Attributes: { homebridgeMapping: 'On=state,nocache=true' } }),
+      )
+      .getServices();
+    const on = characteristicOf(serviceOf(services, 'Switch'), Characteristic.On);
+    const changes = published(services, on);
+
+    for (const value of ['off', 'off', 'on']) {
+      world.update('lamp-state', value);
+    }
+
+    expect(changes.map((change) => change.newValue)).toEqual([false, false, true]);
+  });
+
+  it('is dropped for every other characteristic', () => {
+    const world = createWorld();
+    const services = world.accessory(lamp()).getServices();
+    const on = characteristicOf(serviceOf(services, 'Switch'), Characteristic.On);
+    const changes = published(services, on);
+
+    for (const value of ['off', 'off', 'on', 'on']) {
+      world.update('lamp-state', value);
+    }
+
+    expect(changes.map((change) => change.newValue)).toEqual([false, true]);
+  });
+});

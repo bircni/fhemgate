@@ -1,3 +1,4 @@
+import type { Characteristic } from '@homebridge/hap-nodejs';
 import type { HAP } from 'homebridge';
 import { recordHistory, type HistoryServiceClass } from '../accessory/history.ts';
 import type { ConnectionStatus } from '../fhem/client.ts';
@@ -39,20 +40,32 @@ export class PluginState {
    * @param noUpdate keep the value in the cache and at the mappings, but do not tell HomeKit
    */
   update(informId: string, orig: unknown, noUpdate?: boolean): void {
-    if (orig === undefined || this.cache.values[informId] === orig) {
+    if (orig === undefined) {
       return;
     }
 
-    this.cache.values[informId] = orig;
-    const date = new Date(Date.now() - tzoffset).toISOString().replace(/T/, ' ').replace(/\..+/, '');
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- readings are text. what else is cached is printed as it comes.
-    console.log('  ' + date + ' caching: ' + informId + ': ' + String(orig));
-
+    // an event that repeats the value the reading has says nothing new to most characteristics.
+    // it is another press for a button, and a mapping that is not cached takes every event.
+    const repeated = this.cache.values[informId] === orig;
     const subscriptions = this.subscriptions.byInformId[informId];
+
+    if (!repeated) {
+      this.cache.values[informId] = orig;
+      const date = new Date(Date.now() - tzoffset).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string -- readings are text. what else is cached is printed as it comes.
+      console.log('  ' + date + ' caching: ' + informId + ': ' + String(orig));
+    }
+
     if (subscriptions) {
       subscriptions.forEach((subscription) => {
         const mapping = subscription.mapping;
         if (typeof mapping !== 'object') {
+          return;
+        }
+
+        const characteristic = typeof mapping.characteristic === 'object' ? mapping.characteristic : undefined;
+        const eventOnly = characteristic !== undefined && this.#isEventOnly(characteristic);
+        if (repeated && !eventOnly && !mapping.nocache) {
           return;
         }
 
@@ -68,12 +81,23 @@ export class PluginState {
           recordHistory(accessory, accessory.historyService, mapping, value, this);
         }
 
-        if (!noUpdate && typeof mapping.characteristic === 'object') {
-          // updateValue tells the HomeKit controllers that are subscribed to the characteristic, and
-          // does not run its set handler: the value is not sent back to fhem
-          mapping.characteristic.updateValue(value);
+        if (!noUpdate && characteristic) {
+          if (eventOnly) {
+            // announced also when the value is the one before: two presses in a row are two events
+            characteristic.sendEventNotification(value);
+          } else {
+            // updateValue tells the HomeKit controllers that are subscribed to the characteristic, and
+            // does not run its set handler: the value is not sent back to fhem
+            characteristic.updateValue(value);
+          }
         }
       });
     }
+  }
+
+  /** whether the characteristic reports things that happen, like the press of a button, and has no state of its own */
+  #isEventOnly(characteristic: Characteristic): boolean {
+    const { ProgrammableSwitchEvent, ButtonEvent } = this.hap.Characteristic;
+    return characteristic.UUID === ProgrammableSwitchEvent.UUID || characteristic.UUID === ButtonEvent.UUID;
   }
 }
