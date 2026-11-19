@@ -80,6 +80,14 @@
         "description": "never timeout if trying to reconnect"
       },
 
+      "allowInlineFunctions": {
+        "type": "boolean",
+        "title": "Allow JavaScript in mappings",
+        "required": false,
+        "default": true,
+        "description": "allow a homebridgeMapping to carry the body of a JavaScript function as reading2homekit or homekit2reading. such code runs inside homebridge, so whoever can set attributes in fhem can run code there. switch this off unless you use it."
+      },
+
       "debugPort": {
         "type": "integer",
         "title": "Debug port",

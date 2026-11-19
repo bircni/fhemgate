@@ -25,12 +25,23 @@ export interface FhemPlatformConfig extends PlatformConfig {
   /** keep trying to reach fhem for ever instead of giving up after the fourth failed attempt */
   neverTimeout?: boolean;
   /**
+   * Whether a mapping may carry the body of a JavaScript function between braces, as
+   * reading2homekit or homekit2reading. It may unless this is false. Such code comes from the
+   * attributes of fhem devices and runs inside homebridge.
+   */
+  allowInlineFunctions?: boolean;
+  /**
    * The port of a web page that shows what the plugin has cached and who is subscribed to what.
    * 8282 if not given, or 8283 when that is taken. There is no such page with false or 0.
    */
   debugPort?: number | false;
   /** the address the debug page is served on, e.g. `127.0.0.1` for this machine only. all addresses of the machine if not given. */
   debugHost?: string;
+}
+
+/** whether an option that is on unless the configuration says otherwise was switched off: with false, or with text or a number that says so */
+export function isSwitchedOff(value: unknown): boolean {
+  return value === false || value === 0 || (typeof value === 'string' && ['false', '0'].includes(value.trim().toLowerCase()));
 }
 
 /**

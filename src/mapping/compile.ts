@@ -31,6 +31,8 @@ export interface PrepareEnvironment {
   update: (informId: string, value: unknown) => void;
   /** converts a reading with a mapping */
   reading2homekit: (mapping: PreparedMapping, reading: unknown) => HomekitValue | undefined;
+  /** false if the platform accepts no JavaScript between braces in a mapping */
+  allowInlineFunctions?: boolean;
 }
 
 type ValueNames = Record<string, unknown> | undefined;
@@ -218,8 +220,9 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         }
       }
 
-      resolveConverter(mapping, 'reading2homekit', owner.jsFunctions, owner.log);
-      resolveConverter(mapping, 'homekit2reading', owner.jsFunctions, owner.log);
+      const allowInline = environment.allowInlineFunctions !== false;
+      resolveConverter(mapping, 'reading2homekit', owner.jsFunctions, owner.log, allowInline);
+      resolveConverter(mapping, 'homekit2reading', owner.jsFunctions, owner.log, allowInline);
 
       const reading = mapping.reading as string;
       let orig: unknown = undefined;

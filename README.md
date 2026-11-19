@@ -26,12 +26,26 @@ includes the devices that should be bridged to homekit.
 - auth: user and password of FHEMWEB: `{ "user": "...", "pass": "..." }`
 - jsFunctions: a file with functions for reading2homekit and homekit2reading, see below
 - neverTimeout: true to keep trying for ever when fhem can not be reached while homebridge starts
+- allowInlineFunctions: false to refuse JavaScript in mappings, see [who is trusted](#who-is-trusted).
+  it is allowed if not given
 - debugPort: the port of the debug browser, which shows the cached readings and the subscriptions
   of all FHEM platforms. 8282 if not given, or 8283 when that is taken. false or 0 switches the
   debug browser off
 - debugHost: the address the debug browser listens on. all addresses of the machine if not given,
   so that **anybody who reaches the port can read the names and readings of the devices**. set it
   to `127.0.0.1` to reach it from the machine homebridge runs on only
+
+## who is trusted
+the plugin does what fhem tells it to. two things reach further than the devices themselves:
+
+- a homebridgeMapping can carry JavaScript: `reading2homekit` and `homekit2reading` take the body of a
+  function between braces, e.g. `reading2homekit={return+orig*2}`, and the plugin runs it inside
+  homebridge with the rights homebridge has. **whoever can set attributes in fhem can therefore run
+  code on the machine homebridge runs on.** if fhem is not as protected as homebridge, or you do not
+  use this, set `"allowInlineFunctions": false` for the platform. mappings with such a function then
+  lose it, with a line in the log, and everything else goes on working. functions from the
+  jsFunctions file are not affected: that file lies on the homebridge machine.
+- the jsFunctions file is loaded as code. keep it where only the homebridge user can write.
 
 ## directly (automatically) supports:
 - switches (devices with set on and set off commands)

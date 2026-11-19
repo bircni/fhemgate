@@ -304,6 +304,25 @@ describe('devices', () => {
     expect(world.log.lines.at(-1)).toBe('info got: 0 results');
   });
 
+  it.each([
+    [undefined, 'function'],
+    [true, 'function'],
+    [false, 'undefined'],
+    ['false', 'undefined'],
+  ])('with allowInlineFunctions %j in the config, javascript in a mapping ends up as %s', async (allowInlineFunctions, kind) => {
+    const scripted = device({
+      Internals: { NAME: 'lamp' },
+      Readings: { state: 'on' },
+      PossibleSets: 'on off',
+      Attributes: { homebridgeMapping: 'On=state,cmdOn=on,cmdOff=off,reading2homekit={return+orig.length<3}' },
+    });
+    const platform = await connect({ devices: [{ Name: 'lamp', ...scripted }] }, { allowInlineFunctions });
+
+    const accessory = await firstAccessoryOf(platform);
+
+    expect(typeof (accessory.mappings.On as { reading2homekit?: unknown }).reading2homekit).toBe(kind);
+  });
+
   it('leaves out the devices that are not in the scope siri', async () => {
     const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }] }, { scope: 'alexa' });
 
