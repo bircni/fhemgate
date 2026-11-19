@@ -32,6 +32,8 @@ export interface ConnectionStatus {
   /** bytes received on the current connection, and since homebridge started */
   received?: number;
   received_total: number;
+  /** how often in a row the long poll was opened again because nothing arrived on it while fhem answered */
+  reopened_silent?: number;
   /** when the last event for a subscribed reading arrived, in milliseconds since the epoch */
   last_event_time?: number;
 }

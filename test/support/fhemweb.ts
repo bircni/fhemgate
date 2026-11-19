@@ -17,6 +17,8 @@ export interface FakeFhemOptions {
   auth?: { user: string; pass: string };
   /** refuses every request, as FHEMWEB does for an address it does not allow */
   forbidden?: boolean;
+  /** takes commands and never answers them, as a fhem that hangs. the event streams stay as they are. */
+  hangs?: boolean;
   /** answers a command before any of the built in answers are tried */
   answer?: (cmd: string) => { status?: number; body: string } | undefined;
 }
@@ -134,6 +136,10 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
     const token = parameters.find((parameter) => parameter.startsWith('fwcsrf='))?.slice(7);
     if (csrfToken !== undefined && token !== csrfToken) {
       response.writeHead(400, 'Bad Request').end();
+      return;
+    }
+
+    if (fhem.options.hangs) {
       return;
     }
 

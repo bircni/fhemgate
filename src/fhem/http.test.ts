@@ -1,7 +1,7 @@
 import { createServer, type Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
+import { Socket, type AddressInfo } from 'node:net';
 import { gzipSync } from 'node:zlib';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { get, getText, type GetOptions, type HttpResponse } from './http.ts';
 
 let server: Server | undefined;
@@ -134,5 +134,55 @@ describe('get', () => {
     });
 
     expect(events).toEqual(['error']);
+  });
+
+  it('lets the operating system probe an idle connection when asked to', async () => {
+    const url = await serve((_request, response) => {
+      response.write('one\n');
+    });
+    const keepAlive = vi.spyOn(Socket.prototype, 'setKeepAlive');
+
+    await new Promise<void>((resolve) => {
+      const request = get(url, { keepAlive: 60_000 }, { onData: () => (request.abort(), resolve()) });
+    });
+    expect(keepAlive).toHaveBeenCalledWith(true, 60_000);
+
+    keepAlive.mockClear();
+    await new Promise<void>((resolve) => {
+      const request = get(url, {}, { onData: () => (request.abort(), resolve()) });
+    });
+    expect(keepAlive).not.toHaveBeenCalledWith(true, expect.anything());
+  });
+
+  it('fails a request that is not answered in the given time', async () => {
+    const url = await serve(() => undefined);
+
+    const { error } = await text(url, { timeout: 30 });
+
+    expect(String(error)).toBe('Error: no answer within 0.03 seconds');
+  });
+
+  it('calls no handler after it was aborted', async () => {
+    const url = await serve((_request, response) => {
+      response.write('one\n');
+      setTimeout(() => response.end('two\n'), 20);
+    });
+
+    const events: string[] = [];
+    const request = get(
+      url,
+      {},
+      {
+        onData: (chunk) => {
+          events.push(`data ${chunk.toString().trim()}`);
+          request.abort();
+        },
+        onEnd: () => events.push('end'),
+        onError: () => events.push('error'),
+      },
+    );
+    await new Promise((resolve) => setTimeout(resolve, 60));
+
+    expect(events).toEqual(['data one']);
   });
 });
