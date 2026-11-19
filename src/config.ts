@@ -20,7 +20,7 @@ export interface FhemPlatformConfig extends PlatformConfig {
   auth?: HttpAuth;
   /** a file with functions that mappings can name, absolute or relative to the storage directory of homebridge */
   jsFunctions?: string;
-  /** the scopes this platform serves, separated by commas. devices are published unless a scope is given that is not `siri`. */
+  /** the scopes this platform serves, separated by commas or as a list. devices are published unless scopes are given and `siri` is not one of them. */
   scope?: unknown;
   /** keep trying to reach fhem for ever instead of giving up after the fourth failed attempt */
   neverTimeout?: boolean;

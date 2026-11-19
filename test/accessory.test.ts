@@ -516,11 +516,15 @@ describe('rooms, types and scopes', () => {
     expect(accessory.isInScope('google')).toBe(false);
   });
 
-  it('fails when the scope of the platform is a list', () => {
+  it('takes the scopes of the platform as a list as well', () => {
     const accessory = inRooms();
-    accessory.fhem = { scope: ['siri'] };
 
-    expect(() => accessory.isInScope('siri')).toThrow(TypeError);
+    accessory.fhem = { scope: ['alexa', 'siri'] };
+    expect(accessory.isInScope('siri')).toBe(true);
+    expect(accessory.isInScope('google')).toBe(false);
+
+    accessory.fhem = { scope: [] };
+    expect(accessory.isInScope('siri')).toBe(false);
   });
 });
 
