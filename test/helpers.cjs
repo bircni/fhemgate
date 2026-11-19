@@ -44,11 +44,11 @@ function load() {
   if( context )
     return context;
 
-  var src = fs.readFileSync( path.join(__dirname, '..', 'index.js'), 'utf8' );
+  var src = fs.readFileSync( path.join(__dirname, '..', 'index.cjs'), 'utf8' );
 
   context = {
     console: console,
-    require: function(m) { return m === './lib/version' ? '0.0.0-test' : require(m) },
+    require: function(m) { return m === './lib/version.cjs' ? '0.0.0-test' : require(m) },
     module: { exports: {} }, exports: {}, global: {},
     process: process, Buffer: Buffer,
     setTimeout: setTimeout, clearTimeout: clearTimeout,

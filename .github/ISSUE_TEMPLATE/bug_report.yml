@@ -1,0 +1,39 @@
+name: Bug report
+description: A device is detected wrongly, shows wrong values or does not react
+labels: [bug]
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: plugin, homebridge and node version
+      placeholder: homebridge-fhem2hb 0.6.0, homebridge 2.5.0, node 26.10
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens, and what did you expect
+    validations:
+      required: true
+  - type: textarea
+    id: jsonlist2
+    attributes:
+      label: jsonlist2 of the device
+      description: >
+        Run `jsonlist2 <device>` in fhem and paste the result. Replace anything private first
+        (names, addresses, serial numbers). This becomes the test fixture for the fix.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: mapping
+    attributes:
+      label: homebridgeMapping and genericDeviceType
+      description: the values of these two attributes, if set
+      render: text
+  - type: textarea
+    id: log
+    attributes:
+      label: Homebridge log
+      render: text

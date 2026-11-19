@@ -17,7 +17,7 @@
 // ],
 'use strict';
 
-var version = require('./lib/version');
+var version = require('./lib/version.cjs');
 //var FHEM = require('./lib/fhem').FHEM;
 
 function getLine(offset) {
@@ -973,6 +973,7 @@ FHEM_ct2rgb(ct) {
   if( temp <= 19 )
     b = 0;
   if( temp < 66 )
+    // eslint-disable-next-line no-undef -- known bug, see docs/KNOWN_BUGS.md
     b = 138.5177312231 * log(temp-10) - 305.0447927307;
   if( b < 0 )
     b = 0;
@@ -2421,6 +2422,7 @@ FHEMAccessory(platform, s) {
   else if( this.mappings.ContactSensor )
     this.log( s.Internals.NAME + ' is contact sensor [' + this.mappings.ContactSensor.reading +']' );
   else if( this.mappings.OccupancyDetected )
+    // eslint-disable-next-line no-undef -- known bug, see docs/KNOWN_BUGS.md
     log( s.Internals.NAME + ' is occupancy sensor' );
   else if( !this.mappings ) {
     this.log.error( s.Internals.NAME + ': no service type detected' );

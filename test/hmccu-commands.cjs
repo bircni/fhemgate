@@ -1,5 +1,5 @@
 // the exact 'set ...' string sent to fhem when homekit changes a value
-var h = require('./helpers');
+var h = require('./helpers.cjs');
 var device = h.device, accessoryFor = h.accessoryFor;
 var section = h.section, check = h.check, command = h.command;
 

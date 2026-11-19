@@ -55,7 +55,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 **Milestones** (each = one or more commits on branch `baseline`, each ends green):
 
 - [x] **M0** Phase 0 — import, licence, package identity, dead code removed
-- [ ] **M1** Phase 1 — bun, TypeScript, ESLint, Vitest, `verify` script, CI workflow, repo docs
+- [x] **M1** Phase 1 — bun, TypeScript, ESLint, Vitest, `verify` script, CI workflow, repo docs
 - [ ] **M2.1** test seam + real HAP types + ported harness and HMCCU suites
 - [ ] **M2.2** device fixtures for every detection branch
 - [ ] **M2.3** suites 1–6 and 8 (detection, services, to-HomeKit, to-FHEM, parser, colour, identity)
@@ -75,6 +75,13 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
   388 commits), `main` left at that commit, branch `baseline` created, push URLs of `upstream`
   and `fork` set to `DISABLED`, this file added. Legacy runner `node test/run.js`: 153 checks
   pass on Node 26. M0 continues at step 3 (LICENSE, package identity, dead code).
+- M1 deviations from the text below: the package is `"type": "module"` from M1 on, so the
+  legacy entry is `index.cjs` (was `index.js`), `lib/version.cjs` and the legacy tests are `.cjs`
+  too. Wherever this plan says `index.js` it now means `index.cjs`. TypeScript is pinned to 6.x
+  because typescript-eslint does not support TypeScript 7 yet. `tsconfig.json` type-checks
+  everything without emitting, `tsconfig.build.json` builds `src` to `dist`. `pack-smoke` is
+  `scripts/pack-smoke.ts`, run by Node directly. `actionlint` is run from the locally installed
+  binary. CI on Node 22 and 24 is unverified: there is no remote and only Node 26 locally.
 
 **Blocked / needs owner:** *(filled in during execution)*
 

@@ -1,0 +1,17 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+# the code taken over from homebridge-fhem keeps its formatting until it has moved into src/
+[*.cjs]
+trim_trailing_whitespace = false
+insert_final_newline = unset

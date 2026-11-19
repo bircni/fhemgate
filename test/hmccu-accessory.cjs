@@ -1,6 +1,6 @@
 // the mappings that survive the whole FHEMAccessory constructor, plus the CUL_HM devices
 // the constructor already handled before HMCCU support was added
-var h = require('./helpers');
+var h = require('./helpers.cjs');
 var device = h.device, accessoryFor = h.accessoryFor, errors = h.errors;
 var section = h.section, check = h.check;
 

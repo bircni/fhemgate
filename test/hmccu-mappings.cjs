@@ -1,5 +1,5 @@
 // datapoint lookup and service type detection for HMCCUCHN/HMCCUDEV devices
-var h = require('./helpers');
+var h = require('./helpers.cjs');
 var device = h.device, mappingsFor = h.mappingsFor, section = h.section, check = h.check;
 var CustomUUIDs = h.load().CustomUUIDs;
 
