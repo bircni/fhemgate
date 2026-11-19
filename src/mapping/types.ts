@@ -116,5 +116,8 @@ export interface Mapping {
   [parameter: string]: unknown;
 }
 
+/** a mapping of an accessory, which can log. every mapping is one once its accessory was created. */
+export type PreparedMapping = Mapping & { log: Logging };
+
 /** the mappings of an accessory by characteristic. a characteristic that is given several times holds a list. */
 export type Mappings = Record<string, Mapping | Mapping[] | undefined>;

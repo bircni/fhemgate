@@ -62,7 +62,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 - [x] **M2.4** fake FHEMWEB + transport suite
 - [x] **M2.5** `KNOWN_BUGS.md`, coverage threshold set, mutation spot-check done, tag `baseline-m2`
 - [x] **M3.1** `util/*`, `mapping/types`, `mapping/parser`
-- [ ] **M3.2** `mapping/compile`, `mapping/toHomekit`, `mapping/toFhem`, `mapping/userFunctions`
+- [x] **M3.2** `mapping/compile`, `mapping/toHomekit`, `mapping/toFhem`, `mapping/userFunctions`
 - [ ] **M3.3** `state/*`, `devices/identity`, `accessory/customCharacteristics`
 - [ ] **M3.4** `devices/detect` + `devices/rules/*`
 - [ ] **M3.5** `accessory/*` (accessory, services, history), `debug/server`

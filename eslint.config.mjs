@@ -67,6 +67,13 @@ export default defineConfig(
       '@typescript-eslint/no-dynamic-delete': 'off',
       // asks for the `!` that no-non-null-assertion forbids
       '@typescript-eslint/non-nullable-type-assertion-style': 'off',
+      // log lines are put together with +, from text, numbers and values that may be missing
+      '@typescript-eslint/restrict-plus-operands': ['error', {
+        allowAny: false, allowBoolean: true, allowNullish: true, allowNumberAndString: true, allowRegExp: false,
+      }],
+      // String.match fails for a value that is not text where RegExp.exec would convert it.
+      // readings are matched with the former, and which of the two happens is behaviour.
+      '@typescript-eslint/prefer-regexp-exec': 'off',
     },
   },
 
