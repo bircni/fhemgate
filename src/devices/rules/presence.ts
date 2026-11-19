@@ -38,9 +38,10 @@ export const residents: Rule = ({ s, target }) => {
     reading: 'state',
     values: ['/^home/:DISARMED', '/^gotosleep/:NIGHT_ARM', '/^absent/:STAY_ARM', '/^gone/:AWAY_ARM'],
   };
+  // HomeKit names the state without an alarm DISARMED where it is, and DISARM where it is asked for
   target.mappings.SecuritySystemTargetState = {
     reading: 'state',
-    values: ['/^home/:DISARMED', '/^gotosleep/:NIGHT_ARM', '/^absent/:STAY_ARM', '/^gone/:AWAY_ARM'],
+    values: ['/^home/:DISARM', '/^gotosleep/:NIGHT_ARM', '/^absent/:STAY_ARM', '/^gone/:AWAY_ARM'],
     cmds: ['STAY_ARM:home', 'AWAY_ARM:absent', 'NIGHT_ARM:gotosleep', 'DISARM:home'],
     delay: true,
   };

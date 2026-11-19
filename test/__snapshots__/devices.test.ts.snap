@@ -26322,8 +26322,9 @@ exports[`presence/residents > converts readings 1`] = `
     "3 <- "home"",
   ],
   "SecuritySystemTargetState": [
-    "undefined <- "on" "off" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "undefined <- "on" "off" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "TV" "short" "motion 7 T: 21.5" """,
     "0 <- "absent"",
+    "3 <- "home"",
   ],
 }
 `;
@@ -26564,6 +26565,7 @@ exports[`presence/residents > is detected 1`] = `
         "0": "STAY_ARM",
         "1": "AWAY_ARM",
         "2": "NIGHT_ARM",
+        "3": "DISARM",
       },
       "informId": "residents-state",
       "last_update": 1786881600,
@@ -26572,7 +26574,7 @@ exports[`presence/residents > is detected 1`] = `
       "value2homekit_re": [
         {
           "re": "^home",
-          "to": "DISARMED",
+          "to": 3,
         },
         {
           "re": "^gotosleep",
@@ -26588,7 +26590,7 @@ exports[`presence/residents > is detected 1`] = `
         },
       ],
       "values": [
-        "/^home/:DISARMED",
+        "/^home/:DISARM",
         "/^gotosleep/:NIGHT_ARM",
         "/^absent/:STAY_ARM",
         "/^gone/:AWAY_ARM",

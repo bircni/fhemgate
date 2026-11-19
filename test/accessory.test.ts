@@ -832,3 +832,52 @@ describe('subscriptions', () => {
     expect(world.cached['bulb-v']).toBe(1);
   });
 });
+
+describe('the residents as a security system', () => {
+  const residents = (state: string) => device({ Internals: { NAME: 'rr', TYPE: 'RESIDENTS' }, Readings: { state } });
+  const { SecuritySystemCurrentState: Current, SecuritySystemTargetState: Target } = Characteristic;
+
+  it('is disarmed in both states when the residents come home', async () => {
+    const world = createWorld();
+    const system = serviceOf(world.accessory(residents('gone')).getServices(), 'SecuritySystem');
+    const current = characteristicOf(system, Current);
+    const target = characteristicOf(system, Target);
+    expect([current.value, target.value]).toEqual([Current.AWAY_ARM, Target.AWAY_ARM]);
+    world.log.clear();
+
+    world.update('rr-state', 'home');
+    await settle();
+
+    expect([current.value, target.value]).toEqual([Current.DISARMED, Target.DISARM]);
+    expect(world.log.lines.filter((line) => !line.startsWith('info '))).toEqual([]);
+  });
+
+  it.each([
+    ['home', Current.DISARMED, Target.DISARM],
+    ['gotosleep', Current.NIGHT_ARM, Target.NIGHT_ARM],
+    ['absent', Current.STAY_ARM, Target.STAY_ARM],
+    ['gone', Current.AWAY_ARM, Target.AWAY_ARM],
+  ])('shows the state %s as %i and %i', (state, current, target) => {
+    const world = createWorld();
+    const accessory = world.accessory(residents(state));
+
+    expect((accessory.mappings.SecuritySystemCurrentState as Mapping).cached).toBe(current);
+    expect((accessory.mappings.SecuritySystemTargetState as Mapping).cached).toBe(target);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('only names values and commands its two characteristics have', () => {
+    const accessory = createWorld().accessory(residents('home'));
+
+    for (const [type, constants] of [
+      ['SecuritySystemCurrentState', Current],
+      ['SecuritySystemTargetState', Target],
+    ] as const) {
+      const mapping = accessory.mappings[type] as Mapping & { values: string[]; cmds?: string[] };
+      const named = [...mapping.values.map((pair) => pair.split(':').at(-1)), ...(mapping.cmds ?? []).map((pair) => pair.split(':')[0])];
+      for (const name of named) {
+        expect(constants, `${type} ${name}`).toHaveProperty(name as string);
+      }
+    }
+  });
+});
