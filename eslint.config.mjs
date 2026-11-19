@@ -11,7 +11,7 @@ export default defineConfig(
   // the code this project is built from. it is only checked for real errors, and this
   // block goes away once everything has moved into src/.
   {
-    files: ['index.cjs', 'lib/**/*.cjs', 'test/**/*.cjs'],
+    files: ['index.cjs', 'lib/**/*.cjs'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'commonjs',
@@ -42,7 +42,7 @@ export default defineConfig(
       sourceType: 'module',
       globals: { ...globals.node },
       parserOptions: {
-        projectService: true,
+        projectService: { allowDefaultProject: ['eslint.config.mjs'] },
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -57,6 +57,17 @@ export default defineConfig(
       'max-len': ['error', { code: 160 }],
       '@typescript-eslint/no-unused-vars': ['error', { caughtErrors: 'none', argsIgnorePattern: '^_' }],
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true, allowBoolean: true }],
+    },
+  },
+
+  // these suites were taken over from homebridge-fhem. their checks are written against
+  // mappings that are assumed to exist, which is what they assert.
+  {
+    files: ['test/hmccu/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/prefer-optional-chain': 'off',
+      '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'off',
     },
   },
 );

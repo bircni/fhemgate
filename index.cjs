@@ -3823,6 +3823,55 @@ FHEMdebug_server.on('error', function (e) {
 });
 
 //Lets start our server
+// the tests load this file many times in parallel and switch the server off
+if( process.env.FHEM2HB_DEBUG_SERVER !== 'off' )
 FHEMdebug_server.listen(FHEMdebug_PORT, function(){
     console.log('Server listening on: http://<ip>:%s', FHEMdebug_PORT);
 });
+
+// the plugin does not export its internals. the tests reach them through this.
+module.exports.__internals = {
+  useHap: function(hap) {
+    Accessory = hap.Accessory; Service = hap.Service; Characteristic = hap.Characteristic; UUIDGen = hap.uuid;
+    Units = hap.Units; Formats = hap.Formats; Perms = hap.Perms;
+  },
+  useUser: function(user) { User = user },
+  useFakeGato: function(service) { FakeGatoHistoryService = service },
+
+  FHEMPlatform: FHEMPlatform,
+  FHEMAccessory: FHEMAccessory,
+
+  FHEM_subscriptions: FHEM_subscriptions,
+  FHEM_cached: FHEM_cached,
+  FHEM_longpoll: FHEM_longpoll,
+  FHEM_csrfToken: FHEM_csrfToken,
+  FHEM_platforms: FHEM_platforms,
+
+  FHEM_subscribe: FHEM_subscribe,
+  FHEM_unsubscribe: FHEM_unsubscribe,
+  FHEM_isPublished: FHEM_isPublished,
+  FHEM_update: FHEM_update,
+  FHEM_reading2homekit: FHEM_reading2homekit,
+  FHEM_reading2homekit_: FHEM_reading2homekit_,
+  FHEM_startLongpoll: FHEM_startLongpoll,
+  FHEM_execute: FHEM_execute,
+
+  FHEM_sortByKey: FHEM_sortByKey,
+  FHEM_rgb2hex: FHEM_rgb2hex,
+  FHEM_hsv2rgb: FHEM_hsv2rgb,
+  FHEM_ct2rgb: FHEM_ct2rgb,
+  FHEM_xyY2rgb: FHEM_xyY2rgb,
+  FHEM_rgb2hsv: FHEM_rgb2hsv,
+
+  CustomUUIDs: CustomUUIDs,
+  sanitizeHapName: sanitizeHapName,
+
+  FHEM_hmccuReadings: FHEM_hmccuReadings,
+  FHEM_hmccuChannel: FHEM_hmccuChannel,
+  FHEM_hmccuReading: FHEM_hmccuReading,
+  FHEM_hmccuDatapoint: FHEM_hmccuDatapoint,
+  FHEM_hmccuScalesLevel: FHEM_hmccuScalesLevel,
+  FHEM_hmccuMappings: FHEM_hmccuMappings,
+
+  FHEMdebug_handleRequest: FHEMdebug_handleRequest,
+};

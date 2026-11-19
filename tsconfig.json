@@ -7,7 +7,6 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "strict": true,
-    "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -16,13 +15,14 @@
       "node"
     ],
     "noEmit": true,
-    "allowJs": true, "checkJs": false
+    "allowJs": false,
+    "rewriteRelativeImportExtensions": true,
+    "resolveJsonModule": true
   },
   "include": [
     "src",
     "test",
     "scripts",
-    "*.ts",
-    "*.mjs"
+    "*.ts"
   ]
 }

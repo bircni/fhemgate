@@ -56,7 +56,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 
 - [x] **M0** Phase 0 — import, licence, package identity, dead code removed
 - [x] **M1** Phase 1 — bun, TypeScript, ESLint, Vitest, `verify` script, CI workflow, repo docs
-- [ ] **M2.1** test seam + real HAP types + ported harness and HMCCU suites
+- [x] **M2.1** test seam + real HAP types + ported harness and HMCCU suites
 - [ ] **M2.2** device fixtures for every detection branch
 - [ ] **M2.3** suites 1–6 and 8 (detection, services, to-HomeKit, to-FHEM, parser, colour, identity)
 - [ ] **M2.4** fake FHEMWEB + transport suite
