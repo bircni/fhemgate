@@ -201,13 +201,13 @@ export class FhemAccessory {
     }
   }
 
+  /**
+   * Ends what subscribe started for the mapping, or the id of a reading, and the characteristic.
+   * Without a mapping every subscription of the accessory ends.
+   */
   unsubscribe(mapping?: PreparedMapping | string, characteristic?: Characteristic): void {
     if (mapping === undefined) {
-      // only finds subscriptions of single mappings that were made with this characteristic.
-      for (const characteristic_type in this.mappings) {
-        const each = this.mappings[characteristic_type] as Mapping;
-        this.#state.subscriptions.unsubscribe(this, each.informId as string, characteristic);
-      }
+      this.#state.subscriptions.unsubscribeAll(this);
     } else if (typeof mapping === 'object') {
       mapping.characteristic = characteristic;
 

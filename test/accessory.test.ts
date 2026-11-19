@@ -574,7 +574,7 @@ describe('subscriptions', () => {
     expect(world.subscriptions['dimmer-pct']).toBeUndefined();
   });
 
-  it('fails to unsubscribe everything at once when a characteristic has several mappings', () => {
+  it('unsubscribes everything at once, also for a characteristic with several mappings', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -586,21 +586,28 @@ describe('subscriptions', () => {
     );
     accessory.getServices();
 
+    expect(Object.keys(world.subscriptions)).toEqual(['d-a', 'd-b']);
+
     accessory.unsubscribe();
 
-    // the list of mappings has no reading id, so nothing is found for it
-    expect(Object.keys(world.subscriptions)).toEqual(['d-a', 'd-b']);
+    expect(world.subscriptions).toEqual({});
   });
 
-  it('unsubscribes everything at once only for characteristics without a characteristic object', () => {
+  it('unsubscribes everything at once, with or without a characteristic, and leaves other accessories alone', () => {
     const world = createWorld();
     const accessory = world.accessory(lamp());
     accessory.getServices();
     accessory.subscribe('lamp-state');
+    const other = world.accessory(device({ Internals: { NAME: 'other' }, Readings: { state: 'on' }, PossibleSets: 'on off' }));
+    other.getServices();
+    other.subscribe('lamp-state');
 
     accessory.unsubscribe();
 
-    expect(world.subscriptions['lamp-state']?.map((subscription) => subscription.characteristic?.displayName)).toEqual(['On']);
+    expect(Object.keys(world.subscriptions)).toEqual(['lamp-state', 'other-state']);
+    expect(world.subscriptions['lamp-state']?.map((subscription) => subscription.accessory)).toEqual([other]);
+    expect(world.published('lamp')).toBeNull();
+    expect(world.published('other')).toBe(other);
   });
 
   it('can subscribe to a reading by its id alone', () => {
