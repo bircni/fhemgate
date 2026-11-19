@@ -126,6 +126,7 @@ export class FhemAccessory {
 
   readonly #state: PluginState;
   readonly #execute: Execute;
+  #services?: Service[];
 
   constructor(platform: AccessoryPlatform, s: Jsonlist2Device, state: PluginState, execute: Execute) {
     this.#state = state;
@@ -504,7 +505,13 @@ export class FhemAccessory {
     callback();
   }
 
+  /** builds the services before homebridge asks for them, so that whoever calls can deal with a device they can not be built for */
+  prepareServices(): void {
+    this.#services = createServices(this, this.#state);
+  }
+
+  /** the services homebridge publishes for the accessory: the prepared ones, or a new set */
   getServices(): Service[] {
-    return createServices(this, this.#state);
+    return this.#services ?? createServices(this, this.#state);
   }
 }
