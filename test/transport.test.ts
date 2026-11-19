@@ -72,6 +72,26 @@ describe('connecting', () => {
     ]);
   });
 
+  it('keeps the csrf token out of the log', async () => {
+    const platform = await connect({ csrfToken: 'csrf_42', answer: (cmd) => (cmd === 'boom' ? { status: 500, body: 'no' } : undefined) });
+    const logged = vi.mocked(console.log).mock.calls.length;
+
+    platform.execute('boom');
+    await waitFor(() => world.log.lines.includes('log   500: Internal Server Error'), 'the refusal');
+    await accessoriesOf(platform);
+
+    expect(fhem.requests.every((request) => request.url.includes('inform=') || request.url.includes('fwcsrf=csrf_42'))).toBe(true);
+    expect(world.log.lines.filter((line) => line.includes('fwcsrf=')).length).toBeGreaterThan(4);
+    expect(world.log.lines.filter((line) => line.includes('csrf_42'))).toEqual([]);
+    expect(logged).toBeGreaterThan(0);
+    expect(
+      vi
+        .mocked(console.log)
+        .mock.calls.flat()
+        .filter((line) => String(line).includes('csrf_42')),
+    ).toEqual([]);
+  });
+
   it('works with a FHEMWEB that has no csrf token', async () => {
     await connect({ csrfToken: undefined });
 
@@ -88,8 +108,8 @@ describe('connecting', () => {
     expect(fhem.commands).toEqual(['{AttrVal("global","userattr","")}', 'jsonlist2 TYPE=siri']);
     expect(world.log.lines.map(withoutPort)).toEqual([
       'log Checking devices and attributes...',
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=%7BAttrVal(%22global%22%2C%22userattr%22%2C%22%22)%7D&fwcsrf=csrf_fake_token&XHR=1',
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=jsonlist2%20TYPE%3Dsiri&fwcsrf=csrf_fake_token&XHR=1',
+      'info   executing: http://127.0.0.1:PORT/fhem?cmd=%7BAttrVal(%22global%22%2C%22userattr%22%2C%22%22)%7D&fwcsrf=***&XHR=1',
+      'info   executing: http://127.0.0.1:PORT/fhem?cmd=jsonlist2%20TYPE%3Dsiri&fwcsrf=***&XHR=1',
       'warn no siri device found. please define it.',
     ]);
     expect(exit).not.toHaveBeenCalled();
@@ -219,7 +239,7 @@ describe('devices', () => {
     expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=jsonlist2%20room%3DWohnzimmer%2CK%C3%BCche%26x&fwcsrf=csrf_fake_token&XHR=1');
     expect(world.log.lines.filter((line) => !line.includes('caching')).map(withoutPort)).toEqual([
       'info Fetching FHEM devices...',
-      'info fetching: http://127.0.0.1:PORT/fhem?cmd=jsonlist2%20room%3DWohnzimmer%2CK%C3%BCche%26x&fwcsrf=csrf_fake_token&XHR=1',
+      'info fetching: http://127.0.0.1:PORT/fhem?cmd=jsonlist2%20room%3DWohnzimmer%2CK%C3%BCche%26x&fwcsrf=***&XHR=1',
       'info got: 3 results',
       'log lamp_a is switch',
       'log lamp_a has',
@@ -562,7 +582,7 @@ describe('commands', () => {
     expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=set%20lamp%20off&fwcsrf=csrf_fake_token&XHR=1');
     expect(world.log.lines.map(withoutPort)).toEqual([
       'info lamp: executing set cmd for On with value 0',
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=set%20lamp%20off&fwcsrf=csrf_fake_token&XHR=1',
+      'info   executing: http://127.0.0.1:PORT/fhem?cmd=set%20lamp%20off&fwcsrf=***&XHR=1',
     ]);
   });
 
@@ -595,8 +615,8 @@ describe('commands', () => {
     await waitFor(() => world.log.lines.length === 3, 'the report');
 
     expect(world.log.lines.map(withoutPort)).toEqual([
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=boom&fwcsrf=csrf_fake_token&XHR=1',
-      'log There was a problem connecting to FHEM (http://127.0.0.1:PORT/fhem?cmd=boom&fwcsrf=csrf_fake_token&XHR=1).',
+      'info   executing: http://127.0.0.1:PORT/fhem?cmd=boom&fwcsrf=***&XHR=1',
+      'log There was a problem connecting to FHEM (http://127.0.0.1:PORT/fhem?cmd=boom&fwcsrf=***&XHR=1).',
       'log   500: Internal Server Error',
     ]);
     expect(answered).not.toHaveBeenCalled();
