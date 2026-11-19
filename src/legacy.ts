@@ -32,6 +32,8 @@ import { detectMappings, reviseMappings } from './devices/detect.ts';
 import { hmccuChannel, hmccuDatapoint, hmccuMappings, hmccuReading, hmccuReadings, hmccuScalesLevel } from './devices/rules/hmccu.ts';
 import { CustomUUIDs } from './accessory/customCharacteristics.ts';
 import { FhemAccessory } from './accessory/accessory.ts';
+import { execute, fetchDevices } from './fhem/client.ts';
+import { startLongpoll } from './fhem/eventStream.ts';
 import { handleDebugRequest, startDebugServer } from './debug/server.ts';
 
 const require = createRequire(import.meta.url);
@@ -79,245 +81,8 @@ function FHEM_unsubscribe(accessory, informId, characteristic) { state.subscript
 function FHEM_isPublished(device) { return state.subscriptions.publishedAccessory(device) }
 function FHEM_update(informId, orig, no_update) { state.update(informId, orig, no_update) }
 
-var FHEM_longpoll = {};
-var FHEM_csrfToken = {};
-//FIXME: add filter
 function FHEM_startLongpoll(connection) {
-  if( !FHEM_longpoll[connection.base_url] ) {
-    FHEM_longpoll[connection.base_url] = {};
-    FHEM_longpoll[connection.base_url].connects = 0;
-    FHEM_longpoll[connection.base_url].disconnects = 0;
-    FHEM_longpoll[connection.base_url].received_total = 0;
-  }
-
-  if( FHEM_longpoll[connection.base_url].connected )
-    return;
-  FHEM_longpoll[connection.base_url].connects++;
-  FHEM_longpoll[connection.base_url].received = 0;
-  FHEM_longpoll[connection.base_url].connected = true;
-
-
-  var filter = '.*';
-  var since = 'null';
-  if( FHEM_longpoll[connection.base_url].last_event_time )
-    since = FHEM_longpoll[connection.base_url].last_event_time/1000;
-  var query = '?XHR=1'
-              + '&inform=type=status;addglobal=1;filter='+filter+';since='+since+';fmt=JSON'
-              + '&timestamp='+Date.now();
-
-  var url = encodeURI( connection.base_url + query );
-  console.log( 'starting longpoll: ' + url );
-
-  var FHEM_longpollOffset = 0;
-  var input = '';
-  connection.request.get( { url: url } ).on( 'data', function(data) {
-//console.log( 'data: ' + data );
-               if( !data )
-                 return;
-
-               var length = data.length;
-               FHEM_longpoll[connection.base_url].received += length;
-               FHEM_longpoll[connection.base_url].received_total += length;
-
-               input += data;
-
-               try {
-                 var lastEventTime = Date.now();
-                 for(;;) {
-                   var nOff = input.indexOf('\n', FHEM_longpollOffset);
-                   if(nOff < 0)
-                     break;
-                   var l = input.substr(FHEM_longpollOffset, nOff-FHEM_longpollOffset);
-                   FHEM_longpollOffset = nOff+1;
-//console.log( 'Rcvd: ' + (l.length>132 ? l.substring(0,132)+'...('+l.length+')':l) );
-
-                   if(!l.length)
-                     continue;
-
-                   var d;
-                   if( l.substr(0,1) == '[' ) {
-                     try {
-                       d = JSON.parse(l);
-                     } catch(err) {
-                       console.log( '  longpoll JSON.parse: ' + err );
-                       continue;
-                     }
-                   } else
-                     d = l.split('<<', 3);
-//console.log(d);
-
-                   if(d.length != 3)
-                     continue;
-                   if(d[0].match(/-ts$/))
-                     continue;
-                   if(d[0].match(/^#FHEMWEB:/))
-                     continue;
-
-                   var match = d[0].match(/([^-]*)-(.*)/);
-                   if( !match )
-                     continue;
-                   var device = match[1];
-                   var reading = match[2];
-//console.log( 'device: ' + device );
-//console.log( 'reading: ' + reading );
-                   if( reading === undefined )
-                     continue;
-
-                   var value = d[1];
-//console.log( 'value: ' + value );
-                   if( value.match( /^set-/ ) )
-                     continue;
-
-
-                   if( 0 && device == 'global' ) {
-                     if( reading == 'DEFINED' ) {
-console.log( 'DEFINED: ' + value );
-console.log( connection.base_url );
-                       FHEM_platforms.forEach( function(platform) {
-platform.log( platform.connection.base_url );
-                         if( connection.base_url == platform.connection.base_url ) {
-platform.log( platform.filter );
-                           platform.accessories( function(accessories) {
-                                                   accessories.forEach( function(accessory) {
-                                                     if( platform.addBridgedAccessory )
-                                                       platform.addBridgedAccessory(accessory);
-
-                                                   } );
-                                                } );
-                         }
-                       } );
-
-                     } else if( reading == 'DELETED' ) {
-console.log( 'DELETED: ' + value );
-                       var accessory = FHEM_isPublished(value);
-
-                       //if( accessory && typeof accessory.updateReachability === 'function' )
-                         //accessory.updateReachability( false );
-
-                     } else if( reading == 'ATTR' ) {
-console.log( 'ATTR: ' + value );
-                       var values = value.split( ' ' );
-                       var accessory = FHEM_isPublished(values[0]);
-
-                       if( accessory && values[1] == 'disable' )
-                         FHEM_update(values[0] + '-reachable', !values[2] );
-                       else if( values[1] == 'genericDeviceType' || values[1] =='homebridgeMapping' ) {
-console.log( connection.base_url );
-                         FHEM_platforms.forEach( function(platform) {
-platform.log( platform.connection.base_url );
-                           if( connection.base_url == platform.connection.base_url ) {
-platform.log( platform.filter );
-                             platform.accessories( function(accessories) {
-                                                     accessories.forEach( function(accessory) {
-                                                       if( platform.addBridgedAccessory )
-                                                         platform.addBridgedAccessory(accessory);
-
-                                                     } );
-                                                  } );
-                           }
-                         } );
-                       }
-
-                     } else if( reading == 'DELETEATTR' ) {
-console.log( 'DELETEATTR: ' + value );
-                       var values = value.split( ' ' );
-                       var accessory = FHEM_isPublished(values[0]);
-
-                       if( accessory && values[1] == 'disable' )
-                         FHEM_update(values[0] + '-reachable', !values[2] );
-
-                     }
-
-                     continue;
-                   }
-
-                   var subscriptions = state.subscriptions.byInformId[d[0]];
-                   if( subscriptions ) {
-                     FHEM_update( d[0], value );
-                     FHEM_longpoll[connection.base_url].last_event_time = lastEventTime;
-
-                     subscriptions.forEach( function(subscription) {
-                       var accessory = subscription.accessory;
-
-                       if(accessory.mappings.colormode) {
-                         if( reading == 'xy') {
-                           var xy = value.split(',');
-                           var rgb = FHEM_xyY2rgb(xy[0], xy[1] , 1);
-                           var hsv = FHEM_rgb2hsv(rgb);
-
-                           FHEM_update( device+'-h', hsv[0] );
-                           FHEM_update( device+'-s', hsv[1] );
-                           FHEM_update( device+'-v', hsv[2] );
-
-                           FHEM_update( device+'-'+reading, value, false );
-
-                           return;
-
-                         } else if( reading == 'ct') {
-                           var rgb = FHEM_ct2rgb(value);
-                           var hsv = FHEM_rgb2hsv(rgb);
-
-                           FHEM_update( device+'-h', hsv[0] );
-                           FHEM_update( device+'-s', hsv[1] );
-                           FHEM_update( device+'-v', hsv[2] );
-
-                           FHEM_update( device+'-'+reading, value, false );
-
-                           return;
-                         }
-
-                       }
-                     } );
-
-                   }
-                 }
-
-             } catch(err) {
-               connection.log.error( '  error in longpoll connection: ' + err );
-
-             }
-
-             input = input.substr(FHEM_longpollOffset);
-             FHEM_longpollOffset = 0;
-
-	     if( FHEM_csrfToken[connection.base_url] )
-               FHEM_longpoll[connection.base_url].disconnects = 0;
-
-           } ).on( 'response', function(response) {
-             if( response.headers && response.headers['x-fhem-csrftoken'] )
-               FHEM_csrfToken[connection.base_url] = response.headers['x-fhem-csrftoken'];
-             else
-               FHEM_csrfToken[connection.base_url] = '';
-
-             connection.fhem.checkAndSetGenericDeviceType();
-
-           } ).on( 'end', function() {
-             FHEM_longpoll[connection.base_url].connected = false;
-
-             FHEM_longpoll[connection.base_url].disconnects++;
-             var timeout = 500 * FHEM_longpoll[connection.base_url].disconnects - 300;
-             if( timeout > 30000 ) timeout = 30000;
-
-             connection.log.error( 'longpoll ended, reconnect in: ' + timeout + 'msec' );
-             setTimeout( function(){FHEM_startLongpoll(connection)}, timeout  );
-
-           } ).on( 'error', function(err) {
-             FHEM_longpoll[connection.base_url].connected = false;
-
-             FHEM_longpoll[connection.base_url].disconnects++;
-             var timeout = 3000 * FHEM_longpoll[connection.base_url].disconnects;
-             if( timeout > 30000 ) timeout = 30000;
-
-             if( !connection.neverTimeout && timeout > 10000 && !FHEM_csrfToken[connection.base_url] ) {
-               connection.log.error( 'longpoll error: ' + err + ', retrys exhausted' );
-	       connection.dead = true;
-	       return;
-             }
-
-             connection.log.error( 'longpoll error: ' + err + ', retry in: ' + timeout + 'msec' );
-             setTimeout( function(){FHEM_startLongpoll(connection)}, timeout );
-
-           } );
+  startLongpoll(state, connection, function() { connection.fhem.checkAndSetGenericDeviceType() });
 }
 
 var FHEM_platforms = [];
@@ -382,16 +147,7 @@ FHEMPlatform(log, config, api) {
     base_url += '/fhem';
   }
 
-  var request = require('postman-request');
-  var auth = config['auth'];
-  if( auth ) {
-    if( auth.sendImmediately === undefined )
-      auth.sendImmediately = false;
-
-    request = request.defaults( { auth: auth, rejectUnauthorized: false } );
-  }
-
-  this.connection = { base_url: base_url, request: request, log: log, fhem: this, neverTimeout: config['neverTimeout'] };
+  this.connection = { base_url: base_url, auth: config['auth'], log: log, fhem: this, neverTimeout: config['neverTimeout'] };
 
   FHEM_platforms.push(this);
 
@@ -407,31 +163,8 @@ FHEM_sortByKey(array, key) {
     });
 }
 
-function
-FHEM_execute(log,connection,cmd,callback) {
-  if( FHEM_csrfToken[connection.base_url] )
-    cmd += '&fwcsrf='+FHEM_csrfToken[connection.base_url];
-  cmd += '&XHR=1';
-  var url = encodeURI( connection.base_url + '?cmd=' + cmd );
-  log.info( '  executing: ' + url );
-
-  connection.request
-              .get( { url: url, gzip: true },
-               function(err, response, result) {
-                      if( !err && response.statusCode == 200 ) {
-                        result = result.replace(/[\r\n]/g, '');
-                        if( callback )
-                          callback( result );
-
-                      } else {
-                        log('There was a problem connecting to FHEM ('+ url +').');
-                        if( response )
-                          log( '  ' + response.statusCode + ': ' + response.statusMessage );
-
-                      }
-
-                    } )
-              .on( 'error', function(err) { log('There was a problem connecting to FHEM ('+ url +'):'+ err); } );
+function FHEM_execute(log, connection, cmd, callback) {
+  execute(state, log, connection, cmd, callback);
 }
 
 FHEMPlatform.prototype = {
@@ -474,7 +207,7 @@ FHEMPlatform.prototype = {
                       this.execute( cmd,
                                     function(result) {
                                         this.log.warn( 'genericDeviceType attribute was not known. please restart.' );
-					if( FHEM_csrfToken[this.connection.base_url] )
+					if( state.csrfToken[this.connection.base_url] )
                                           process.exit(0);
                                     }.bind(this) );
                     }
@@ -512,15 +245,15 @@ FHEMPlatform.prototype = {
     var asyncCalls = 0;
     function callbackLater() { if (--asyncCalls == 0) callback(foundAccessories); }
 
-    if( FHEM_csrfToken[this.connection.base_url] === undefined ) {
+    if( state.csrfToken[this.connection.base_url] === undefined ) {
       if( this.connection.dead ) {
         callback(foundAccessories);
 	return;
       }
 
       var timeout = 500;
-      if( FHEM_longpoll[this.connection.base_url].disconnects )
-        timeout = FHEM_longpoll[this.connection.base_url].disconnects * 1000;
+      if( state.longpoll[this.connection.base_url].disconnects )
+        timeout = state.longpoll[this.connection.base_url].disconnects * 1000;
       this.log.debug('FHEM csrfToken missing, retry in: ' + timeout + 'msec');
       setTimeout( function(){this.connection.fhem.accessories(callback)}.bind(this), timeout  );
       return;
@@ -528,17 +261,9 @@ FHEMPlatform.prototype = {
 
     this.log.info('Fetching FHEM devices...');
 
-    var cmd = 'jsonlist2';
-    if( this.filter )
-      cmd += '%20' + encodeURIComponent(this.filter);
-    if( FHEM_csrfToken[this.connection.base_url] )
-      cmd += '&fwcsrf='+FHEM_csrfToken[this.connection.base_url];
-    var url = this.connection.base_url + '?cmd=' + cmd + '&XHR=1';
-    this.log.info( 'fetching: ' + url );
-
     asyncCalls++;
 
-    this.connection.request.get( { url: url, json: true, gzip: true },
+    fetchDevices( state, this.log, this.connection, this.filter,
                  function(err, response, json) {
                    if( !err && response.statusCode == 200 && json ) {
 //console.log("got json: " + util.inspect(json) );
@@ -589,7 +314,7 @@ class FHEMAccessory extends FhemAccessory {
 
 //http server for debugging
 function FHEMdebug_handleRequest(request, response){
-  handleDebugRequest(request, response, state, FHEM_longpoll);
+  handleDebugRequest(request, response, state, state.longpoll);
 }
 
 // the tests load this file many times in parallel and switch the server off
@@ -610,8 +335,6 @@ export const __internals = {
   FHEMPlatform: FHEMPlatform,
   FHEMAccessory: FHEMAccessory,
 
-  FHEM_longpoll: FHEM_longpoll,
-  FHEM_csrfToken: FHEM_csrfToken,
   FHEM_platforms: FHEM_platforms,
 
   FHEM_subscribe: FHEM_subscribe,

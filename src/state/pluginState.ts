@@ -1,5 +1,6 @@
 import type { HAP } from 'homebridge';
 import { recordHistory, type HistoryServiceClass } from '../accessory/history.ts';
+import type { ConnectionStatus } from '../fhem/client.ts';
 import { reading2homekit } from '../mapping/toHomekit.ts';
 import { toInt } from '../util/loose.ts';
 import { ReadingCache } from './readingCache.ts';
@@ -17,6 +18,14 @@ const tzoffset = (new Date()).getTimezoneOffset() * 60000;
 export class PluginState {
   readonly cache = new ReadingCache();
   readonly subscriptions = new Subscriptions();
+
+  /** how the long poll to each fhem is doing, by the url of its FHEMWEB */
+  readonly longpoll: Record<string, ConnectionStatus | undefined> = {};
+  /**
+   * The csrf token of each FHEMWEB, by its url. Not there before FHEMWEB answered for the first
+   * time, and empty for a FHEMWEB that has none.
+   */
+  readonly csrfToken: Record<string, string | undefined> = {};
 
   /** the history service of the fakegato-history package for this homebridge, if the package is installed */
   historyServiceClass?: HistoryServiceClass;

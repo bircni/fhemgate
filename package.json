@@ -46,9 +46,6 @@
     "type": "git",
     "url": "https://github.com/bircni/fhem2hb.git"
   },
-  "dependencies": {
-    "postman-request": "^2.88.1-postman.31"
-  },
   "optionalDependencies": {
     "fakegato-history": ">=0.5.3"
   },

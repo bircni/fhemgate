@@ -59,7 +59,7 @@ describe('connecting', () => {
     await connect();
 
     expect(fhem.streams.map(withoutPort)).toEqual([
-      '/fhem?XHR=1&inform=type=status;addglobal=1;filter=.%2A;since=null;fmt=JSON&timestamp=NOW',
+      '/fhem?XHR=1&inform=type=status;addglobal=1;filter=.*;since=null;fmt=JSON&timestamp=NOW',
     ]);
     expect(world.longpoll[baseUrl()]).toMatchObject({ connected: true, connects: 1, disconnects: 0 });
   });
@@ -69,7 +69,7 @@ describe('connecting', () => {
 
     expect(world.csrfToken[baseUrl()]).toBe('csrf_42');
     expect(fhem.requests.slice(1).map((request) => request.url)).toEqual([
-      '/fhem?cmd=%7BAttrVal%28%22global%22,%22userattr%22,%22%22%29%7D&fwcsrf=csrf_42&XHR=1',
+      '/fhem?cmd=%7BAttrVal(%22global%22,%22userattr%22,%22%22)%7D&fwcsrf=csrf_42&XHR=1',
       '/fhem?cmd=jsonlist2%20TYPE=siri&fwcsrf=csrf_42&XHR=1',
     ]);
   });
@@ -79,7 +79,7 @@ describe('connecting', () => {
 
     expect(world.csrfToken[baseUrl()]).toBe('');
     expect(fhem.requests.slice(1).map((request) => request.url)).toEqual([
-      '/fhem?cmd=%7BAttrVal%28%22global%22,%22userattr%22,%22%22%29%7D&XHR=1',
+      '/fhem?cmd=%7BAttrVal(%22global%22,%22userattr%22,%22%22)%7D&XHR=1',
       '/fhem?cmd=jsonlist2%20TYPE=siri&XHR=1',
     ]);
   });
@@ -169,17 +169,13 @@ describe('connecting', () => {
 });
 
 describe('authentication', () => {
-  it('sends user and password once FHEMWEB asks for them', async () => {
+  it('sends user and password with every request', async () => {
     const auth = { user: 'fhem', pass: 'secret' };
     await connect({ auth }, { auth });
 
     const authorization = `Basic ${Buffer.from('fhem:secret').toString('base64')}`;
-    // every request is first sent without and then, once refused, with the credentials
-    const sent = fhem.requests.map((request) => request.authorization);
-    expect(sent[0]).toBeUndefined();
-    expect(sent.filter((header) => header === authorization)).toHaveLength(sent.length / 2);
-    expect(sent.filter((header) => header === undefined)).toHaveLength(sent.length / 2);
-    expect(fhem.commands).toEqual(expect.arrayContaining(['{AttrVal("global","userattr","")}', 'jsonlist2 TYPE=siri']));
+    expect(fhem.requests.map((request) => request.authorization)).toEqual([authorization, authorization, authorization]);
+    expect(fhem.commands).toEqual(['{AttrVal("global","userattr","")}', 'jsonlist2 TYPE=siri']);
   });
 
   it('reports the commands FHEMWEB refuses for lack of a password', async () => {

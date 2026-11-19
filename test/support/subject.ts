@@ -17,8 +17,6 @@ interface Internals {
   FHEMPlatform: (new (log: CapturedLog, config: PlatformConfig, api: unknown) => Platform) & { prototype: unknown };
   FHEMAccessory: (new (platform: unknown, device: FhemDevice) => Accessory) & { prototype: { execute: Executor } };
 
-  FHEM_longpoll: Record<string, Record<string, unknown> | undefined>;
-  FHEM_csrfToken: Record<string, string | undefined>;
   FHEM_platforms: Platform[];
 
   FHEM_isPublished: (device: string) => Accessory | null;
@@ -123,8 +121,6 @@ const realExecute = internals.FHEMAccessory.prototype.execute;
 export function createWorld(options: WorldOptions = {}): World {
   const state = internals.useHap(hap);
   internals.FHEM_platforms.length = 0;
-  // the state of the connections stays: it is kept per url, and a connection that is still
-  // open from an earlier test would fail without it
 
   internals.useUser({ storagePath: () => options.storagePath ?? '/nonexistent' });
   internals.useFakeGato(options.fakeGato);
@@ -166,8 +162,8 @@ export function createWorld(options: WorldOptions = {}): World {
 
     cached: state.cache.values,
     subscriptions: state.subscriptions.byInformId as Record<string, Subscription[] | undefined>,
-    longpoll: internals.FHEM_longpoll,
-    csrfToken: internals.FHEM_csrfToken,
+    longpoll: state.longpoll as Record<string, Record<string, unknown> | undefined>,
+    csrfToken: state.csrfToken,
 
     shutdown() {
       (internals.FHEMPlatform.prototype as Platform).shutdown.call({ log });

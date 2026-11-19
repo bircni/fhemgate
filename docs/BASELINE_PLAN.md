@@ -68,7 +68,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 - [x] **M3.3** `state/*`, `devices/identity`, `accessory/customCharacteristics`
 - [x] **M3.4** `devices/detect` + `devices/rules/*`
 - [x] **M3.5** `accessory/*` (accessory, services, history), `debug/server`
-- [ ] **M3.6** `fhem/*` on native `fetch`, drop `postman-request` (transport snapshots may change)
+- [x] **M3.6** `fhem/*` on native `fetch`, drop `postman-request` (transport snapshots may change)
 - [ ] **M3.7** `platform`, `config`, `index.ts`; delete `index.js` and legacy lint tier; final verify
 - [ ] **M3.8** end-to-end test (added by the owner on 2026-11-19, while M3.4 was in progress):
   a real Homebridge process loads the built plugin from `dist/`, configured against the stand-in
@@ -104,6 +104,23 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
   70 % branches. Mutation spot-check: making the HM dimmer read `state` failed 4 tests, rounding
   the value scaling down failed 14. The code no test reaches is listed at the end of
   `docs/KNOWN_BUGS.md`.
+- M3 deviations so far. (1) The legacy file was moved to `src/legacy.ts` as an ES module before
+  anything was extracted, so the suites could run on the code as it moved, without a build step.
+  It dropped the unused global `__LINE__` getter. (2) The reading cache and the subscriptions are
+  one `PluginState` shared by all FHEM platforms of a homebridge, as the module globals were.
+  Giving every platform its own would publish a device twice when two platforms select it; that
+  separation is left for the multi-server work in Phase 4. (3) M3.6 uses Node's own `http` and
+  `https` modules instead of `fetch`. Skipping the certificate check, which the old code did when
+  `auth` was set, needs an `undici` Agent with `fetch`, and an Agent from the npm package only
+  works with the `fetch` of a Node that ships a matching undici, across Node 22, 24 and 26. The
+  http modules need no dependency for it. `postman-request` is gone and `bun audit --prod`
+  reports no advisories.
+- What changed for the transport in M3.6, all in `test/transport.test.ts` (it has no snapshot
+  file): `(`, `)` and `*` are no longer percent-encoded on the wire, which the old request
+  library did on top of `encodeURI`; and user and password are sent with the first request
+  instead of only after FHEMWEB answered 401. Digest authentication, which the old library
+  could do, is no longer possible. The snapshot files under `test/` are unchanged since
+  `baseline-m2`.
 
 **Blocked / needs owner:** *(filled in during execution)*
 

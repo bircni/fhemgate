@@ -1,19 +1,8 @@
 // a small web page that shows what the plugin has cached and who is subscribed to what
 import http from 'node:http';
 import util from 'node:util';
+import type { ConnectionStatus } from '../fhem/client.ts';
 import type { PluginState } from '../state/pluginState.ts';
-
-/** how the long poll to one fhem is doing */
-export interface ConnectionStatus {
-  connected?: boolean;
-  connects: number;
-  disconnects: number;
-  /** bytes received on the current connection, and since homebridge started */
-  received?: number;
-  received_total: number;
-  /** when the last event for a subscribed reading arrived, in milliseconds since the epoch */
-  last_event_time?: number;
-}
 
 export interface DebugResponse {
   write(chunk: string): unknown;
