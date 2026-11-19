@@ -15166,7 +15166,7 @@ exports[`mapping/information-and-category > gets its services 1`] = `
 exports[`mapping/information-and-category > is detected 1`] = `
 {
   "alias": "information_and_category",
-  "category": undefined,
+  "category": 3,
   "device": "information_and_category",
   "fuuid": "745fdb07-f33f-f014-2390-e1e57009bcad",
   "homekit_uuid": "62fc005b-97f3-4bd4-b141-641be1bf4dc6",
@@ -15176,7 +15176,7 @@ AccessoryCategory=NOPE
 SerialNumber=serial=ABC123
 Manufacturer=value=ACME
 FirmwareRevision=fw",
-    "error unknown category: FAN",
+    "info using category: 3 (FAN)",
     "error unknown category: NOPE",
     "log information_and_category is switch",
     "log information_and_category has",

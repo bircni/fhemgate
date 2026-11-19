@@ -20,9 +20,14 @@ export interface MappingTarget {
  * where a parameter is `<name>=<value>`, `invert`, the name of another characteristic whose
  * mapping is copied, `clear`, or `[<cmd>:][<device>:]<reading>`.
  *
- * @param categories the accessory categories of HomeKit by name, for the AccessoryCategory entry
+ * @param categories the accessory categories of HomeKit by name, for the AccessoryCategory
+ *   entry. The enumeration of HAP-NodeJS also holds the names by number, which are no categories.
  */
-export function parseHomebridgeMapping(target: MappingTarget, homebridgeMapping: string | undefined, categories?: Record<string, number | undefined>): void {
+export function parseHomebridgeMapping(
+  target: MappingTarget,
+  homebridgeMapping: string | undefined,
+  categories?: Record<string, number | string | undefined>,
+): void {
   if (!homebridgeMapping) {
     return;
   }
@@ -94,10 +99,11 @@ export function parseHomebridgeMapping(target: MappingTarget, homebridgeMapping:
         continue;
       } else if (characteristic === 'AccessoryCategory') {
         delete target.mappings[characteristic];
-        if (categories?.[param] === undefined) {
+        const category = categories?.[param];
+        if (typeof category !== 'number') {
           target.log.error('unknown category: ' + param);
         } else {
-          target.category = categories[param];
+          target.category = category;
           target.log.info('using category: ' + String(target.category) + ' (' + param + ')');
         }
         continue;
