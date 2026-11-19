@@ -11,18 +11,16 @@ export function longpollUrl(baseUrl: string, lastEventTime: number | undefined, 
 }
 
 /**
- * The url that runs a fhem command.
- *
- * The command is encoded with encodeURI, which leaves `;`, `&` and `#` as they are. A command
- * that contains them is cut short or carries more parameters.
+ * The url that runs a fhem command. The command is encoded completely, so that a `;`, `&` or
+ * `#` in a value stays part of the command.
  */
 export function commandUrl(baseUrl: string, cmd: string, csrfToken: string | undefined): string {
-  let query = cmd;
+  let query = encodeURIComponent(cmd);
   if (csrfToken) {
-    query += '&fwcsrf=' + csrfToken;
+    query += '&fwcsrf=' + encodeURIComponent(csrfToken);
   }
   query += '&XHR=1';
-  return encodeURI(baseUrl + '?cmd=' + query);
+  return baseUrl + '?cmd=' + query;
 }
 
 /** the url that lists the devices of a devspec with everything fhem knows about them. all devices without a filter. */

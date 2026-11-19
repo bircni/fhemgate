@@ -13,10 +13,15 @@ describe('urls', () => {
 
   it('carry a command and the csrf token', () => {
     expect(commandUrl('http://fhem:8083/fhem', 'set lamp on', 'csrf_1')).toBe('http://fhem:8083/fhem?cmd=set%20lamp%20on&fwcsrf=csrf_1&XHR=1');
-    expect(commandUrl(fhem, '{ReadingsVal("a","b","")}', '')).toBe(fhem + '?cmd=%7BReadingsVal(%22a%22,%22b%22,%22%22)%7D&XHR=1');
+    expect(commandUrl(fhem, '{ReadingsVal("a","b","")}', '')).toBe(fhem + '?cmd=%7BReadingsVal(%22a%22%2C%22b%22%2C%22%22)%7D&XHR=1');
   });
 
-  it('encode the devspec of the device list completely, unlike a command', () => {
+  it('keep what would end a command or start another parameter inside the command', () => {
+    expect(commandUrl(fhem, 'set tts say a;b&c=d#e', 'csrf_1')).toBe(fhem + '?cmd=set%20tts%20say%20a%3Bb%26c%3Dd%23e&fwcsrf=csrf_1&XHR=1');
+    expect(commandUrl(fhem, 'x', 'a&b')).toBe(fhem + '?cmd=x&fwcsrf=a%26b&XHR=1');
+  });
+
+  it('encode the devspec of the device list completely', () => {
     expect(devicesUrl(fhem, 'room=A&B,TYPE=x', 'csrf_1')).toBe(fhem + '?cmd=jsonlist2%20room%3DA%26B%2CTYPE%3Dx&fwcsrf=csrf_1&XHR=1');
     expect(devicesUrl('http://fhem:8083/fhem', undefined, undefined)).toBe('http://fhem:8083/fhem?cmd=jsonlist2&XHR=1');
   });

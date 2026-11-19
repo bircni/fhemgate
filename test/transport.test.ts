@@ -67,8 +67,8 @@ describe('connecting', () => {
 
     expect(world.csrfToken[baseUrl()]).toBe('csrf_42');
     expect(fhem.requests.slice(1).map((request) => request.url)).toEqual([
-      '/fhem?cmd=%7BAttrVal(%22global%22,%22userattr%22,%22%22)%7D&fwcsrf=csrf_42&XHR=1',
-      '/fhem?cmd=jsonlist2%20TYPE=siri&fwcsrf=csrf_42&XHR=1',
+      '/fhem?cmd=%7BAttrVal(%22global%22%2C%22userattr%22%2C%22%22)%7D&fwcsrf=csrf_42&XHR=1',
+      '/fhem?cmd=jsonlist2%20TYPE%3Dsiri&fwcsrf=csrf_42&XHR=1',
     ]);
   });
 
@@ -77,8 +77,8 @@ describe('connecting', () => {
 
     expect(world.csrfToken[baseUrl()]).toBe('');
     expect(fhem.requests.slice(1).map((request) => request.url)).toEqual([
-      '/fhem?cmd=%7BAttrVal(%22global%22,%22userattr%22,%22%22)%7D&XHR=1',
-      '/fhem?cmd=jsonlist2%20TYPE=siri&XHR=1',
+      '/fhem?cmd=%7BAttrVal(%22global%22%2C%22userattr%22%2C%22%22)%7D&XHR=1',
+      '/fhem?cmd=jsonlist2%20TYPE%3Dsiri&XHR=1',
     ]);
   });
 
@@ -88,8 +88,8 @@ describe('connecting', () => {
     expect(fhem.commands).toEqual(['{AttrVal("global","userattr","")}', 'jsonlist2 TYPE=siri']);
     expect(world.log.lines.map(withoutPort)).toEqual([
       'log Checking devices and attributes...',
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=%7BAttrVal(%22global%22,%22userattr%22,%22%22)%7D&fwcsrf=csrf_fake_token&XHR=1',
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=jsonlist2%20TYPE=siri&fwcsrf=csrf_fake_token&XHR=1',
+      'info   executing: http://127.0.0.1:PORT/fhem?cmd=%7BAttrVal(%22global%22%2C%22userattr%22%2C%22%22)%7D&fwcsrf=csrf_fake_token&XHR=1',
+      'info   executing: http://127.0.0.1:PORT/fhem?cmd=jsonlist2%20TYPE%3Dsiri&fwcsrf=csrf_fake_token&XHR=1',
       'warn no siri device found. please define it.',
     ]);
     expect(exit).not.toHaveBeenCalled();
@@ -576,14 +576,14 @@ describe('commands', () => {
     expect(result).toBe('abc');
   });
 
-  it('leaves characters in place that separate commands and parameters', async () => {
+  it('sends a command whole, also with characters that separate commands and parameters in a url', async () => {
     const platform = await connect();
 
-    platform.execute('set lamp on;set other off&x=1#y');
+    platform.execute('set lamp on;set other off&x=1#y +%?');
     await waitFor(() => fhem.requests.some((request) => request.url.includes('set%20lamp')), 'the command');
 
-    expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=set%20lamp%20on;set%20other%20off&x=1');
-    expect(fhem.commands.at(-1)).toBe('set lamp on;set other off');
+    expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=set%20lamp%20on%3Bset%20other%20off%26x%3D1%23y%20%2B%25%3F&fwcsrf=csrf_fake_token&XHR=1');
+    expect(fhem.commands.at(-1)).toBe('set lamp on;set other off&x=1#y +%?');
   });
 
   it('reports a command fhem refuses and does not answer the caller', async () => {
