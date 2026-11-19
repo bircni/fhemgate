@@ -676,6 +676,99 @@ describe('reconnecting', () => {
   });
 });
 
+describe('a long poll nothing arrives on', () => {
+  const quarterHour = 15 * 60 * 1000;
+  const probes = () => fhem.commands.filter((cmd) => cmd === '{1}').length;
+
+  async function quietLamp(): Promise<void> {
+    const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }] });
+    (await firstAccessoryOf(platform)).getServices();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    // the wait for the next byte starts over with this event, on the faked timers
+    await event('standby');
+    world.log.clear();
+  }
+
+  /** an event arrives, which also starts the wait for the next byte over */
+  async function event(value: string): Promise<void> {
+    fhem.event('lamp-state', value);
+    await waitFor(() => world.cached['lamp-state'] === value, 'the event');
+  }
+
+  const logged = () => world.log.lines.filter((line) => line.includes('longpoll'));
+
+  it('is left alone while something arrives now and then', async () => {
+    await quietLamp();
+
+    for (const value of ['off', 'on', 'off']) {
+      vi.advanceTimersByTime(quarterHour - 1);
+      await event(value);
+    }
+
+    expect(probes()).toBe(0);
+    expect(fhem.streams).toHaveLength(1);
+    expect(logged()).toEqual([]);
+  });
+
+  it('is opened again after a quarter of an hour of silence when fhem answers, and events arrive on the new one', async () => {
+    await quietLamp();
+
+    vi.advanceTimersByTime(quarterHour - 1);
+    expect(probes()).toBe(0);
+    vi.advanceTimersByTime(1);
+    await waitFor(() => fhem.streams.length === 2, 'the second long poll');
+    await waitFor(() => fhem.openStreams() === 1, 'the silent long poll to be closed');
+
+    expect(probes()).toBe(1);
+    expect(logged()[0]).toBe('info longpoll: nothing arrived for 15 minutes while fhem answers. opening the long poll again.');
+    expect(world.log.errors()).toEqual([]);
+    expect(world.longpoll[baseUrl()]).toMatchObject({ connected: true, connects: 2, disconnects: 0 });
+
+    await event('off');
+    expect(world.cached['lamp-state']).toBe('off');
+  });
+
+  it('waits twice as long each time a fhem stays silent, and a quarter of an hour again once something arrived', async () => {
+    await quietLamp();
+
+    vi.advanceTimersByTime(quarterHour);
+    await waitFor(() => fhem.streams.length === 2, 'the second long poll');
+    await waitFor(() => fhem.commands.filter((cmd) => cmd === 'jsonlist2 TYPE=siri').length === 2, 'the checks after the second long poll');
+
+    vi.advanceTimersByTime(2 * quarterHour - 1);
+    expect(probes()).toBe(1);
+    vi.advanceTimersByTime(1);
+    await waitFor(() => fhem.streams.length === 3, 'the third long poll');
+    await waitFor(() => fhem.commands.filter((cmd) => cmd === 'jsonlist2 TYPE=siri').length === 3, 'the checks after the third long poll');
+    expect(probes()).toBe(2);
+
+    await event('off');
+    vi.advanceTimersByTime(quarterHour);
+    await waitFor(() => fhem.streams.length === 4, 'the fourth long poll');
+    expect(probes()).toBe(3);
+  });
+
+  it('is taken for failed when fhem does not answer within ten seconds, and tried again like after any failure', async () => {
+    await quietLamp();
+    fhem.options.hangs = true;
+
+    vi.advanceTimersByTime(quarterHour);
+    await waitFor(() => probes() === 1, 'fhem to be asked');
+    expect(fhem.streams).toHaveLength(1);
+
+    vi.advanceTimersByTime(10_000);
+    await waitFor(() => world.log.errors().length === 1, 'the failure to be reported');
+    expect(world.log.errors()[0]).toBe(
+      'error longpoll error: Error: nothing arrived for 15 minutes and fhem does not answer (Error: no answer within 10 seconds), retry in: 3000msec',
+    );
+    await waitFor(() => fhem.openStreams() === 0, 'the silent long poll to be closed');
+    expect(world.longpoll[baseUrl()]).toMatchObject({ connected: false, disconnects: 1 });
+
+    vi.advanceTimersByTime(3000);
+    await waitFor(() => fhem.streams.length === 2, 'the second long poll');
+  });
+});
+
 describe('commands', () => {
   it('sends the command of a characteristic to fhem', async () => {
     const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }] });

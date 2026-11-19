@@ -17,6 +17,19 @@ export interface GetOptions {
   insecure?: boolean;
   /** accept a compressed answer */
   gzip?: boolean;
+  /**
+   * Let the operating system probe the connection after it was idle for this many milliseconds,
+   * so that a peer that is gone without saying so is noticed and the request fails.
+   */
+  keepAlive?: number;
+  /** milliseconds after which a request that is not complete fails */
+  timeout?: number;
+}
+
+/** a request that is under way */
+export interface GetRequest {
+  /** ends the request. none of its handlers is called from then on. */
+  abort(): void;
 }
 
 export interface HttpResponse {
@@ -37,7 +50,7 @@ export interface GetHandlers {
 }
 
 /** sends a GET request and reports what comes back as it comes */
-export function get(url: string, options: GetOptions, handlers: GetHandlers): void {
+export function get(url: string, options: GetOptions, handlers: GetHandlers): GetRequest {
   const headers: Record<string, string> = {};
   if (options.auth) {
     const user = options.auth.user ?? options.auth.username ?? '';
@@ -49,7 +62,10 @@ export function get(url: string, options: GetOptions, handlers: GetHandlers): vo
   }
 
   let failed = false;
+  let aborted = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
   const fail = (error: Error): void => {
+    clearTimeout(timer);
     if (!failed) {
       failed = true;
       handlers.onError?.(error);
@@ -64,7 +80,20 @@ export function get(url: string, options: GetOptions, handlers: GetHandlers): vo
     queueMicrotask(() => {
       fail(error as Error);
     });
-    return;
+    return { abort: () => (failed = true) };
+  }
+
+  if (options.keepAlive !== undefined) {
+    const idle = options.keepAlive;
+    request.on('socket', (socket) => {
+      socket.setKeepAlive(true, idle);
+    });
+  }
+  if (options.timeout !== undefined) {
+    const milliseconds = options.timeout;
+    timer = setTimeout(() => {
+      request.destroy(new Error('no answer within ' + milliseconds / 1000 + ' seconds'));
+    }, milliseconds);
   }
 
   request.on('error', fail);
@@ -75,14 +104,26 @@ export function get(url: string, options: GetOptions, handlers: GetHandlers): vo
     response.on('error', fail);
     body.on('error', fail);
     body.on('data', (chunk: Buffer) => {
-      handlers.onData?.(chunk);
+      if (!aborted) {
+        handlers.onData?.(chunk);
+      }
     });
     body.on('end', () => {
+      clearTimeout(timer);
       if (!failed) {
         handlers.onEnd?.();
       }
     });
   });
+
+  return {
+    abort: () => {
+      clearTimeout(timer);
+      aborted = true;
+      failed = true;
+      request.destroy();
+    },
+  };
 }
 
 /** sends a GET request and hands over the whole body as text: `callback(error)` or `callback(undefined, response, body)` */
