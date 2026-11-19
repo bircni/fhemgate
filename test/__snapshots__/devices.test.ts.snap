@@ -32928,7 +32928,7 @@ exports[`switch/generic-display-type > gets its services 1`] = `
     "log   information service for generic-display-type",
     "log     manufacturer, model and serial number characteristics for generic-display-type",
     "log     name (siriName) characteristic for generic-display-type",
-    "log   Switch service for generic-display-type",
+    "log   Outlet service for generic-display-type",
     "log     On characteristic for generic_display_type:state",
   ],
   "services": [
@@ -33035,8 +33035,8 @@ exports[`switch/generic-display-type > gets its services 1`] = `
       ],
       "linked": [],
       "name": "generic_display_type",
-      "type": "Switch",
-      "uuid": "00000049-0000-1000-8000-0026BB765291",
+      "type": "Outlet",
+      "uuid": "00000047-0000-1000-8000-0026BB765291",
     },
   ],
   "subscriptions": {
@@ -33053,7 +33053,7 @@ exports[`switch/generic-display-type > is detected 1`] = `
   "fuuid": "c6cabd1e-f33f-1aae-061f-434562d60c94",
   "homekit_uuid": "6981fdc8-36bd-44c5-8d97-f232be70e34a",
   "log": [
-    "log generic_display_type is switch",
+    "log generic_display_type is outlet",
     "log generic_display_type has",
     "log   On [state;on,off]",
     "info     caching: On: false (as boolean; from 'off')",
@@ -33078,7 +33078,7 @@ exports[`switch/generic-display-type > is detected 1`] = `
   "room": undefined,
   "sent": [],
   "serial": "c6cabd1e-f33f-1aae-061f-434562d60c94",
-  "service_name": "switch",
+  "service_name": "outlet",
   "siriName": "generic_display_type",
   "type": "dummy",
   "uuid_base": "c6cabd1e-f33f-1aae-061f-434562d60c94",

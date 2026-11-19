@@ -35,8 +35,8 @@ describe('detectMappings', () => {
     expect(target.service_name).toBe('outlet');
   });
 
-  it('does not look at the genericDisplayType', () => {
-    expect(detect({ PossibleSets: 'on off', Attributes: { genericDisplayType: 'light' } }).target.service_name).toBe('switch');
+  it('uses the genericDisplayType when there is no genericDeviceType', () => {
+    expect(detect({ PossibleSets: 'on off', Attributes: { genericDisplayType: 'light' } }).target.service_name).toBe('light');
   });
 
   it('skips a device that is to be ignored before it has mappings', () => {

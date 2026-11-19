@@ -41,7 +41,7 @@ export interface DetectionTarget {
 
 export interface DetectionContext {
   s: Jsonlist2Device;
-  /** the genericDeviceType attribute of the device */
+  /** the genericDeviceType attribute of the device, or its genericDisplayType */
   genericType: string | undefined;
   target: DetectionTarget;
   state: PluginState;
@@ -108,9 +108,10 @@ const rules: Rule[] = [
  * beyond a note.
  */
 export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, state: PluginState): boolean {
-  // the genericDisplayType attribute was meant to stand in for a missing genericDeviceType,
-  // but the check for that never holds.
-  const genericType = s.Attributes.genericDeviceType;
+  let genericType = s.Attributes.genericDeviceType;
+  if (genericType === undefined) {
+    genericType = s.Attributes.genericDisplayType;
+  }
 
   if (genericType === 'ignore') {
     target.log.info('ignoring ' + s.Internals.NAME);
