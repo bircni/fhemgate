@@ -15,6 +15,12 @@ const require = createRequire(import.meta.url);
 /** the version of this plugin */
 export const version = (require('../package.json') as { version: string }).version;
 
+/**
+ * How many accessories one HomeKit bridge can carry: 150 with the bridge itself. A bridge with
+ * more can not be added to HomeKit, and one that grows beyond it stops responding as a whole.
+ */
+export const MAX_BRIDGED_ACCESSORIES = 149;
+
 /** what all FHEM platforms of a homebridge share */
 export interface Plugin {
   state: PluginState;
@@ -299,6 +305,17 @@ export class FhemPlatform implements StaticPlatformPlugin {
               this.log.info('no accessory created for ' + s?.Internals.NAME + ' (' + s?.Internals.TYPE + ')');
             }
           }
+        }
+
+        if (foundAccessories.length > MAX_BRIDGED_ACCESSORIES) {
+          this.log.warn(
+            (this.filter ? 'the filter ' + this.filter + ' selects ' : 'fhem lists ') +
+              foundAccessories.length +
+              ' devices that are published. a HomeKit bridge takes ' +
+              MAX_BRIDGED_ACCESSORIES +
+              ' accessories at most, and HomeKit refuses a bridge with more. ' +
+              'narrow the filter, or split the devices over several FHEM platforms with different filters and run each as a child bridge.',
+          );
         }
 
         done();

@@ -375,6 +375,33 @@ describe('devices', () => {
     expect(first?.getServices().map((service) => service.constructor.name)).toEqual(['AccessoryInformation', 'Lightbulb']);
   });
 
+  const lamps = (count: number) =>
+    Array.from({ length: count }, (_, index) => {
+      const name = `lamp_${String(index).padStart(3, '0')}`;
+      return { Name: name, ...device({ Internals: { NAME: name, FUUID: `fuuid-${index}` }, Readings: { state: 'on' }, PossibleSets: 'on off' }) };
+    });
+
+  it('warns when it publishes more accessories than a HomeKit bridge takes, and says what to do', async () => {
+    const platform = await connect({ devices: lamps(150) }, { filter: 'room=HomeKit' });
+    world.log.clear();
+
+    expect(await accessoriesOf(platform)).toHaveLength(150);
+
+    expect(world.log.lines.filter((line) => line.startsWith('warn '))).toEqual([
+      'warn the filter room=HomeKit selects 150 devices that are published. a HomeKit bridge takes 149 accessories at most, and HomeKit refuses a bridge with more. ' +
+        'narrow the filter, or split the devices over several FHEM platforms with different filters and run each as a child bridge.',
+    ]);
+  });
+
+  it('does not warn about as many accessories as a HomeKit bridge takes', async () => {
+    const platform = await connect({ devices: lamps(149) });
+    world.log.clear();
+
+    expect(await accessoriesOf(platform)).toHaveLength(149);
+
+    expect(world.log.lines.filter((line) => line.startsWith('warn '))).toEqual([]);
+  });
+
   it('asks for all devices without a filter', async () => {
     const platform = await connect();
 
