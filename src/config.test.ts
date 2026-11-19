@@ -26,14 +26,31 @@ describe('baseUrl', () => {
     expect(baseUrl(config, logging().logging)).toBe('https://192.0.2.1:8088/haus');
   });
 
-  it('ends the process for an ssl setting that is no boolean', () => {
+  it.each(['true', 'TRUE', ' 1 ', 1])('takes %j for ssl as true, with a warning', (ssl) => {
     const exit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const { log, logging: target } = logging();
 
-    baseUrl({ platform: 'FHEM', server: 'fhem', ssl: 'yes' as unknown as boolean }, target);
+    expect(baseUrl({ platform: 'FHEM', server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('https://fhem:8083/fhem');
 
-    expect(exit).toHaveBeenCalledWith(0);
-    expect(log.lines).toEqual(['error config: value for ssl has to be boolean.']);
+    expect(exit).not.toHaveBeenCalled();
+    expect(log.lines).toEqual([`warn config: value for ssl has to be boolean. taking ${JSON.stringify(ssl)} as true.`]);
+  });
+
+  it.each(['yes', 'false', '0', 2, {}])('takes %j for ssl as false, with an error, and goes on', (ssl) => {
+    const exit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    const { log, logging: target } = logging();
+
+    expect(baseUrl({ platform: 'FHEM', server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('http://fhem:8083/fhem');
+
+    expect(exit).not.toHaveBeenCalled();
+    expect(log.lines).toEqual([`error config: value for ssl has to be boolean. taking ${JSON.stringify(ssl)} as false.`]);
+  });
+
+  it.each([false, undefined, null, '', 0])('says nothing about %j for ssl', (ssl) => {
+    const { log, logging: target } = logging();
+
+    expect(baseUrl({ platform: 'FHEM', server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('http://fhem:8083/fhem');
+    expect(log.lines).toEqual([]);
   });
 });
 

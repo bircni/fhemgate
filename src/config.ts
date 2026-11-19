@@ -12,7 +12,7 @@ export interface FhemPlatformConfig extends PlatformConfig {
   port?: number | string;
   /** the fhem devspec that selects the devices to publish, e.g. `room=HomeKit`. all devices if not given. */
   filter?: string;
-  /** talk https to FHEMWEB. has to be true or false. */
+  /** talk https to FHEMWEB. meant to be true or false. */
   ssl?: boolean;
   /** the webname of the FHEMWEB instance, `fhem` if not given */
   webname?: string;
@@ -27,17 +27,28 @@ export interface FhemPlatformConfig extends PlatformConfig {
 }
 
 /**
- * The url of FHEMWEB for the configuration.
- *
- * Ends the homebridge process when `ssl` is neither true nor false.
+ * Whether the configuration asks for https. `ssl` is meant to be true or false. Text that says
+ * true is taken for it with a warning, anything else that is no boolean counts as false.
  */
+function wantsSsl(ssl: unknown, log: Logging): boolean {
+  if (typeof ssl === 'boolean' || !ssl) {
+    return Boolean(ssl);
+  }
+
+  const text = (typeof ssl === 'string' ? ssl : JSON.stringify(ssl)).trim().toLowerCase();
+  if (text === 'true' || text === '1') {
+    log.warn('config: value for ssl has to be boolean. taking ' + JSON.stringify(ssl) + ' as true.');
+    return true;
+  }
+
+  log.error('config: value for ssl has to be boolean. taking ' + JSON.stringify(ssl) + ' as false.');
+  return false;
+}
+
+/** the url of FHEMWEB for the configuration */
 export function baseUrl(config: FhemPlatformConfig, log: Logging): string {
   let base_url = 'http://';
-  if (config.ssl) {
-    if (typeof config.ssl !== 'boolean') {
-      log.error('config: value for ssl has to be boolean.');
-      process.exit(0);
-    }
+  if (wantsSsl(config.ssl, log)) {
     base_url = 'https://';
   }
   base_url += config.server + ':' + (config.port || 8083);

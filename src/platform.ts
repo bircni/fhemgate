@@ -116,8 +116,6 @@ export class FhemPlatform implements StaticPlatformPlugin {
   /**
    * Makes sure fhem knows the homebridgeMapping and genericDeviceType attributes, and looks for
    * the siri device until it is found. Called every time the long poll was opened.
-   *
-   * Ends the homebridge process after it created the genericDeviceType attribute.
    */
   checkAndSetGenericDeviceType(): void {
     this.log('Checking devices and attributes...');
@@ -131,10 +129,8 @@ export class FhemPlatform implements StaticPlatformPlugin {
       if (!result.match(/(^| )genericDeviceType\b/)) {
         const cmd = '{addToAttrList( "genericDeviceType:security,ignore,switch,outlet,light,blind,thermometer,thermostat,contact,garage,window,lock" ) }';
         this.execute(cmd, () => {
-          this.log.warn('genericDeviceType attribute was not known. please restart.');
-          if (this.#plugin.state.csrfToken[(this.connection as FhemConnection).base_url]) {
-            process.exit(0);
-          }
+          // the devices were or are listed without it. homebridge goes on with what it has.
+          this.log.error('genericDeviceType attribute was not known to fhem and was created. restart homebridge after giving it to devices.');
         });
       }
     });
