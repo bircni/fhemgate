@@ -15283,9 +15283,6 @@ exports[`mapping/information-and-category > gets its services 1`] = `
     "log     name (siriName) characteristic for information-and-category",
     "log   Switch service for information-and-category",
     "log     On characteristic for information_and_category:state",
-    "log     SerialNumber characteristic for information_and_category:state",
-    "log     Manufacturer characteristic for information_and_category:state",
-    "log     FirmwareRevision characteristic for information_and_category:fw",
   ],
   "services": [
     {
@@ -15388,39 +15385,6 @@ exports[`mapping/information-and-category > gets its services 1`] = `
           "uuid": "00000025-0000-1000-8000-0026BB765291",
           "value": true,
         },
-        {
-          "name": "Serial Number",
-          "props": {
-            "format": "string",
-            "perms": [
-              "pr",
-            ],
-          },
-          "uuid": "00000030-0000-1000-8000-0026BB765291",
-          "value": "on",
-        },
-        {
-          "name": "Manufacturer",
-          "props": {
-            "format": "string",
-            "perms": [
-              "pr",
-            ],
-          },
-          "uuid": "00000020-0000-1000-8000-0026BB765291",
-          "value": "on",
-        },
-        {
-          "name": "Firmware Revision",
-          "props": {
-            "format": "string",
-            "perms": [
-              "pr",
-            ],
-          },
-          "uuid": "00000052-0000-1000-8000-0026BB765291",
-          "value": "1.2.3",
-        },
       ],
       "linked": [],
       "name": "information_and_category",
@@ -15429,8 +15393,8 @@ exports[`mapping/information-and-category > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "information_and_category-fw": 2,
-    "information_and_category-state": 3,
+    "information_and_category-fw": 1,
+    "information_and_category-state": 1,
   },
 }
 `;
@@ -15547,30 +15511,21 @@ exports[`mapping/information-and-category > sends commands 1`] = `
 exports[`mapping/information-and-category > updates characteristics 1`] = `
 {
   "information_and_category-fw": [
-    "Firmware Revision="on" Firmware Revision="on" <- "on"",
-    "Firmware Revision="off" Firmware Revision="off" <- "off"",
-    "Firmware Revision="0" Firmware Revision="0" <- "0"",
-    "Firmware Revision="1" Firmware Revision="1" <- "1"",
-    "Firmware Revision="50" Firmware Revision="50" <- "50"",
-    "Firmware Revision="100" Firmware Revision="100" <- "100"",
-    "Firmware Revision="21.5" Firmware Revision="21.5" <- "21.5"",
-    "Firmware Revision="closed" Firmware Revision="closed" <- "closed"",
-    "Firmware Revision="open" Firmware Revision="open" <- "open"",
-    "Firmware Revision="ff8000" Firmware Revision="ff8000" <- "ff8000"",
-    "Firmware Revision="" Firmware Revision="" <- """,
+    "Firmware Revision="on" <- "on"",
+    "Firmware Revision="off" <- "off"",
+    "Firmware Revision="0" <- "0"",
+    "Firmware Revision="1" <- "1"",
+    "Firmware Revision="50" <- "50"",
+    "Firmware Revision="100" <- "100"",
+    "Firmware Revision="21.5" <- "21.5"",
+    "Firmware Revision="closed" <- "closed"",
+    "Firmware Revision="open" <- "open"",
+    "Firmware Revision="ff8000" <- "ff8000"",
+    "Firmware Revision="" <- """,
   ],
   "information_and_category-state": [
-    "On=true Serial Number="on" Manufacturer="on" <- "on"",
-    "On=false Serial Number="off" Manufacturer="off" <- "off"",
-    "On=true Serial Number="off" Manufacturer="0" <- "0"",
-    "On=true Serial Number="off" Manufacturer="1" <- "1"",
-    "On=true Serial Number="50" Manufacturer="50" <- "50"",
-    "On=true Serial Number="100" Manufacturer="100" <- "100"",
-    "On=true Serial Number="21.5" Manufacturer="21.5" <- "21.5"",
-    "On=true Serial Number="closed" Manufacturer="closed" <- "closed"",
-    "On=true Serial Number="open" Manufacturer="open" <- "open"",
-    "On=true Serial Number="ff8000" Manufacturer="ff8000" <- "ff8000"",
-    "On=true Serial Number="ff8000" Manufacturer="" <- """,
+    "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=false <- "off"",
   ],
 }
 `;
@@ -20267,7 +20222,6 @@ exports[`mapping/serial-from-value > gets its services 1`] = `
     "log     name (siriName) characteristic for serial-from-value",
     "log   Switch service for serial-from-value",
     "log     On characteristic for serial_from_value:state",
-    "log     SerialNumber characteristic for serial_from_value:state",
   ],
   "services": [
     {
@@ -20370,17 +20324,6 @@ exports[`mapping/serial-from-value > gets its services 1`] = `
           "uuid": "00000025-0000-1000-8000-0026BB765291",
           "value": true,
         },
-        {
-          "name": "Serial Number",
-          "props": {
-            "format": "string",
-            "perms": [
-              "pr",
-            ],
-          },
-          "uuid": "00000030-0000-1000-8000-0026BB765291",
-          "value": "on",
-        },
       ],
       "linked": [],
       "name": "serial_from_value",
@@ -20389,7 +20332,7 @@ exports[`mapping/serial-from-value > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "serial_from_value-state": 2,
+    "serial_from_value-state": 1,
   },
 }
 `;
@@ -20471,15 +20414,8 @@ exports[`mapping/serial-from-value > sends commands 1`] = `
 exports[`mapping/serial-from-value > updates characteristics 1`] = `
 {
   "serial_from_value-state": [
-    "On=true Serial Number="on" <- "on"",
-    "On=false Serial Number="off" <- "off"",
-    "On=true Serial Number="off" <- "0" "1"",
-    "On=true Serial Number="50" <- "50"",
-    "On=true Serial Number="100" <- "100"",
-    "On=true Serial Number="21.5" <- "21.5"",
-    "On=true Serial Number="closed" <- "closed"",
-    "On=true Serial Number="open" <- "open"",
-    "On=true Serial Number="ff8000" <- "ff8000" """,
+    "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=false <- "off"",
   ],
 }
 `;

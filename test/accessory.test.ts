@@ -881,3 +881,62 @@ describe('the residents as a security system', () => {
     }
   });
 });
+
+describe('mappings for the accessory information', () => {
+  const plug = () =>
+    device({
+      Internals: { NAME: 'plug' },
+      Readings: { state: 'on', fw: '2.0.1' },
+      PossibleSets: 'on off',
+      Attributes: { homebridgeMapping: 'Manufacturer=value=ACME Model=value=P-100 SerialNumber=serial=4711 FirmwareRevision=fw' },
+    });
+  const names = (service: { characteristics: { displayName: string }[] }) => service.characteristics.map((characteristic) => characteristic.displayName);
+
+  it('are shown there and nowhere else', () => {
+    const world = createWorld();
+    const services = world.accessory(plug()).getServices();
+    const information = serviceOf(services, 'AccessoryInformation');
+
+    expect(names(serviceOf(services, 'Switch'))).toEqual(['Name', 'On']);
+    expect(characteristicOf(information, Characteristic.Manufacturer).value).toBe('ACME');
+    expect(characteristicOf(information, Characteristic.Model).value).toBe('P-100');
+    expect(characteristicOf(information, Characteristic.SerialNumber).value).toBe('4711');
+    expect(characteristicOf(information, Characteristic.FirmwareRevision).value).toBe('2.0.1');
+    expect(Object.fromEntries(Object.entries(world.subscriptions).map(([informId, list]) => [informId, list?.length]))).toEqual({
+      'plug-state': 1,
+      'plug-fw': 1,
+    });
+  });
+
+  it('answer a read of the firmware revision once, the way HomeKit reads it', async () => {
+    const world = createWorld();
+    const information = serviceOf(world.accessory(plug()).getServices(), 'AccessoryInformation');
+    const firmware = characteristicOf(information, Characteristic.FirmwareRevision);
+    const warned = vi.fn();
+    firmware.on('characteristic-warning', warned);
+
+    expect(await firmware.handleGetRequest()).toBe('2.0.1');
+    await settle();
+
+    expect(warned).not.toHaveBeenCalled();
+    expect(vi.mocked(console.warn).mock.calls.flat().join(' ')).not.toContain('already');
+  });
+
+  it('follow the firmware revision when its reading changes', async () => {
+    const world = createWorld();
+    const information = serviceOf(world.accessory(plug()).getServices(), 'AccessoryInformation');
+
+    world.update('plug-fw', '2.1.0');
+    await settle();
+
+    expect(characteristicOf(information, Characteristic.FirmwareRevision).value).toBe('2.1.0');
+  });
+
+  it('still become a characteristic of a service that is named for them', () => {
+    const world = createWorld();
+    const outlet = device({ Internals: { NAME: 'plug' }, Readings: { state: 'on', fw: '2.0.1' }, PossibleSets: 'on off' });
+    outlet.Attributes.homebridgeMapping = 'Outlet#FirmwareRevision=fw';
+
+    expect(names(serviceOf(world.accessory(outlet).getServices(), 'Outlet'))).toEqual(['Name', 'On', 'Firmware Revision']);
+  });
+});
