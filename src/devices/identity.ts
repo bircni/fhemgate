@@ -33,8 +33,11 @@ export interface DeviceIdentity {
  * The serial number is taken from what identifies the hardware for the device types where fhem
  * knows that, so it survives when the device is deleted and defined again in fhem. For all other
  * types it is the FUUID.
+ *
+ * @param remembered answers what the device was first published with, given what was worked out
+ * now. Not asked when the SerialNumber mapping says what the serial number is.
  */
-export function deviceIdentity(s: Jsonlist2Device, mappings: Mappings): DeviceIdentity {
+export function deviceIdentity(s: Jsonlist2Device, mappings: Mappings, remembered?: (computed: string) => string): DeviceIdentity {
   const type = s.Internals.TYPE;
   const fuuid = s.Internals.FUUID;
   const alias = s.Attributes.alias ? s.Attributes.alias : s.Internals.NAME;
@@ -87,12 +90,13 @@ export function deviceIdentity(s: Jsonlist2Device, mappings: Mappings): DeviceId
 
   // the SerialNumber mapping only carries the serial number, it is not a reading
   const given = mappings.SerialNumber as Mapping | undefined;
-  if (given !== undefined) {
-    if (given.serial != null) {
-      serial = given.serial;
-    } else if (given.value != null) {
-      serial = given.value;
-    }
+  if (given?.serial != null) {
+    serial = given.serial;
+  } else if (given?.value != null) {
+    serial = given.value;
+  } else if (serial && remembered) {
+    // what the device was first published with wins over what was worked out now
+    serial = remembered(serial);
   }
 
   return {

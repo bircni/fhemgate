@@ -3,6 +3,7 @@ import type { Characteristic, Service } from '@homebridge/hap-nodejs';
 import type { Logging } from 'homebridge';
 import { detectMappings, reviseMappings } from '../devices/detect.ts';
 import { deviceIdentity } from '../devices/identity.ts';
+import { identityKey, type IdentityStore } from '../devices/identityStore.ts';
 import type { Jsonlist2Device } from '../devices/types.ts';
 import { prepareMappings } from '../mapping/compile.ts';
 import { parseHomebridgeMapping } from '../mapping/parser.ts';
@@ -31,6 +32,8 @@ export interface AccessoryPlatform {
   jsFunctions?: unknown;
   /** false if mappings must not carry JavaScript */
   allowInlineFunctions?: boolean;
+  /** what each device was first published as. without it a device is what is worked out for it now. */
+  identities?: IdentityStore;
 }
 
 /**
@@ -180,7 +183,16 @@ export class FhemAccessory {
 
     this.#logMappings(s);
 
-    Object.assign(this, deviceIdentity(s, this.mappings));
+    const identities = platform.identities;
+    const baseUrl = (platform.connection as { base_url?: string } | undefined)?.base_url;
+    Object.assign(
+      this,
+      deviceIdentity(
+        s,
+        this.mappings,
+        identities && ((computed) => identities.resolve(identityKey(baseUrl, s.Internals.NAME, s.Internals.FUUID), computed, this.log)),
+      ),
+    );
 
     prepareMappings(this, s, {
       characteristics: state.hap.Characteristic as unknown as Record<string, unknown>,
