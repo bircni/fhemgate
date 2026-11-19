@@ -2,14 +2,14 @@
 import type { PluginState } from '../state/pluginState.ts';
 import { ct2rgb, rgb2hsv, xyY2rgb, type Hsv } from '../util/color.ts';
 import { describeError, requestOptions, type ConnectionStatus, type FhemConnection } from './client.ts';
-import { get } from './http.ts';
+import { get, type HttpResponse } from './http.ts';
 import { longpollUrl, parseEventLine, reconnectDelayAfterEnd, retryDelayAfterError } from './protocol.ts';
 
 /**
  * Opens the long poll to the fhem of the connection, unless there is one already, and keeps it
  * open: when it ends or fails it is opened again after a pause that grows with every attempt.
  * A fhem that was never reached is given up after the fourth failure, unless the connection
- * says never to.
+ * says never to. A fhem that refuses user and password is tried again for as long as it does.
  *
  * @param onConnected called every time FHEMWEB has answered the request
  */
@@ -68,8 +68,16 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
     });
   };
 
+  // set when FHEMWEB answers that user and password are missing or wrong
+  let refused: HttpResponse | undefined;
+
   get(url, requestOptions(connection), {
     onData: (data) => {
+      if (refused) {
+        // the text of the refusal, no events
+        return;
+      }
+
       const length = data.length;
       status.received = (status.received ?? 0) + length;
       status.received_total += length;
@@ -106,6 +114,11 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
     },
 
     onResponse: (response) => {
+      if (response.statusCode === 401 || response.statusCode === 403) {
+        refused = response;
+        return;
+      }
+
       const token = response.headers['x-fhem-csrftoken'];
       state.csrfToken[connection.base_url] = token ? String(token) : '';
 
@@ -116,6 +129,26 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
       status.connected = false;
 
       status.disconnects++;
+
+      if (refused) {
+        // trying again at once does not help. the pause grows as after a failure, and it is
+        // tried for as long as homebridge runs: the password may be corrected in fhem.
+        const timeout = retryDelayAfterError(status.disconnects);
+        connection.log.error(
+          'longpoll refused by fhem with ' +
+            refused.statusCode +
+            ' ' +
+            refused.statusMessage +
+            ': authentication failed. check user and password (auth) of the platform. retry in: ' +
+            timeout +
+            'msec',
+        );
+        setTimeout(() => {
+          startLongpoll(state, connection, onConnected);
+        }, timeout);
+        return;
+      }
+
       const timeout = reconnectDelayAfterEnd(status.disconnects);
 
       connection.log.error('longpoll ended, reconnect in: ' + timeout + 'msec');
