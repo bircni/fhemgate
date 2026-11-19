@@ -317,6 +317,43 @@ describe('writing a characteristic', () => {
   });
 });
 
+describe('the heating state of a thermostat', () => {
+  const thermostat = (readings: Record<string, string>) =>
+    device({
+      Internals: { NAME: 'valve', TYPE: 'CUL_HM', DEF: '123456' },
+      Readings: { 'desired-temp': '21.0', 'measured-temp': '19.0', ...readings },
+      PossibleSets: 'desired-temp:slider,4.5,0.5,30.5',
+    });
+
+  it('follows the valve: off while it is closed, heating while it is open', async () => {
+    const world = createWorld();
+    const services = world.accessory(thermostat({ actuator: '0' })).getServices();
+    const state = characteristicOf(serviceOf(services, 'Thermostat'), Characteristic.CurrentHeatingCoolingState);
+    expect(state.value).toBe(Characteristic.CurrentHeatingCoolingState.OFF);
+
+    const seen: unknown[] = [];
+    for (const position of ['12', '0 %', '0.5', '0.0', '100']) {
+      world.update('valve-actuator', position);
+      await settle();
+      seen.push(state.value);
+    }
+
+    const { OFF, HEAT } = Characteristic.CurrentHeatingCoolingState;
+    expect(seen).toEqual([HEAT, OFF, HEAT, OFF, HEAT]);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('is heating when the thermostat reports no valve position', () => {
+    const world = createWorld();
+    const accessory = world.accessory(thermostat({}));
+    const state = characteristicOf(serviceOf(accessory.getServices(), 'Thermostat'), Characteristic.CurrentHeatingCoolingState);
+
+    expect(accessory.mappings.CurrentHeatingCoolingState).toMatchObject({ default: Characteristic.CurrentHeatingCoolingState.HEAT });
+    expect(accessory.mappings.CurrentHeatingCoolingState).not.toHaveProperty('reading');
+    expect(read(state)).toEqual({ error: undefined, value: Characteristic.CurrentHeatingCoolingState.HEAT, answered: true });
+  });
+});
+
 describe('readings without a value in the values list', () => {
   it('are reported as an error every time they arrive', async () => {
     const world = createWorld();

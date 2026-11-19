@@ -121,15 +121,23 @@ export const pid20Desired: Rule = ({ s, target }) => {
   return true;
 };
 
+/** a valve position of zero, as `0`, `0.0` or with a unit behind it */
+const valveClosed = '/^0+(\\.0+)?( |%|$)/';
+
 /**
- * A thermostat says nothing about whether it is heating, so it is shown as heating.
- * This also holds while its valve is closed.
+ * A thermostat says nothing about whether it is heating. With a valve position it is heating
+ * while the valve is open. Without one nothing is known, and it is shown as heating.
  */
 export const heatingStateDefault: Rule = ({ target }) => {
   if (target.service_name !== 'thermostat') {
     return false;
   }
 
-  target.mappings.CurrentHeatingCoolingState = { default: 'HEAT' };
+  const valve = target.mappings[CustomUUIDs.Actuation] as Mapping | undefined;
+  if (valve?.reading !== undefined) {
+    target.mappings.CurrentHeatingCoolingState = { reading: valve.reading, values: [valveClosed + ':OFF', '/.*/:HEAT'], default: 'HEAT' };
+  } else {
+    target.mappings.CurrentHeatingCoolingState = { default: 'HEAT' };
+  }
   return true;
 };
