@@ -34,7 +34,8 @@ export function parseHomebridgeMapping(
 
   target.log.info('homebridgeMapping: ' + homebridgeMapping);
 
-  if (/^{.*}$/.test(homebridgeMapping)) {
+  // an object, on one line or on many
+  if (/^\s*\{[\s\S]*\}\s*$/.test(homebridgeMapping)) {
     try {
       target.mappings = JSON.parse(homebridgeMapping) as Mappings;
     } catch (err) {
