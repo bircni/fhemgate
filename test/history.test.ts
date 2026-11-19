@@ -163,8 +163,6 @@ describe('a contact sensor with history', () => {
 
     expect(read(reset)).toEqual({ error: null, value: 42, answered: true });
     expect(w.cached['door-EVE-TimesOpened']).toBe(0);
-    expect(write(reset, 43, 'fromFHEM').answered).toBe(true);
-    expect(read(reset).value).toBe(42);
   });
 
   it('waits for the history to be loaded', () => {

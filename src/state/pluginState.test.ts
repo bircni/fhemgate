@@ -10,42 +10,42 @@ beforeEach(() => {
   state = new PluginState(hap);
 });
 
-function subscribed(informId: string, setValue = vi.fn()) {
-  const characteristic = { setValue, props: { format: 'string' } };
+function subscribed(informId: string, updateValue = vi.fn()) {
+  const characteristic = { updateValue, props: { format: 'string' } };
   const mapping = { reading: 'state', informId, characteristic_type: 'X', characteristic, log: createLog() } as unknown as PreparedMapping;
   state.subscriptions.subscribe({ device: 'lamp', mappings: {} }, informId, undefined, mapping);
-  return { mapping, setValue };
+  return { mapping, updateValue };
 }
 
 describe('PluginState.update', () => {
-  it('keeps the reading and hands the converted value to the characteristic, marked as coming from fhem', () => {
-    const { mapping, setValue } = subscribed('lamp-state');
+  it('keeps the reading and publishes the converted value at the characteristic without running its set handler', () => {
+    const { mapping, updateValue } = subscribed('lamp-state');
 
     state.update('lamp-state', 'on');
 
     expect(state.cache.get('lamp-state')).toBe('on');
     expect(mapping.cached).toBe('on');
-    expect(setValue).toHaveBeenCalledWith('on', undefined, 'fromFHEM');
+    expect(updateValue).toHaveBeenCalledWith('on');
   });
 
   it('does nothing for a value that is already known, or for no value', () => {
-    const { setValue } = subscribed('lamp-state');
+    const { updateValue } = subscribed('lamp-state');
     state.update('lamp-state', 'on');
 
     state.update('lamp-state', 'on');
     state.update('lamp-state', undefined);
 
-    expect(setValue).toHaveBeenCalledOnce();
+    expect(updateValue).toHaveBeenCalledOnce();
     expect(state.cache.get('lamp-state')).toBe('on');
   });
 
   it('can keep a value without telling HomeKit', () => {
-    const { mapping, setValue } = subscribed('lamp-state');
+    const { mapping, updateValue } = subscribed('lamp-state');
 
     state.update('lamp-state', 'off', true);
 
     expect(mapping.cached).toBe('off');
-    expect(setValue).not.toHaveBeenCalled();
+    expect(updateValue).not.toHaveBeenCalled();
   });
 
   it('keeps a reading nobody is subscribed to', () => {

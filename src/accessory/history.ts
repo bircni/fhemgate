@@ -204,13 +204,11 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
     characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.PAIRED_WRITE] });
     log.debug('      props: ' + util.inspect(characteristic.props));
     characteristic
-      .on('set', (value, callback, context) => {
-        if (context !== 'fromFHEM') {
-          // eslint-disable-next-line @typescript-eslint/no-base-to-string -- logged as it comes
-          log('set reset: ' + String(value));
-          historyService.extra_persist.reset = value as number;
-          state.update(mapping.device + '-EVE-TimesOpened', 0);
-        }
+      .on('set', (value, callback) => {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string -- logged as it comes
+        log('set reset: ' + String(value));
+        historyService.extra_persist.reset = value as number;
+        state.update(mapping.device + '-EVE-TimesOpened', 0);
         callback();
       })
       .on('get', (callback) => {

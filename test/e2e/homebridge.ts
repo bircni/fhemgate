@@ -2,7 +2,7 @@
 // controller does. homebridge runs in insecure mode, which lets it be asked without pairing.
 import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { createServer, type AddressInfo } from 'node:net';
+import { connect, createServer, type AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -66,6 +66,20 @@ export function shortType(uuid: string): string {
   return (match?.[1] ?? uuid).toUpperCase();
 }
 
+/** a value homebridge sent on its own, because the characteristic changed */
+export interface HapEvent {
+  aid: number;
+  iid: number;
+  value: unknown;
+}
+
+/** a connection of a controller that asked to be told about changes */
+export interface HapSubscription {
+  /** the events received so far */
+  events: HapEvent[];
+  close(): void;
+}
+
 export interface Homebridge {
   /** everything homebridge wrote to its log */
   output(): string;
@@ -73,6 +87,8 @@ export interface Homebridge {
   accessories(): Promise<HapAccessory[]>;
   read(characteristic: HapCharacteristic): Promise<unknown>;
   write(characteristic: HapCharacteristic, value: unknown): Promise<void>;
+  /** asks to be told about changes of the characteristics, on a connection that stays open as the one of a controller does */
+  subscribe(characteristics: HapCharacteristic[]): Promise<HapSubscription>;
   stop(): Promise<void>;
 }
 
@@ -161,6 +177,70 @@ export async function startHomebridge(platform: Record<string, unknown>, files: 
       if (!response.ok) {
         throw new Error(`homebridge answered ${response.status} to the write`);
       }
+    },
+
+    subscribe(characteristics) {
+      // HAP sends events as messages of their own down the connection the subscription was made
+      // on: `EVENT/1.0 200 OK`, headers, and a JSON body. fetch can not read those, so this
+      // speaks HTTP over a socket by hand.
+      const body = JSON.stringify({ characteristics: characteristics.map(({ aid, iid }) => ({ aid, iid, ev: true })) });
+      const events: HapEvent[] = [];
+
+      return new Promise((resolve, reject) => {
+        const socket = connect(port, '127.0.0.1');
+        let received = '';
+        let subscribed = false;
+
+        const takeMessages = (): void => {
+          for (;;) {
+            const headEnd = received.indexOf('\r\n\r\n');
+            if (headEnd < 0) {
+              return;
+            }
+            const head = received.slice(0, headEnd);
+            const length = Number(/^content-length: *(\d+)/im.exec(head)?.[1] ?? 0);
+            // the messages are ASCII, so characters are bytes
+            if (received.length < headEnd + 4 + length) {
+              return;
+            }
+            const content = received.slice(headEnd + 4, headEnd + 4 + length);
+            received = received.slice(headEnd + 4 + length);
+
+            if (head.startsWith('EVENT/1.0 200')) {
+              events.push(...(JSON.parse(content) as { characteristics: HapEvent[] }).characteristics);
+            } else if (!subscribed && /^HTTP\/1\.1 20[47]/.test(head) && !content.includes('"status":-')) {
+              subscribed = true;
+              resolve({
+                events,
+                close: () => {
+                  socket.destroy();
+                },
+              });
+            } else if (!subscribed) {
+              socket.destroy();
+              reject(new Error(`homebridge answered the subscription with: ${head.split('\r\n')[0]} ${content}`));
+            }
+          }
+        };
+
+        socket.setEncoding('latin1');
+        socket.on('data', (chunk: string) => {
+          received += chunk;
+          takeMessages();
+        });
+        socket.on('error', reject);
+        socket.on('connect', () => {
+          socket.write(
+            'PUT /characteristics HTTP/1.1\r\n' +
+              `Host: 127.0.0.1:${port}\r\n` +
+              'Content-Type: application/hap+json\r\n' +
+              // without pairing, the request is authorized with the pin of the bridge
+              `Authorization: ${pin}\r\n` +
+              `Content-Length: ${Buffer.byteLength(body)}\r\n\r\n` +
+              body,
+          );
+        });
+      });
     },
 
     stop() {

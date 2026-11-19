@@ -300,15 +300,6 @@ describe('writing a characteristic', () => {
     expect(world.sent).toEqual(['set lamp off', 'set lamp on']);
   });
 
-  it('sends nothing when the value comes from fhem', () => {
-    const world = createWorld();
-    const on = characteristicOf(serviceOf(world.accessory(lamp()).getServices(), 'Switch'), Characteristic.On);
-
-    expect(write(on, false, 'fromFHEM').answered).toBe(true);
-
-    expect(world.sent).toEqual([]);
-  });
-
   it('takes a reading that changed in fhem without sending it back', async () => {
     const world = createWorld();
     const on = characteristicOf(serviceOf(world.accessory(lamp()).getServices(), 'Switch'), Characteristic.On);
