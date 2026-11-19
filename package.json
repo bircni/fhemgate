@@ -40,6 +40,7 @@
     "test:watch": "vitest",
     "test:e2e": "bun run build && vitest run --config vitest.e2e.config.ts",
     "coverage": "vitest run --coverage",
+    "coverage:e2e": "bun run build && node scripts/coverage-e2e.ts",
     "pack-smoke": "node scripts/pack-smoke.ts",
     "verify": "bun install --frozen-lockfile && bun run format:check && bun run lint && bun run typecheck && bun run coverage && bun run build && bun run pack-smoke && vitest run --config vitest.e2e.config.ts",
     "prepublishOnly": "bun run verify"
