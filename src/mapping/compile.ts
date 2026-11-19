@@ -80,7 +80,8 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       if (parts[1]) {
         characteristic_type = parts[1];
       }
-      const names = environment.characteristics[characteristic_type] as ValueNames;
+      // the class the owner found knows the names of its values, also when the mapping calls it by an older name
+      const names = (mapping.characteristic ?? environment.characteristics[characteristic_type]) as ValueNames;
 
       //FIXME: better integrate eventMap
       if (s.Attributes.eventMap) {

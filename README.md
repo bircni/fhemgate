@@ -241,6 +241,8 @@ examples:
                                 BatteryService#StatusLowBattery=battery,threshold=20,values=0:BATTERY_LEVEL_LOW;;1:BATTERY_LEVEL_NORMAL
                                 BatteryService#ChargingState=charging
 ```
+  `BatteryService` is what the `Battery` service was called before. both names work, as do the other
+  service and characteristic names HAP-NodeJS has renamed since.
 
 
 instead of the format described above homebridgeMapping can also contain the same data encoded as json

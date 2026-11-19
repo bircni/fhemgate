@@ -55,6 +55,32 @@ const serviceNameOfGenericDeviceType: Record<string, string | null | undefined> 
   lock: 'LockMechanism',
 };
 
+// the names HAP-NodeJS had for some services and characteristics before its version 2. existing
+// homebridgeMapping attributes use them, so they stay known.
+const renamedServices: Record<string, string | undefined> = {
+  BatteryService: 'Battery',
+  Slat: 'Slats',
+  Label: 'ServiceLabel',
+  Relay: 'CloudRelay',
+  TunneledBTLEAccessoryService: 'Tunnel',
+  CameraEventRecordingManagement: 'CameraRecordingManagement',
+};
+const renamedCharacteristics: Record<string, string | undefined> = {
+  LabelIndex: 'ServiceLabelIndex',
+  LabelNamespace: 'ServiceLabelNamespace',
+  PairingPairings: 'ListPairings',
+  SelectedStreamConfiguration: 'SelectedRTPStreamConfiguration',
+};
+
+/** the class HAP-NodeJS has under the name, or under the name it gave it since */
+function classOfName(classes: Record<string, unknown>, renamed: Record<string, string | undefined>, name: string): { name: string; found: unknown } {
+  const current = Object.hasOwn(renamed, name) ? renamed[name] : undefined;
+  if (classes[name] === undefined && current !== undefined) {
+    return { name: current, found: classes[current] };
+  }
+  return { name, found: classes[name] };
+}
+
 /**
  * One fhem device as a HomeKit accessory. homebridge asks it for its services once and from
  * then on talks to the characteristics of those.
@@ -416,9 +442,10 @@ export class FhemAccessory {
   /** a new service for a genericDeviceType value or the name of a HomeKit service. undefined if there is no such service. */
   serviceOfName(service_name: string | undefined, subtype?: string): NamedService | undefined {
     const translated = serviceNameOfGenericDeviceType[service_name as string];
-    const serviceName = translated !== undefined ? translated : service_name;
+    const given = translated !== undefined ? translated : service_name;
 
-    const serviceClass = (this.#state.hap.Service as unknown as Record<string, unknown>)[serviceName as string];
+    const services = this.#state.hap.Service as unknown as Record<string, unknown>;
+    const { name: serviceName, found: serviceClass } = classOfName(services, renamedServices, given as string);
     if (typeof serviceClass === 'function') {
       let name = this.siriName;
       if (subtype) {
@@ -427,7 +454,7 @@ export class FhemAccessory {
 
       this.log('  ' + serviceName + ' service for ' + this.name + (subtype ? ' (' + subtype + ')' : ''));
       const service = new (serviceClass as new (name?: string, subtype?: string) => NamedService)(name, subtype ? subtype : '');
-      service.service_name = serviceName as string;
+      service.service_name = serviceName;
       return service;
     }
 
@@ -443,7 +470,8 @@ export class FhemAccessory {
     const parts = name.split('#');
     const characteristicName = parts[1] ? parts[1] : name;
 
-    const characteristic = (this.#state.hap.Characteristic as unknown as Record<string, unknown>)[characteristicName];
+    const characteristics = this.#state.hap.Characteristic as unknown as Record<string, unknown>;
+    const characteristic = classOfName(characteristics, renamedCharacteristics, characteristicName).found;
     if (typeof characteristic === 'function') {
       return characteristic as CharacteristicClass;
     }

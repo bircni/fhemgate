@@ -940,3 +940,83 @@ describe('mappings for the accessory information', () => {
     expect(names(serviceOf(world.accessory(outlet).getServices(), 'Outlet'))).toEqual(['Name', 'On', 'Firmware Revision']);
   });
 });
+
+describe('names of services and characteristics', () => {
+  const kinds = (services: { constructor: { name: string }; subtype?: string }[]) => services.map((service) => service.constructor.name);
+  const switched = (homebridgeMapping: string) =>
+    device({
+      Internals: { NAME: 'plug' },
+      Readings: { state: 'on', level: '15', charging: '1', nr: '2' },
+      PossibleSets: 'on off',
+      Attributes: { genericDeviceType: 'switch', homebridgeMapping },
+    });
+
+  it('are still known by the name HAP-NodeJS had for them before it renamed them, as in the example of the README', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      switched(
+        'On=state,cmdOn=on,cmdOff=off BatteryService#BatteryLevel=level ' +
+          'BatteryService#StatusLowBattery=level,threshold=20,values=0:BATTERY_LEVEL_LOW;1:BATTERY_LEVEL_NORMAL BatteryService#ChargingState=charging',
+      ),
+    );
+
+    const services = accessory.getServices();
+
+    expect(kinds(services)).toEqual(['AccessoryInformation', 'Switch', 'Battery']);
+    const battery = serviceOf(services, 'Battery');
+    expect(characteristicOf(battery, Characteristic.BatteryLevel).value).toBe(15);
+    expect(characteristicOf(battery, Characteristic.StatusLowBattery).value).toBe(Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW);
+    expect(characteristicOf(battery, Characteristic.ChargingState).value).toBe(Characteristic.ChargingState.CHARGING);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('are known by their older name for characteristics as well, with the names of their values', () => {
+    const world = createWorld();
+    const accessory = world.accessory(switched('Label#LabelNamespace=nr,values=2:ARABIC_NUMERALS;/.*/:DOTS LabelIndex=nr'));
+
+    const label = serviceOf(accessory.getServices(), 'ServiceLabel');
+
+    expect(characteristicOf(label, Characteristic.ServiceLabelNamespace).value).toBe(Characteristic.ServiceLabelNamespace.ARABIC_NUMERALS);
+    expect(characteristicOf(label, Characteristic.ServiceLabelIndex).value).toBe(2);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it.each([
+    ['Service', 'BatteryService', 'Battery'],
+    ['Service', 'Slat', 'Slats'],
+    ['Service', 'Label', 'ServiceLabel'],
+    ['Service', 'Relay', 'CloudRelay'],
+    ['Service', 'TunneledBTLEAccessoryService', 'Tunnel'],
+    ['Service', 'CameraEventRecordingManagement', 'CameraRecordingManagement'],
+    ['Characteristic', 'LabelIndex', 'ServiceLabelIndex'],
+    ['Characteristic', 'LabelNamespace', 'ServiceLabelNamespace'],
+    ['Characteristic', 'PairingPairings', 'ListPairings'],
+    ['Characteristic', 'SelectedStreamConfiguration', 'SelectedRTPStreamConfiguration'],
+  ] as const)('the %s %s is %s by now', (kind, older, current) => {
+    const classes = hap[kind] as unknown as Record<string, unknown>;
+    const accessory = createWorld().accessory(switched(''));
+
+    expect(classes[older]).toBeUndefined();
+    expect(classes[current]).toBeTypeOf('function');
+    expect(kind === 'Service' ? accessory.serviceOfName(older)?.constructor : accessory.characteristicOfName(older)).toBe(classes[current]);
+  });
+
+  it('skip a mapping of a switch that names a service HomeKit does not know, so that homebridge takes the accessory', () => {
+    const world = createWorld();
+    const accessory = world.accessory(switched('On=state,cmdOn=on,cmdOff=off NoSuchService#BatteryLevel=level'));
+
+    const services = accessory.getServices();
+
+    expect(kinds(services)).toEqual(['AccessoryInformation', 'Switch']);
+    expect(world.log.errors()).toEqual([
+      'error plug: service name NoSuchService unknown',
+      'error plug: NoSuchService#BatteryLevel needs another NoSuchService service without a subtype. give it a subtype of its own. the mapping is skipped.',
+    ]);
+    const published = new hap.Accessory('plug', hap.uuid.generate('plug'));
+    expect(() => {
+      for (const service of services.slice(1)) {
+        published.addService(service);
+      }
+    }).not.toThrow();
+  });
+});
