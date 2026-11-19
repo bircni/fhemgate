@@ -287,6 +287,71 @@ describe('reading a characteristic', () => {
     expect(firmware.value).toBe('3.2');
     expect(read(firmware)).toEqual({ error: undefined, value: '3.2', answered: true });
   });
+
+  const withFirmware = (firmware: string) =>
+    device({ Internals: { NAME: 'plug', TYPE: 'ZWave', DEF: 'c1 2' }, Readings: { state: 'on', firmware }, PossibleSets: 'on off' });
+
+  it.each([
+    ['3.2', '3.2'],
+    ['7', '7'],
+    ['1.2.3', '1.2.3'],
+    ['1.2.3.4', '1.2.3'],
+    ['V2.10', '2.10'],
+    ['ZWave+ 4.05 (build 3)', '4.05'],
+    ['1.0-beta2', '1.0'],
+    ['20190219', '20190219'],
+  ])('takes the version out of the firmware reading %j: %s', (reading, version) => {
+    const world = createWorld();
+    const firmware = characteristicOf(serviceOf(world.accessory(withFirmware(reading)).getServices(), 'AccessoryInformation'), Characteristic.FirmwareRevision);
+
+    expect(firmware.value).toBe(version);
+    expect(read(firmware).value).toBe(version);
+  });
+
+  it.each(['unknown', 'n/a', '-', 'beta'])('leaves the firmware revision at 0.0.0 when the reading %j holds no version', (reading) => {
+    const world = createWorld();
+    const firmware = characteristicOf(serviceOf(world.accessory(withFirmware(reading)).getServices(), 'AccessoryInformation'), Characteristic.FirmwareRevision);
+
+    expect(firmware.value).toBe('0.0.0');
+    expect(firmware.listenerCount('get')).toBe(0);
+    expect(world.log.lines).toContain('warn plug: the firmware reading "' + reading + '" holds no version number. HomeKit is not told a firmware revision.');
+  });
+
+  it('follows the firmware reading, and keeps the version it has when the reading holds none', () => {
+    const world = createWorld();
+    const firmware = characteristicOf(serviceOf(world.accessory(withFirmware('3.2')).getServices(), 'AccessoryInformation'), Characteristic.FirmwareRevision);
+
+    world.update('plug-firmware', 'V3.4 beta');
+    expect(firmware.value).toBe('3.4');
+
+    world.update('plug-firmware', 'updating');
+    expect(firmware.value).toBe('3.4');
+    expect(read(firmware).value).toBe('3.4');
+  });
+
+  it('answers a read of a firmware revision that is given with a homebridgeMapping once, and keeps it off the service of the device', async () => {
+    const world = createWorld();
+    const services = world
+      .accessory(
+        device({
+          Internals: { NAME: 'plug' },
+          Readings: { state: 'on', fw: 'fw 1.2.3' },
+          PossibleSets: 'on off',
+          Attributes: { homebridgeMapping: 'FirmwareRevision=fw SerialNumber=serial=ABC123 Manufacturer=value=ACME' },
+        }),
+      )
+      .getServices();
+    const firmware = characteristicOf(serviceOf(services, 'AccessoryInformation'), Characteristic.FirmwareRevision);
+    const warnings: string[] = [];
+    firmware.on('characteristic-warning', (_type, message) => warnings.push(message));
+
+    // the way HAP-NodeJS reads: every get handler is handed the same callback, which may be called once
+    await expect(firmware.handleGetRequest()).resolves.toBe('1.2.3');
+
+    expect(warnings).toEqual([]);
+    expect(firmware.listenerCount('get')).toBe(1);
+    expect(serviceOf(services, 'Switch').characteristics.map((characteristic) => characteristic.displayName)).toEqual(['Name', 'On']);
+  });
 });
 
 describe('writing a characteristic', () => {

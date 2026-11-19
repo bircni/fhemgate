@@ -72,7 +72,12 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
     .setCharacteristic(Characteristic.SerialNumber, informationText(accessory.mappings.SerialNumber) ?? (accessory.serial ? accessory.serial : '<unknown>'));
 
   const firmwareRevision = single('FirmwareRevision');
-  if (firmwareRevision) {
+  if (firmwareRevision && firmwareRevision.cached === undefined) {
+    // the characteristic keeps the 0.0.0 it starts with
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- readings are text
+    const reading = String(cached[firmwareRevision.informId as string] ?? '');
+    log.warn(accessory.name + ': the firmware reading "' + reading + '" holds no version number. HomeKit is not told a firmware revision.');
+  } else if (firmwareRevision) {
     log('    firmware revision characteristic for ' + accessory.name);
 
     // getCharacteristic only adds what the service knows as optional. the types say it always answers.
@@ -83,13 +88,11 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
 
     accessory.subscribe(firmwareRevision, characteristic);
 
-    setQuietly(characteristic, cached[firmwareRevision.informId as string]);
+    // the version that was taken out of the reading when the mappings were prepared
+    setQuietly(characteristic, firmwareRevision.cached);
 
     characteristic.on('get', (callback) => {
-      const mapping = single('FirmwareRevision');
-      if (mapping) {
-        accessory.query(mapping, callback as QueryCallback);
-      }
+      accessory.query(firmwareRevision, callback as QueryCallback);
     });
   }
 
