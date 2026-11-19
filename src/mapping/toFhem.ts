@@ -48,8 +48,7 @@ export function commandFor(source: CommandSource, target: PreparedMapping | stri
   let command: string;
   if (c === 'identify') {
     if (source.type === 'HUEDevice') {
-      // the blank after the device is missing.
-      command = 'set ' + source.device + 'alert select';
+      command = 'set ' + source.device + ' alert select';
     } else {
       command = 'set ' + source.device + ' toggle; sleep 1; set ' + source.device + ' toggle';
     }

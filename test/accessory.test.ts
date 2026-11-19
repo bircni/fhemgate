@@ -389,7 +389,7 @@ describe('commands', () => {
     expect(identified).toHaveBeenCalledOnce();
   });
 
-  it('identifies a hue device with a command that lacks a space', () => {
+  it('identifies a hue device by letting it blink once', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -401,7 +401,7 @@ describe('commands', () => {
 
     accessory.identify(() => undefined);
 
-    expect(world.sent).toEqual(['set bulbalert select']);
+    expect(world.sent).toEqual(['set bulb alert select']);
   });
 
   it('does not identify a device that can not toggle', () => {
