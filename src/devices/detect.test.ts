@@ -101,6 +101,40 @@ describe('a window', () => {
   });
 });
 
+describe('an FS20 dimmer', () => {
+  const step = (percent: number) => {
+    const { target } = detect({ PossibleSets: 'on off dim06% dim50% dim100%', Readings: { state: { Value: 'dim50%' } } });
+    return (target.mappings.Brightness as { homekit2reading: (value: number) => unknown }).homekit2reading(percent);
+  };
+
+  it.each([
+    [0, 'off'],
+    [1, 'dim06%'],
+    [6, 'dim06%'],
+    [9, 'dim06%'],
+    [10, 'dim12%'],
+    [25, 'dim25%'],
+    [50, 'dim50%'],
+    [53, 'dim50%'],
+    [54, 'dim56%'],
+    [75, 'dim75%'],
+    [96, 'dim93%'],
+    [97, 'dim100%'],
+    [100, 'dim100%'],
+  ])('sends a brightness of %i as %s, the nearest of its sixteen steps', (percent, command) => {
+    expect(step(percent)).toBe(command);
+  });
+
+  it('reads back the step it sent', () => {
+    const { target } = detect({ PossibleSets: 'on off dim06% dim50% dim100%', Readings: { state: { Value: 'dim50%' } } });
+    const brightness = target.mappings.Brightness as { reading2homekit: (value: string) => number; homekit2reading: (value: number) => string };
+
+    for (const percent of [6, 12, 18, 25, 31, 37, 43, 50, 56, 62, 68, 75, 81, 87, 93, 100]) {
+      expect(brightness.reading2homekit(brightness.homekit2reading(percent)), `${percent}`).toBe(percent);
+    }
+  });
+});
+
 describe('reviseMappings', () => {
   it('takes the switch away from what has a position', () => {
     const { target, s } = detect({ PossibleSets: 'on off pct', Attributes: { subType: 'blindActuator' } });

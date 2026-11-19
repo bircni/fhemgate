@@ -114,12 +114,14 @@ const fs20Steps = [
   'dim100%',
 ];
 
+/** the step that is nearest to the brightness: the steps are 6.25 % apart, the first one is 6.25 %. `off` for no brightness. */
 function percent2fs20Step(_mapping: Mapping, orig: number): string | undefined {
-  if (orig > 97) {
-    return 'dim100%';
+  if (orig <= 0) {
+    return 'off';
   }
 
-  return fs20Steps[Math.round(orig / 6.25)];
+  const step = Math.min(Math.max(Math.round(orig / 6.25), 1), fs20Steps.length);
+  return fs20Steps[step - 1];
 }
 
 /** the FS20 dimmer model that is only switched */

@@ -9150,13 +9150,13 @@ exports[`dimmer/fs20-dimmer > is detected 1`] = `
 exports[`dimmer/fs20-dimmer > sends commands 1`] = `
 {
   "Brightness": [
-    "set fs20_dimmer   dim06% <- true false 0 1 2 3",
-    "set fs20_dimmer   dim18% <- 10",
-    "set fs20_dimmer   dim56% <- 50",
+    "set fs20_dimmer   dim06% <- true 1 2 3",
+    "set fs20_dimmer   off <- false 0 -90",
+    "set fs20_dimmer   dim12% <- 10",
+    "set fs20_dimmer   dim50% <- 50",
     "set fs20_dimmer   dim100% <- 100 359",
-    "set fs20_dimmer   dim25% <- 21.5",
-    "(nothing) <- -90",
-    "set fs20_dimmer   dim93% <- 90",
+    "set fs20_dimmer   dim18% <- 21.5",
+    "set fs20_dimmer   dim87% <- 90",
   ],
   "On": [
     "set fs20_dimmer on <- true 1",
