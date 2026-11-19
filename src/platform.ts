@@ -115,7 +115,7 @@ export class FhemPlatform implements StaticPlatformPlugin {
 
   /**
    * Makes sure fhem knows the homebridgeMapping and genericDeviceType attributes, and looks for
-   * the siri device. Called every time the long poll was opened.
+   * the siri device until it is found. Called every time the long poll was opened.
    *
    * Ends the homebridge process after it created the genericDeviceType attribute.
    */
@@ -139,7 +139,10 @@ export class FhemPlatform implements StaticPlatformPlugin {
       }
     });
 
-    // meant to happen only until the siri device is known, but happens every time.
+    if (this.siri_device !== undefined) {
+      return;
+    }
+
     this.execute('jsonlist2 TYPE=siri', (result) => {
       try {
         const d = JSON.parse(result) as { totalResultsReturned: number; Results: { Name: string }[] };

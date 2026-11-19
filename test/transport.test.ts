@@ -423,12 +423,28 @@ describe('reconnecting', () => {
     expect(world.longpoll[baseUrl()]).toMatchObject({ connected: true, connects: 2 });
   });
 
-  it('looks at the attributes again after every reconnect', async () => {
+  it('looks at the attributes again after every reconnect, and for the siri device as long as there is none', async () => {
     await connect();
     fhem.endStreams();
     await waitFor(() => fhem.commands.filter((cmd) => cmd === 'jsonlist2 TYPE=siri').length === 2, 'the second check');
 
     expect(fhem.commands.filter((cmd) => cmd.startsWith('{AttrVal'))).toHaveLength(2);
+  });
+
+  it('does not look for the siri device again once it is known', async () => {
+    const platform = await connect({
+      answer: (cmd) => (cmd === 'jsonlist2 TYPE=siri' ? { body: JSON.stringify({ Results: [{ Name: 'siri' }], totalResultsReturned: 1 }) } : undefined),
+    });
+    expect(platform.siri_device).toBe('siri');
+    await waitFor(() => fhem.commands.some((cmd) => cmd.startsWith('{$defs{siri}')), 'the version to be noted');
+
+    fhem.endStreams();
+    await waitFor(() => fhem.commands.filter((cmd) => cmd.startsWith('{AttrVal')).length === 2, 'the second check');
+    // long enough for a second lookup to arrive, which is sent right after the check
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(fhem.commands.filter((cmd) => cmd === 'jsonlist2 TYPE=siri')).toHaveLength(1);
+    expect(fhem.commands.filter((cmd) => cmd.startsWith('{$defs{siri}'))).toHaveLength(1);
   });
 
   it('gives up after four failed attempts when it never reached fhem', async () => {
