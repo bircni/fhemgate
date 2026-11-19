@@ -30,6 +30,44 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
   let input = '';
   const decoder = new TextDecoder();
 
+  /** takes one line of the stream to the characteristics that are subscribed to its reading */
+  const handleLine = (line: string, lastEventTime: number): void => {
+    const event = parseEventLine(line);
+    if (!event) {
+      return;
+    }
+
+    const subscriptions = state.subscriptions.byInformId[event.informId];
+    if (!subscriptions) {
+      return;
+    }
+
+    state.update(event.informId, event.value);
+    status.last_event_time = lastEventTime;
+
+    subscriptions.forEach((subscription) => {
+      // a light that takes its colour as xy or colour temperature reports no hue and
+      // saturation for it. they are worked out here for the mappings that read them.
+      if (subscription.accessory.mappings.colormode) {
+        let hsv: Hsv;
+        if (event.reading === 'xy') {
+          const xy = event.value.split(',');
+          hsv = rgb2hsv(xyY2rgb(xy[0] as string, xy[1] as string, 1)) as Hsv;
+        } else if (event.reading === 'ct') {
+          hsv = rgb2hsv(ct2rgb(event.value)) as Hsv;
+        } else {
+          return;
+        }
+
+        state.update(event.device + '-h', hsv[0]);
+        state.update(event.device + '-s', hsv[1]);
+        state.update(event.device + '-v', hsv[2]);
+
+        state.update(event.device + '-' + event.reading, event.value, false);
+      }
+    });
+  };
+
   get(url, requestOptions(connection), {
     onData: (data) => {
       const length = data.length;
@@ -38,57 +76,25 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
 
       input += decoder.decode(data, { stream: true });
 
-      // when something fails for one line, the lines that arrived with it and were not looked
-      // at yet stay in the buffer until more data arrives.
-      try {
-        const lastEventTime = Date.now();
-        for (;;) {
-          const nOff = input.indexOf('\n', offset);
-          if (nOff < 0) {
-            break;
-          }
-          const l = input.substring(offset, nOff);
-          offset = nOff + 1;
-
-          if (!l.length) {
-            continue;
-          }
-
-          const event = parseEventLine(l);
-          if (!event) {
-            continue;
-          }
-
-          const subscriptions = state.subscriptions.byInformId[event.informId];
-          if (subscriptions) {
-            state.update(event.informId, event.value);
-            status.last_event_time = lastEventTime;
-
-            subscriptions.forEach((subscription) => {
-              // a light that takes its colour as xy or colour temperature reports no hue and
-              // saturation for it. they are worked out here for the mappings that read them.
-              if (subscription.accessory.mappings.colormode) {
-                let hsv: Hsv;
-                if (event.reading === 'xy') {
-                  const xy = event.value.split(',');
-                  hsv = rgb2hsv(xyY2rgb(xy[0] as string, xy[1] as string, 1)) as Hsv;
-                } else if (event.reading === 'ct') {
-                  hsv = rgb2hsv(ct2rgb(event.value)) as Hsv;
-                } else {
-                  return;
-                }
-
-                state.update(event.device + '-h', hsv[0]);
-                state.update(event.device + '-s', hsv[1]);
-                state.update(event.device + '-v', hsv[2]);
-
-                state.update(event.device + '-' + event.reading, event.value, false);
-              }
-            });
-          }
+      const lastEventTime = Date.now();
+      for (;;) {
+        const nOff = input.indexOf('\n', offset);
+        if (nOff < 0) {
+          break;
         }
-      } catch (err) {
-        connection.log.error('  error in longpoll connection: ' + String(err));
+        const l = input.substring(offset, nOff);
+        offset = nOff + 1;
+
+        if (!l.length) {
+          continue;
+        }
+
+        // a line that can not be handled is reported and the lines after it are still looked at
+        try {
+          handleLine(l, lastEventTime);
+        } catch (err) {
+          connection.log.error('  error in longpoll connection: ' + String(err));
+        }
       }
 
       input = input.substring(offset);
