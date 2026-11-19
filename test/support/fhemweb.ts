@@ -15,6 +15,8 @@ export interface FakeFhemOptions {
   readings?: Record<string, string>;
   /** user and password, if FHEMWEB asks for them */
   auth?: { user: string; pass: string };
+  /** refuses every request, as FHEMWEB does for an address it does not allow */
+  forbidden?: boolean;
   /** answers a command before any of the built in answers are tried */
   answer?: (cmd: string) => { status?: number; body: string } | undefined;
 }
@@ -100,7 +102,11 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
     const url = request.url ?? '';
     fhem.requests.push({ url, authorization: request.headers.authorization });
 
-    const { auth, csrfToken } = fhem.options;
+    const { auth, csrfToken, forbidden } = fhem.options;
+    if (forbidden) {
+      response.writeHead(403, 'Forbidden').end('Forbidden');
+      return;
+    }
     if (auth && request.headers.authorization !== `Basic ${Buffer.from(`${auth.user}:${auth.pass}`).toString('base64')}`) {
       response.writeHead(401, { 'WWW-Authenticate': 'Basic realm="fhem"' }).end();
       return;

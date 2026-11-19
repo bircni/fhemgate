@@ -205,15 +205,59 @@ describe('authentication', () => {
     expect(fhem.commands).toEqual(['{AttrVal("global","userattr","")}', 'jsonlist2 TYPE=siri']);
   });
 
-  it('reports the commands FHEMWEB refuses for lack of a password', async () => {
+  it('says that the authentication failed when FHEMWEB asks for a password, and tries again with a growing pause', async () => {
     fhem = await startFakeFhem({ auth: { user: 'fhem', pass: 'secret' } });
     world = createWorld();
-    world.platform({ server: '127.0.0.1', port: fhem.port });
-    await waitFor(() => world.log.lines.filter((line) => line === 'log   401: Unauthorized').length === 2, 'the refusals');
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const platform = world.platform({ server: '127.0.0.1', port: fhem.port });
+    const refusal = (pause: number) =>
+      `error longpoll refused by fhem with 401 Unauthorized: authentication failed. check user and password (auth) of the platform. retry in: ${pause}msec`;
 
-    expect(world.csrfToken[baseUrl()]).toBe('');
-    // the refused long poll ends at once and is opened again and again
-    expect(world.log.errors()[0]).toBe('error longpoll ended, reconnect in: 200msec');
+    await waitFor(() => world.log.errors().length === 1, 'the first refusal');
+    expect(world.log.lines).toEqual([refusal(3000)]);
+
+    vi.advanceTimersByTime(2999);
+    expect(fhem.requests).toHaveLength(1);
+    vi.advanceTimersByTime(1);
+    await waitFor(() => world.log.errors().length === 2, 'the second refusal');
+    expect(world.log.lines).toEqual([refusal(3000), refusal(6000)]);
+
+    // nothing else is asked of a fhem that lets nobody in, and it is not given up
+    for (let attempt = 3; attempt <= 6; attempt++) {
+      vi.advanceTimersByTime(30000);
+      await waitFor(() => world.log.errors().length === attempt, `refusal ${attempt}`);
+    }
+    expect(world.log.errors().at(-1)).toBe(refusal(18000));
+    expect(fhem.requests.every((request) => request.url.includes('inform='))).toBe(true);
+    expect(world.csrfToken[baseUrl()]).toBeUndefined();
+    expect(platform.connection?.dead).toBeUndefined();
+    expect(world.longpoll[baseUrl()]).toMatchObject({ connected: false, connects: 6, disconnects: 6 });
+  });
+
+  it('connects once the password is accepted', async () => {
+    fhem = await startFakeFhem({ auth: { user: 'fhem', pass: 'secret' } });
+    world = createWorld();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    world.platform({ server: '127.0.0.1', port: fhem.port });
+    await waitFor(() => world.log.errors().length === 1, 'the refusal');
+
+    fhem.options.auth = undefined;
+    vi.advanceTimersByTime(3000);
+    await waitFor(() => fhem.commands.includes('jsonlist2 TYPE=siri'), 'the platform to connect');
+
+    expect(world.csrfToken[baseUrl()]).toBe('csrf_fake_token');
+    expect(world.longpoll[baseUrl()]).toMatchObject({ connected: true, connects: 2 });
+  });
+
+  it('treats 403 like 401', async () => {
+    fhem = await startFakeFhem({ forbidden: true });
+    world = createWorld();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+    world.platform({ server: '127.0.0.1', port: fhem.port });
+    await waitFor(() => world.log.errors().length === 1, 'the refusal');
+
+    expect(world.log.errors()[0]).toMatch(/^error longpoll refused by fhem with 403 Forbidden: authentication failed\..* retry in: 3000msec$/);
   });
 });
 
