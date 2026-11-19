@@ -320,13 +320,29 @@ describe('history entries', () => {
     expect(history?.entries).toEqual([
       { time: 1786882200, temp: 21.5 },
       { time: 1786882200, humidity: 55 },
-      // the air quality level, not the co2 concentration
-      { time: 1786882200, ppm: 3 },
+      // the co2 concentration, not the air quality level it stands for
+      { time: 1786882200, ppm: 900 },
       { time: 1786882200, pressure: 1013 },
       { time: 1786882200, power: 7 },
       { time: 1786882200, status: 1 },
       { time: 1786882200, status: 0 },
     ]);
+  });
+
+  it('records no air quality when its reading is no concentration', async () => {
+    const w = world();
+    w.accessory(
+      device({
+        Internals: { NAME: 'luft' },
+        Readings: { state: 'gut' },
+        Attributes: { genericDeviceType: 'AirQualitySensor', homebridgeMapping: 'AirQuality=state,values=gut:GOOD;/.*/:POOR history=size=10' },
+      }),
+    ).getServices();
+
+    w.update('luft-state', 'schlecht');
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(FakeHistory.instances[0]?.entries).toEqual([]);
   });
 
   it('records nothing for other characteristics', async () => {
