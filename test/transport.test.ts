@@ -364,7 +364,7 @@ describe('events', () => {
     expect(world.cached['bulb-v']).toBeCloseTo(0.9451, 4);
   });
 
-  it('reports the failing colour temperature conversion and holds back the rest of what arrived with it', async () => {
+  it('derives hue, saturation and brightness from the colour temperature of a light', async () => {
     const bulb = device({
       Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
       Readings: { state: 'on', onoff: '1', bri: '254', xy: '0.4573,0.41', colormode: 'ct' },
@@ -375,17 +375,31 @@ describe('events', () => {
     accessory.subscribe('bulb-ct');
     world.log.clear();
 
-    fhem.send('["bulb-ct","366","x"]\n["bulb-onoff","0","x"]\n');
+    fhem.event('bulb-ct', '366');
+    await waitFor(() => world.cached['bulb-ct'] === '366', 'the event');
+
+    // 366 mired is the warm white ffc799
+    expect(world.cached['bulb-h']).toBeCloseTo(0.0752, 4);
+    expect(world.cached['bulb-s']).toBeCloseTo(0.4, 4);
+    expect(world.cached['bulb-v']).toBe(1);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('reports an event it can not read and holds back the rest of what arrived with it', async () => {
+    const { accessory } = await published({ devices: [{ Name: 'lamp', ...lamp() }] });
+    accessory.getServices();
+    world.log.clear();
+
+    // a value that is no text
+    fhem.send('["lamp-state",1,"x"]\n["lamp-state","off","x"]\n');
     await waitFor(() => world.log.errors().length > 0, 'the error');
 
-    expect(world.log.errors()).toEqual(['error   error in longpoll connection: ReferenceError: log is not defined']);
-    expect(world.cached['bulb-ct']).toBe('366');
+    expect(world.log.errors()).toEqual(['error   error in longpoll connection: TypeError: value.match is not a function']);
     // what arrived together with the failing event is only looked at when more arrives
-    expect(world.cached['bulb-onoff']).toBe('1');
+    expect(world.cached['lamp-state']).toBe('on');
 
-    fhem.event('bulb-bri', '100');
-    await waitFor(() => world.cached['bulb-bri'] === '100', 'the next event');
-    expect(world.cached['bulb-onoff']).toBe('0');
+    fhem.send('\n');
+    await waitFor(() => world.cached['lamp-state'] === 'off', 'the next event');
   });
 });
 

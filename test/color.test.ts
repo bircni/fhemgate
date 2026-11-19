@@ -96,10 +96,18 @@ describe('ct2rgb', () => {
     expect(color.ct2rgb(20000)).toBe('a9c5ff');
   });
 
-  it('fails for every colour temperature below 5600 kelvin', () => {
-    expect(() => color.ct2rgb(2700)).toThrow(ReferenceError);
-    expect(() => color.ct2rgb(366)).toThrow('log is not defined');
-    expect(() => color.ct2rgb('366')).toThrow(ReferenceError);
+  it('takes blue away as the light gets warmer, below 5600 kelvin', () => {
+    expect(color.ct2rgb(5500)).toBe('fffefa');
+    expect(color.ct2rgb(4000)).toBe('ffe4ce');
+    expect(color.ct2rgb(2700)).toBe('ffc697');
+    expect(color.ct2rgb(366)).toBe('ffc799');
+    expect(color.ct2rgb('366')).toBe('ffc799');
+    expect(color.ct2rgb(2000)).toBe('ffb16e');
+  });
+
+  it('stays within a byte for the warmest light', () => {
+    expect(color.ct2rgb(1000)).toBe('ff890e');
+    expect(color.ct2rgb(1001)).toBe('ff890e');
   });
 });
 
