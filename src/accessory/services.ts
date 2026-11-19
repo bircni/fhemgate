@@ -140,11 +140,10 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   let controlService = accessory.createDeviceService(accessory.service_name);
   services.push(controlService);
 
-  // the service, the mapping and the characteristic type of the last mapping that was looked at
-  // stay for the mappings that follow and for the history characteristics after the loop:
-  // a mapping without a service of its own lands on the service of the mapping before it.
+  // the service and the characteristic type of the last mapping that was looked at stay for the
+  // mappings that follow: a mapping without a service of its own lands on the service of the
+  // mapping before it.
   let service_name = controlService.service_name as string;
-  let mapping: PreparedMapping | undefined = undefined;
 
   const seen: Record<string, boolean | undefined> = {};
   const services_hash: Record<string, NamedService | undefined> = {};
@@ -163,7 +162,6 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
     }
 
     for (const each of mappings) {
-      mapping = each;
       if (each._isInformation) {
         continue;
       }
@@ -343,7 +341,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   }
 
   if (accessory.historyService != null) {
-    addEveCharacteristics(accessory, state, controlService, mapping as PreparedMapping, service_name, seen);
+    addEveCharacteristics(accessory, state, services, controlService, seen);
   }
 
   return services;

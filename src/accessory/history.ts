@@ -217,24 +217,35 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
   }
 }
 
+/** the mapping of a characteristic, the first one if it has several */
+const firstOf = (mapping: Mapping | Mapping[] | undefined): PreparedMapping | undefined =>
+  (Array.isArray(mapping) ? mapping[0] : mapping) as PreparedMapping | undefined;
+
 /**
- * Adds the characteristics Eve reads the counters of a contact or motion sensor from.
+ * Adds the characteristics Eve reads the counters of a contact or motion sensor from. They are
+ * added to the service that has the contact or motion characteristic and read from its mapping.
  *
- * They are added to the service the last mapping of the accessory ended up on, and read from
- * that mapping, whichever it was.
+ * @param fallbackService the service to use when the sensor mapping got no characteristic
  */
 export function addEveCharacteristics(
   accessory: FhemAccessory,
   state: PluginState,
-  controlService: NamedService,
-  mapping: PreparedMapping,
-  service_name: string,
+  services: Service[],
+  fallbackService: NamedService,
   seen: Record<string, boolean | undefined>,
 ): void {
+  const mapping = firstOf(accessory.mappings.ContactSensorState) ?? firstOf(accessory.mappings.MotionDetected);
+  if (!mapping) {
+    return;
+  }
+
   const { Formats, Perms } = state.hap;
   const Custom = state.hap.Characteristic as unknown as CustomCharacteristicClass;
   const log = accessory.log;
   const from = mapping.device + ':' + mapping.reading;
+  const controlService =
+    (services as NamedService[]).find((service) => service.characteristics.includes(mapping.characteristic as Characteristic)) ?? fallbackService;
+  const service_name = controlService.service_name as string;
 
   const answerZero =
     (name: string) =>
