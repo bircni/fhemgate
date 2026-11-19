@@ -141,17 +141,19 @@ describe('reading a characteristic', () => {
     expect(world.log.lines).toEqual(['info query: ContactSensorState for door-Window', 'info   cached: 1 (as number; means CONTACT_NOT_DETECTED)']);
   });
 
-  it('asks for a reading given by its name, but fails on the answer', () => {
+  it('asks fhem for a reading given by its name and answers its text', () => {
     const world = createWorld({ respond: () => '42' });
     const accessory = world.accessory(lamp());
     const answered = vi.fn();
+    world.log.clear();
 
-    // without a mapping there is nothing to convert the answer with, or to log to
-    expect(() => accessory.query('level', answered)).toThrow(TypeError);
+    expect(accessory.query('level', answered)).toBeUndefined();
 
     expect(world.sent).toEqual(['{ReadingsVal("lamp","level","")}']);
-    expect(answered).not.toHaveBeenCalled();
-    expect(world.cached.undefined).toBe('42');
+    expect(answered).toHaveBeenCalledExactlyOnceWith(undefined, '42');
+    expect(world.cached['lamp-level']).toBe('42');
+    expect(world.cached).not.toHaveProperty('undefined');
+    expect(world.log.lines).toEqual(['info query: level for lamp-level', 'info   not cached', 'info   value: 42']);
   });
 
   it('answers 1 as error when there is neither a reading nor a default', () => {
@@ -425,7 +427,7 @@ describe('commands', () => {
     expect(identified).toHaveBeenCalledOnce();
   });
 
-  it('knows two commands that are given by name instead of by mapping', () => {
+  it('takes a command that is given by name instead of by mapping', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -438,10 +440,11 @@ describe('commands', () => {
     accessory.command('xhue', 180);
     accessory.command('xsat', 50);
 
-    expect(world.sent).toEqual(['set bulb hue 32859', 'set bulb sat 127']);
-    expect(() => {
-      accessory.command('other', 1);
-    }).toThrow(TypeError);
+    accessory.command('bri', 100);
+    accessory.command('toggle');
+
+    expect(world.sent).toEqual(['set bulb hue 32859', 'set bulb sat 127', 'set bulb bri 100', 'set bulb toggle']);
+    expect(world.log.lines.at(-1)).toBe('info bulb sending command toggle with value undefined');
   });
 
   it('sends nothing when a converter leaves the value unchanged or fails', () => {

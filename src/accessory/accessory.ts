@@ -266,24 +266,27 @@ export class FhemAccessory {
   /**
    * The value of the characteristic of the mapping: from the cache of the mapping, or from fhem
    * for a mapping that is not cached. Answers the callback, and returns the value if it was cached.
+   *
+   * Given the name of a reading of the device instead of a mapping, fhem is asked for it and the
+   * callback gets the text of the reading.
    */
   query(target: PreparedMapping | string, callback?: QueryCallback): HomekitValue | undefined {
-    const mapping = target as PreparedMapping;
+    const mapping = typeof target === 'object' ? target : undefined;
     let device = this.device;
     let reading: string | undefined;
 
-    if (typeof target === 'object') {
-      if (target.device) {
-        device = target.device;
+    if (mapping) {
+      if (mapping.device) {
+        device = mapping.device;
       }
-      if (target.reading) {
-        reading = target.reading;
+      if (mapping.reading) {
+        reading = mapping.reading;
       }
     } else {
-      reading = target;
+      reading = target as string;
     }
 
-    if (reading === undefined && mapping.default === undefined) {
+    if (reading === undefined && mapping?.default === undefined) {
       if (callback !== undefined) {
         callback(1);
       }
@@ -292,16 +295,18 @@ export class FhemAccessory {
 
     if (reading === undefined) {
       // only a default: there is no reading to ask fhem for
-      const value = mapping.cached ?? mapping.default;
+      const value = mapping?.cached ?? mapping?.default;
       if (callback !== undefined) {
         callback(undefined, value);
       }
       return value;
     }
 
-    this.log.info('query: ' + (mapping.name ? mapping.name : mapping.characteristic_type) + ' for ' + mapping.informId);
-    const cached = mapping.cached;
-    if (typeof target === 'object' && cached !== undefined && !('nocache' in target)) {
+    const informId = mapping ? (mapping.informId as string) : device + '-' + reading;
+
+    this.log.info('query: ' + (mapping ? (mapping.name ? mapping.name : mapping.characteristic_type) : reading) + ' for ' + informId);
+    const cached = mapping?.cached;
+    if (mapping && cached !== undefined && !('nocache' in mapping)) {
       let defined: string | undefined = undefined;
       if (mapping.homekit2name !== undefined) {
         defined = mapping.homekit2name[cached as unknown as string];
@@ -326,10 +331,11 @@ export class FhemAccessory {
       const value = result.replace(/[\r\n]/g, '');
       this.log.info('  value: ' + value);
 
-      this.#state.update(mapping.informId as string, value, true);
+      this.#state.update(informId, value, true);
 
       if (callback !== undefined) {
-        const converted = reading2homekit(mapping, value);
+        // without a mapping there is nothing to convert the reading with
+        const converted = mapping ? reading2homekit(mapping, value) : value;
         if (converted === undefined) {
           callback(1);
         } else {
