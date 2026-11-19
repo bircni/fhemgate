@@ -28,6 +28,9 @@ function meaning(mapping: Mapping, value: unknown): string {
   return '; means ' + (mapping.homekit2name[value as string] ?? '???');
 }
 
+/** the characteristics of the accessory information a mapping can fill */
+const informationCharacteristics = new Set(['Manufacturer', 'Model', 'SerialNumber', 'FirmwareRevision']);
+
 /**
  * The text a mapping for the accessory information stands for: what the mapping itself says with
  * `value`, `serial` or `default`, or else the reading it names. Nothing without any of them.
@@ -158,6 +161,12 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
     const mappings = (Array.isArray(entry) ? entry : [entry]) as PreparedMapping[];
 
     if (characteristic_type === 'Reachable') {
+      continue;
+    }
+
+    // these are shown at the accessory information, which has them already. a mapping that
+    // names a service for one of them, as `<service>#Model`, is none of these.
+    if (informationCharacteristics.has(characteristic_type)) {
       continue;
     }
 
