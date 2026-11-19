@@ -33,8 +33,15 @@ export interface AccessoryPlatform {
   allowInlineFunctions?: boolean;
 }
 
-/** milliseconds fhem has to answer a read of a characteristic, after which HomeKit is told that it failed */
-const QUERY_TIMEOUT = 10000;
+/**
+ * Milliseconds fhem has to answer a read of a characteristic before HomeKit is answered without
+ * it. homebridge calls a plugin slow that takes three seconds, and HomeKit shows the whole
+ * accessory as not responding soon after.
+ */
+export const QUERY_TIMEOUT = 2000;
+
+/** milliseconds in which fhem is asked at most once for a reading that HomeKit reads from the cache */
+export const READ_REFRESH_INTERVAL = 60 * 1000;
 
 /** a service with the name it was created under, which the plugin keeps at the service */
 export type NamedService = Service & { service_name?: string };
@@ -127,6 +134,8 @@ export class FhemAccessory {
   readonly #state: PluginState;
   readonly #execute: Execute;
   #services?: Service[];
+  /** when fhem was last asked for a reading that is cached, by the id of the reading */
+  readonly #refreshed = new Map<string, number>();
 
   constructor(platform: AccessoryPlatform, s: Jsonlist2Device, state: PluginState, execute: Execute) {
     this.#state = state;
@@ -340,6 +349,8 @@ export class FhemAccessory {
 
     this.log.info('query: ' + (mapping ? (mapping.name ? mapping.name : mapping.characteristic_type) : reading) + ' for ' + informId);
     const cached = mapping?.cached;
+    const cmd = '{ReadingsVal("' + device + '","' + reading + '","")}';
+
     if (mapping && cached !== undefined && !('nocache' in mapping)) {
       let defined: string | undefined = undefined;
       if (mapping.homekit2name !== undefined) {
@@ -353,22 +364,27 @@ export class FhemAccessory {
 
       if (callback !== undefined) {
         callback(undefined, cached);
+        this.#refresh(informId, cmd);
       }
       return cached;
     } else {
       this.log.info('  not cached');
     }
 
-    const cmd = '{ReadingsVal("' + device + '","' + reading + '","")}';
-
-    // HomeKit is not left without an answer when fhem gives none
+    // HomeKit is not left waiting when fhem takes its time: it gets the value last seen, or an
+    // error if there never was one, and the answer of fhem is published when it comes
     let timedOut = false;
     const timer =
       callback &&
       setTimeout(() => {
         timedOut = true;
-        this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
-        callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
+        if (cached !== undefined) {
+          this.log.debug('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds, answering with the last value');
+          callback(undefined, cached);
+        } else {
+          this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
+          callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
+        }
       }, QUERY_TIMEOUT);
 
     this.execute(cmd, (result) => {
@@ -376,7 +392,9 @@ export class FhemAccessory {
       const value = result.replace(/[\r\n]/g, '');
       this.log.info('  value: ' + value);
 
-      this.#state.update(informId, value, true);
+      // the read that waited gets the value as its answer. one that was answered meanwhile is
+      // told with an update like any change in fhem.
+      this.#state.update(informId, value, !timedOut);
 
       if (callback !== undefined && !timedOut) {
         // without a mapping there is nothing to convert the reading with
@@ -389,6 +407,31 @@ export class FhemAccessory {
       }
     });
     return undefined;
+  }
+
+  /**
+   * Asks fhem for a reading whose cached value was just handed to HomeKit, and takes over what
+   * it answers if that differs. The events of the long poll keep the cache current, so this
+   * only matters when one was missed, and a reading is asked for at most once in
+   * READ_REFRESH_INTERVAL however often HomeKit reads it.
+   */
+  #refresh(informId: string, cmd: string): void {
+    const now = Date.now();
+    const last = this.#refreshed.get(informId);
+    if (last !== undefined && now - last < READ_REFRESH_INTERVAL) {
+      return;
+    }
+    this.#refreshed.set(informId, now);
+
+    const before = this.#state.cache.get(informId);
+    this.execute(cmd, (result) => {
+      const value = result.replace(/[\r\n]/g, '');
+      // fhem answers with nothing for a reading it does not have. and an event that arrived while
+      // fhem was asked is newer than the answer.
+      if (value !== '' && this.#state.cache.get(informId) === before) {
+        this.#state.update(informId, value);
+      }
+    });
   }
 
   isInRoom(room: string | undefined): boolean {
