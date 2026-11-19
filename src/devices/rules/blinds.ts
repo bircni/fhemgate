@@ -98,6 +98,26 @@ export const blind: Rule = ({ s, target, genericType }) => {
   return true;
 };
 
+/**
+ * genericDeviceType window. A window has no brightness, whatever the command it is set with made
+ * the dimmer rules think. One that is set with `set pct` is opened that far, like a blind.
+ */
+export const window: Rule = ({ s, target, genericType }) => {
+  if (genericType !== 'window') {
+    return false;
+  }
+
+  delete target.mappings.Brightness;
+
+  if (!s.PossibleSets.match(/(^| )pct\b/)) {
+    return false;
+  }
+
+  target.mappings.CurrentPosition = { reading: 'pct' };
+  target.mappings.TargetPosition = { reading: 'pct', cmd: 'pct', delay: true };
+  return true;
+};
+
 /** the HomeMatic window drive: the state is the opening in percent, or `locked` */
 export const hmSecWin: Rule = ({ s, target }) => {
   if (s.Attributes.model !== 'HM-SEC-WIN') {

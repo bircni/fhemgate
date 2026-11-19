@@ -79,6 +79,28 @@ describe('detectMappings', () => {
   });
 });
 
+describe('a window', () => {
+  const skylight = { PossibleSets: 'pct:slider,0,1,100', Readings: { pct: { Value: '10' } }, Attributes: { genericDeviceType: 'window' } };
+
+  it('that is set with pct gets its position from pct and no brightness', () => {
+    const { target, s } = detect(skylight);
+    reviseMappings(target, s);
+
+    expect(target.service_name).toBe('window');
+    expect(target.mappings).toEqual({ CurrentPosition: { reading: 'pct' }, TargetPosition: { reading: 'pct', cmd: 'pct', delay: true } });
+  });
+
+  it('has no brightness with any command a dimmer is set with', () => {
+    for (const PossibleSets of ['on off dim:slider,0,1,99', 'on off dim06% dim100%', 'on off bri:slider,0,1,254']) {
+      expect(detect({ ...skylight, PossibleSets }).target.mappings, PossibleSets).not.toHaveProperty('Brightness');
+    }
+  });
+
+  it('leaves the brightness of what is no window alone', () => {
+    expect(detect({ ...skylight, Attributes: {} }).target.mappings).toHaveProperty('Brightness');
+  });
+});
+
 describe('reviseMappings', () => {
   it('takes the switch away from what has a position', () => {
     const { target, s } = detect({ PossibleSets: 'on off pct', Attributes: { subType: 'blindActuator' } });
