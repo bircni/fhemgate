@@ -24,6 +24,7 @@ end-to-end tests.
 | `bun run build` | compiles `src` to `dist` |
 | `bun run pack-smoke` | packs, installs and loads the plugin |
 | `bun run test:e2e` | builds, then runs a real homebridge with the plugin against the stand-in fhem |
+| `bun run coverage:e2e` | the same, and reports which lines of `src` the homebridge processes ran |
 
 ## Layout
 
@@ -38,13 +39,28 @@ end-to-end tests.
 
 Unit tests sit next to the module they test, as `*.test.ts`.
 
-The end-to-end tests in `test/e2e` start a real homebridge that loads the built plugin and read
-and write its accessories the way a HomeKit controller does. `fixtures.e2e.ts` serves every device
-fixture and compares what homebridge publishes with what the plugin builds. `scenarios.e2e.ts`
-sends values both ways for one device of every common kind. With `E2E_FHEM_URL` set to the url of
-a FHEMWEB, the scenarios run against that fhem instead of the stand-in. They define dummy devices
-named `e2e_*` there and overwrite the `userattr` attribute of `global`, so only point it at a fhem
-that is there to be tested with.
+The end-to-end tests in `test/e2e` start a real homebridge that loads the built plugin. They read
+and write its accessories the way a HomeKit controller does, and are notified by it about changes.
+
+| File | Holds |
+|---|---|
+| `scenarios.e2e.ts` | one device of every common kind, values both ways, identify, the filter |
+| `devices.e2e.ts` | every kind of device the detection knows that a dummy device can be |
+| `mappings.e2e.ts` | what the `homebridgeMapping` attribute can say, one device per feature |
+| `history.e2e.ts` | the Eve history with the real fakegato-history |
+| `hardware.e2e.ts` | device types of other fhem modules, and the `eventMap` attribute |
+| `platform.e2e.ts` | the options of the platform, several platforms, what ends homebridge |
+| `connection.e2e.ts` | a fhem that is not there, restarts, or sends events in pieces |
+| `fixtures.e2e.ts` | every device fixture: is what homebridge publishes what the plugin builds? |
+
+The devices of the first four are dummy devices. With `E2E_FHEM_URL` set to the url of a FHEMWEB,
+these files run against that fhem instead of the stand-in, and the others skip themselves. The
+tests define dummy devices named `e2e_*` there and overwrite the `userattr` attribute of `global`,
+so only point it at a fhem that is there to be tested with. A test that needs the stand-in goes
+into one of the other files, or checks for `fhem.fake`.
+
+The files run side by side, each with a fhem and a homebridge of its own. A homebridge takes up
+to five seconds to end, which the tests do not wait for: the run ends once the last one is gone.
 
 ## Behaviour is pinned by tests
 
