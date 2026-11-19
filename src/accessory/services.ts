@@ -341,20 +341,20 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
       log.debug('      props: ' + util.inspect(characteristic.props));
 
       characteristic
-        .on('set', (value: CharacteristicValue, callback: CharacteristicSetCallback, context: unknown) => {
-          // a value the plugin itself took over from fhem is not sent back
-          if (context !== 'fromFHEM') {
-            if (each.delay) {
-              accessory.delayed(each, value, each.delay);
-            } else {
-              accessory.command(each, value);
-            }
+        // only HomeKit writes through this handler: values from fhem are published with updateValue
+        .on('set', (value: CharacteristicValue, callback: CharacteristicSetCallback) => {
+          if (each.delay) {
+            accessory.delayed(each, value, each.delay);
+          } else {
+            accessory.command(each, value);
+          }
 
-            if (each.timeout && each.default !== undefined) {
-              setTimeout(() => {
-                (each.characteristic as unknown as FromFhem).setValue(each.default, undefined, 'fromFHEM');
-              }, each.timeout);
-            }
+          const fallback = each.default;
+          if (each.timeout && fallback !== undefined) {
+            // a push button: HomeKit is shown the default again, and fhem is not told
+            setTimeout(() => {
+              characteristic.updateValue(fallback);
+            }, each.timeout);
           }
           callback();
         })
@@ -373,9 +373,4 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   }
 
   return services;
-}
-
-/** setValue as it is called here, with the callback left out */
-interface FromFhem {
-  setValue(value: unknown, callback: undefined, context: string): void;
 }

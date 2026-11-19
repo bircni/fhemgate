@@ -166,6 +166,37 @@ describe('a reading that changes in fhem', () => {
   });
 });
 
+describe('a controller that is subscribed to a characteristic', () => {
+  it('is sent an event when the reading changes in fhem, without asking', async () => {
+    const on = characteristic('e2e_outlet', hapType.Outlet, hapType.On);
+    const contact = characteristic('e2e_contact', hapType.ContactSensor, hapType.ContactSensorState);
+    // read first: a read that finds another value than HomeKit last saw is announced as well
+    const before = Number(await homebridge.read(on));
+    const subscription = await homebridge.subscribe([on, contact]);
+    const eventFor = (target: HapCharacteristic, value: unknown) =>
+      eventually(`an event for ${target.aid}.${target.iid} with ${String(value)}`, () =>
+        Promise.resolve(subscription.events.some((event) => event.aid === target.aid && event.iid === target.iid && event.value === value) ? true : undefined),
+      );
+
+    try {
+      await fhem.change('e2e_outlet', 'state', before ? 'off' : 'on');
+      await eventFor(on, before ? 0 : 1);
+      await fhem.change('e2e_outlet', 'state', before ? 'on' : 'off');
+      await eventFor(on, before ? 1 : 0);
+
+      await fhem.change('e2e_contact', 'state', 'open');
+      await eventFor(contact, 1);
+      await fhem.change('e2e_contact', 'state', 'closed');
+      await eventFor(contact, 0);
+
+      // only what changed is announced, and each change once
+      expect(subscription.events).toHaveLength(4);
+    } finally {
+      subscription.close();
+    }
+  });
+});
+
 describe('the connection to fhem', () => {
   it('is opened again after fhem ended it, and events arrive as before', async (context) => {
     if (!fhem.fake) {

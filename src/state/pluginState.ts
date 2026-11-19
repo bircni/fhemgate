@@ -68,16 +68,12 @@ export class PluginState {
           recordHistory(accessory, accessory.historyService, mapping, value, this);
         }
 
-        if (!noUpdate && mapping.characteristic) {
-          // the context tells the set handler of the characteristic not to send this back to fhem
-          (mapping.characteristic as unknown as FromFhem).setValue(value, undefined, 'fromFHEM');
+        if (!noUpdate && typeof mapping.characteristic === 'object') {
+          // updateValue tells the HomeKit controllers that are subscribed to the characteristic, and
+          // does not run its set handler: the value is not sent back to fhem
+          mapping.characteristic.updateValue(value);
         }
       });
     }
   }
-}
-
-/** setValue as it is called here, with the callback left out */
-interface FromFhem {
-  setValue(value: unknown, callback: undefined, context: string): void;
 }
