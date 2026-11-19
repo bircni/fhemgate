@@ -35,7 +35,6 @@ export function resolveConverter(mapping: Mapping, parameter: 'reading2homekit' 
 
   if (mapping[parameter] !== undefined && typeof mapping[parameter] !== 'function') {
     log.error('  ' + parameter + ' disabled.');
-    // for homekit2reading the text stays and reading2homekit goes as well.
-    delete mapping.reading2homekit;
+    delete mapping[parameter];
   }
 }
