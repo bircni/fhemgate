@@ -115,12 +115,27 @@ describe('a contact sensor with history', () => {
     expect(read(characteristicOf(sensor, 'ClosedDuration'))).toEqual({ error: null, value: 0, answered: true });
   });
 
-  it('answers the seconds from the start of the history to the last change, taken from whichever mapping came last', () => {
+  it('answers the seconds from the start of the history to the last change of the contact', () => {
     const w = world();
     const sensor = serviceOf(w.accessory(contact()).getServices(), 'ContactSensor');
 
     // the reading is from 12:00:00, the history starts 600 seconds before that
     expect(read(characteristicOf(sensor, 'LastActivation'))).toEqual({ error: null, value: 600, answered: true });
+  });
+
+  it('reads the eve characteristics from the contact, whatever mappings follow it', () => {
+    const w = world();
+    const door = contact('Switch#On=licht,cmdOn=an,cmdOff=aus');
+    door.Readings.state = { Value: 'closed', Time: '2026-08-16 12:00:00' };
+    door.Readings.licht = { Value: 'on', Time: '2026-08-16 12:05:00' };
+    const services = w.accessory(door).getServices();
+    const sensor = serviceOf(services, 'ContactSensor');
+
+    // on the service of the contact, not on the switch that came last
+    expect(serviceOf(services, 'Switch').characteristics.map((characteristic) => characteristic.displayName)).toEqual(['Name', 'On']);
+    expect(read(characteristicOf(sensor, 'LastActivation'))).toEqual({ error: null, value: 600, answered: true });
+    expect(w.log.lines).toContain('log     Custom LastActivation characteristic door:state');
+    expect(w.log.lines).toContain('log query Custom LastActivation for door:state: 600');
   });
 
   it('starts the history with the current state when it is empty, and then has no last activation', () => {
@@ -130,7 +145,7 @@ describe('a contact sensor with history', () => {
 
     const result = read(characteristicOf(sensor, 'LastActivation'));
 
-    expect(FakeHistory.instances[0]?.entries).toEqual([{ time: 1786881600, status: undefined }]);
+    expect(FakeHistory.instances[0]?.entries).toEqual([{ time: 1786881600, status: 0 }]);
     expect(result).toEqual({ error: null, value: NaN, answered: true });
   });
 
