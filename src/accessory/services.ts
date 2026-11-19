@@ -2,6 +2,7 @@
 // characteristics to fhem
 import util from 'node:util';
 import type { Characteristic, CharacteristicSetCallback, CharacteristicValue, Service } from '@homebridge/hap-nodejs';
+import { reading2homekit } from '../mapping/toHomekit.ts';
 import type { CharacteristicClass, Mapping, PreparedMapping } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import { ct2rgb, rgb2hsv, xyY2rgb, type Hsv } from '../util/color.ts';
@@ -99,13 +100,13 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
       });
   }
 
-  // HAP-NodeJS 2 has no Reachable characteristic any more.
-  if ((Characteristic as unknown as { Reachable?: unknown }).Reachable) {
-    const reachable = single('Reachable');
-    if (reachable) {
-      log.info('  ' + accessory.device + ' has reachability [' + reachable.reading + ']');
-      accessory.subscribe(reachable);
-    }
+  // HomeKit has no characteristic for whether a device can be reached. the mapping is followed
+  // all the same: while it says no, reads of the other characteristics are answered with an error.
+  const reachable = single('Reachable');
+  if (reachable) {
+    log.info('  ' + accessory.device + ' has reachability [' + reachable.reading + ']');
+    accessory.subscribe(reachable);
+    reading2homekit(reachable, cached[reachable.informId as string]);
   }
 
   // a light that is in xy or colour temperature mode reports no hue and saturation. they are
@@ -330,8 +331,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
           callback();
         })
         .on('get', (callback) => {
-          const reachable = single('Reachable');
-          if (reachable?.cached === false) {
+          if (single('Reachable')?.cached === false) {
             (callback as QueryCallback)('unreachable');
           } else {
             accessory.query(each, callback as QueryCallback);

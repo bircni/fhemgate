@@ -146,7 +146,7 @@ describe('reading a characteristic', () => {
     expect(world.log.lines).toContain('log   StatusActive [default 1]');
   });
 
-  it('answers normally for a device that is not reachable, as homekit has no Reachable characteristic any more', () => {
+  it('answers unreachable for a device that is not reachable, and normally once it is again', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -155,12 +155,31 @@ describe('reading a characteristic', () => {
         PossibleSets: 'on off',
       }),
     );
+    const on = characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On);
 
-    const result = read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On));
+    expect((accessory.mappings.Reachable as Mapping).cached).toBe(false);
+    expect(world.subscriptions['bulb-reachable']).toHaveLength(1);
+    expect(read(on)).toEqual({ error: 'unreachable', value: undefined, answered: true });
 
-    expect(result).toEqual({ error: undefined, value: true, answered: true });
-    expect((accessory.mappings.Reachable as Mapping).cached).toBeUndefined();
-    expect(world.subscriptions['bulb-reachable']).toBeUndefined();
+    world.update('bulb-reachable', '1');
+    expect(read(on)).toEqual({ error: undefined, value: true, answered: true });
+
+    world.update('bulb-reachable', '0');
+    expect(read(on)).toEqual({ error: 'unreachable', value: undefined, answered: true });
+  });
+
+  it('answers normally for a device that is reachable', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
+        Readings: { state: 'on', reachable: '1' },
+        PossibleSets: 'on off',
+      }),
+    );
+
+    expect(read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On))).toEqual({ error: undefined, value: true, answered: true });
+    expect((accessory.mappings.Reachable as Mapping).cached).toBe(true);
   });
 
   it('answers unreachable for every characteristic once the reachable mapping is cached as false', () => {
