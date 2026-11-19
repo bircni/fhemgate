@@ -2,21 +2,21 @@
 // file, so the same tests keep running while the code moves from index.cjs into src/.
 import * as hap from '@homebridge/hap-nodejs';
 import * as legacy from '../../src/legacy.ts';
+import type { PluginState } from '../../src/state/pluginState.ts';
 import { createLog, type CapturedLog } from './log.ts';
 import type { Accessory, FhemDevice, Mapping, Platform, PlatformConfig, Subscription } from './types.ts';
 
 type Executor = (cmd: string, callback?: (result: string) => void) => void;
 
 interface Internals {
-  useHap: (api: unknown) => void;
+  /** takes the hap classes and starts with an empty state, which is returned */
+  useHap: (api: unknown) => PluginState;
   useUser: (user: { storagePath(): string }) => void;
   useFakeGato: (service: unknown) => void;
 
   FHEMPlatform: (new (log: CapturedLog, config: PlatformConfig, api: unknown) => Platform) & { prototype: unknown };
   FHEMAccessory: (new (platform: unknown, device: FhemDevice) => Accessory) & { prototype: { execute: Executor } };
 
-  FHEM_subscriptions: Record<string, Subscription[] | undefined>;
-  FHEM_cached: Record<string, unknown>;
   FHEM_longpoll: Record<string, Record<string, unknown> | undefined>;
   FHEM_csrfToken: Record<string, string | undefined>;
   FHEM_platforms: Platform[];
@@ -117,18 +117,11 @@ export interface World {
   debugPage(url: string): string;
 }
 
-function clear(object: Record<string, unknown>): void {
-  for (const key of Object.keys(object)) {
-    delete object[key];
-  }
-}
-
 const realExecute = internals.FHEMAccessory.prototype.execute;
 
 /** starts from an empty plugin state. there is only one state at a time. */
 export function createWorld(options: WorldOptions = {}): World {
-  clear(internals.FHEM_subscriptions);
-  clear(internals.FHEM_cached);
+  const state = internals.useHap(hap);
   internals.FHEM_platforms.length = 0;
   // the state of the connections stays: it is kept per url, and a connection that is still
   // open from an earlier test would fail without it
@@ -171,8 +164,8 @@ export function createWorld(options: WorldOptions = {}): World {
     toHomekit: internals.FHEM_reading2homekit,
     published: internals.FHEM_isPublished,
 
-    cached: internals.FHEM_cached,
-    subscriptions: internals.FHEM_subscriptions,
+    cached: state.cache.values,
+    subscriptions: state.subscriptions.byInformId as Record<string, Subscription[] | undefined>,
     longpoll: internals.FHEM_longpoll,
     csrfToken: internals.FHEM_csrfToken,
 

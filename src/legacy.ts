@@ -27,6 +27,9 @@ import { parseHomebridgeMapping } from './mapping/parser.ts';
 import { reading2homekit as FHEM_reading2homekit } from './mapping/toHomekit.ts';
 import { commandFor } from './mapping/toFhem.ts';
 import { prepareMappings } from './mapping/compile.ts';
+import { PluginState } from './state/pluginState.ts';
+import { deviceIdentity } from './devices/identity.ts';
+import { CustomUUIDs } from './accessory/customCharacteristics.ts';
 
 const require = createRequire(import.meta.url);
 
@@ -49,6 +52,8 @@ export default function(homebridge){
   Characteristic = homebridge.hap.Characteristic;
   UUIDGen = homebridge.hap.uuid;
 
+  state = new PluginState(homebridge.hap);
+
   try {
     FakeGatoHistoryService = require('fakegato-history')(homebridge);
   } catch(e) {
@@ -63,157 +68,12 @@ export default function(homebridge){
 }
 
 
-// subscriptions to fhem longpoll events
-var FHEM_subscriptions = {};
-function
-FHEM_subscribe(accessory, informId, characteristic, mapping) {
-  if( !FHEM_subscriptions[informId] )
-    FHEM_subscriptions[informId] = [];
-
-  FHEM_subscriptions[informId].push( { accessory: accessory, characteristic: characteristic, mapping: mapping } );
-}
-function
-FHEM_unsubscribe(accessory, informId, characteristic) {
-  var subscriptions = FHEM_subscriptions[informId];
-  if( subscriptions ) {
-    for( var i = 0; i < subscriptions.length; ++i  ) {
-      var subscription = subscriptions[i];
-      if( subscription.accessory !== accessory )
-        continue;
-
-      if( subscription.characteristic !== characteristic )
-        continue;
-
-      delete subscriptions[i];
-    }
-
-    FHEM_subscriptions[informId] = subscriptions.filter( function(n){ return n !== undefined } );
-    if( !FHEM_subscriptions[informId].length )
-      delete FHEM_subscriptions[informId] ;
-  }
-}
-
-function
-FHEM_isPublished(device) {
-  for( var inform_id in FHEM_subscriptions ) {
-    for( var subscription of FHEM_subscriptions[inform_id] ) {
-      var accessory = subscription.accessory;
-
-      if( accessory.device === device )
-        return accessory;
-    }
-  }
-
-  return null;
-}
-
-var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
-
-// cached readings from longpoll & query
-var FHEM_cached = {};
-function
-FHEM_update(informId, orig, no_update) {
-  if( orig === undefined
-      || FHEM_cached[informId] === orig )
-     return;
-
-  FHEM_cached[informId] = orig;
-  //FHEM_cached[informId] = { orig: orig, timestamp: Date.now() };
-  var date = new Date(Date.now()-tzoffset).toISOString().replace(/T/, ' ').replace(/\..+/, '');
-  console.log('  ' + date + ' caching: ' + informId + ': ' + orig );
-
-  var subscriptions = FHEM_subscriptions[informId];
-  if( subscriptions )
-    subscriptions.forEach( function(subscription) {
-      var mapping = subscription.mapping;
-      if( typeof mapping !== 'object' )
-        return;
-
-      mapping.last_update = parseInt( Date.now()/1000 );
-
-      var value = FHEM_reading2homekit(mapping, orig);
-      if( value === undefined )
-        return;
-
-      var accessory = subscription.accessory;
-      if( accessory && accessory.historyService ) {
-        var historyService = accessory.historyService;
-
-        var extra_persist = {};
-        if( historyService.isHistoryLoaded() ) {
-          extra_persist = historyService.getExtraPersistedData();
-        }
-        historyService.extra_persist = extra_persist;
-
-        if( mapping.name === 'Custom TimesOpened' )
-          historyService.extra_persist.TimesOpened = value;
-
-        else if( mapping.name === 'Custom LastActivation' )
-          historyService.extra_persist.LastActivation = value;
-
-        else {
-          var entry = { time: mapping.last_update };
-          if( mapping.characteristic_type === 'ContactSensorState' ) {
-            entry.status = value;
-            if( value === Characteristic.ContactSensorState.CONTACT_NOT_DETECTED ) {
-              FHEM_update( mapping.device + '-EVE-TimesOpened', ++historyService.extra_persist.TimesOpened );
-            }
-            //var time = mapping.last_update - historyService.getInitialTime();
-            //accessory.mappings['E863F11A-079E-48FF-8F27-9C2605A29F52'].characteristic.setValue(time, undefined, 'fromFHEM');
-
-          } else if( mapping.characteristic_type === 'MotionDetected' )
-            entry.status = value?1:0;
-
-          else if( mapping.characteristic_type === 'CurrentTemperature'
-                   || mapping.characteristic_type === 'TargetTemperature'
-                   || mapping.characteristic_type === CustomUUIDs.Actuation ) {
-            var current;
-            if( accessory.mappings.CurrentTemperature )
-              current = accessory.mappings.CurrentTemperature.cached;
-
-            if( accessory.mappings.TargetTemperature ) {
-              var target = accessory.mappings.TargetTemperature.cached;
-              if( target !== undefined )
-                entry.setTemp = target;
-              if( current !== undefined )
-                entry.currentTemp = current;
-            } else
-              if( current !== undefined )
-                entry.temp = current;
-
-            if( accessory.mappings[CustomUUIDs.Actuation] ) {
-              var valve = accessory.mappings[CustomUUIDs.Actuation].cached;
-              if( valve !== undefined )
-                entry.valvePosition = valve;
-            }
-
-          } else if( mapping.characteristic_type === 'CurrentRelativeHumidity' )
-            entry.humidity = value;
-
-          else if( mapping.characteristic_type === 'AirQuality' )
-            entry.ppm = value;
-
-          else if( mapping.characteristic_type === CustomUUIDs.AirPressure )
-            entry.pressure = value;
-
-          else if( mapping.characteristic_type === CustomUUIDs.Power )
-            entry.power = value;
-
-          else
-            entry = undefined;
-
-          if( entry !== undefined ) {
-            mapping.log.info( '      adding history entry '+ util.inspect(entry) );
-            historyService.addEntry(entry);
-          }
-        }
-
-      }
-
-      if( !no_update && mapping.characteristic )
-        mapping.characteristic.setValue(value, undefined, 'fromFHEM');
-    } );
-}
+// the readings and subscriptions of the running plugin. set when homebridge loads the plugin.
+var state;
+function FHEM_subscribe(accessory, informId, characteristic, mapping) { state.subscriptions.subscribe(accessory, informId, characteristic, mapping) }
+function FHEM_unsubscribe(accessory, informId, characteristic) { state.subscriptions.unsubscribe(accessory, informId, characteristic) }
+function FHEM_isPublished(device) { return state.subscriptions.publishedAccessory(device) }
+function FHEM_update(informId, orig, no_update) { state.update(informId, orig, no_update) }
 
 var FHEM_longpoll = {};
 var FHEM_csrfToken = {};
@@ -367,7 +227,7 @@ console.log( 'DELETEATTR: ' + value );
                      continue;
                    }
 
-                   var subscriptions = FHEM_subscriptions[d[0]];
+                   var subscriptions = state.subscriptions.byInformId[d[0]];
                    if( subscriptions ) {
                      FHEM_update( d[0], value );
                      FHEM_longpoll[connection.base_url].last_event_time = lastEventTime;
@@ -575,8 +435,8 @@ FHEMPlatform.prototype = {
   },
 
   shutdown: function() { //this.log.error('shutdown')
-    for( var informId in FHEM_subscriptions ) {
-      for( var subscription of FHEM_subscriptions[informId] ) {
+    for( var informId in state.subscriptions.byInformId ) {
+      for( var subscription of state.subscriptions.byInformId[informId] ) {
         var accessory = subscription.accessory;
         if( accessory.shutdown ) continue;
 
@@ -715,27 +575,6 @@ FHEMPlatform.prototype = {
                  }.bind(this) );
   }
 }
-
-var CustomUUIDs = {
-                  //  F H E M       h o  m e  b r i d g e
-            xVolume: '4648454d-0101-686F-6D65-627269646765',
-        //Actuation: '4648454d-0201-686F-6D65-627269646765',
-   //ColorTemperature: '4648454d-0301-686F-6D65-627269646765',
-
-                 // see: https://github.com/ebaauw/homebridge-hue/wiki/Characteristics
-                 CT: 'E887EF67-509A-552D-A138-3DA215050F46',
-   //ColorTemperature: 'A18E5901-CFA1-4D37-A10F-0071CEEEEEBD',
-
-             Volume: '00001001-0000-1000-8000-135D67EC4377', // used in YamahaAVRPlatform, recognized by EVE
-
-                  // see: https://gist.github.com/gomfunkel/b1a046d729757120907c
-            Voltage: 'E863F10A-079E-48FF-8F27-9C2605A29F52',
-            Current: 'E863F126-079E-48FF-8F27-9C2605A29F52',
-              Power: 'E863F10D-079E-48FF-8F27-9C2605A29F52',
-             Energy: 'E863F10C-079E-48FF-8F27-9C2605A29F52',
-        AirPressure: 'E863F10F-079E-48FF-8F27-9C2605A29F52',
-          Actuation: 'E863F12E-079E-48FF-8F27-9C2605A29F52',
-};
 
 //
 // HomeMatic and HomeMatic IP support for the HMCCU modules (HMCCUCHN and HMCCUDEV).
@@ -1366,9 +1205,9 @@ FHEMAccessory(platform, s) {
     this.mappings.Brightness = { reading: 'brightness', cmd: 'HSV', max: 100, maxValue: 100, delay: true };
 
     var homekit2reading = function(mapping, orig) {
-      var h = FHEM_cached[mapping.device + '-hue'];
-      var s = FHEM_cached[mapping.device + '-saturation'];
-      var v = FHEM_cached[mapping.device + '-brightness'];
+      var h = state.cache.values[mapping.device + '-hue'];
+      var s = state.cache.values[mapping.device + '-saturation'];
+      var v = state.cache.values[mapping.device + '-brightness'];
       //mapping.log( ' from cached : [' + h + ',' + s + ',' + v + ']' );
 
       if( h === undefined ) h = 0;
@@ -1379,20 +1218,20 @@ FHEMAccessory(platform, s) {
       if( mapping.characteristic_type == 'Hue' ) {
         h = orig;
 
-        //if( FHEM_cached[mapping.device + '-hue'] === orig ) return undefined;
-        FHEM_cached[mapping.device + '-hue'] = orig;
+        //if( state.cache.values[mapping.device + '-hue'] === orig ) return undefined;
+        state.cache.values[mapping.device + '-hue'] = orig;
 
       } else if( mapping.characteristic_type == 'Saturation' ) {
         s = orig;
 
-        //if( FHEM_cached[mapping.device + '-saturation'] === orig ) return undefined;
-        FHEM_cached[mapping.device + '-saturation'] = orig;
+        //if( state.cache.values[mapping.device + '-saturation'] === orig ) return undefined;
+        state.cache.values[mapping.device + '-saturation'] = orig;
 
       } else if( mapping.characteristic_type == 'Brightness' ) {
         v = orig;
 
-        //if( FHEM_cached[mapping.device + '-brightness'] === orig ) return undefined;
-        FHEM_cached[mapping.device + '-brightness'] = orig;
+        //if( state.cache.values[mapping.device + '-brightness'] === orig ) return undefined;
+        state.cache.values[mapping.device + '-brightness'] = orig;
 
       }
       //mapping.log( ' new : [' + h + ',' + s + ',' + v + ']' );
@@ -1426,9 +1265,9 @@ FHEMAccessory(platform, s) {
       this.mappings.Brightness = { reading: reading, cmd: cmd, max: 100, maxValue: 100,  delay: true };
 
       var homekit2reading = function(mapping, orig) {
-        var h = FHEM_cached[mapping.device + '-h'];
-        var s = FHEM_cached[mapping.device + '-s'];
-        var v = FHEM_cached[mapping.device + '-v'];
+        var h = state.cache.values[mapping.device + '-h'];
+        var s = state.cache.values[mapping.device + '-s'];
+        var v = state.cache.values[mapping.device + '-v'];
         //mapping.log( ' from cached : [' + h + ',' + s + ',' + v + ']' );
 
         if( h === undefined ) h = 0.0;
@@ -1438,21 +1277,21 @@ FHEMAccessory(platform, s) {
 
         if( mapping.characteristic_type === 'Hue' ) {
           h = orig / 360.0;
-          FHEM_cached[mapping.device + '-h'] = h;
+          state.cache.values[mapping.device + '-h'] = h;
 
         } else if( mapping.characteristic_type === 'Saturation' ) {
           s = orig / 100.0;
-          FHEM_cached[mapping.device + '-s'] = s;
+          state.cache.values[mapping.device + '-s'] = s;
 
         } else if( mapping.characteristic_type === 'Brightness' ) {
           v = orig / 100.0;
-          FHEM_cached[mapping.device + '-v'] = v;
+          state.cache.values[mapping.device + '-v'] = v;
 
         }
         //mapping.log( ' new : [' + h + ',' + s + ',' + v + ']' );
 
         var value = FHEM_hsv2rgb( h, s, v );
-        if( value === FHEM_cached[mapping.informId] )
+        if( value === state.cache.values[mapping.informId] )
           return undefined;
 
         FHEM_update(mapping.informId, value, true);
@@ -1466,7 +1305,7 @@ FHEMAccessory(platform, s) {
           var hsv = FHEM_rgb2hsv(orig);
           var hue = parseInt( hsv[0] * mapping.maxValue );
 
-          FHEM_cached[mapping.device + '-h'] = hsv[0];
+          state.cache.values[mapping.device + '-h'] = hsv[0];
 
           return hue;
         }.bind(null, this.mappings.Hue);
@@ -1477,7 +1316,7 @@ FHEMAccessory(platform, s) {
           var hsv = FHEM_rgb2hsv(orig);
           var sat = parseInt( hsv[1] * mapping.maxValue );
 
-          FHEM_cached[mapping.device + '-s'] = hsv[1];
+          state.cache.values[mapping.device + '-s'] = hsv[1];
 
           return sat;
         }.bind(null, this.mappings.Saturation);
@@ -1488,7 +1327,7 @@ FHEMAccessory(platform, s) {
           var hsv = FHEM_rgb2hsv(orig);
           var bri = parseInt( hsv[2] * mapping.maxValue );
 
-          FHEM_cached[mapping.device + '-v'] = hsv[2];
+          state.cache.values[mapping.device + '-v'] = hsv[2];
 
           return bri;
         }.bind(null, this.mappings.Brightness);
@@ -1944,65 +1783,9 @@ FHEMAccessory(platform, s) {
 
 //log( util.inspect(s) );
 
-  // device info
-  this.name		        = sanitizeHapName( s.Internals.NAME );
-  this.fuuid            = s.Internals.FUUID;
-  this.alias		    = s.Attributes.alias ? s.Attributes.alias : s.Internals.NAME;
-  this.siriName         = s.Attributes.siriName ? s.Attributes.siriName : this.alias;
-  this.device		= s.Internals.NAME;
-  this.type             = s.Internals.TYPE;
-  this.model            = s.Readings.model ? s.Readings.model.Value
-                                           : (s.Attributes.model ? s.Attributes.model
-                                                                 : ( s.Internals.model ? s.Internals.model : '<unknown>' ) );
-  this.PossibleSets     = s.PossibleSets;
-  this.room		= s.Attributes.room;
+  Object.assign(this, deviceIdentity(s, this.mappings));
 
-  if( this.type == 'CUL_HM' ) {
-    this.serial = this.type + '.' + s.Internals.DEF;
-    if( s.Attributes.serialNr )
-      this.serial = s.Attributes.serialNr;
-    else if( s.Readings['D-serialNr'] && s.Readings['D-serialNr'].Value )
-      this.serial = s.Readings['D-serialNr'].Value;
-  } else if( this.type == 'CUL_WS' || this.type == 'Siro' || this.type == 'FS20' || this.type == 'IT' || this.type == 'EnOcean')
-    this.serial = this.type + '.' + s.Internals.DEF;
-  else if( this.type == 'HUEDevice' ) {
-    if( s.Internals.uniqueid && s.Internals.uniqueid != 'ff:ff:ff:ff:ff:ff:ff:ff-0b' )
-      this.serial = s.Internals.uniqueid;
-  } else if( this.type == 'SONOSPLAYER' )
-    this.serial = s.Internals.UDN;
-  else if( this.type == 'WOL' )
-    this.serial = this.type + '.' + s.Internals.MAC;
-  else if( this.type == 'MAX' ) {
-    this.model = s.Internals.type;
-    this.serial = this.type + '.' + s.Internals.addr;
-  } else if( this.type == 'DUOFERN' ) {
-    this.model = s.Internals.SUBTYPE;
-    this.serial = this.type + '.' + s.Internals.DEF;
-  } else if( this.type == 'ZWave' ) {
-    if( s.Readings.model && s.Readings.model.Value )
-      this.model = s.Readings.model.Value;
-    this.serial = this.type + '.' + s.Internals.DEF.replace(/ /, '-');
-  } else if( this.type == 'HMCCUDEV' || this.type == 'HMCCUCHN' ) {
-    this.model = s.Internals.ccutype;
-    this.serial = s.Internals.DEF;
-  }
-
-  if( !this.serial )
-    this.serial = this.fuuid;
-
-
-  if( this.mappings.SerialNumber !== undefined ) {
-    if( this.mappings.SerialNumber.serial != undefined )
-      this.serial = this.mappings.SerialNumber.serial;
-    else if( this.mappings.SerialNumber.value != undefined )
-      this.serial = this.mappings.SerialNumber.value;
-  }
-
-
-  this.uuid_base = this.serial;
-
-
-  prepareMappings(this, s, { characteristics: Characteristic, cached: FHEM_cached, update: FHEM_update, reading2homekit: FHEM_reading2homekit });
+  prepareMappings(this, s, { characteristics: Characteristic, cached: state.cache.values, update: FHEM_update, reading2homekit: FHEM_reading2homekit });
 }
 
 FHEMAccessory.prototype = {
@@ -2115,7 +1898,7 @@ FHEMAccessory.prototype = {
     } else {
       /*this.log.info('not cached; query: ' + mapping.informId);
 
-      var value = FHEM_cached[mapping.informId];
+      var value = state.cache.values[mapping.informId];
       value = FHEM_reading2homekit(mapping, value);
 
       if( value !== undefined ) {
@@ -2281,7 +2064,7 @@ FHEMAccessory.prototype = {
 
       this.subscribe(this.mappings.FirmwareRevision, characteristic);
 
-      characteristic.value = FHEM_cached[this.mappings.FirmwareRevision.informId];
+      characteristic.value = state.cache.values[this.mappings.FirmwareRevision.informId];
 
       characteristic
         .on('get', function(callback) {
@@ -2321,26 +2104,26 @@ FHEMAccessory.prototype = {
       this.subscribe(this.mappings.xy);
       this.subscribe(this.mappings.colormode);
 
-      if( this.mappings.xy && FHEM_cached[this.mappings.colormode.informId] == 'xy' ) {
+      if( this.mappings.xy && state.cache.values[this.mappings.colormode.informId] == 'xy' ) {
         var mapping = this.mappings.xy;
-        var value = FHEM_cached[mapping.informId];
+        var value = state.cache.values[mapping.informId];
         var xy = value.split(',');
         var rgb = FHEM_xyY2rgb(xy[0], xy[1] , 1);
         var hsv = FHEM_rgb2hsv(rgb);
 
-        FHEM_cached[mapping.device + '-h'] = hsv[0];
-        FHEM_cached[mapping.device + '-s'] = hsv[1];
-        FHEM_cached[mapping.device + '-v'] = hsv[2];
+        state.cache.values[mapping.device + '-h'] = hsv[0];
+        state.cache.values[mapping.device + '-s'] = hsv[1];
+        state.cache.values[mapping.device + '-v'] = hsv[2];
 
-      } else if( this.mappings.ct && FHEM_cached[this.mappings.colormode.informId] == 'ct' ) {
+      } else if( this.mappings.ct && state.cache.values[this.mappings.colormode.informId] == 'ct' ) {
         var mapping = this.mappings.ct;
-        var value = FHEM_cached[mapping.informId];
+        var value = state.cache.values[mapping.informId];
         var rgb = FHEM_ct2rgb(value);
         var hsv = FHEM_rgb2hsv(rgb);
 
-        FHEM_cached[mapping.device + '-h'] = hsv[0];
-        FHEM_cached[mapping.device + '-s'] = hsv[1];
-        FHEM_cached[mapping.device + '-v'] = hsv[2];
+        state.cache.values[mapping.device + '-h'] = hsv[0];
+        state.cache.values[mapping.device + '-s'] = hsv[1];
+        state.cache.values[mapping.device + '-v'] = hsv[2];
       }
 
     }
@@ -2756,11 +2539,11 @@ function FHEMdebug_handleRequest(request, response){
      }
     response.write( '<br>' );
 
-    for( var informId in FHEM_subscriptions ) {
-      response.write( informId + ': '+ FHEM_cached[informId] +'<br>' );
+    for( var informId in state.subscriptions.byInformId ) {
+      response.write( informId + ': '+ state.cache.values[informId] +'<br>' );
 
       var derived = false;
-      for( var subscription of FHEM_subscriptions[informId] ) {
+      for( var subscription of state.subscriptions.byInformId[informId] ) {
         var characteristic = subscription.characteristic;
         if( !characteristic ) continue;
 
@@ -2782,12 +2565,12 @@ function FHEMdebug_handleRequest(request, response){
       //if( derived )
         response.write( '<br>' );
     }
-    //response.write( '<br>cached: ' + util.inspect(FHEM_cached).replace(/\n/g, '<br>') );
+    //response.write( '<br>cached: ' + util.inspect(state.cache.values).replace(/\n/g, '<br>') );
     response.end( '' );
 
   } else if( request.url == '/subscriptions' ) {
     response.write( '<a href="/">home</a><br><br>' );
-    response.end( '<pre>subscriptions: ' + util.inspect(FHEM_subscriptions, {depth: 5}) + '</pre>');
+    response.end( '<pre>subscriptions: ' + util.inspect(state.subscriptions.byInformId, {depth: 5}) + '</pre>');
 
   } else
     response.end( '<a href="/cached">cached</a><br><a href="/subscriptions">subscriptions</a>' );
@@ -2817,6 +2600,8 @@ export const __internals = {
   useHap: function(hap) {
     Accessory = hap.Accessory; Service = hap.Service; Characteristic = hap.Characteristic; UUIDGen = hap.uuid;
     Units = hap.Units; Formats = hap.Formats; Perms = hap.Perms;
+    state = new PluginState(hap);
+    return state;
   },
   useUser: function(user) { User = user },
   useFakeGato: function(service) { FakeGatoHistoryService = service },
@@ -2824,8 +2609,6 @@ export const __internals = {
   FHEMPlatform: FHEMPlatform,
   FHEMAccessory: FHEMAccessory,
 
-  FHEM_subscriptions: FHEM_subscriptions,
-  FHEM_cached: FHEM_cached,
   FHEM_longpoll: FHEM_longpoll,
   FHEM_csrfToken: FHEM_csrfToken,
   FHEM_platforms: FHEM_platforms,
