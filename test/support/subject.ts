@@ -133,9 +133,9 @@ const realExecute = internals.FHEMAccessory.prototype.execute;
 export function createWorld(options: WorldOptions = {}): World {
   clear(internals.FHEM_subscriptions);
   clear(internals.FHEM_cached);
-  clear(internals.FHEM_longpoll);
-  clear(internals.FHEM_csrfToken);
   internals.FHEM_platforms.length = 0;
+  // the state of the connections stays: it is kept per url, and a connection that is still
+  // open from an earlier test would fail without it
 
   internals.useUser({ storagePath: () => options.storagePath ?? '/nonexistent' });
   internals.useFakeGato(options.fakeGato);

@@ -59,7 +59,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 - [x] **M2.1** test seam + real HAP types + ported harness and HMCCU suites
 - [x] **M2.2** device fixtures for every detection branch
 - [x] **M2.3** suites 1–6 and 8 (detection, services, to-HomeKit, to-FHEM, parser, colour, identity)
-- [ ] **M2.4** fake FHEMWEB + transport suite
+- [x] **M2.4** fake FHEMWEB + transport suite
 - [ ] **M2.5** `KNOWN_BUGS.md`, coverage threshold set, mutation spot-check done, tag `baseline-m2`
 - [ ] **M3.1** `util/*`, `mapping/types`, `mapping/parser`
 - [ ] **M3.2** `mapping/compile`, `mapping/toHomekit`, `mapping/toFhem`, `mapping/userFunctions`
