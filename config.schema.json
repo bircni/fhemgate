@@ -51,6 +51,13 @@
         "description": "use ssl/https when connecting to fhem"
       },
 
+      "rejectUnauthorized": {
+        "type": "boolean",
+        "title": "Verify the certificate",
+        "required": false,
+        "description": "with ssl: on to only talk to a fhem whose certificate is trusted, off to accept any certificate. if not set, the certificate is not checked when user and password are configured, and checked when they are not."
+      },
+
       "auth": {
         "type": "object",
         "required": false,

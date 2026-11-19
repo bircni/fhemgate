@@ -22,6 +22,12 @@ includes the devices that should be bridged to homekit.
 - port: the port of FHEMWEB, 8083 if not given
 - filter: the fhem devspec of the devices to bridge. all devices if not given
 - ssl: true to talk https to FHEMWEB
+- rejectUnauthorized: with ssl, whether fhem has to show a certificate that is trusted. true: always.
+  false: never, e.g. for the self-signed certificate of a fhem with `attr WEB HTTPS 1`.
+  if not given, it is as it was in homebridge-fhem: **with auth the certificate is not checked**,
+  without auth it is. without the check the connection is encrypted, but anybody in the network
+  can pose as fhem and is sent user and password. set it to true if fhem has a certificate that
+  node trusts
 - webname: the webname of the FHEMWEB instance, fhem if not given
 - auth: user and password of FHEMWEB: `{ "user": "...", "pass": "..." }`
 - jsFunctions: a file with functions for reading2homekit and homekit2reading, see below

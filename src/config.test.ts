@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import type { Logging } from 'homebridge';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLog } from '../test/support/log.ts';
-import { baseUrl, isSwitchedOff, loadJsFunctions } from './config.ts';
+import { baseUrl, isSwitchedOff, loadJsFunctions, optionalSwitch } from './config.ts';
 
 const logging = () => {
   const log = createLog();
@@ -61,6 +61,14 @@ describe('isSwitchedOff', () => {
 
   it.each([undefined, null, true, 'true', 1, '', 'no', {}])('leaves an option on for %j', (value) => {
     expect(isSwitchedOff(value)).toBe(false);
+  });
+});
+
+describe('optionalSwitch', () => {
+  it('is on, off, or not given', () => {
+    expect([true, 'true', 1, 'yes'].map(optionalSwitch)).toEqual([true, true, true, true]);
+    expect([false, 'false', 0, '0'].map(optionalSwitch)).toEqual([false, false, false, false]);
+    expect([undefined, null].map(optionalSwitch)).toEqual([undefined, undefined]);
   });
 });
 
