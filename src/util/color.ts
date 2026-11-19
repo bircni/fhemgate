@@ -69,6 +69,10 @@ export function hsv2rgb(h: number, s: number, v: number): string {
  */
 export function ct2rgb(ct: number | string): string {
   let mired = Number(ct);
+  if (isNaN(mired)) {
+    // no colour temperature: white
+    return 'ffffff';
+  }
 
   // kelvin -> mired
   if (mired > 1000) {
@@ -89,8 +93,13 @@ export function ct2rgb(ct: number | string): string {
     r = 255;
   }
 
-  // green was calculated here and then always replaced by 255.
-  const g = 255;
+  let g = temp <= 66 ? 99.4708025861 * Math.log(temp) - 161.1195681661 : 288.1221695283 * Math.pow(temp - 60, -0.0755148492);
+  if (g < 0) {
+    g = 0;
+  }
+  if (g > 255) {
+    g = 255;
+  }
 
   // blue for temperatures below 5600 K was calculated with a function that does not exist, which
   // ended the conversion with this error.
