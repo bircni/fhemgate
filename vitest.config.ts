@@ -14,6 +14,12 @@ export default defineConfig({
       include: ['index.cjs', 'src/**/*.ts'],
       exclude: ['src/**/*.test.ts'],
       reporter: ['text-summary', 'json-summary', 'html'],
+      thresholds: {
+        lines: 85,
+        statements: 85,
+        functions: 80,
+        branches: 70,
+      },
     },
   },
 });

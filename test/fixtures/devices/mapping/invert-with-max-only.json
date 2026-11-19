@@ -1,0 +1,25 @@
+{
+  "Name": "invert_with_max_only",
+  "PossibleSets": "position",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "invert_with_max_only",
+    "TYPE": "dummy",
+    "FUUID": "79e73d63-f33f-79ce-51ef-c8555059043d",
+    "STATE": "20"
+  },
+  "Readings": {
+    "state": {
+      "Value": "20",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "position": {
+      "Value": "20",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "blind",
+    "homebridgeMapping": "CurrentPosition=position,invert=1,maxValue=80\nTargetPosition=position,cmd=position,invert=1,maxValue=80"
+  }
+}

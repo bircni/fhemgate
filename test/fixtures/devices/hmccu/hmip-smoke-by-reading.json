@@ -1,0 +1,20 @@
+{
+  "Name": "hmip_smoke_by_reading",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_smoke_by_reading",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "f564230c-f33f-92c8-c8c8-eaa80c914390",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000007:4",
+    "ccutype": "X"
+  },
+  "Readings": {
+    "1.SMOKE_DETECTOR_ALARM_STATUS": {
+      "Value": "IDLE_OFF",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

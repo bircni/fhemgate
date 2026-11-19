@@ -60,7 +60,7 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
 - [x] **M2.2** device fixtures for every detection branch
 - [x] **M2.3** suites 1–6 and 8 (detection, services, to-HomeKit, to-FHEM, parser, colour, identity)
 - [x] **M2.4** fake FHEMWEB + transport suite
-- [ ] **M2.5** `KNOWN_BUGS.md`, coverage threshold set, mutation spot-check done, tag `baseline-m2`
+- [x] **M2.5** `KNOWN_BUGS.md`, coverage threshold set, mutation spot-check done, tag `baseline-m2`
 - [ ] **M3.1** `util/*`, `mapping/types`, `mapping/parser`
 - [ ] **M3.2** `mapping/compile`, `mapping/toHomekit`, `mapping/toFhem`, `mapping/userFunctions`
 - [ ] **M3.3** `state/*`, `devices/identity`, `accessory/customCharacteristics`
@@ -82,6 +82,17 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
   everything without emitting, `tsconfig.build.json` builds `src` to `dist`. `pack-smoke` is
   `scripts/pack-smoke.ts`, run by Node directly. `actionlint` is run from the locally installed
   binary. CI on Node 22 and 24 is unverified: there is no remote and only Node 26 locally.
+- M2 as built: the legacy file exports its internals as `__internals`, and every test reaches the
+  code through `test/support/subject.ts` only, so Phase 3 re-points that one file. Tests run
+  against the real HAP-NodeJS 2.3 classes. 179 device fixtures, synthesised from the detection
+  code, run through five recorded checks each (`test/devices.test.ts`, 819 snapshots). The
+  transport suite talks over real HTTP to a stand-in FHEMWEB on a random local port; no test
+  touches a real fhem. `postman-request` does load on the local Node 26.10 with the versions bun
+  resolved, so the legacy transport is tested as it is. Coverage of `index.cjs` at the tag
+  `baseline-m2`: 93.6 % of lines; thresholds are 85 % lines and statements, 80 % functions,
+  70 % branches. Mutation spot-check: making the HM dimmer read `state` failed 4 tests, rounding
+  the value scaling down failed 14. The code no test reaches is listed at the end of
+  `docs/KNOWN_BUGS.md`.
 
 **Blocked / needs owner:** *(filled in during execution)*
 

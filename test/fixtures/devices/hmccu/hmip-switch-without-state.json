@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_switch_without_state",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_switch_without_state",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "6f769fb8-f33f-6504-e616-7474318a037b",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000002:4",
+    "ccutype": "X",
+    "ccurole": "SWITCH_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "1.LEVEL": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

@@ -1,0 +1,25 @@
+{
+  "Name": "json_broken_write_function",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "json_broken_write_function",
+    "TYPE": "dummy",
+    "FUUID": "466680fb-f33f-e43d-6c13-b425fc6e0467",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "pct": {
+      "Value": "128",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "genericDeviceType": "light",
+    "homebridgeMapping": "{\"On\": {\"reading\": \"state\", \"homekit2reading\": \"{return (}\", \"cmdOn\": \"on\", \"cmdOff\": \"off\"}, \"Brightness\": {\"reading\": \"pct\", \"cmd\": \"pct\", \"homekit2reading\": \"percentToByte\", \"reading2homekit\": \"byteToPercent\"}}"
+  }
+}

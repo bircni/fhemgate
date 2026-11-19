@@ -1,0 +1,24 @@
+{
+  "Name": "empty_reading_and_format",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "empty_reading_and_format",
+    "TYPE": "dummy",
+    "FUUID": "3fa200e9-f33f-be23-96ba-1c1687f4e721",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "wert": {
+      "Value": "5",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "On=,cmdOn=on,cmdOff=off\n00000000-0000-1000-8000-0026BB765299=wert,name=Wert,format=nope"
+  }
+}

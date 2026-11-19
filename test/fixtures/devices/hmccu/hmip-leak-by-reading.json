@@ -1,0 +1,20 @@
+{
+  "Name": "hmip_leak_by_reading",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_leak_by_reading",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "8f8fc7be-f33f-7831-c348-354d9e12e6aa",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000008:4",
+    "ccutype": "X"
+  },
+  "Readings": {
+    "1.MOISTURE_DETECTED": {
+      "Value": "false",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

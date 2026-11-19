@@ -1,0 +1,28 @@
+{
+  "Name": "custom_by_known_name",
+  "PossibleSets": "on off",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "custom_by_known_name",
+    "TYPE": "dummy",
+    "FUUID": "39686cb7-f33f-644e-4616-cdc02cf7bc63",
+    "STATE": "on"
+  },
+  "Readings": {
+    "state": {
+      "Value": "on",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "watt": {
+      "Value": "5",
+      "Time": "2026-08-16 12:00:00"
+    },
+    "kwh": {
+      "Value": "1.5",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {
+    "homebridgeMapping": "Power=watt,name=Leistung,format=FLOAT\nEnergy=kwh,name=Energie,format=FLOAT,cmd=kwh"
+  }
+}

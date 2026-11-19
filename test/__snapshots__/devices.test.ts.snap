@@ -10897,6 +10897,265 @@ exports[`hmccu/hmip-bbl-venetian > updates characteristics 1`] = `
 }
 `;
 
+exports[`hmccu/hmip-bdt-by-type > converts readings 1`] = `
+{
+  "Brightness": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "-5" "000000"",
+    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "35 <- "0.35"",
+    "46 <- "0.4573,0.41"",
+  ],
+  "On": [
+    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "0"",
+    "undefined <- "set-on" "set_off"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-bdt-by-type > gets its services 1`] = `
+{
+  "displayName": "99ad797f-f33f-a30d-6fb6-0cfb3cf762b6",
+  "log": [
+    "log creating services for hmip-bdt-by-type",
+    "log   information service for hmip-bdt-by-type",
+    "log     manufacturer, model and serial number characteristics for hmip-bdt-by-type",
+    "log     name (siriName) characteristic for hmip-bdt-by-type",
+    "log   Lightbulb service for hmip-bdt-by-type",
+    "log     On characteristic for hmip_bdt_by_type:4.LEVEL",
+    "log     Brightness characteristic for hmip_bdt_by_type:4.LEVEL",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HmIP-BDT",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000002:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_bdt_by_type",
+        },
+        {
+          "name": "On",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+          },
+          "uuid": "00000025-0000-1000-8000-0026BB765291",
+          "value": true,
+        },
+        {
+          "name": "Brightness",
+          "props": {
+            "format": "int",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "00000008-0000-1000-8000-0026BB765291",
+          "value": 20,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_bdt_by_type",
+      "type": "Lightbulb",
+      "uuid": "00000043-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_bdt_by_type-4.LEVEL": 2,
+  },
+}
+`;
+
+exports[`hmccu/hmip-bdt-by-type > is detected 1`] = `
+{
+  "alias": "hmip_bdt_by_type",
+  "category": undefined,
+  "device": "hmip_bdt_by_type",
+  "fuuid": "99ad797f-f33f-a30d-6fb6-0cfb3cf762b6",
+  "homekit_uuid": "4a037786-3268-42ff-8288-a4bce0fe3900",
+  "log": [
+    "info hmip_bdt_by_type (HmIP-BDT/?) mapped as HMCCU light; LEVEL=4.LEVEL x100",
+    "log hmip_bdt_by_type is light",
+    "log hmip_bdt_by_type has",
+    "log   On [4.LEVEL;datapoint 4.LEVEL 1,datapoint 4.LEVEL 0]",
+    "log   Brightness [4.LEVEL]",
+    "info     caching: On: true (as boolean; from '0.2')",
+    "info     caching: Brightness: 20 (as number; from '0.2')",
+  ],
+  "mappings": {
+    "Brightness": {
+      "cached": 20,
+      "characteristic": "class Brightness",
+      "characteristic_type": "Brightness",
+      "cmd": "datapoint 4.LEVEL",
+      "delay": true,
+      "device": "hmip_bdt_by_type",
+      "homekit2reading": "[function]",
+      "informId": "hmip_bdt_by_type-4.LEVEL",
+      "last_update": 1786881600,
+      "levelFactor": 100,
+      "levelWriteFactor": 100,
+      "reading": "4.LEVEL",
+      "reading2homekit": "[function]",
+    },
+    "On": {
+      "cached": true,
+      "characteristic": "class On",
+      "characteristic_type": "On",
+      "cmdOff": "datapoint 4.LEVEL 0",
+      "cmdOn": "datapoint 4.LEVEL 1",
+      "device": "hmip_bdt_by_type",
+      "informId": "hmip_bdt_by_type-4.LEVEL",
+      "last_update": 1786881600,
+      "reading": "4.LEVEL",
+      "valueOff": "/^0(\\.0*)?$/",
+    },
+  },
+  "model": "HmIP-BDT",
+  "name": "hmip-bdt-by-type",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000002:4",
+  "service_name": "light",
+  "siriName": "hmip_bdt_by_type",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000002:4",
+}
+`;
+
+exports[`hmccu/hmip-bdt-by-type > sends commands 1`] = `
+{
+  "Brightness": [
+    "set hmip_bdt_by_type datapoint 4.LEVEL 0.01 <- true 1",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 0 <- false 0",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 0.02 <- 2",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 0.03 <- 3",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 0.1 <- 10",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 0.5 <- 50",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 1 <- 100",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 0.215 <- 21.5",
+    "set hmip_bdt_by_type datapoint 4.LEVEL -0.9 <- -90",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 0.9 <- 90",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 3.59 <- 359",
+  ],
+  "On": [
+    "set hmip_bdt_by_type datapoint 4.LEVEL 1 <- true 1",
+    "set hmip_bdt_by_type datapoint 4.LEVEL 0 <- false 0",
+    "set hmip_bdt_by_type undefined 2 <- 2",
+    "set hmip_bdt_by_type undefined 3 <- 3",
+    "set hmip_bdt_by_type undefined 10 <- 10",
+    "set hmip_bdt_by_type undefined 50 <- 50",
+    "set hmip_bdt_by_type undefined 100 <- 100",
+    "set hmip_bdt_by_type undefined 21.5 <- 21.5",
+    "set hmip_bdt_by_type undefined -90 <- -90",
+    "set hmip_bdt_by_type undefined 90 <- 90",
+    "set hmip_bdt_by_type undefined 359 <- 359",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-bdt-by-type > updates characteristics 1`] = `
+{
+  "hmip_bdt_by_type-4.LEVEL": [
+    "On=true Brightness=20 <- "on" "off"",
+    "On=false Brightness=0 <- "0"",
+    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
 exports[`hmccu/hmip-bdt-dimmer > converts readings 1`] = `
 {
   "Brightness": [
@@ -11152,6 +11411,304 @@ exports[`hmccu/hmip-bdt-dimmer > updates characteristics 1`] = `
     "On=true Brightness=60 <- "on" "off"",
     "On=false Brightness=0 <- "0"",
     "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-blind-without-level > is detected 1`] = `
+{
+  "alias": undefined,
+  "category": undefined,
+  "device": undefined,
+  "fuuid": undefined,
+  "homekit_uuid": "7d13f087-bcc5-489e-bc70-d0329af65dcc",
+  "log": [
+    "error hmip_blind_without_level: detected as blind but has no LEVEL reading",
+    "error hmip_blind_without_level: no service type detected",
+  ],
+  "mappings": undefined,
+  "model": undefined,
+  "name": undefined,
+  "published": false,
+  "room": undefined,
+  "sent": [],
+  "serial": undefined,
+  "service_name": undefined,
+  "siriName": undefined,
+  "type": undefined,
+  "uuid_base": undefined,
+}
+`;
+
+exports[`hmccu/hmip-broll-by-type > converts readings 1`] = `
+{
+  "CurrentPosition": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "-5" "000000"",
+    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "35 <- "0.35"",
+    "46 <- "0.4573,0.41"",
+  ],
+  "TargetPosition": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "-5" "000000"",
+    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "35 <- "0.35"",
+    "46 <- "0.4573,0.41"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-broll-by-type > gets its services 1`] = `
+{
+  "displayName": "6563d079-f33f-6cea-1f29-e9e3ab1f867b",
+  "log": [
+    "log creating services for hmip-broll-by-type",
+    "log   information service for hmip-broll-by-type",
+    "log     manufacturer, model and serial number characteristics for hmip-broll-by-type",
+    "log     name (siriName) characteristic for hmip-broll-by-type",
+    "log   WindowCovering service for hmip-broll-by-type",
+    "log     CurrentPosition characteristic for hmip_broll_by_type:4.LEVEL",
+    "log     TargetPosition characteristic for hmip_broll_by_type:4.LEVEL",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HmIP-BROLL",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000001:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_broll_by_type",
+        },
+        {
+          "name": "Current Position",
+          "props": {
+            "format": "uint8",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "0000006D-0000-1000-8000-0026BB765291",
+          "value": 20,
+        },
+        {
+          "name": "Position State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 2,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+            ],
+          },
+          "uuid": "00000072-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+        {
+          "name": "Target Position",
+          "props": {
+            "format": "uint8",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "0000007C-0000-1000-8000-0026BB765291",
+          "value": 20,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_broll_by_type",
+      "type": "WindowCovering",
+      "uuid": "0000008C-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_broll_by_type-4.LEVEL": 2,
+  },
+}
+`;
+
+exports[`hmccu/hmip-broll-by-type > is detected 1`] = `
+{
+  "alias": "hmip_broll_by_type",
+  "category": undefined,
+  "device": "hmip_broll_by_type",
+  "fuuid": "6563d079-f33f-6cea-1f29-e9e3ab1f867b",
+  "homekit_uuid": "a2c5f186-ce2b-4a56-aa1a-d114caa4bc05",
+  "log": [
+    "info hmip_broll_by_type (HmIP-BROLL/?) mapped as HMCCU blind; LEVEL=4.LEVEL x100",
+    "log hmip_broll_by_type is blind",
+    "log hmip_broll_by_type has",
+    "log   CurrentPosition [4.LEVEL]",
+    "log   TargetPosition [4.LEVEL]",
+    "info     caching: CurrentPosition: 20 (as number; from '0.2')",
+    "info     caching: TargetPosition: 20 (as number; from '0.2')",
+  ],
+  "mappings": {
+    "CurrentPosition": {
+      "cached": 20,
+      "characteristic": "class CurrentPosition",
+      "characteristic_type": "CurrentPosition",
+      "device": "hmip_broll_by_type",
+      "informId": "hmip_broll_by_type-4.LEVEL",
+      "last_update": 1786881600,
+      "levelFactor": 100,
+      "reading": "4.LEVEL",
+      "reading2homekit": "[function]",
+    },
+    "TargetPosition": {
+      "cached": 20,
+      "characteristic": "class TargetPosition",
+      "characteristic_type": "TargetPosition",
+      "cmd": "pct",
+      "delay": true,
+      "device": "hmip_broll_by_type",
+      "homekit2reading": "[function]",
+      "informId": "hmip_broll_by_type-4.LEVEL",
+      "last_update": 1786881600,
+      "levelFactor": 100,
+      "levelWriteFactor": 1,
+      "reading": "4.LEVEL",
+      "reading2homekit": "[function]",
+    },
+  },
+  "model": "HmIP-BROLL",
+  "name": "hmip-broll-by-type",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000001:4",
+  "service_name": "blind",
+  "siriName": "hmip_broll_by_type",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000001:4",
+}
+`;
+
+exports[`hmccu/hmip-broll-by-type > sends commands 1`] = `
+{
+  "CurrentPosition": [
+    "set hmip_broll_by_type undefined 1 <- 1",
+  ],
+  "TargetPosition": [
+    "set hmip_broll_by_type pct 1 <- true 1",
+    "set hmip_broll_by_type pct 0 <- false 0",
+    "set hmip_broll_by_type pct 2 <- 2",
+    "set hmip_broll_by_type pct 3 <- 3",
+    "set hmip_broll_by_type pct 10 <- 10",
+    "set hmip_broll_by_type pct 50 <- 50",
+    "set hmip_broll_by_type pct 100 <- 100",
+    "set hmip_broll_by_type pct 21.5 <- 21.5",
+    "set hmip_broll_by_type pct -90 <- -90",
+    "set hmip_broll_by_type pct 90 <- 90",
+    "set hmip_broll_by_type pct 359 <- 359",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-broll-by-type > updates characteristics 1`] = `
+{
+  "hmip_broll_by_type-4.LEVEL": [
+    "Current Position=20 Target Position=20 <- "on" "off"",
+    "Current Position=0 Target Position=0 <- "0"",
+    "Current Position=100 Target Position=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -14147,6 +14704,797 @@ exports[`hmccu/hmip-etrv-thermostat > updates characteristics 1`] = `
 }
 `;
 
+exports[`hmccu/hmip-leak-by-reading > converts readings 1`] = `
+{
+  "LeakDetected": [
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
+    "0 <- "0" "false"",
+    "undefined <- "set-on" "set_off" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-leak-by-reading > gets its services 1`] = `
+{
+  "displayName": "8f8fc7be-f33f-7831-c348-354d9e12e6aa",
+  "log": [
+    "log creating services for hmip-leak-by-reading",
+    "log   information service for hmip-leak-by-reading",
+    "log     manufacturer, model and serial number characteristics for hmip-leak-by-reading",
+    "log     name (siriName) characteristic for hmip-leak-by-reading",
+    "log   LeakSensor service for hmip-leak-by-reading",
+    "log     LeakDetected characteristic for hmip_leak_by_reading:1.MOISTURE_DETECTED",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:X",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000008:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_leak_by_reading",
+        },
+        {
+          "name": "Leak Detected",
+          "props": {
+            "format": "uint8",
+            "maxValue": 1,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+            ],
+          },
+          "uuid": "00000070-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_leak_by_reading",
+      "type": "LeakSensor",
+      "uuid": "00000083-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_leak_by_reading-1.MOISTURE_DETECTED": 1,
+  },
+}
+`;
+
+exports[`hmccu/hmip-leak-by-reading > is detected 1`] = `
+{
+  "alias": "hmip_leak_by_reading",
+  "category": undefined,
+  "device": "hmip_leak_by_reading",
+  "fuuid": "8f8fc7be-f33f-7831-c348-354d9e12e6aa",
+  "homekit_uuid": "ba7fd6dc-db8a-491d-9ccd-611d9a2ff705",
+  "log": [
+    "info hmip_leak_by_reading (X/?) mapped as HMCCU leak",
+    "log hmip_leak_by_reading is LeakSensor",
+    "log hmip_leak_by_reading has",
+    "log   LeakDetected [1.MOISTURE_DETECTED]",
+    "info     caching: LeakDetected: 0 (as number; means LEAK_NOT_DETECTED; from 'false')",
+  ],
+  "mappings": {
+    "LeakDetected": {
+      "cached": 0,
+      "characteristic": "class LeakDetected",
+      "characteristic_type": "LeakDetected",
+      "device": "hmip_leak_by_reading",
+      "homekit2name": {
+        "0": "LEAK_NOT_DETECTED",
+        "1": "LEAK_DETECTED",
+      },
+      "informId": "hmip_leak_by_reading-1.MOISTURE_DETECTED",
+      "last_update": 1786881600,
+      "reading": "1.MOISTURE_DETECTED",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^(0|[Ff]alse|FALSE)$",
+          "to": 0,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^(0|[Ff]alse|FALSE)$/:LEAK_NOT_DETECTED",
+        "/.*/:LEAK_DETECTED",
+      ],
+    },
+  },
+  "model": "X",
+  "name": "hmip-leak-by-reading",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000008:4",
+  "service_name": "LeakSensor",
+  "siriName": "hmip_leak_by_reading",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000008:4",
+}
+`;
+
+exports[`hmccu/hmip-leak-by-reading > sends commands 1`] = `
+{
+  "LeakDetected": [
+    "set hmip_leak_by_reading undefined 1 <- 1",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-leak-by-reading > updates characteristics 1`] = `
+{
+  "hmip_leak_by_reading-1.MOISTURE_DETECTED": [
+    "Leak Detected=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Leak Detected=0 <- "0"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-leak-without-reading > is detected 1`] = `
+{
+  "alias": undefined,
+  "category": undefined,
+  "device": undefined,
+  "fuuid": undefined,
+  "homekit_uuid": "7d13f087-bcc5-489e-bc70-d0329af65dcc",
+  "log": [
+    "error hmip_leak_without_reading: detected as leak sensor but has no water detection reading",
+    "error hmip_leak_without_reading: no service type detected",
+  ],
+  "mappings": undefined,
+  "model": undefined,
+  "name": undefined,
+  "published": false,
+  "room": undefined,
+  "sent": [],
+  "serial": undefined,
+  "service_name": undefined,
+  "siriName": undefined,
+  "type": undefined,
+  "uuid_base": undefined,
+}
+`;
+
+exports[`hmccu/hmip-light-by-level-and-pct > converts readings 1`] = `
+{
+  "Brightness": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "-5" "000000"",
+    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "35 <- "0.35"",
+    "46 <- "0.4573,0.41"",
+  ],
+  "On": [
+    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "0"",
+    "undefined <- "set-on" "set_off"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-light-by-level-and-pct > gets its services 1`] = `
+{
+  "displayName": "4b537ef0-f33f-7e11-a61f-ca40365ad232",
+  "log": [
+    "log creating services for hmip-light-by-level-and-pct",
+    "log   information service for hmip-light-by-level-and-pct",
+    "log     manufacturer, model and serial number characteristics for hmip-light-by-level-and-pct",
+    "log     name (siriName) characteristic for hmip-light-by-level-and-pct",
+    "log   Lightbulb service for hmip-light-by-level-and-pct",
+    "log     On characteristic for hmip_light_by_level_and_pct:1.LEVEL",
+    "log     Brightness characteristic for hmip_light_by_level_and_pct:1.LEVEL",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:X",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000009:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_light_by_level_and_pct",
+        },
+        {
+          "name": "On",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+          },
+          "uuid": "00000025-0000-1000-8000-0026BB765291",
+          "value": true,
+        },
+        {
+          "name": "Brightness",
+          "props": {
+            "format": "int",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "00000008-0000-1000-8000-0026BB765291",
+          "value": 40,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_light_by_level_and_pct",
+      "type": "Lightbulb",
+      "uuid": "00000043-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_light_by_level_and_pct-1.LEVEL": 2,
+  },
+}
+`;
+
+exports[`hmccu/hmip-light-by-level-and-pct > is detected 1`] = `
+{
+  "alias": "hmip_light_by_level_and_pct",
+  "category": undefined,
+  "device": "hmip_light_by_level_and_pct",
+  "fuuid": "4b537ef0-f33f-7e11-a61f-ca40365ad232",
+  "homekit_uuid": "7ad7a909-3abf-42a6-a482-ed8d4422c599",
+  "log": [
+    "info hmip_light_by_level_and_pct (X/?) mapped as HMCCU light; LEVEL=1.LEVEL x100",
+    "log hmip_light_by_level_and_pct is light",
+    "log hmip_light_by_level_and_pct has",
+    "log   On [1.LEVEL;datapoint 1.LEVEL 1,datapoint 1.LEVEL 0]",
+    "log   Brightness [1.LEVEL]",
+    "info     caching: On: true (as boolean; from '0.4')",
+    "info     caching: Brightness: 40 (as number; from '0.4')",
+  ],
+  "mappings": {
+    "Brightness": {
+      "cached": 40,
+      "characteristic": "class Brightness",
+      "characteristic_type": "Brightness",
+      "cmd": "pct",
+      "delay": true,
+      "device": "hmip_light_by_level_and_pct",
+      "homekit2reading": "[function]",
+      "informId": "hmip_light_by_level_and_pct-1.LEVEL",
+      "last_update": 1786881600,
+      "levelFactor": 100,
+      "levelWriteFactor": 1,
+      "reading": "1.LEVEL",
+      "reading2homekit": "[function]",
+    },
+    "On": {
+      "cached": true,
+      "characteristic": "class On",
+      "characteristic_type": "On",
+      "cmdOff": "datapoint 1.LEVEL 0",
+      "cmdOn": "datapoint 1.LEVEL 1",
+      "device": "hmip_light_by_level_and_pct",
+      "informId": "hmip_light_by_level_and_pct-1.LEVEL",
+      "last_update": 1786881600,
+      "reading": "1.LEVEL",
+      "valueOff": "/^0(\\.0*)?$/",
+    },
+  },
+  "model": "X",
+  "name": "hmip-light-by-level-and-pct",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000009:4",
+  "service_name": "light",
+  "siriName": "hmip_light_by_level_and_pct",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000009:4",
+}
+`;
+
+exports[`hmccu/hmip-light-by-level-and-pct > sends commands 1`] = `
+{
+  "Brightness": [
+    "set hmip_light_by_level_and_pct pct 1 <- true 1",
+    "set hmip_light_by_level_and_pct pct 0 <- false 0",
+    "set hmip_light_by_level_and_pct pct 2 <- 2",
+    "set hmip_light_by_level_and_pct pct 3 <- 3",
+    "set hmip_light_by_level_and_pct pct 10 <- 10",
+    "set hmip_light_by_level_and_pct pct 50 <- 50",
+    "set hmip_light_by_level_and_pct pct 100 <- 100",
+    "set hmip_light_by_level_and_pct pct 21.5 <- 21.5",
+    "set hmip_light_by_level_and_pct pct -90 <- -90",
+    "set hmip_light_by_level_and_pct pct 90 <- 90",
+    "set hmip_light_by_level_and_pct pct 359 <- 359",
+  ],
+  "On": [
+    "set hmip_light_by_level_and_pct datapoint 1.LEVEL 1 <- true 1",
+    "set hmip_light_by_level_and_pct datapoint 1.LEVEL 0 <- false 0",
+    "set hmip_light_by_level_and_pct undefined 2 <- 2",
+    "set hmip_light_by_level_and_pct undefined 3 <- 3",
+    "set hmip_light_by_level_and_pct undefined 10 <- 10",
+    "set hmip_light_by_level_and_pct undefined 50 <- 50",
+    "set hmip_light_by_level_and_pct undefined 100 <- 100",
+    "set hmip_light_by_level_and_pct undefined 21.5 <- 21.5",
+    "set hmip_light_by_level_and_pct undefined -90 <- -90",
+    "set hmip_light_by_level_and_pct undefined 90 <- 90",
+    "set hmip_light_by_level_and_pct undefined 359 <- 359",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-light-by-level-and-pct > updates characteristics 1`] = `
+{
+  "hmip_light_by_level_and_pct-1.LEVEL": [
+    "On=true Brightness=40 <- "on" "off"",
+    "On=false Brightness=0 <- "0"",
+    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-motion-by-reading > converts readings 1`] = `
+{
+  "LightSensor#CurrentAmbientLightLevel": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "-5" "000000"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100"",
+    "254 <- "254"",
+    "1500 <- "1500"",
+    "21.5 <- "21.5"",
+    "0.35 <- "0.35"",
+    "0.4573 <- "0.4573,0.41"",
+  ],
+  "MotionDetected": [
+    "true <- "on" "ON" "1" "true"",
+    "false <- "off" "0" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "undefined <- "set-on" "set_off"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-motion-by-reading > gets its services 1`] = `
+{
+  "displayName": "18c9af6c-f33f-a3da-eb8c-5ce67a1f5758",
+  "log": [
+    "log creating services for hmip-motion-by-reading",
+    "log   information service for hmip-motion-by-reading",
+    "log     manufacturer, model and serial number characteristics for hmip-motion-by-reading",
+    "log     name (siriName) characteristic for hmip-motion-by-reading",
+    "log   MotionSensor service for hmip-motion-by-reading",
+    "log     MotionDetected characteristic for hmip_motion_by_reading:1.MOTION",
+    "log   LightSensor service for hmip-motion-by-reading",
+    "log     LightSensor#CurrentAmbientLightLevel characteristic for hmip_motion_by_reading:1.AVERAGE_ILLUMINATION",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:X",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000005:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_motion_by_reading",
+        },
+        {
+          "name": "Motion Detected",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+            ],
+          },
+          "uuid": "00000022-0000-1000-8000-0026BB765291",
+          "value": true,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_motion_by_reading",
+      "type": "MotionSensor",
+      "uuid": "00000085-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_motion_by_reading",
+        },
+        {
+          "name": "Current Ambient Light Level",
+          "props": {
+            "format": "float",
+            "maxValue": 100000,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "unit": "lux",
+          },
+          "uuid": "0000006B-0000-1000-8000-0026BB765291",
+          "value": 12,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_motion_by_reading",
+      "subtype": "",
+      "type": "LightSensor",
+      "uuid": "00000084-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_motion_by_reading-1.AVERAGE_ILLUMINATION": 1,
+    "hmip_motion_by_reading-1.MOTION": 1,
+  },
+}
+`;
+
+exports[`hmccu/hmip-motion-by-reading > is detected 1`] = `
+{
+  "alias": "hmip_motion_by_reading",
+  "category": undefined,
+  "device": "hmip_motion_by_reading",
+  "fuuid": "18c9af6c-f33f-a3da-eb8c-5ce67a1f5758",
+  "homekit_uuid": "0cf0fc71-1d42-49bd-94db-db9c8a5319e9",
+  "log": [
+    "info hmip_motion_by_reading (X/?) mapped as HMCCU motion",
+    "log hmip_motion_by_reading is MotionSensor",
+    "log hmip_motion_by_reading has",
+    "log   MotionDetected [1.MOTION]",
+    "log   LightSensor#CurrentAmbientLightLevel [1.AVERAGE_ILLUMINATION]",
+    "info     caching: MotionDetected: true (as boolean; from 'true')",
+    "info     caching: LightSensor#CurrentAmbientLightLevel: 12 (as number; from '12')",
+  ],
+  "mappings": {
+    "LightSensor#CurrentAmbientLightLevel": {
+      "cached": 12,
+      "characteristic": "class CurrentAmbientLightLevel",
+      "characteristic_type": "LightSensor#CurrentAmbientLightLevel",
+      "device": "hmip_motion_by_reading",
+      "informId": "hmip_motion_by_reading-1.AVERAGE_ILLUMINATION",
+      "last_update": 1786881600,
+      "minValue": 0,
+      "reading": "1.AVERAGE_ILLUMINATION",
+    },
+    "MotionDetected": {
+      "cached": true,
+      "characteristic": "class MotionDetected",
+      "characteristic_type": "MotionDetected",
+      "device": "hmip_motion_by_reading",
+      "informId": "hmip_motion_by_reading-1.MOTION",
+      "last_update": 1786881600,
+      "reading": "1.MOTION",
+      "valueOn": "/^(1|[Tt]rue|TRUE|[Oo]n|ON)$/",
+    },
+  },
+  "model": "X",
+  "name": "hmip-motion-by-reading",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000005:4",
+  "service_name": "MotionSensor",
+  "siriName": "hmip_motion_by_reading",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000005:4",
+}
+`;
+
+exports[`hmccu/hmip-motion-by-reading > sends commands 1`] = `
+{
+  "LightSensor#CurrentAmbientLightLevel": [
+    "set hmip_motion_by_reading undefined 1 <- 1",
+  ],
+  "MotionDetected": [
+    "set hmip_motion_by_reading undefined 1 <- 1",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-motion-by-reading > updates characteristics 1`] = `
+{
+  "hmip_motion_by_reading-1.AVERAGE_ILLUMINATION": [
+    "Current Ambient Light Level=12 <- "on" "off"",
+    "Current Ambient Light Level=0 <- "0"",
+    "Current Ambient Light Level=1 <- "1"",
+    "Current Ambient Light Level=50 <- "50"",
+    "Current Ambient Light Level=100 <- "100"",
+    "Current Ambient Light Level=21.5 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+  "hmip_motion_by_reading-1.MOTION": [
+    "Motion Detected=true <- "on" "1"",
+    "Motion Detected=false <- "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-motion-without-motion > is detected 1`] = `
+{
+  "alias": undefined,
+  "category": undefined,
+  "device": undefined,
+  "fuuid": undefined,
+  "homekit_uuid": "7d13f087-bcc5-489e-bc70-d0329af65dcc",
+  "log": [
+    "error hmip_motion_without_motion: detected as motion sensor but has no MOTION reading",
+    "error hmip_motion_without_motion: no service type detected",
+  ],
+  "mappings": undefined,
+  "model": undefined,
+  "name": undefined,
+  "published": false,
+  "room": undefined,
+  "sent": [],
+  "serial": undefined,
+  "service_name": undefined,
+  "siriName": undefined,
+  "type": undefined,
+  "uuid_base": undefined,
+}
+`;
+
 exports[`hmccu/hmip-outlet-generic-type > converts readings 1`] = `
 {
   "On": [
@@ -14407,6 +15755,246 @@ exports[`hmccu/hmip-outlet-generic-type > updates characteristics 1`] = `
   "hmip_outlet_generic_type-battery": [
     "Status Low Battery=1 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
+}
+`;
+
+exports[`hmccu/hmip-presence-by-reading > converts readings 1`] = `
+{
+  "OccupancyDetected": [
+    "0 <- "on" "off" "ON" "0" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
+    "1 <- "1" "true"",
+    "undefined <- "set-on" "set_off" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-presence-by-reading > gets its services 1`] = `
+{
+  "displayName": "e49c0d87-f33f-da1a-f08f-36f6c2deb7cd",
+  "log": [
+    "log creating services for hmip-presence-by-reading",
+    "log   information service for hmip-presence-by-reading",
+    "log     manufacturer, model and serial number characteristics for hmip-presence-by-reading",
+    "log     name (siriName) characteristic for hmip-presence-by-reading",
+    "log   OccupancySensor service for hmip-presence-by-reading",
+    "log     OccupancyDetected characteristic for hmip_presence_by_reading:1.PRESENCE_DETECTION_STATE",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:X",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000006:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_presence_by_reading",
+        },
+        {
+          "name": "Occupancy Detected",
+          "props": {
+            "format": "uint8",
+            "maxValue": 1,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+            ],
+          },
+          "uuid": "00000071-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_presence_by_reading",
+      "type": "OccupancySensor",
+      "uuid": "00000086-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_presence_by_reading-1.PRESENCE_DETECTION_STATE": 1,
+  },
+}
+`;
+
+exports[`hmccu/hmip-presence-by-reading > is detected 1`] = `
+{
+  "alias": "hmip_presence_by_reading",
+  "category": undefined,
+  "device": "hmip_presence_by_reading",
+  "fuuid": "e49c0d87-f33f-da1a-f08f-36f6c2deb7cd",
+  "homekit_uuid": "98f983d8-3dd1-4276-94f9-b17e4a85aa1f",
+  "log": [
+    "info hmip_presence_by_reading (X/?) mapped as HMCCU presence",
+    "log hmip_presence_by_reading is OccupancySensor",
+    "log hmip_presence_by_reading has",
+    "log   OccupancyDetected [1.PRESENCE_DETECTION_STATE]",
+    "info     caching: OccupancyDetected: 0 (as number; means OCCUPANCY_NOT_DETECTED; from 'false')",
+  ],
+  "mappings": {
+    "OccupancyDetected": {
+      "cached": 0,
+      "characteristic": "class OccupancyDetected",
+      "characteristic_type": "OccupancyDetected",
+      "device": "hmip_presence_by_reading",
+      "homekit2name": {
+        "0": "OCCUPANCY_NOT_DETECTED",
+        "1": "OCCUPANCY_DETECTED",
+      },
+      "informId": "hmip_presence_by_reading-1.PRESENCE_DETECTION_STATE",
+      "last_update": 1786881600,
+      "reading": "1.PRESENCE_DETECTION_STATE",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^(1|[Tt]rue|TRUE)$",
+          "to": 1,
+        },
+        {
+          "re": ".*",
+          "to": 0,
+        },
+      ],
+      "values": [
+        "/^(1|[Tt]rue|TRUE)$/:OCCUPANCY_DETECTED",
+        "/.*/:OCCUPANCY_NOT_DETECTED",
+      ],
+    },
+  },
+  "model": "X",
+  "name": "hmip-presence-by-reading",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000006:4",
+  "service_name": "OccupancySensor",
+  "siriName": "hmip_presence_by_reading",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000006:4",
+}
+`;
+
+exports[`hmccu/hmip-presence-by-reading > sends commands 1`] = `
+{
+  "OccupancyDetected": [
+    "set hmip_presence_by_reading undefined 1 <- 1",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-presence-by-reading > updates characteristics 1`] = `
+{
+  "hmip_presence_by_reading-1.PRESENCE_DETECTION_STATE": [
+    "Occupancy Detected=0 <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Occupancy Detected=1 <- "1"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-presence-without-state > is detected 1`] = `
+{
+  "alias": undefined,
+  "category": undefined,
+  "device": undefined,
+  "fuuid": undefined,
+  "homekit_uuid": "7d13f087-bcc5-489e-bc70-d0329af65dcc",
+  "log": [
+    "error hmip_presence_without_state: detected as presence sensor but has no PRESENCE_DETECTION_STATE reading",
+    "error hmip_presence_without_state: no service type detected",
+  ],
+  "mappings": undefined,
+  "model": undefined,
+  "name": undefined,
+  "published": false,
+  "room": undefined,
+  "sent": [],
+  "serial": undefined,
+  "service_name": undefined,
+  "siriName": undefined,
+  "type": undefined,
+  "uuid_base": undefined,
 }
 `;
 
@@ -15573,6 +17161,246 @@ exports[`hmccu/hmip-smi-motion > updates characteristics 1`] = `
 }
 `;
 
+exports[`hmccu/hmip-smoke-by-reading > converts readings 1`] = `
+{
+  "SmokeDetected": [
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
+    "0 <- "0"",
+    "undefined <- "set-on" "set_off" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-smoke-by-reading > gets its services 1`] = `
+{
+  "displayName": "f564230c-f33f-92c8-c8c8-eaa80c914390",
+  "log": [
+    "log creating services for hmip-smoke-by-reading",
+    "log   information service for hmip-smoke-by-reading",
+    "log     manufacturer, model and serial number characteristics for hmip-smoke-by-reading",
+    "log     name (siriName) characteristic for hmip-smoke-by-reading",
+    "log   SmokeSensor service for hmip-smoke-by-reading",
+    "log     SmokeDetected characteristic for hmip_smoke_by_reading:1.SMOKE_DETECTOR_ALARM_STATUS",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:X",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000007:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_smoke_by_reading",
+        },
+        {
+          "name": "Smoke Detected",
+          "props": {
+            "format": "uint8",
+            "maxValue": 1,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+            ],
+          },
+          "uuid": "00000076-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_smoke_by_reading",
+      "type": "SmokeSensor",
+      "uuid": "00000087-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_smoke_by_reading-1.SMOKE_DETECTOR_ALARM_STATUS": 1,
+  },
+}
+`;
+
+exports[`hmccu/hmip-smoke-by-reading > is detected 1`] = `
+{
+  "alias": "hmip_smoke_by_reading",
+  "category": undefined,
+  "device": "hmip_smoke_by_reading",
+  "fuuid": "f564230c-f33f-92c8-c8c8-eaa80c914390",
+  "homekit_uuid": "059d4dc0-92f3-439b-9fea-e540c85d0122",
+  "log": [
+    "info hmip_smoke_by_reading (X/?) mapped as HMCCU smoke",
+    "log hmip_smoke_by_reading is SmokeSensor",
+    "log hmip_smoke_by_reading has",
+    "log   SmokeDetected [1.SMOKE_DETECTOR_ALARM_STATUS]",
+    "info     caching: SmokeDetected: 0 (as number; means SMOKE_NOT_DETECTED; from 'IDLE_OFF')",
+  ],
+  "mappings": {
+    "SmokeDetected": {
+      "cached": 0,
+      "characteristic": "class SmokeDetected",
+      "characteristic_type": "SmokeDetected",
+      "device": "hmip_smoke_by_reading",
+      "homekit2name": {
+        "0": "SMOKE_NOT_DETECTED",
+        "1": "SMOKE_DETECTED",
+      },
+      "informId": "hmip_smoke_by_reading-1.SMOKE_DETECTOR_ALARM_STATUS",
+      "last_update": 1786881600,
+      "reading": "1.SMOKE_DETECTOR_ALARM_STATUS",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^(0|IDLE_OFF|idle_off)$",
+          "to": 0,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^(0|IDLE_OFF|idle_off)$/:SMOKE_NOT_DETECTED",
+        "/.*/:SMOKE_DETECTED",
+      ],
+    },
+  },
+  "model": "X",
+  "name": "hmip-smoke-by-reading",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000007:4",
+  "service_name": "SmokeSensor",
+  "siriName": "hmip_smoke_by_reading",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000007:4",
+}
+`;
+
+exports[`hmccu/hmip-smoke-by-reading > sends commands 1`] = `
+{
+  "SmokeDetected": [
+    "set hmip_smoke_by_reading undefined 1 <- 1",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-smoke-by-reading > updates characteristics 1`] = `
+{
+  "hmip_smoke_by_reading-1.SMOKE_DETECTOR_ALARM_STATUS": [
+    "Smoke Detected=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Smoke Detected=0 <- "0"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-smoke-without-status > is detected 1`] = `
+{
+  "alias": undefined,
+  "category": undefined,
+  "device": undefined,
+  "fuuid": undefined,
+  "homekit_uuid": "7d13f087-bcc5-489e-bc70-d0329af65dcc",
+  "log": [
+    "error hmip_smoke_without_status: detected as smoke detector but has no SMOKE_DETECTOR_ALARM_STATUS reading",
+    "error hmip_smoke_without_status: no service type detected",
+  ],
+  "mappings": undefined,
+  "model": undefined,
+  "name": undefined,
+  "published": false,
+  "room": undefined,
+  "sent": [],
+  "serial": undefined,
+  "service_name": undefined,
+  "siriName": undefined,
+  "type": undefined,
+  "uuid_base": undefined,
+}
+`;
+
 exports[`hmccu/hmip-spi-presence > converts readings 1`] = `
 {
   "LightSensor#CurrentAmbientLightLevel": [
@@ -16419,6 +18247,282 @@ exports[`hmccu/hmip-swd-leak > updates characteristics 1`] = `
 }
 `;
 
+exports[`hmccu/hmip-swdo-by-type > converts readings 1`] = `
+{
+  "ContactSensorState": [
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
+    "0 <- "0" "closed" "false"",
+    "undefined <- "set-on" "set_off" """,
+  ],
+  "CurrentDoorState": [
+    "0 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
+    "1 <- "0" "closed" "false"",
+    "undefined <- "set-on" "set_off" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-swdo-by-type > gets its services 1`] = `
+{
+  "displayName": "298af417-f33f-328c-2f4b-20d40e414eb0",
+  "log": [
+    "log creating services for hmip-swdo-by-type",
+    "log   information service for hmip-swdo-by-type",
+    "log     manufacturer, model and serial number characteristics for hmip-swdo-by-type",
+    "log     name (siriName) characteristic for hmip-swdo-by-type",
+    "log   ContactSensor service for hmip-swdo-by-type",
+    "log     ContactSensorState characteristic for hmip_swdo_by_type:1.STATE",
+    "log     CurrentDoorState characteristic for hmip_swdo_by_type:1.STATE",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HmIP-SWDO-I",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000003:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_swdo_by_type",
+        },
+        {
+          "name": "Contact Sensor State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 1,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+            ],
+          },
+          "uuid": "0000006A-0000-1000-8000-0026BB765291",
+          "value": 1,
+        },
+        {
+          "name": "Current Door State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 4,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+              3,
+              4,
+            ],
+          },
+          "uuid": "0000000E-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_swdo_by_type",
+      "type": "ContactSensor",
+      "uuid": "00000080-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_swdo_by_type-1.STATE": 2,
+  },
+}
+`;
+
+exports[`hmccu/hmip-swdo-by-type > is detected 1`] = `
+{
+  "alias": "hmip_swdo_by_type",
+  "category": undefined,
+  "device": "hmip_swdo_by_type",
+  "fuuid": "298af417-f33f-328c-2f4b-20d40e414eb0",
+  "homekit_uuid": "ce645ba9-4481-43af-ad7d-056781d7981d",
+  "log": [
+    "info hmip_swdo_by_type (HmIP-SWDO-I/?) mapped as HMCCU contact; STATE=1.STATE",
+    "log hmip_swdo_by_type is contact",
+    "log hmip_swdo_by_type has",
+    "log   ContactSensorState [1.STATE]",
+    "log   CurrentDoorState [1.STATE]",
+    "info     caching: ContactSensorState: 1 (as number; means CONTACT_NOT_DETECTED; from '1')",
+    "info     caching: CurrentDoorState: 0 (as number; means OPEN; from '1')",
+  ],
+  "mappings": {
+    "ContactSensorState": {
+      "cached": 1,
+      "characteristic": "class ContactSensorState",
+      "characteristic_type": "ContactSensorState",
+      "device": "hmip_swdo_by_type",
+      "homekit2name": {
+        "0": "CONTACT_DETECTED",
+        "1": "CONTACT_NOT_DETECTED",
+      },
+      "informId": "hmip_swdo_by_type-1.STATE",
+      "last_update": 1786881600,
+      "reading": "1.STATE",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^(0|CLOSED|closed|[Ff]alse|FALSE)$",
+          "to": 0,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^(0|CLOSED|closed|[Ff]alse|FALSE)$/:CONTACT_DETECTED",
+        "/.*/:CONTACT_NOT_DETECTED",
+      ],
+    },
+    "CurrentDoorState": {
+      "cached": 0,
+      "characteristic": "class CurrentDoorState",
+      "characteristic_type": "CurrentDoorState",
+      "device": "hmip_swdo_by_type",
+      "homekit2name": {
+        "0": "OPEN",
+        "1": "CLOSED",
+      },
+      "informId": "hmip_swdo_by_type-1.STATE",
+      "last_update": 1786881600,
+      "reading": "1.STATE",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^(0|CLOSED|closed|[Ff]alse|FALSE)$",
+          "to": 1,
+        },
+        {
+          "re": ".*",
+          "to": 0,
+        },
+      ],
+      "values": [
+        "/^(0|CLOSED|closed|[Ff]alse|FALSE)$/:CLOSED",
+        "/.*/:OPEN",
+      ],
+    },
+  },
+  "model": "HmIP-SWDO-I",
+  "name": "hmip-swdo-by-type",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000003:4",
+  "service_name": "contact",
+  "siriName": "hmip_swdo_by_type",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000003:4",
+}
+`;
+
+exports[`hmccu/hmip-swdo-by-type > sends commands 1`] = `
+{
+  "ContactSensorState": [
+    "set hmip_swdo_by_type undefined 1 <- 1",
+  ],
+  "CurrentDoorState": [
+    "set hmip_swdo_by_type undefined 1 <- 1",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-swdo-by-type > updates characteristics 1`] = `
+{
+  "hmip_swdo_by_type-1.STATE": [
+    "Contact Sensor State=1 Current Door State=0 <- "on" "off" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "Contact Sensor State=0 Current Door State=1 <- "0" "closed"",
+  ],
+}
+`;
+
 exports[`hmccu/hmip-swdo-contact > converts readings 1`] = `
 {
   "ContactSensorState": [
@@ -16758,6 +18862,234 @@ exports[`hmccu/hmip-swdo-contact > updates characteristics 1`] = `
 }
 `;
 
+exports[`hmccu/hmip-switch-by-state-and-on-off > converts readings 1`] = `
+{
+  "On": [
+    "true <- "on" "ON" "1" "true"",
+    "false <- "off" "0" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "undefined <- "set-on" "set_off"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-switch-by-state-and-on-off > gets its services 1`] = `
+{
+  "displayName": "359b5a8f-f33f-06b9-7593-73bb70cd5118",
+  "log": [
+    "log creating services for hmip-switch-by-state-and-on-off",
+    "log   information service for hmip-switch-by-state-and-on-off",
+    "log     manufacturer, model and serial number characteristics for hmip-switch-by-state-and-on-off",
+    "log     name (siriName) characteristic for hmip-switch-by-state-and-on-off",
+    "log   Switch service for hmip-switch-by-state-and-on-off",
+    "log     On characteristic for hmip_switch_by_state_and_on_off:1.STATE",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:X",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000000:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_switch_by_state_and_on_off",
+        },
+        {
+          "name": "On",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+          },
+          "uuid": "00000025-0000-1000-8000-0026BB765291",
+          "value": true,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_switch_by_state_and_on_off",
+      "type": "Switch",
+      "uuid": "00000049-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_switch_by_state_and_on_off-1.STATE": 1,
+  },
+}
+`;
+
+exports[`hmccu/hmip-switch-by-state-and-on-off > is detected 1`] = `
+{
+  "alias": "hmip_switch_by_state_and_on_off",
+  "category": undefined,
+  "device": "hmip_switch_by_state_and_on_off",
+  "fuuid": "359b5a8f-f33f-06b9-7593-73bb70cd5118",
+  "homekit_uuid": "53751ba4-ef1d-4a85-9335-d8f09dcf7ec5",
+  "log": [
+    "info hmip_switch_by_state_and_on_off (X/?) mapped as HMCCU switch; STATE=1.STATE",
+    "log hmip_switch_by_state_and_on_off is switch",
+    "log hmip_switch_by_state_and_on_off has",
+    "log   On [1.STATE;on,off]",
+    "info     caching: On: true (as boolean; from 'true')",
+  ],
+  "mappings": {
+    "On": {
+      "cached": true,
+      "characteristic": "class On",
+      "characteristic_type": "On",
+      "cmdOff": "off",
+      "cmdOn": "on",
+      "device": "hmip_switch_by_state_and_on_off",
+      "informId": "hmip_switch_by_state_and_on_off-1.STATE",
+      "last_update": 1786881600,
+      "reading": "1.STATE",
+      "valueOn": "/^(1|[Tt]rue|TRUE|[Oo]n|ON)$/",
+    },
+  },
+  "model": "X",
+  "name": "hmip-switch-by-state-and-on-off",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000000:4",
+  "service_name": "switch",
+  "siriName": "hmip_switch_by_state_and_on_off",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000000:4",
+}
+`;
+
+exports[`hmccu/hmip-switch-by-state-and-on-off > sends commands 1`] = `
+{
+  "On": [
+    "set hmip_switch_by_state_and_on_off on <- true 1",
+    "set hmip_switch_by_state_and_on_off off <- false 0",
+    "set hmip_switch_by_state_and_on_off undefined 2 <- 2",
+    "set hmip_switch_by_state_and_on_off undefined 3 <- 3",
+    "set hmip_switch_by_state_and_on_off undefined 10 <- 10",
+    "set hmip_switch_by_state_and_on_off undefined 50 <- 50",
+    "set hmip_switch_by_state_and_on_off undefined 100 <- 100",
+    "set hmip_switch_by_state_and_on_off undefined 21.5 <- 21.5",
+    "set hmip_switch_by_state_and_on_off undefined -90 <- -90",
+    "set hmip_switch_by_state_and_on_off undefined 90 <- 90",
+    "set hmip_switch_by_state_and_on_off undefined 359 <- 359",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-switch-by-state-and-on-off > updates characteristics 1`] = `
+{
+  "hmip_switch_by_state_and_on_off-1.STATE": [
+    "On=true <- "on" "1"",
+    "On=false <- "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-switch-without-state > is detected 1`] = `
+{
+  "alias": undefined,
+  "category": undefined,
+  "device": undefined,
+  "fuuid": undefined,
+  "homekit_uuid": "7d13f087-bcc5-489e-bc70-d0329af65dcc",
+  "log": [
+    "error hmip_switch_without_state: detected as switch but has no STATE reading",
+    "error hmip_switch_without_state: no service type detected",
+  ],
+  "mappings": undefined,
+  "model": undefined,
+  "name": undefined,
+  "published": false,
+  "room": undefined,
+  "sent": [],
+  "serial": undefined,
+  "service_name": undefined,
+  "siriName": undefined,
+  "type": undefined,
+  "uuid_base": undefined,
+}
+`;
+
 exports[`hmccu/hmip-swsd-smoke > converts readings 1`] = `
 {
   "SmokeDetected": [
@@ -16970,6 +19302,893 @@ exports[`hmccu/hmip-swsd-smoke > updates characteristics 1`] = `
     "Smoke Detected=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "Smoke Detected=0 <- "0"",
   ],
+}
+`;
+
+exports[`hmccu/hmip-thermostat-by-reading > converts readings 1`] = `
+{
+  "CurrentHeatingCoolingState": [
+    ""on" <- "on"",
+    ""off" <- "off"",
+    ""ON" <- "ON"",
+    ""0" <- "0"",
+    ""1" <- "1"",
+    ""2" <- "2"",
+    ""3" <- "3"",
+    ""20" <- "20"",
+    ""50" <- "50"",
+    ""99" <- "99"",
+    ""100" <- "100"",
+    ""254" <- "254"",
+    ""1500" <- "1500"",
+    ""21.5" <- "21.5"",
+    ""-5" <- "-5"",
+    ""0.35" <- "0.35"",
+    ""dim 50" <- "dim 50"",
+    ""dim50%" <- "dim50%"",
+    ""closed" <- "closed"",
+    ""open" <- "open"",
+    ""Closed" <- "Closed"",
+    ""present" <- "present"",
+    ""absent" <- "absent"",
+    ""locked" <- "locked"",
+    ""ok" <- "ok"",
+    ""low" <- "low"",
+    ""A0" <- "A0"",
+    ""000000" <- "000000"",
+    ""ff8000" <- "ff8000"",
+    ""0.4573,0.41" <- "0.4573,0.41"",
+    ""set-on" <- "set-on"",
+    ""set_off" <- "set_off"",
+    ""true" <- "true"",
+    ""false" <- "false"",
+    ""PLAYING" <- "PLAYING"",
+    ""opening" <- "opening"",
+    ""up:on" <- "up:on"",
+    ""auto" <- "auto"",
+    ""manual" <- "manual"",
+    ""home" <- "home"",
+    ""TV" <- "TV"",
+    ""short" <- "short"",
+    ""motion 7 T: 21.5" <- "motion 7 T: 21.5"",
+    """ <- """,
+  ],
+  "CurrentTemperature": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "000000"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100"",
+    "254 <- "254"",
+    "1500 <- "1500"",
+    "21.5 <- "21.5"",
+    "-5 <- "-5"",
+    "0.35 <- "0.35"",
+    "0.4573 <- "0.4573,0.41"",
+  ],
+  "TargetTemperature": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "4.5 <- "0" "1" "2" "3" "-5" "0.35" "000000" "0.4573,0.41"",
+    "20 <- "20"",
+    "30.5 <- "50" "99" "100" "254" "1500"",
+    "21.5 <- "21.5"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-thermostat-by-reading > gets its services 1`] = `
+{
+  "displayName": "7fe228ee-f33f-2f46-f1c6-4a7e27ded336",
+  "log": [
+    "log creating services for hmip-thermostat-by-reading",
+    "log   information service for hmip-thermostat-by-reading",
+    "log     manufacturer, model and serial number characteristics for hmip-thermostat-by-reading",
+    "log     name (siriName) characteristic for hmip-thermostat-by-reading",
+    "log   Thermostat service for hmip-thermostat-by-reading",
+    "log     TargetTemperature characteristic for hmip_thermostat_by_reading:1.SET_TEMPERATURE",
+    "log     CurrentTemperature characteristic for hmip_thermostat_by_reading:1.ACTUAL_TEMPERATURE",
+    "log     CurrentHeatingCoolingState characteristic for hmip_thermostat_by_reading:undefined",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HM-TC-IT",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000004:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_thermostat_by_reading",
+        },
+        {
+          "name": "Current Heating Cooling State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 2,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+            ],
+          },
+          "uuid": "0000000F-0000-1000-8000-0026BB765291",
+          "value": 1,
+        },
+        {
+          "name": "Target Heating Cooling State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 3,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+              3,
+            ],
+          },
+          "uuid": "00000033-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+        {
+          "name": "Current Temperature",
+          "props": {
+            "format": "float",
+            "maxValue": 100,
+            "minStep": 0.1,
+            "minValue": -30,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "unit": "celsius",
+          },
+          "uuid": "00000011-0000-1000-8000-0026BB765291",
+          "value": 19,
+        },
+        {
+          "name": "Target Temperature",
+          "props": {
+            "format": "float",
+            "maxValue": 30.5,
+            "minStep": 0.5,
+            "minValue": 4.5,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "celsius",
+          },
+          "uuid": "00000035-0000-1000-8000-0026BB765291",
+          "value": 20,
+        },
+        {
+          "name": "Temperature Display Units",
+          "props": {
+            "format": "uint8",
+            "maxValue": 1,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "validValues": [
+              0,
+              1,
+            ],
+          },
+          "uuid": "00000036-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_thermostat_by_reading",
+      "type": "Thermostat",
+      "uuid": "0000004A-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_thermostat_by_reading-1.ACTUAL_TEMPERATURE": 1,
+    "hmip_thermostat_by_reading-1.SET_TEMPERATURE": 1,
+    "undefined": 1,
+  },
+}
+`;
+
+exports[`hmccu/hmip-thermostat-by-reading > is detected 1`] = `
+{
+  "alias": "hmip_thermostat_by_reading",
+  "category": undefined,
+  "device": "hmip_thermostat_by_reading",
+  "fuuid": "7fe228ee-f33f-2f46-f1c6-4a7e27ded336",
+  "homekit_uuid": "fa30c934-6188-4d1c-bca1-064cd0ae676c",
+  "log": [
+    "info hmip_thermostat_by_reading (HM-TC-IT/?) mapped as HMCCU thermostat; setpoint=1.SET_TEMPERATURE",
+    "log hmip_thermostat_by_reading is thermostat",
+    "log hmip_thermostat_by_reading has",
+    "log   TargetTemperature [1.SET_TEMPERATURE]",
+    "log   CurrentTemperature [1.ACTUAL_TEMPERATURE]",
+    "log   CurrentHeatingCoolingState [undefined]",
+    "info     caching: TargetTemperature: 20 (as number; from '20.0')",
+    "info     caching: CurrentTemperature: 19 (as number; from '19.0')",
+  ],
+  "mappings": {
+    "CurrentHeatingCoolingState": {
+      "characteristic": "class CurrentHeatingCoolingState",
+      "characteristic_type": "CurrentHeatingCoolingState",
+      "default": 1,
+      "device": "hmip_thermostat_by_reading",
+      "homekit2name": {
+        "1": "HEAT",
+      },
+    },
+    "CurrentTemperature": {
+      "cached": 19,
+      "characteristic": "class CurrentTemperature",
+      "characteristic_type": "CurrentTemperature",
+      "device": "hmip_thermostat_by_reading",
+      "informId": "hmip_thermostat_by_reading-1.ACTUAL_TEMPERATURE",
+      "last_update": 1786881600,
+      "minValue": -30,
+      "reading": "1.ACTUAL_TEMPERATURE",
+    },
+    "TargetTemperature": {
+      "cached": 20,
+      "characteristic": "class TargetTemperature",
+      "characteristic_type": "TargetTemperature",
+      "cmd": "datapoint 1.SET_POINT_TEMPERATURE",
+      "delay": true,
+      "device": "hmip_thermostat_by_reading",
+      "informId": "hmip_thermostat_by_reading-1.SET_TEMPERATURE",
+      "last_update": 1786881600,
+      "maxValue": 30.5,
+      "minStep": 0.5,
+      "minValue": 4.5,
+      "reading": "1.SET_TEMPERATURE",
+    },
+  },
+  "model": "HM-TC-IT",
+  "name": "hmip-thermostat-by-reading",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000004:4",
+  "service_name": "thermostat",
+  "siriName": "hmip_thermostat_by_reading",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000004:4",
+}
+`;
+
+exports[`hmccu/hmip-thermostat-by-reading > sends commands 1`] = `
+{
+  "CurrentHeatingCoolingState": [
+    "set hmip_thermostat_by_reading undefined 1 <- 1",
+  ],
+  "CurrentTemperature": [
+    "set hmip_thermostat_by_reading undefined 1 <- 1",
+  ],
+  "TargetTemperature": [
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE true <- true",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE false <- false",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 0 <- 0",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 1 <- 1",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 2 <- 2",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 3 <- 3",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 10 <- 10",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 50 <- 50",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 100 <- 100",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 21.5 <- 21.5",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE -90 <- -90",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 90 <- 90",
+    "set hmip_thermostat_by_reading datapoint 1.SET_POINT_TEMPERATURE 359 <- 359",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-thermostat-by-reading > updates characteristics 1`] = `
+{
+  "hmip_thermostat_by_reading-1.ACTUAL_TEMPERATURE": [
+    "Current Temperature=19 <- "on" "off"",
+    "Current Temperature=0 <- "0"",
+    "Current Temperature=1 <- "1"",
+    "Current Temperature=50 <- "50"",
+    "Current Temperature=100 <- "100"",
+    "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+  "hmip_thermostat_by_reading-1.SET_TEMPERATURE": [
+    "Target Temperature=20 <- "on" "off"",
+    "Target Temperature=4.5 <- "0" "1"",
+    "Target Temperature=30.5 <- "50" "100"",
+    "Target Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+  "undefined": [
+    "Current Heating Cooling State=1 <- "on" "off" "1"",
+    "Current Heating Cooling State=0 <- "0"",
+    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-thermostat-with-off > converts readings 1`] = `
+{
+  "CurrentHeatingCoolingState": [
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
+    "0 <- "0"",
+    "undefined <- "set-on" "set_off" """,
+  ],
+  "E863F12E-079E-48FF-8F27-9C2605A29F52": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "-5" "0.35" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100" "254" "1500"",
+    "22 <- "21.5"",
+  ],
+  "TargetHeatingCoolingState": [
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
+    "3 <- "0" "auto"",
+    "undefined <- "set-on" "set_off" """,
+  ],
+  "TargetTemperature": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "4.5 <- "0" "1" "2" "3" "-5" "0.35" "000000" "0.4573,0.41"",
+    "20 <- "20"",
+    "30.5 <- "50" "99" "100" "254" "1500"",
+    "21.5 <- "21.5"",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-thermostat-with-off > gets its services 1`] = `
+{
+  "displayName": "3304eb44-f33f-017c-864b-7939cc9e8035",
+  "log": [
+    "log creating services for hmip-thermostat-with-off",
+    "log   information service for hmip-thermostat-with-off",
+    "log     manufacturer, model and serial number characteristics for hmip-thermostat-with-off",
+    "log     name (siriName) characteristic for hmip-thermostat-with-off",
+    "log   Thermostat service for hmip-thermostat-with-off",
+    "log     TargetTemperature characteristic for hmip_thermostat_with_off:1.SET_POINT_TEMPERATURE",
+    "log     CurrentHeatingCoolingState characteristic for hmip_thermostat_with_off:1.LEVEL",
+    "log     Custom Actuation characteristic for hmip_thermostat_with_off:1.LEVEL",
+    "log     TargetHeatingCoolingState characteristic for hmip_thermostat_with_off:1.CONTROL_MODE",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HMCCUCHN",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:HM-CC-RT-DN",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "CCU 000ABC00000008:4",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "hmip_thermostat_with_off",
+        },
+        {
+          "name": "Current Heating Cooling State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 2,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+            ],
+          },
+          "uuid": "0000000F-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+        {
+          "name": "Target Heating Cooling State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 3,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+              3,
+            ],
+          },
+          "uuid": "00000033-0000-1000-8000-0026BB765291",
+          "value": 3,
+        },
+        {
+          "name": "Current Temperature",
+          "props": {
+            "format": "float",
+            "maxValue": 100,
+            "minStep": 0.1,
+            "minValue": -270,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "unit": "celsius",
+          },
+          "uuid": "00000011-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+        {
+          "name": "Target Temperature",
+          "props": {
+            "format": "float",
+            "maxValue": 30.5,
+            "minStep": 0.5,
+            "minValue": 4.5,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "celsius",
+          },
+          "uuid": "00000035-0000-1000-8000-0026BB765291",
+          "value": 22,
+        },
+        {
+          "name": "Temperature Display Units",
+          "props": {
+            "format": "uint8",
+            "maxValue": 1,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "validValues": [
+              0,
+              1,
+            ],
+          },
+          "uuid": "00000036-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+        {
+          "name": "Actuation",
+          "props": {
+            "format": "uint8",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "pr",
+              "ev",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "E863F12E-079E-48FF-8F27-9C2605A29F52",
+          "value": 0,
+        },
+      ],
+      "linked": [],
+      "name": "hmip_thermostat_with_off",
+      "type": "Thermostat",
+      "uuid": "0000004A-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "hmip_thermostat_with_off-1.CONTROL_MODE": 1,
+    "hmip_thermostat_with_off-1.LEVEL": 2,
+    "hmip_thermostat_with_off-1.SET_POINT_TEMPERATURE": 1,
+  },
+}
+`;
+
+exports[`hmccu/hmip-thermostat-with-off > is detected 1`] = `
+{
+  "alias": "hmip_thermostat_with_off",
+  "category": undefined,
+  "device": "hmip_thermostat_with_off",
+  "fuuid": "3304eb44-f33f-017c-864b-7939cc9e8035",
+  "homekit_uuid": "ba7fd6dc-db8a-491d-9ccd-611d9a2ff705",
+  "log": [
+    "info hmip_thermostat_with_off (HM-CC-RT-DN/CLIMATECONTROL_RT_TRANSCEIVER) mapped as HMCCU thermostat; LEVEL=1.LEVEL x1; setpoint=1.SET_POINT_TEMPERATURE",
+    "log hmip_thermostat_with_off is thermostat",
+    "log hmip_thermostat_with_off has",
+    "log   TargetTemperature [1.SET_POINT_TEMPERATURE]",
+    "log   CurrentHeatingCoolingState [1.LEVEL]",
+    "log   Custom Actuation [1.LEVEL]",
+    "log   TargetHeatingCoolingState [1.CONTROL_MODE]",
+    "info     caching: TargetTemperature: 22 (as number; from '22.0')",
+    "info     caching: CurrentHeatingCoolingState: 0 (as number; means OFF; from '0.0')",
+    "info     caching: Actuation: 0 (as number; from '0.0')",
+    "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'AUTO-MODE')",
+  ],
+  "mappings": {
+    "CurrentHeatingCoolingState": {
+      "cached": 0,
+      "characteristic": "class CurrentHeatingCoolingState",
+      "characteristic_type": "CurrentHeatingCoolingState",
+      "device": "hmip_thermostat_with_off",
+      "homekit2name": {
+        "0": "OFF",
+        "1": "HEAT",
+      },
+      "informId": "hmip_thermostat_with_off-1.LEVEL",
+      "last_update": 1786881600,
+      "reading": "1.LEVEL",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^0(\\.0*)?$",
+          "to": 0,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^0(\\.0*)?$/:OFF",
+        "/.*/:HEAT",
+      ],
+    },
+    "E863F12E-079E-48FF-8F27-9C2605A29F52": {
+      "cached": 0,
+      "characteristic": undefined,
+      "characteristic_type": "E863F12E-079E-48FF-8F27-9C2605A29F52",
+      "device": "hmip_thermostat_with_off",
+      "format": "UINT8",
+      "informId": "hmip_thermostat_with_off-1.LEVEL",
+      "last_update": 1786881600,
+      "levelFactor": 1,
+      "maxValue": 100,
+      "minStep": 1,
+      "minValue": 0,
+      "name": "Actuation",
+      "reading": "1.LEVEL",
+      "reading2homekit": "[function]",
+      "unit": "PERCENTAGE",
+    },
+    "TargetHeatingCoolingState": {
+      "cached": 3,
+      "characteristic": "class TargetHeatingCoolingState",
+      "characteristic_type": "TargetHeatingCoolingState",
+      "cmds": [
+        "AUTO:auto",
+        "HEAT:manu",
+        "COOL:manu",
+        "OFF:off",
+      ],
+      "delay": true,
+      "device": "hmip_thermostat_with_off",
+      "homekit2cmd": {
+        "0": "off",
+        "1": "manu",
+        "2": "manu",
+        "3": "auto",
+      },
+      "homekit2cmd_re": [],
+      "homekit2name": {
+        "1": "HEAT",
+        "3": "AUTO",
+      },
+      "informId": "hmip_thermostat_with_off-1.CONTROL_MODE",
+      "last_update": 1786881600,
+      "reading": "1.CONTROL_MODE",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^(0|AUTO|auto|AUTO-MODE)$",
+          "to": 3,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^(0|AUTO|auto|AUTO-MODE)$/:AUTO",
+        "/.*/:HEAT",
+      ],
+    },
+    "TargetTemperature": {
+      "cached": 22,
+      "characteristic": "class TargetTemperature",
+      "characteristic_type": "TargetTemperature",
+      "cmd": "desired-temp",
+      "delay": true,
+      "device": "hmip_thermostat_with_off",
+      "informId": "hmip_thermostat_with_off-1.SET_POINT_TEMPERATURE",
+      "last_update": 1786881600,
+      "maxValue": 30.5,
+      "minStep": 0.5,
+      "minValue": 4.5,
+      "reading": "1.SET_POINT_TEMPERATURE",
+    },
+  },
+  "model": "HM-CC-RT-DN",
+  "name": "hmip-thermostat-with-off",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "CCU 000ABC00000008:4",
+  "service_name": "thermostat",
+  "siriName": "hmip_thermostat_with_off",
+  "type": "HMCCUCHN",
+  "uuid_base": "CCU 000ABC00000008:4",
+}
+`;
+
+exports[`hmccu/hmip-thermostat-with-off > sends commands 1`] = `
+{
+  "CurrentHeatingCoolingState": [
+    "set hmip_thermostat_with_off undefined 1 <- 1",
+  ],
+  "E863F12E-079E-48FF-8F27-9C2605A29F52": [
+    "set hmip_thermostat_with_off undefined 1 <- 1",
+  ],
+  "TargetHeatingCoolingState": [
+    "set hmip_thermostat_with_off undefined true <- true",
+    "set hmip_thermostat_with_off undefined false <- false",
+    "set hmip_thermostat_with_off off <- 0",
+    "set hmip_thermostat_with_off manu <- 1 2",
+    "set hmip_thermostat_with_off auto <- 3",
+    "set hmip_thermostat_with_off undefined 10 <- 10",
+    "set hmip_thermostat_with_off undefined 50 <- 50",
+    "set hmip_thermostat_with_off undefined 100 <- 100",
+    "set hmip_thermostat_with_off undefined 21.5 <- 21.5",
+    "set hmip_thermostat_with_off undefined -90 <- -90",
+    "set hmip_thermostat_with_off undefined 90 <- 90",
+    "set hmip_thermostat_with_off undefined 359 <- 359",
+  ],
+  "TargetTemperature": [
+    "set hmip_thermostat_with_off desired-temp true <- true",
+    "set hmip_thermostat_with_off desired-temp false <- false",
+    "set hmip_thermostat_with_off desired-temp 0 <- 0",
+    "set hmip_thermostat_with_off desired-temp 1 <- 1",
+    "set hmip_thermostat_with_off desired-temp 2 <- 2",
+    "set hmip_thermostat_with_off desired-temp 3 <- 3",
+    "set hmip_thermostat_with_off desired-temp 10 <- 10",
+    "set hmip_thermostat_with_off desired-temp 50 <- 50",
+    "set hmip_thermostat_with_off desired-temp 100 <- 100",
+    "set hmip_thermostat_with_off desired-temp 21.5 <- 21.5",
+    "set hmip_thermostat_with_off desired-temp -90 <- -90",
+    "set hmip_thermostat_with_off desired-temp 90 <- 90",
+    "set hmip_thermostat_with_off desired-temp 359 <- 359",
+  ],
+}
+`;
+
+exports[`hmccu/hmip-thermostat-with-off > updates characteristics 1`] = `
+{
+  "hmip_thermostat_with_off-1.CONTROL_MODE": [
+    "Target Heating Cooling State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Target Heating Cooling State=3 <- "0"",
+  ],
+  "hmip_thermostat_with_off-1.LEVEL": [
+    "Current Heating Cooling State=1 Actuation=0 <- "on" "off"",
+    "Current Heating Cooling State=0 Actuation=0 <- "0"",
+    "Current Heating Cooling State=1 Actuation=1 <- "1"",
+    "Current Heating Cooling State=1 Actuation=50 <- "50"",
+    "Current Heating Cooling State=1 Actuation=100 <- "100"",
+    "Current Heating Cooling State=1 Actuation=22 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+  "hmip_thermostat_with_off-1.SET_POINT_TEMPERATURE": [
+    "Target Temperature=22 <- "on" "off"",
+    "Target Temperature=4.5 <- "0" "1"",
+    "Target Temperature=30.5 <- "50" "100"",
+    "Target Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
+exports[`hmccu/hmip-thermostat-without-setpoint > is detected 1`] = `
+{
+  "alias": undefined,
+  "category": undefined,
+  "device": undefined,
+  "fuuid": undefined,
+  "homekit_uuid": "7d13f087-bcc5-489e-bc70-d0329af65dcc",
+  "log": [
+    "error hmip_thermostat_without_setpoint: detected as thermostat but has no set point reading",
+    "error hmip_thermostat_without_setpoint: no service type detected",
+  ],
+  "mappings": undefined,
+  "model": undefined,
+  "name": undefined,
+  "published": false,
+  "room": undefined,
+  "sent": [],
+  "serial": undefined,
+  "service_name": undefined,
+  "siriName": undefined,
+  "type": undefined,
+  "uuid_base": undefined,
 }
 `;
 
@@ -19079,6 +22298,291 @@ exports[`lock/hm-sec-key-uncertain > updates characteristics 1`] = `
 }
 `;
 
+exports[`mapping/bool-factor-and-invert > converts readings 1`] = `
+{
+  "MotionDetected": [
+    "false <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5"",
+    "true <- "off" "0" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "undefined <- "set-on" "set_off"",
+  ],
+  "On": [
+    "true <- "on" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "A0" "000000"",
+    "undefined <- "set-on" "set_off"",
+  ],
+  "StatusActive": [
+    "true <- "on" "off" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "undefined <- "set-on" "set_off"",
+  ],
+}
+`;
+
+exports[`mapping/bool-factor-and-invert > gets its services 1`] = `
+{
+  "displayName": "c40a87f5-f33f-2341-c430-2e3e722a219a",
+  "log": [
+    "log creating services for bool-factor-and-invert",
+    "log   information service for bool-factor-and-invert",
+    "log     manufacturer, model and serial number characteristics for bool-factor-and-invert",
+    "log     name (siriName) characteristic for bool-factor-and-invert",
+    "log   Switch service for bool-factor-and-invert",
+    "log     On characteristic for bool_factor_and_invert:state",
+    "log     MotionDetected characteristic for bool_factor_and_invert:bewegung",
+    "log     StatusActive characteristic for bool_factor_and_invert:aktiv",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:dummy",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:<unknown>",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "c40a87f5-f33f-2341-c430-2e3e722a219a",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "bool_factor_and_invert",
+        },
+        {
+          "name": "On",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+          },
+          "uuid": "00000025-0000-1000-8000-0026BB765291",
+          "value": true,
+        },
+        {
+          "name": "Motion Detected",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+            ],
+          },
+          "uuid": "00000022-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Status Active",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+            ],
+          },
+          "uuid": "00000075-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+      ],
+      "linked": [],
+      "name": "bool_factor_and_invert",
+      "type": "Switch",
+      "uuid": "00000049-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "bool_factor_and_invert-aktiv": 1,
+    "bool_factor_and_invert-bewegung": 1,
+    "bool_factor_and_invert-state": 1,
+  },
+}
+`;
+
+exports[`mapping/bool-factor-and-invert > is detected 1`] = `
+{
+  "alias": "bool_factor_and_invert",
+  "category": undefined,
+  "device": "bool_factor_and_invert",
+  "fuuid": "c40a87f5-f33f-2341-c430-2e3e722a219a",
+  "homekit_uuid": "553f973e-418e-4e9b-9996-7a55c9b1a469",
+  "log": [
+    "info homebridgeMapping: MotionDetected=bewegung,invert=1
+On=state,factor=2,cmdOn=on,cmdOff=off
+StatusActive=aktiv,invert=1,valueOn=ja",
+    "log bool_factor_and_invert is switch",
+    "log bool_factor_and_invert has",
+    "log   On [state;on,off]",
+    "log   MotionDetected [bewegung]",
+    "log   StatusActive [aktiv]",
+    "info     caching: On: true (as boolean; from 'on')",
+    "info     caching: MotionDetected: false (as boolean; from '1')",
+    "info     caching: StatusActive: false (as boolean; from 'ja')",
+  ],
+  "mappings": {
+    "MotionDetected": {
+      "cached": false,
+      "characteristic": "class MotionDetected",
+      "characteristic_type": "MotionDetected",
+      "device": "bool_factor_and_invert",
+      "informId": "bool_factor_and_invert-bewegung",
+      "invert": "1",
+      "last_update": 1786881600,
+      "maxValue": 1,
+      "minValue": 0,
+      "reading": "bewegung",
+    },
+    "On": {
+      "cached": true,
+      "characteristic": "class On",
+      "characteristic_type": "On",
+      "cmdOff": "off",
+      "cmdOn": "on",
+      "device": "bool_factor_and_invert",
+      "factor": "2",
+      "informId": "bool_factor_and_invert-state",
+      "last_update": 1786881600,
+      "reading": "state",
+      "valueOff": "/off|A0|000000/",
+    },
+    "StatusActive": {
+      "cached": false,
+      "characteristic": "class StatusActive",
+      "characteristic_type": "StatusActive",
+      "device": "bool_factor_and_invert",
+      "informId": "bool_factor_and_invert-aktiv",
+      "invert": "1",
+      "last_update": 1786881600,
+      "maxValue": 1,
+      "minValue": 0,
+      "reading": "aktiv",
+      "valueOn": "ja",
+    },
+  },
+  "model": "<unknown>",
+  "name": "bool-factor-and-invert",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "c40a87f5-f33f-2341-c430-2e3e722a219a",
+  "service_name": "switch",
+  "siriName": "bool_factor_and_invert",
+  "type": "dummy",
+  "uuid_base": "c40a87f5-f33f-2341-c430-2e3e722a219a",
+}
+`;
+
+exports[`mapping/bool-factor-and-invert > sends commands 1`] = `
+{
+  "MotionDetected": [
+    "set bool_factor_and_invert undefined 0 <- 1",
+  ],
+  "On": [
+    "set bool_factor_and_invert on <- true 2",
+    "set bool_factor_and_invert off <- false 0",
+    "set bool_factor_and_invert undefined 0.5 <- 1",
+    "set bool_factor_and_invert undefined 1.5 <- 3",
+    "set bool_factor_and_invert undefined 5 <- 10",
+    "set bool_factor_and_invert undefined 25 <- 50",
+    "set bool_factor_and_invert undefined 50 <- 100",
+    "set bool_factor_and_invert undefined 10.75 <- 21.5",
+    "set bool_factor_and_invert undefined -45 <- -90",
+    "set bool_factor_and_invert undefined 45 <- 90",
+    "set bool_factor_and_invert undefined 179.5 <- 359",
+  ],
+  "StatusActive": [
+    "set bool_factor_and_invert undefined 0 <- 1",
+  ],
+}
+`;
+
+exports[`mapping/bool-factor-and-invert > updates characteristics 1`] = `
+{
+  "bool_factor_and_invert-aktiv": [
+    "Status Active=true <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+  "bool_factor_and_invert-bewegung": [
+    "Motion Detected=false <- "on" "1" "50" "100" "21.5"",
+    "Motion Detected=true <- "off" "0" "closed" "open" "ff8000" """,
+  ],
+  "bool_factor_and_invert-state": [
+    "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=false <- "off"",
+  ],
+}
+`;
+
 exports[`mapping/clear-one-characteristic > converts readings 1`] = `
 {
   "CurrentTemperature": [
@@ -19788,6 +23292,334 @@ exports[`mapping/copy-characteristic > updates characteristics 1`] = `
     "Target Position=50 <- "50"",
     "Target Position=100 <- "100"",
     "Target Position=22 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
+exports[`mapping/custom-by-known-name > converts readings 1`] = `
+{
+  "Energy": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "000000"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100"",
+    "254 <- "254"",
+    "1500 <- "1500"",
+    "21.5 <- "21.5"",
+    "-5 <- "-5"",
+    "0.35 <- "0.35"",
+    "0.4573 <- "0.4573,0.41"",
+  ],
+  "On": [
+    "true <- "on" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "A0" "000000"",
+    "undefined <- "set-on" "set_off"",
+  ],
+  "Power": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "000000"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100"",
+    "254 <- "254"",
+    "1500 <- "1500"",
+    "21.5 <- "21.5"",
+    "-5 <- "-5"",
+    "0.35 <- "0.35"",
+    "0.4573 <- "0.4573,0.41"",
+  ],
+}
+`;
+
+exports[`mapping/custom-by-known-name > gets its services 1`] = `
+{
+  "displayName": "39686cb7-f33f-644e-4616-cdc02cf7bc63",
+  "log": [
+    "log creating services for custom-by-known-name",
+    "log   information service for custom-by-known-name",
+    "log     manufacturer, model and serial number characteristics for custom-by-known-name",
+    "log     name (siriName) characteristic for custom-by-known-name",
+    "log   Switch service for custom-by-known-name",
+    "log     On characteristic for custom_by_known_name:state",
+    "log     Custom Leistung characteristic for custom_by_known_name:watt",
+    "log     Custom Energie characteristic for custom_by_known_name:kwh",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:dummy",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:<unknown>",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "39686cb7-f33f-644e-4616-cdc02cf7bc63",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "custom_by_known_name",
+        },
+        {
+          "name": "On",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+          },
+          "uuid": "00000025-0000-1000-8000-0026BB765291",
+          "value": true,
+        },
+        {
+          "name": "Leistung",
+          "props": {
+            "format": "float",
+            "perms": [
+              "pr",
+              "ev",
+            ],
+          },
+          "uuid": "E863F10D-079E-48FF-8F27-9C2605A29F52",
+          "value": 5,
+        },
+        {
+          "name": "Energie",
+          "props": {
+            "format": "float",
+            "perms": [
+              "pr",
+              "pw",
+              "ev",
+            ],
+          },
+          "uuid": "E863F10C-079E-48FF-8F27-9C2605A29F52",
+          "value": 1.5,
+        },
+      ],
+      "linked": [],
+      "name": "custom_by_known_name",
+      "type": "Switch",
+      "uuid": "00000049-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "custom_by_known_name-kwh": 1,
+    "custom_by_known_name-state": 1,
+    "custom_by_known_name-watt": 1,
+  },
+}
+`;
+
+exports[`mapping/custom-by-known-name > is detected 1`] = `
+{
+  "alias": "custom_by_known_name",
+  "category": undefined,
+  "device": "custom_by_known_name",
+  "fuuid": "39686cb7-f33f-644e-4616-cdc02cf7bc63",
+  "homekit_uuid": "7352ed4c-3594-4cca-8a6c-8ca8d00f3ae9",
+  "log": [
+    "info homebridgeMapping: Power=watt,name=Leistung,format=FLOAT
+Energy=kwh,name=Energie,format=FLOAT,cmd=kwh",
+    "log custom_by_known_name is switch",
+    "log custom_by_known_name has",
+    "log   On [state;on,off]",
+    "log   Custom Leistung [watt]",
+    "log   Custom Energie [kwh]",
+    "info     caching: On: true (as boolean; from 'on')",
+    "info     caching: Leistung: 5 (as number; from '5')",
+    "info     caching: Energie: 1.5 (as number; from '1.5')",
+  ],
+  "mappings": {
+    "Energy": {
+      "cached": 1.5,
+      "characteristic": undefined,
+      "characteristic_type": "Energy",
+      "cmd": "kwh",
+      "device": "custom_by_known_name",
+      "format": "FLOAT",
+      "informId": "custom_by_known_name-kwh",
+      "last_update": 1786881600,
+      "name": "Energie",
+      "reading": "kwh",
+    },
+    "On": {
+      "cached": true,
+      "characteristic": "class On",
+      "characteristic_type": "On",
+      "cmdOff": "off",
+      "cmdOn": "on",
+      "device": "custom_by_known_name",
+      "informId": "custom_by_known_name-state",
+      "last_update": 1786881600,
+      "reading": "state",
+      "valueOff": "/off|A0|000000/",
+    },
+    "Power": {
+      "cached": 5,
+      "characteristic": undefined,
+      "characteristic_type": "Power",
+      "device": "custom_by_known_name",
+      "format": "FLOAT",
+      "informId": "custom_by_known_name-watt",
+      "last_update": 1786881600,
+      "name": "Leistung",
+      "reading": "watt",
+    },
+  },
+  "model": "<unknown>",
+  "name": "custom-by-known-name",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "39686cb7-f33f-644e-4616-cdc02cf7bc63",
+  "service_name": "switch",
+  "siriName": "custom_by_known_name",
+  "type": "dummy",
+  "uuid_base": "39686cb7-f33f-644e-4616-cdc02cf7bc63",
+}
+`;
+
+exports[`mapping/custom-by-known-name > sends commands 1`] = `
+{
+  "Energy": [
+    "set custom_by_known_name kwh true <- true",
+    "set custom_by_known_name kwh false <- false",
+    "set custom_by_known_name kwh 0 <- 0",
+    "set custom_by_known_name kwh 1 <- 1",
+    "set custom_by_known_name kwh 2 <- 2",
+    "set custom_by_known_name kwh 3 <- 3",
+    "set custom_by_known_name kwh 10 <- 10",
+    "set custom_by_known_name kwh 50 <- 50",
+    "set custom_by_known_name kwh 100 <- 100",
+    "set custom_by_known_name kwh 21.5 <- 21.5",
+    "set custom_by_known_name kwh -90 <- -90",
+    "set custom_by_known_name kwh 90 <- 90",
+    "set custom_by_known_name kwh 359 <- 359",
+  ],
+  "On": [
+    "set custom_by_known_name on <- true 1",
+    "set custom_by_known_name off <- false 0",
+    "set custom_by_known_name undefined 2 <- 2",
+    "set custom_by_known_name undefined 3 <- 3",
+    "set custom_by_known_name undefined 10 <- 10",
+    "set custom_by_known_name undefined 50 <- 50",
+    "set custom_by_known_name undefined 100 <- 100",
+    "set custom_by_known_name undefined 21.5 <- 21.5",
+    "set custom_by_known_name undefined -90 <- -90",
+    "set custom_by_known_name undefined 90 <- 90",
+    "set custom_by_known_name undefined 359 <- 359",
+  ],
+  "Power": [
+    "set custom_by_known_name undefined 1 <- 1",
+  ],
+}
+`;
+
+exports[`mapping/custom-by-known-name > updates characteristics 1`] = `
+{
+  "custom_by_known_name-kwh": [
+    "Energie=1.5 <- "on" "off"",
+    "Energie=0 <- "0"",
+    "Energie=1 <- "1"",
+    "Energie=50 <- "50"",
+    "Energie=100 <- "100"",
+    "Energie=21.5 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+  "custom_by_known_name-state": [
+    "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=false <- "off"",
+  ],
+  "custom_by_known_name-watt": [
+    "Leistung=5 <- "on" "off"",
+    "Leistung=0 <- "0"",
+    "Leistung=1 <- "1"",
+    "Leistung=50 <- "50"",
+    "Leistung=100 <- "100"",
+    "Leistung=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -20698,6 +24530,263 @@ exports[`mapping/default-only > updates characteristics 1`] = `
   "undefined": [
     "Status Active=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "Status Active=true <- "1"",
+  ],
+}
+`;
+
+exports[`mapping/empty-reading-and-format > converts readings 1`] = `
+{
+  "00000000-0000-1000-8000-0026BB765299": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "0.35" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100"",
+    "254 <- "254"",
+    "1500 <- "1500"",
+    "22 <- "21.5"",
+    "-4 <- "-5"",
+  ],
+  "On": [
+    "true <- "on" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "A0" "000000"",
+    "undefined <- "set-on" "set_off"",
+  ],
+}
+`;
+
+exports[`mapping/empty-reading-and-format > gets its services 1`] = `
+{
+  "displayName": "3fa200e9-f33f-be23-96ba-1c1687f4e721",
+  "log": [
+    "log creating services for empty-reading-and-format",
+    "log   information service for empty-reading-and-format",
+    "log     manufacturer, model and serial number characteristics for empty-reading-and-format",
+    "log     name (siriName) characteristic for empty-reading-and-format",
+    "log   Switch service for empty-reading-and-format",
+    "log     On characteristic for empty_reading_and_format:state",
+    "log     Custom Wert characteristic for empty_reading_and_format:wert",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:dummy",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:<unknown>",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "3fa200e9-f33f-be23-96ba-1c1687f4e721",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "empty_reading_and_format",
+        },
+        {
+          "name": "On",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+          },
+          "uuid": "00000025-0000-1000-8000-0026BB765291",
+          "value": true,
+        },
+        {
+          "name": "Wert",
+          "props": {
+            "format": "int",
+            "perms": [
+              "pr",
+              "ev",
+            ],
+          },
+          "uuid": "00000000-0000-1000-8000-0026BB765299",
+          "value": 5,
+        },
+      ],
+      "linked": [],
+      "name": "empty_reading_and_format",
+      "type": "Switch",
+      "uuid": "00000049-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "empty_reading_and_format-state": 1,
+    "empty_reading_and_format-wert": 1,
+  },
+}
+`;
+
+exports[`mapping/empty-reading-and-format > is detected 1`] = `
+{
+  "alias": "empty_reading_and_format",
+  "category": undefined,
+  "device": "empty_reading_and_format",
+  "fuuid": "3fa200e9-f33f-be23-96ba-1c1687f4e721",
+  "homekit_uuid": "3503e259-c40f-47c9-9d8e-5aa51b744f4e",
+  "log": [
+    "info homebridgeMapping: On=,cmdOn=on,cmdOff=off
+00000000-0000-1000-8000-0026BB765299=wert,name=Wert,format=nope",
+    "log empty_reading_and_format is switch",
+    "log empty_reading_and_format has",
+    "log   On [state;on,off]",
+    "log   Custom Wert [wert]",
+    "info     caching: On: true (as boolean; from 'on')",
+    "info     caching: Wert: 5 (as string; from '5')",
+  ],
+  "mappings": {
+    "00000000-0000-1000-8000-0026BB765299": {
+      "cached": "5",
+      "characteristic": undefined,
+      "characteristic_type": "00000000-0000-1000-8000-0026BB765299",
+      "device": "empty_reading_and_format",
+      "format": "nope",
+      "informId": "empty_reading_and_format-wert",
+      "last_update": 1786881600,
+      "name": "Wert",
+      "reading": "wert",
+    },
+    "On": {
+      "cached": true,
+      "characteristic": "class On",
+      "characteristic_type": "On",
+      "cmdOff": "off",
+      "cmdOn": "on",
+      "device": "empty_reading_and_format",
+      "informId": "empty_reading_and_format-state",
+      "last_update": 1786881600,
+      "reading": "state",
+      "valueOff": "/off|A0|000000/",
+    },
+  },
+  "model": "<unknown>",
+  "name": "empty-reading-and-format",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "3fa200e9-f33f-be23-96ba-1c1687f4e721",
+  "service_name": "switch",
+  "siriName": "empty_reading_and_format",
+  "type": "dummy",
+  "uuid_base": "3fa200e9-f33f-be23-96ba-1c1687f4e721",
+}
+`;
+
+exports[`mapping/empty-reading-and-format > sends commands 1`] = `
+{
+  "00000000-0000-1000-8000-0026BB765299": [
+    "set empty_reading_and_format undefined 1 <- 1",
+  ],
+  "On": [
+    "set empty_reading_and_format on <- true 1",
+    "set empty_reading_and_format off <- false 0",
+    "set empty_reading_and_format undefined 2 <- 2",
+    "set empty_reading_and_format undefined 3 <- 3",
+    "set empty_reading_and_format undefined 10 <- 10",
+    "set empty_reading_and_format undefined 50 <- 50",
+    "set empty_reading_and_format undefined 100 <- 100",
+    "set empty_reading_and_format undefined 21.5 <- 21.5",
+    "set empty_reading_and_format undefined -90 <- -90",
+    "set empty_reading_and_format undefined 90 <- 90",
+    "set empty_reading_and_format undefined 359 <- 359",
+  ],
+}
+`;
+
+exports[`mapping/empty-reading-and-format > updates characteristics 1`] = `
+{
+  "empty_reading_and_format-state": [
+    "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=false <- "off"",
+  ],
+  "empty_reading_and_format-wert": [
+    "Wert=5 <- "on" "off"",
+    "Wert=0 <- "0"",
+    "Wert=1 <- "1"",
+    "Wert=50 <- "50"",
+    "Wert=100 <- "100"",
+    "Wert=22 <- "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -22280,6 +26369,293 @@ exports[`mapping/invert-bare-word > updates characteristics 1`] = `
 }
 `;
 
+exports[`mapping/invert-with-max-only > converts readings 1`] = `
+{
+  "CurrentPosition": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "80 <- "0" "0.35" "000000" "0.4573,0.41"",
+    "79 <- "1"",
+    "78 <- "2"",
+    "77 <- "3"",
+    "60 <- "20"",
+    "30 <- "50"",
+    "0 <- "99" "100" "254" "1500"",
+    "58 <- "21.5"",
+    "84 <- "-5"",
+  ],
+  "TargetPosition": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "80 <- "0" "0.35" "000000" "0.4573,0.41"",
+    "79 <- "1"",
+    "78 <- "2"",
+    "77 <- "3"",
+    "60 <- "20"",
+    "30 <- "50"",
+    "0 <- "99" "100" "254" "1500"",
+    "58 <- "21.5"",
+    "84 <- "-5"",
+  ],
+}
+`;
+
+exports[`mapping/invert-with-max-only > gets its services 1`] = `
+{
+  "displayName": "79e73d63-f33f-79ce-51ef-c8555059043d",
+  "log": [
+    "log creating services for invert-with-max-only",
+    "log   information service for invert-with-max-only",
+    "log     manufacturer, model and serial number characteristics for invert-with-max-only",
+    "log     name (siriName) characteristic for invert-with-max-only",
+    "log   WindowCovering service for invert-with-max-only",
+    "log     CurrentPosition characteristic for invert_with_max_only:position",
+    "log     TargetPosition characteristic for invert_with_max_only:position",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:dummy",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:<unknown>",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "79e73d63-f33f-79ce-51ef-c8555059043d",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "invert_with_max_only",
+        },
+        {
+          "name": "Current Position",
+          "props": {
+            "format": "uint8",
+            "maxValue": 80,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "0000006D-0000-1000-8000-0026BB765291",
+          "value": 60,
+        },
+        {
+          "name": "Position State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 2,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+            ],
+          },
+          "uuid": "00000072-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+        {
+          "name": "Target Position",
+          "props": {
+            "format": "uint8",
+            "maxValue": 80,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "0000007C-0000-1000-8000-0026BB765291",
+          "value": 60,
+        },
+      ],
+      "linked": [],
+      "name": "invert_with_max_only",
+      "type": "WindowCovering",
+      "uuid": "0000008C-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "invert_with_max_only-position": 2,
+  },
+}
+`;
+
+exports[`mapping/invert-with-max-only > is detected 1`] = `
+{
+  "alias": "invert_with_max_only",
+  "category": undefined,
+  "device": "invert_with_max_only",
+  "fuuid": "79e73d63-f33f-79ce-51ef-c8555059043d",
+  "homekit_uuid": "9b1ef3cc-a3fe-4eb2-a9e2-214c2bb5cd61",
+  "log": [
+    "info homebridgeMapping: CurrentPosition=position,invert=1,maxValue=80
+TargetPosition=position,cmd=position,invert=1,maxValue=80",
+    "log invert_with_max_only is blind",
+    "log invert_with_max_only has",
+    "log   CurrentPosition [position]",
+    "log   TargetPosition [position]",
+    "info     caching: CurrentPosition: 60 (as number; from '20')",
+    "info     caching: TargetPosition: 60 (as number; from '20')",
+  ],
+  "mappings": {
+    "CurrentPosition": {
+      "cached": 60,
+      "characteristic": "class CurrentPosition",
+      "characteristic_type": "CurrentPosition",
+      "device": "invert_with_max_only",
+      "informId": "invert_with_max_only-position",
+      "invert": "1",
+      "last_update": 1786881600,
+      "maxValue": 80,
+      "reading": "position",
+    },
+    "TargetPosition": {
+      "cached": 60,
+      "characteristic": "class TargetPosition",
+      "characteristic_type": "TargetPosition",
+      "cmd": "position",
+      "delay": true,
+      "device": "invert_with_max_only",
+      "informId": "invert_with_max_only-position",
+      "invert": "1",
+      "last_update": 1786881600,
+      "maxValue": 80,
+      "reading": "position",
+    },
+  },
+  "model": "<unknown>",
+  "name": "invert-with-max-only",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "79e73d63-f33f-79ce-51ef-c8555059043d",
+  "service_name": "blind",
+  "siriName": "invert_with_max_only",
+  "type": "dummy",
+  "uuid_base": "79e73d63-f33f-79ce-51ef-c8555059043d",
+}
+`;
+
+exports[`mapping/invert-with-max-only > sends commands 1`] = `
+{
+  "CurrentPosition": [
+    "set invert_with_max_only undefined 79 <- 1",
+  ],
+  "TargetPosition": [
+    "set invert_with_max_only position true <- true",
+    "set invert_with_max_only position false <- false",
+    "set invert_with_max_only position 80 <- 0",
+    "set invert_with_max_only position 79 <- 1",
+    "set invert_with_max_only position 78 <- 2",
+    "set invert_with_max_only position 77 <- 3",
+    "set invert_with_max_only position 70 <- 10",
+    "set invert_with_max_only position 30 <- 50",
+    "set invert_with_max_only position -20 <- 100",
+    "set invert_with_max_only position 58.5 <- 21.5",
+    "set invert_with_max_only position 170 <- -90",
+    "set invert_with_max_only position -10 <- 90",
+    "set invert_with_max_only position -279 <- 359",
+  ],
+}
+`;
+
+exports[`mapping/invert-with-max-only > updates characteristics 1`] = `
+{
+  "invert_with_max_only-position": [
+    "Current Position=60 Target Position=60 <- "on" "off"",
+    "Current Position=80 Target Position=80 <- "0"",
+    "Current Position=79 Target Position=79 <- "1"",
+    "Current Position=30 Target Position=30 <- "50"",
+    "Current Position=0 Target Position=0 <- "100"",
+    "Current Position=58 Target Position=58 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
 exports[`mapping/js-functions-by-name > converts readings 1`] = `
 {
   "Brightness": [
@@ -23162,6 +27538,275 @@ exports[`mapping/json-broken-functions > sends commands 1`] = `
 exports[`mapping/json-broken-functions > updates characteristics 1`] = `
 {
   "json_broken_functions-state": [
+    "On=true <- "on" "1" "50" "100" "21.5"",
+    "On=false <- "off" "0" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
+exports[`mapping/json-broken-write-function > converts readings 1`] = `
+{
+  "Brightness": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
+    "0 <- "0" "1" "0.35" "000000" """,
+    "1 <- "2" "3"",
+    "8 <- "20" "21.5"",
+    "20 <- "50"",
+    "39 <- "99" "100"",
+    "100 <- "254"",
+    "588 <- "1500"",
+    "-2 <- "-5"",
+  ],
+  "On": [
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5"",
+    "false <- "off" "0" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "undefined <- "set-on" "set_off"",
+  ],
+}
+`;
+
+exports[`mapping/json-broken-write-function > gets its services 1`] = `
+{
+  "displayName": "466680fb-f33f-e43d-6c13-b425fc6e0467",
+  "log": [
+    "log creating services for json-broken-write-function",
+    "log   information service for json-broken-write-function",
+    "log     manufacturer, model and serial number characteristics for json-broken-write-function",
+    "log     name (siriName) characteristic for json-broken-write-function",
+    "log   Lightbulb service for json-broken-write-function",
+    "log     On characteristic for json_broken_write_function:state",
+    "log     Brightness characteristic for json_broken_write_function:pct",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:dummy",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:<unknown>",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "466680fb-f33f-e43d-6c13-b425fc6e0467",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "json_broken_write_function",
+        },
+        {
+          "name": "On",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+          },
+          "uuid": "00000025-0000-1000-8000-0026BB765291",
+          "value": true,
+        },
+        {
+          "name": "Brightness",
+          "props": {
+            "format": "int",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "00000008-0000-1000-8000-0026BB765291",
+          "value": 50,
+        },
+      ],
+      "linked": [],
+      "name": "json_broken_write_function",
+      "type": "Lightbulb",
+      "uuid": "00000043-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "json_broken_write_function-pct": 1,
+    "json_broken_write_function-state": 1,
+  },
+}
+`;
+
+exports[`mapping/json-broken-write-function > is detected 1`] = `
+{
+  "alias": "json_broken_write_function",
+  "category": undefined,
+  "device": "json_broken_write_function",
+  "fuuid": "466680fb-f33f-e43d-6c13-b425fc6e0467",
+  "homekit_uuid": "a980232e-a15c-4e9f-9361-7a67da1997d3",
+  "log": [
+    "info homebridgeMapping: {"On": {"reading": "state", "homekit2reading": "{return (}", "cmdOn": "on", "cmdOff": "off"}, "Brightness": {"reading": "pct", "cmd": "pct", "homekit2reading": "percentToByte", "reading2homekit": "byteToPercent"}}",
+    "log json_broken_write_function is light",
+    "log json_broken_write_function has",
+    "log   On [state;on,off]",
+    "log   Brightness [pct]",
+    "error   homekit2reading: SyntaxError: Unexpected token '}'",
+    "error   homekit2reading disabled.",
+    "info     caching: On: true (as boolean; from 'on')",
+    "info     caching: Brightness: 50 (as number; from '128')",
+  ],
+  "mappings": {
+    "Brightness": {
+      "cached": 50,
+      "characteristic": "class Brightness",
+      "characteristic_type": "Brightness",
+      "cmd": "pct",
+      "device": "json_broken_write_function",
+      "homekit2reading": "[function]",
+      "informId": "json_broken_write_function-pct",
+      "last_update": 1786881600,
+      "reading": "pct",
+      "reading2homekit": "[function]",
+    },
+    "On": {
+      "cached": true,
+      "characteristic": "class On",
+      "characteristic_type": "On",
+      "cmdOff": "off",
+      "cmdOn": "on",
+      "device": "json_broken_write_function",
+      "homekit2reading": "{return (}",
+      "informId": "json_broken_write_function-state",
+      "last_update": 1786881600,
+      "reading": "state",
+    },
+  },
+  "model": "<unknown>",
+  "name": "json-broken-write-function",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "466680fb-f33f-e43d-6c13-b425fc6e0467",
+  "service_name": "light",
+  "siriName": "json_broken_write_function",
+  "type": "dummy",
+  "uuid_base": "466680fb-f33f-e43d-6c13-b425fc6e0467",
+}
+`;
+
+exports[`mapping/json-broken-write-function > sends commands 1`] = `
+{
+  "Brightness": [
+    "set json_broken_write_function pct 3 <- true 1",
+    "set json_broken_write_function pct 0 <- false 0",
+    "set json_broken_write_function pct 5 <- 2",
+    "set json_broken_write_function pct 8 <- 3",
+    "set json_broken_write_function pct 26 <- 10",
+    "set json_broken_write_function pct 127 <- 50",
+    "set json_broken_write_function pct 255 <- 100",
+    "set json_broken_write_function pct 55 <- 21.5",
+    "set json_broken_write_function pct -229 <- -90",
+    "set json_broken_write_function pct 229 <- 90",
+    "set json_broken_write_function pct 915 <- 359",
+  ],
+  "On": [
+    "set json_broken_write_function on <- true 1",
+    "set json_broken_write_function off <- false 0",
+    "set json_broken_write_function undefined 2 <- 2",
+    "set json_broken_write_function undefined 3 <- 3",
+    "set json_broken_write_function undefined 10 <- 10",
+    "set json_broken_write_function undefined 50 <- 50",
+    "set json_broken_write_function undefined 100 <- 100",
+    "set json_broken_write_function undefined 21.5 <- 21.5",
+    "set json_broken_write_function undefined -90 <- -90",
+    "set json_broken_write_function undefined 90 <- 90",
+    "set json_broken_write_function undefined 359 <- 359",
+  ],
+}
+`;
+
+exports[`mapping/json-broken-write-function > updates characteristics 1`] = `
+{
+  "json_broken_write_function-pct": [
+    "Brightness=50 <- "on" "off"",
+    "Brightness=0 <- "0" "1" """,
+    "Brightness=20 <- "50"",
+    "Brightness=39 <- "100"",
+    "Brightness=8 <- "21.5" "closed" "open" "ff8000"",
+  ],
+  "json_broken_write_function-state": [
     "On=true <- "on" "1" "50" "100" "21.5"",
     "On=false <- "off" "0" "closed" "open" "ff8000" """,
   ],
@@ -27629,6 +32274,445 @@ exports[`mapping/threshold-and-part > updates characteristics 1`] = `
 }
 `;
 
+exports[`mapping/valid-numbers > converts readings 1`] = `
+{
+  "CurrentHeatingCoolingState": [
+    ""on" <- "on"",
+    ""off" <- "off"",
+    ""ON" <- "ON"",
+    ""0" <- "0"",
+    ""1" <- "1"",
+    ""2" <- "2"",
+    ""3" <- "3"",
+    ""20" <- "20"",
+    ""50" <- "50"",
+    ""99" <- "99"",
+    ""100" <- "100"",
+    ""254" <- "254"",
+    ""1500" <- "1500"",
+    ""21.5" <- "21.5"",
+    ""-5" <- "-5"",
+    ""0.35" <- "0.35"",
+    ""dim 50" <- "dim 50"",
+    ""dim50%" <- "dim50%"",
+    ""closed" <- "closed"",
+    ""open" <- "open"",
+    ""Closed" <- "Closed"",
+    ""present" <- "present"",
+    ""absent" <- "absent"",
+    ""locked" <- "locked"",
+    ""ok" <- "ok"",
+    ""low" <- "low"",
+    ""A0" <- "A0"",
+    ""000000" <- "000000"",
+    ""ff8000" <- "ff8000"",
+    ""0.4573,0.41" <- "0.4573,0.41"",
+    ""set-on" <- "set-on"",
+    ""set_off" <- "set_off"",
+    ""true" <- "true"",
+    ""false" <- "false"",
+    ""PLAYING" <- "PLAYING"",
+    ""opening" <- "opening"",
+    ""up:on" <- "up:on"",
+    ""auto" <- "auto"",
+    ""manual" <- "manual"",
+    ""home" <- "home"",
+    ""TV" <- "TV"",
+    ""short" <- "short"",
+    ""motion 7 T: 21.5" <- "motion 7 T: 21.5"",
+    """ <- """,
+  ],
+  "TargetHeatingCoolingState": [
+    "undefined <- "on" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "off"",
+    "3 <- "auto"",
+    "1 <- "manual"",
+  ],
+  "TargetTemperature": [
+    "31 <- "on" "ON"",
+    "4 <- "off"",
+    "0 <- "0" "000000"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100"",
+    "254 <- "254"",
+    "1500 <- "1500"",
+    "21.5 <- "21.5"",
+    "-5 <- "-5"",
+    "0.35 <- "0.35"",
+    "null <- "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0.4573 <- "0.4573,0.41"",
+  ],
+}
+`;
+
+exports[`mapping/valid-numbers > gets its services 1`] = `
+{
+  "displayName": "4dc0267e-f33f-2e86-ff7d-c1050ab2e6e3",
+  "log": [
+    "log creating services for valid-numbers",
+    "log   information service for valid-numbers",
+    "log     manufacturer, model and serial number characteristics for valid-numbers",
+    "log     name (siriName) characteristic for valid-numbers",
+    "log   Thermostat service for valid-numbers",
+    "log     TargetTemperature characteristic for valid_numbers:desired-temp",
+    "log     TargetHeatingCoolingState characteristic for valid_numbers:mode",
+    "log     CurrentHeatingCoolingState characteristic for valid_numbers:undefined",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:dummy",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:<unknown>",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "4dc0267e-f33f-2e86-ff7d-c1050ab2e6e3",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "valid_numbers",
+        },
+        {
+          "name": "Current Heating Cooling State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 2,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+            ],
+          },
+          "uuid": "0000000F-0000-1000-8000-0026BB765291",
+          "value": 1,
+        },
+        {
+          "name": "Target Heating Cooling State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 3,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "validValues": [
+              7,
+              "HEAT",
+              null,
+              "OFF",
+            ],
+          },
+          "uuid": "00000033-0000-1000-8000-0026BB765291",
+          "value": 7,
+        },
+        {
+          "name": "Current Temperature",
+          "props": {
+            "format": "float",
+            "maxValue": 100,
+            "minStep": 0.1,
+            "minValue": -270,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "unit": "celsius",
+          },
+          "uuid": "00000011-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+        {
+          "name": "Target Temperature",
+          "props": {
+            "format": "float",
+            "maxValue": 38,
+            "minStep": 0.1,
+            "minValue": 10,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "celsius",
+          },
+          "uuid": "00000035-0000-1000-8000-0026BB765291",
+          "value": 21,
+        },
+        {
+          "name": "Temperature Display Units",
+          "props": {
+            "format": "uint8",
+            "maxValue": 1,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "validValues": [
+              0,
+              1,
+            ],
+          },
+          "uuid": "00000036-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+      ],
+      "linked": [],
+      "name": "valid_numbers",
+      "type": "Thermostat",
+      "uuid": "0000004A-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "undefined": 1,
+    "valid_numbers-desired-temp": 1,
+    "valid_numbers-mode": 1,
+  },
+}
+`;
+
+exports[`mapping/valid-numbers > is detected 1`] = `
+{
+  "alias": "valid_numbers",
+  "category": undefined,
+  "device": "valid_numbers",
+  "fuuid": "4dc0267e-f33f-2e86-ff7d-c1050ab2e6e3",
+  "homekit_uuid": "a2377762-3f04-48e6-bb6c-b2880ca741b3",
+  "log": [
+    "info homebridgeMapping: TargetHeatingCoolingState=mode,valid=0;1;7;x,values=auto:AUTO;manual:HEAT;off:OFF",
+    "log valid_numbers is thermostat",
+    "log valid_numbers has",
+    "log   TargetTemperature [desired-temp]",
+    "log   TargetHeatingCoolingState [mode]",
+    "log   CurrentHeatingCoolingState [undefined]",
+    "info     caching: TargetTemperature: 21 (as number; from '21')",
+    "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'auto')",
+  ],
+  "mappings": {
+    "CurrentHeatingCoolingState": {
+      "characteristic": "class CurrentHeatingCoolingState",
+      "characteristic_type": "CurrentHeatingCoolingState",
+      "default": 1,
+      "device": "valid_numbers",
+      "homekit2name": {
+        "1": "HEAT",
+      },
+    },
+    "TargetHeatingCoolingState": {
+      "cached": 3,
+      "characteristic": "class TargetHeatingCoolingState",
+      "characteristic_type": "TargetHeatingCoolingState",
+      "cmds": [
+        "OFF:mode holiday_short",
+        "HEAT:mode manual",
+        "COOL:mode manual",
+        "AUTO:mode auto",
+      ],
+      "device": "valid_numbers",
+      "homekit2cmd": {
+        "0": "mode holiday_short",
+        "1": "mode manual",
+        "2": "mode manual",
+        "3": "mode auto",
+      },
+      "homekit2cmd_re": [],
+      "homekit2name": {
+        "0": "OFF",
+        "1": "HEAT",
+        "3": "AUTO",
+      },
+      "informId": "valid_numbers-mode",
+      "last_update": 1786881600,
+      "reading": "mode",
+      "valid": [
+        7,
+        "HEAT",
+        NaN,
+        "OFF",
+      ],
+      "value2homekit": {
+        "auto": 3,
+        "manual": 1,
+        "off": 0,
+      },
+      "value2homekit_re": [],
+      "values": [
+        "auto:AUTO",
+        "manual:HEAT",
+        "off:OFF",
+      ],
+    },
+    "TargetTemperature": {
+      "cached": 21,
+      "characteristic": "class TargetTemperature",
+      "characteristic_type": "TargetTemperature",
+      "cmd": "desired-temp",
+      "delay": true,
+      "device": "valid_numbers",
+      "informId": "valid_numbers-desired-temp",
+      "last_update": 1786881600,
+      "reading": "desired-temp",
+    },
+  },
+  "model": "<unknown>",
+  "name": "valid-numbers",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "4dc0267e-f33f-2e86-ff7d-c1050ab2e6e3",
+  "service_name": "thermostat",
+  "siriName": "valid_numbers",
+  "type": "dummy",
+  "uuid_base": "4dc0267e-f33f-2e86-ff7d-c1050ab2e6e3",
+}
+`;
+
+exports[`mapping/valid-numbers > sends commands 1`] = `
+{
+  "CurrentHeatingCoolingState": [
+    "set valid_numbers undefined 1 <- 1",
+  ],
+  "TargetHeatingCoolingState": [
+    "set valid_numbers undefined true <- true",
+    "set valid_numbers undefined false <- false",
+    "set valid_numbers mode holiday_short <- 0",
+    "set valid_numbers mode manual <- 1 2",
+    "set valid_numbers mode auto <- 3",
+    "set valid_numbers undefined 10 <- 10",
+    "set valid_numbers undefined 50 <- 50",
+    "set valid_numbers undefined 100 <- 100",
+    "set valid_numbers undefined 21.5 <- 21.5",
+    "set valid_numbers undefined -90 <- -90",
+    "set valid_numbers undefined 90 <- 90",
+    "set valid_numbers undefined 359 <- 359",
+  ],
+  "TargetTemperature": [
+    "set valid_numbers desired-temp true <- true",
+    "set valid_numbers desired-temp false <- false",
+    "set valid_numbers desired-temp 0 <- 0",
+    "set valid_numbers desired-temp 1 <- 1",
+    "set valid_numbers desired-temp 2 <- 2",
+    "set valid_numbers desired-temp 3 <- 3",
+    "set valid_numbers desired-temp 10 <- 10",
+    "set valid_numbers desired-temp 50 <- 50",
+    "set valid_numbers desired-temp 100 <- 100",
+    "set valid_numbers desired-temp 21.5 <- 21.5",
+    "set valid_numbers desired-temp -90 <- -90",
+    "set valid_numbers desired-temp 90 <- 90",
+    "set valid_numbers desired-temp 359 <- 359",
+  ],
+}
+`;
+
+exports[`mapping/valid-numbers > updates characteristics 1`] = `
+{
+  "undefined": [
+    "Current Heating Cooling State=1 <- "on" "off" "1"",
+    "Current Heating Cooling State=0 <- "0"",
+    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+  "valid_numbers-desired-temp": [
+    "Target Temperature=31 <- "on"",
+    "Target Temperature=10 <- "off" "0" "1"",
+    "Target Temperature=38 <- "50" "100"",
+    "Target Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+  "valid_numbers-mode": [
+    "Target Heating Cooling State=7 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
 exports[`mapping/valid-values > converts readings 1`] = `
 {
   "CurrentHeatingCoolingState": [
@@ -28815,6 +33899,409 @@ exports[`mapping/values-and-cmds > updates characteristics 1`] = `
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "values_and_cmds-valve": [
+    "Current Heating Cooling State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Current Heating Cooling State=0 <- "0"",
+  ],
+}
+`;
+
+exports[`mapping/values-as-numbers > converts readings 1`] = `
+{
+  "CurrentHeatingCoolingState": [
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0"",
+  ],
+  "TargetHeatingCoolingState": [
+    "undefined <- "on" "off" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "3 <- "auto"",
+    "1 <- "manual"",
+  ],
+  "TargetTemperature": [
+    "31 <- "on" "ON"",
+    "4 <- "off"",
+    "0 <- "0" "000000"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100"",
+    "254 <- "254"",
+    "1500 <- "1500"",
+    "21.5 <- "21.5"",
+    "-5 <- "-5"",
+    "0.35 <- "0.35"",
+    "null <- "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0.4573 <- "0.4573,0.41"",
+  ],
+}
+`;
+
+exports[`mapping/values-as-numbers > gets its services 1`] = `
+{
+  "displayName": "851fe7ed-f33f-9e7d-dc0b-7a3fbc55a89e",
+  "log": [
+    "log creating services for values-as-numbers",
+    "log   information service for values-as-numbers",
+    "log     manufacturer, model and serial number characteristics for values-as-numbers",
+    "log     name (siriName) characteristic for values-as-numbers",
+    "log   Thermostat service for values-as-numbers",
+    "log     TargetTemperature characteristic for values_as_numbers:desired-temp",
+    "log     TargetHeatingCoolingState characteristic for values_as_numbers:mode",
+    "log     CurrentHeatingCoolingState characteristic for values_as_numbers:valve",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:dummy",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:<unknown>",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "851fe7ed-f33f-9e7d-dc0b-7a3fbc55a89e",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "values_as_numbers",
+        },
+        {
+          "name": "Current Heating Cooling State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 2,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+            ],
+          },
+          "uuid": "0000000F-0000-1000-8000-0026BB765291",
+          "value": 1,
+        },
+        {
+          "name": "Target Heating Cooling State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 3,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+              3,
+            ],
+          },
+          "uuid": "00000033-0000-1000-8000-0026BB765291",
+          "value": 3,
+        },
+        {
+          "name": "Current Temperature",
+          "props": {
+            "format": "float",
+            "maxValue": 100,
+            "minStep": 0.1,
+            "minValue": -270,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "unit": "celsius",
+          },
+          "uuid": "00000011-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+        {
+          "name": "Target Temperature",
+          "props": {
+            "format": "float",
+            "maxValue": 38,
+            "minStep": 0.1,
+            "minValue": 10,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "celsius",
+          },
+          "uuid": "00000035-0000-1000-8000-0026BB765291",
+          "value": 21,
+        },
+        {
+          "name": "Temperature Display Units",
+          "props": {
+            "format": "uint8",
+            "maxValue": 1,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "validValues": [
+              0,
+              1,
+            ],
+          },
+          "uuid": "00000036-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+      ],
+      "linked": [],
+      "name": "values_as_numbers",
+      "type": "Thermostat",
+      "uuid": "0000004A-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "values_as_numbers-desired-temp": 1,
+    "values_as_numbers-mode": 1,
+    "values_as_numbers-valve": 1,
+  },
+}
+`;
+
+exports[`mapping/values-as-numbers > is detected 1`] = `
+{
+  "alias": "values_as_numbers",
+  "category": undefined,
+  "device": "values_as_numbers",
+  "fuuid": "851fe7ed-f33f-9e7d-dc0b-7a3fbc55a89e",
+  "homekit_uuid": "49102a1e-aaf9-4510-b923-96b8b6cfc993",
+  "log": [
+    "info homebridgeMapping: CurrentHeatingCoolingState=valve,values=0:0;/.*/:1
+TargetHeatingCoolingState=mode,values=auto:3;manual:1,cmds=3:mode+auto;1:mode+manual",
+    "log values_as_numbers is thermostat",
+    "log values_as_numbers has",
+    "log   TargetTemperature [desired-temp]",
+    "log   TargetHeatingCoolingState [mode]",
+    "log   CurrentHeatingCoolingState [valve]",
+    "info     caching: TargetTemperature: 21 (as number; from '21')",
+    "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'auto')",
+    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from '10')",
+  ],
+  "mappings": {
+    "CurrentHeatingCoolingState": {
+      "cached": 1,
+      "characteristic": "class CurrentHeatingCoolingState",
+      "characteristic_type": "CurrentHeatingCoolingState",
+      "default": 1,
+      "device": "values_as_numbers",
+      "homekit2name": {
+        "0": "captureRejections",
+        "1": "HEAT",
+      },
+      "informId": "values_as_numbers-valve",
+      "last_update": 1786881600,
+      "reading": "valve",
+      "value2homekit": {
+        "0": "0",
+      },
+      "value2homekit_re": [
+        {
+          "re": ".*",
+          "to": "1",
+        },
+      ],
+      "values": [
+        "0:0",
+        "/.*/:1",
+      ],
+    },
+    "TargetHeatingCoolingState": {
+      "cached": 3,
+      "characteristic": "class TargetHeatingCoolingState",
+      "characteristic_type": "TargetHeatingCoolingState",
+      "cmds": [
+        "3:mode+auto",
+        "1:mode+manual",
+      ],
+      "device": "values_as_numbers",
+      "homekit2cmd": {
+        "1": "mode manual",
+        "3": "mode auto",
+      },
+      "homekit2cmd_re": [],
+      "homekit2name": {
+        "1": "HEAT",
+        "3": "AUTO",
+      },
+      "informId": "values_as_numbers-mode",
+      "last_update": 1786881600,
+      "reading": "mode",
+      "value2homekit": {
+        "auto": "3",
+        "manual": "1",
+      },
+      "value2homekit_re": [],
+      "values": [
+        "auto:3",
+        "manual:1",
+      ],
+    },
+    "TargetTemperature": {
+      "cached": 21,
+      "characteristic": "class TargetTemperature",
+      "characteristic_type": "TargetTemperature",
+      "cmd": "desired-temp",
+      "delay": true,
+      "device": "values_as_numbers",
+      "informId": "values_as_numbers-desired-temp",
+      "last_update": 1786881600,
+      "reading": "desired-temp",
+    },
+  },
+  "model": "<unknown>",
+  "name": "values-as-numbers",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "851fe7ed-f33f-9e7d-dc0b-7a3fbc55a89e",
+  "service_name": "thermostat",
+  "siriName": "values_as_numbers",
+  "type": "dummy",
+  "uuid_base": "851fe7ed-f33f-9e7d-dc0b-7a3fbc55a89e",
+}
+`;
+
+exports[`mapping/values-as-numbers > sends commands 1`] = `
+{
+  "CurrentHeatingCoolingState": [
+    "set values_as_numbers undefined 1 <- 1",
+  ],
+  "TargetHeatingCoolingState": [
+    "set values_as_numbers undefined true <- true",
+    "set values_as_numbers undefined false <- false",
+    "set values_as_numbers undefined 0 <- 0",
+    "set values_as_numbers mode manual <- 1",
+    "set values_as_numbers undefined 2 <- 2",
+    "set values_as_numbers mode auto <- 3",
+    "set values_as_numbers undefined 10 <- 10",
+    "set values_as_numbers undefined 50 <- 50",
+    "set values_as_numbers undefined 100 <- 100",
+    "set values_as_numbers undefined 21.5 <- 21.5",
+    "set values_as_numbers undefined -90 <- -90",
+    "set values_as_numbers undefined 90 <- 90",
+    "set values_as_numbers undefined 359 <- 359",
+  ],
+  "TargetTemperature": [
+    "set values_as_numbers desired-temp true <- true",
+    "set values_as_numbers desired-temp false <- false",
+    "set values_as_numbers desired-temp 0 <- 0",
+    "set values_as_numbers desired-temp 1 <- 1",
+    "set values_as_numbers desired-temp 2 <- 2",
+    "set values_as_numbers desired-temp 3 <- 3",
+    "set values_as_numbers desired-temp 10 <- 10",
+    "set values_as_numbers desired-temp 50 <- 50",
+    "set values_as_numbers desired-temp 100 <- 100",
+    "set values_as_numbers desired-temp 21.5 <- 21.5",
+    "set values_as_numbers desired-temp -90 <- -90",
+    "set values_as_numbers desired-temp 90 <- 90",
+    "set values_as_numbers desired-temp 359 <- 359",
+  ],
+}
+`;
+
+exports[`mapping/values-as-numbers > updates characteristics 1`] = `
+{
+  "values_as_numbers-desired-temp": [
+    "Target Temperature=31 <- "on"",
+    "Target Temperature=10 <- "off" "0" "1"",
+    "Target Temperature=38 <- "50" "100"",
+    "Target Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+  "values_as_numbers-mode": [
+    "Target Heating Cooling State=3 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+  "values_as_numbers-valve": [
     "Current Heating Cooling State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "Current Heating Cooling State=0 <- "0"",
   ],

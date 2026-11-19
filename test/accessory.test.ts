@@ -98,6 +98,42 @@ describe('reading a characteristic', () => {
     expect(read(characteristicOf(serviceOf(services, 'Switch'), Characteristic.On))).toEqual({ error: 'unreachable', value: undefined, answered: true });
   });
 
+  it('answers a value that stands for a name', () => {
+    const world = createWorld();
+    const accessory = world.accessory(device({
+      Internals: { NAME: 'door', TYPE: 'CUL_FHTTK', DEF: 'abc' }, Readings: { Window: 'Open', state: 'Open' },
+    }));
+    const sensor = serviceOf(accessory.getServices(), 'ContactSensor');
+    world.log.clear();
+
+    expect(read(characteristicOf(sensor, Characteristic.ContactSensorState)).value).toBe(1);
+    expect(world.log.lines).toEqual(['info query: ContactSensorState for door-Window', 'info   cached: 1 (as number; means CONTACT_NOT_DETECTED)']);
+  });
+
+  it('asks for a reading given by its name, but fails on the answer', () => {
+    const world = createWorld({ respond: () => '42' });
+    const accessory = world.accessory(lamp());
+    const answered = vi.fn();
+
+    // without a mapping there is nothing to convert the answer with, or to log to
+    expect(() => accessory.query('level', answered)).toThrow(TypeError);
+
+    expect(world.sent).toEqual(['{ReadingsVal("lamp","level","")}']);
+    expect(answered).not.toHaveBeenCalled();
+    expect(world.cached.undefined).toBe('42');
+  });
+
+  it('answers 1 as error when there is neither a reading nor a default', () => {
+    const world = createWorld();
+    const accessory = world.accessory(lamp());
+    const answered = vi.fn();
+
+    expect(accessory.query({}, answered)).toBeUndefined();
+
+    expect(answered).toHaveBeenCalledWith(1);
+    expect(world.sent).toEqual([]);
+  });
+
   it('answers the name with the siriName', () => {
     const world = createWorld();
     const accessory = world.accessory(device({
@@ -222,6 +258,29 @@ describe('writing a characteristic', () => {
 
     await vi.advanceTimersByTimeAsync(500);
     expect(target.value).toBe(Characteristic.TargetDoorState.CLOSED);
+  });
+});
+
+describe('readings without a value in the values list', () => {
+  it('are reported as an error every time they arrive', async () => {
+    const world = createWorld();
+    const accessory = world.accessory(device({
+      Internals: { NAME: 'door', TYPE: 'MAX', type: 'ShutterContact', addr: 'abc' }, Readings: { state: 'closed' },
+      Attributes: { homebridgeMapping: 'ContactSensorState=values=closed:CONTACT_DETECTED;open:CONTACT_NOT_DETECTED' },
+    }));
+    const sensor = characteristicOf(serviceOf(accessory.getServices(), 'ContactSensor'), Characteristic.ContactSensorState);
+    world.log.clear();
+
+    world.update('door-state', 'tilted');
+    world.update('door-state', 'closed');
+    world.update('door-state', 'tilted');
+    await settle();
+
+    expect(world.log.errors()).toEqual([
+      'error door-state value tilted not handled in values',
+      'error door-state value tilted not handled in values',
+    ]);
+    expect(sensor.value).toBe(0);
   });
 });
 
@@ -378,6 +437,31 @@ describe('subscriptions', () => {
 
     accessory.unsubscribe('dimmer-pct', characteristicOf(service, Characteristic.Brightness));
     expect(world.subscriptions['dimmer-pct']).toBeUndefined();
+  });
+
+  it('fails to unsubscribe everything at once when a characteristic has several mappings', () => {
+    const world = createWorld();
+    const accessory = world.accessory(device({
+      Internals: { NAME: 'd' }, Readings: { a: '1', b: '1' }, PossibleSets: 'on off',
+      Attributes: { homebridgeMapping: 'clear On=a On=b,subtype=B' },
+    }));
+    accessory.getServices();
+
+    accessory.unsubscribe();
+
+    // the list of mappings has no reading id, so nothing is found for it
+    expect(Object.keys(world.subscriptions)).toEqual(['d-a', 'd-b']);
+  });
+
+  it('unsubscribes everything at once only for characteristics without a characteristic object', () => {
+    const world = createWorld();
+    const accessory = world.accessory(lamp());
+    accessory.getServices();
+    accessory.subscribe('lamp-state');
+
+    accessory.unsubscribe();
+
+    expect(world.subscriptions['lamp-state']?.map((subscription) => subscription.characteristic?.displayName)).toEqual(['On']);
   });
 
   it('can subscribe to a reading by its id alone', () => {

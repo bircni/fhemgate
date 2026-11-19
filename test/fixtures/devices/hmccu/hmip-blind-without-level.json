@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_blind_without_level",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_blind_without_level",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "b764f5e9-f33f-e164-bd6e-22cc080099d3",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000001:4",
+    "ccutype": "X",
+    "ccurole": "BLIND_VIRTUAL_RECEIVER"
+  },
+  "Readings": {
+    "1.STATE": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

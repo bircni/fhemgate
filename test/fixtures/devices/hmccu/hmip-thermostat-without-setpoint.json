@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_thermostat_without_setpoint",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_thermostat_without_setpoint",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "66e722ed-f33f-5ce3-b795-710bb74dc529",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000003:4",
+    "ccutype": "X",
+    "ccurole": "HEATING_CLIMATECONTROL_TRANSCEIVER"
+  },
+  "Readings": {
+    "1.ACTUAL_TEMPERATURE": {
+      "Value": "19.0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}

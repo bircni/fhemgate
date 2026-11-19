@@ -9,6 +9,7 @@ import { createWorld, customUUIDs, hap } from './support/subject.ts';
 class FakeHistory extends hap.Service {
   static instances: FakeHistory[] = [];
   static loaded = true;
+  static initialTime: number | undefined = 1786881000;
   static persisted: Record<string, number> | undefined = { TimesOpened: 3, LastActivation: 0, OpenDuration: 0, ClosedDuration: 0, reset: 0 };
 
   entries: unknown[] = [];
@@ -30,7 +31,7 @@ class FakeHistory extends hap.Service {
     this.entries.push(entry);
   };
 
-  getInitialTime = () => 1786881000;
+  getInitialTime = () => FakeHistory.initialTime;
   save = () => {
     this.saved++;
   };
@@ -50,6 +51,7 @@ beforeEach(() => {
   vi.useFakeTimers({ now: new Date('2026-08-16T12:10:00Z') });
   FakeHistory.instances = [];
   FakeHistory.loaded = true;
+  FakeHistory.initialTime = 1786881000;
   FakeHistory.persisted = { TimesOpened: 3, LastActivation: 0, OpenDuration: 0, ClosedDuration: 0, reset: 0 };
 });
 
@@ -110,6 +112,17 @@ describe('a contact sensor with history', () => {
 
     // the reading is from 12:00:00, the history starts 600 seconds before that
     expect(read(characteristicOf(sensor, 'LastActivation'))).toEqual({ error: null, value: 600, answered: true });
+  });
+
+  it('starts the history with the current state when it is empty, and then has no last activation', () => {
+    FakeHistory.initialTime = undefined;
+    const w = world();
+    const sensor = serviceOf(w.accessory(contact()).getServices(), 'ContactSensor');
+
+    const result = read(characteristicOf(sensor, 'LastActivation'));
+
+    expect(FakeHistory.instances[0].entries).toEqual([{ time: 1786881600, status: undefined }]);
+    expect(result).toEqual({ error: null, value: NaN, answered: true });
   });
 
   it('resets the counter', () => {

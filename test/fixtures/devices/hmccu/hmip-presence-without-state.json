@@ -1,0 +1,21 @@
+{
+  "Name": "hmip_presence_without_state",
+  "PossibleSets": "datapoint",
+  "PossibleAttrs": "alias comment eventMap genericDeviceType group homebridgeMapping room siriName userattr",
+  "Internals": {
+    "NAME": "hmip_presence_without_state",
+    "TYPE": "HMCCUCHN",
+    "FUUID": "ffee0a14-f33f-c7ce-e31e-46ab8ace58a2",
+    "STATE": "???",
+    "DEF": "CCU 000ABC00000005:4",
+    "ccutype": "X",
+    "ccurole": "PRESENCEDETECTOR_TRANSCEIVER"
+  },
+  "Readings": {
+    "1.STATE": {
+      "Value": "0",
+      "Time": "2026-08-16 12:00:00"
+    }
+  },
+  "Attributes": {}
+}
