@@ -151,8 +151,9 @@ describe('parameters', () => {
     expect(current).toEqual({ reading: 'pct', invert: true });
   });
 
-  it('takes a lone invert for the name of a reading', () => {
-    expect(parse('CurrentPosition=pct,invert').mappings.CurrentPosition).toEqual({ reading: 'invert' });
+  it('takes a lone invert as the parameter it is, not as the name of a reading', () => {
+    expect(parse('CurrentPosition=pct,invert').mappings.CurrentPosition).toEqual({ reading: 'pct', invert: true });
+    expect(parse('CurrentPosition=invert,pct').mappings.CurrentPosition).toEqual({ reading: 'pct', invert: true });
   });
 });
 

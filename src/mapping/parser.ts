@@ -17,8 +17,8 @@ export interface MappingTarget {
  *
  *     [<service>[(<subtype>)]#]<characteristic>=<parameter>,<parameter>,...
  *
- * where a parameter is `<name>=<value>`, the name of another characteristic whose mapping is
- * copied, `clear`, or `[<cmd>:][<device>:]<reading>`.
+ * where a parameter is `<name>=<value>`, `invert`, the name of another characteristic whose
+ * mapping is copied, `clear`, or `[<cmd>:][<device>:]<reading>`.
  *
  * @param categories the accessory categories of HomeKit by name, for the AccessoryCategory entry
  */
@@ -121,8 +121,12 @@ export function parseHomebridgeMapping(target: MappingTarget, homebridgeMapping:
           mapping[name] = value.replace(/\+/g, ' ');
         }
       } else if (p.length === 1) {
-        // a bare `invert` was meant to be a parameter of its own but is taken for a reading
-        // like any other word.
+        if (param === 'invert') {
+          // the one parameter that needs no value
+          mapping.invert = true;
+          continue;
+        }
+
         let other = target.mappings[param];
         if (other === undefined) {
           other = target.mappings[String(service) + '#' + param];
