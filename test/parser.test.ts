@@ -173,12 +173,19 @@ describe('services', () => {
     expect(mappings['Fan#Active']).toEqual({ reading: 'speed' });
   });
 
-  it('does not find a category, as the accessory class of homekit has none any more', () => {
+  it('takes the category of the accessory from the categories of homekit', () => {
     const { mappings, log, accessory } = parse('AccessoryCategory=FAN');
 
     expect(mappings).toEqual({});
+    expect(accessory.category).toBe(3);
+    expect(log).toEqual(['info using category: 3 (FAN)']);
+  });
+
+  it('reports a category homekit does not know, also when it is the number of one', () => {
+    const { log, accessory } = parse('AccessoryCategory=VACUUM AccessoryCategory=3');
+
     expect(accessory.category).toBeUndefined();
-    expect(log).toEqual(['error unknown category: FAN']);
+    expect(log).toEqual(['error unknown category: VACUUM', 'error unknown category: 3']);
   });
 });
 

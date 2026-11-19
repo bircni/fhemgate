@@ -225,9 +225,10 @@ export class FhemAccessory {
   }
 
   fromHomebridgeMapping(homebridgeMapping: string | undefined): void {
-    const { Accessory } = this.#state.hap;
-    // HAP-NodeJS 2 has the categories elsewhere, so none is found here.
-    parseHomebridgeMapping(this, homebridgeMapping, (Accessory as unknown as { Categories?: Record<string, number | undefined> }).Categories);
+    // the types declare the categories as a const enum, which can not be handed on as a value.
+    // HAP-NodeJS does export the object.
+    const { Categories } = this.#state.hap as unknown as { Categories?: Record<string, number | string | undefined> };
+    parseHomebridgeMapping(this, homebridgeMapping, Categories);
   }
 
   /** sends the command for the value after the delay, unless another value for the mapping arrives before */
