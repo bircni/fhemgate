@@ -62,9 +62,10 @@ export const blind: Rule = ({ s, target, genericType }) => {
     return false;
   }
 
-  // a blind that is set with `set pct` was already taken for a light by the dimmer rule, and
-  // stays one.
-  if (!target.service_name) {
+  // the 'set pct' rule already claimed the service as a light. that guess only wins when
+  // the user did not ask for a specific type, otherwise a blindActuator ends up exposed as
+  // a Lightbulb instead of a WindowCovering.
+  if (!target.service_name || (target.service_name === 'light' && genericType === undefined)) {
     target.service_name = 'blind';
   }
   delete target.mappings.Brightness;

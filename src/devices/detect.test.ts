@@ -70,6 +70,13 @@ describe('detectMappings', () => {
 
     expect(target.service_name).toBe('thermometer');
   });
+
+  it('takes a blind that is set with pct for a blind, unless its type says otherwise', () => {
+    const blind = { PossibleSets: 'on off pct', Readings: { pct: { Value: '40' } }, Attributes: { subType: 'blindActuator' } };
+
+    expect(detect(blind).target.service_name).toBe('blind');
+    expect(detect({ ...blind, Attributes: { ...blind.Attributes, genericDeviceType: 'light' } }).target.service_name).toBe('light');
+  });
 });
 
 describe('reviseMappings', () => {
