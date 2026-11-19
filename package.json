@@ -62,5 +62,5 @@
     "homebridge": "^1.8.0 || ^2.0.0",
     "node": "^22.12.0 || ^24.0.0 || ^26.0.0"
   },
-  "packageManager": "bun@1.4.4"
+  "packageManager": "bun@1.4.5"
 }
