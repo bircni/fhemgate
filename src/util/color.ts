@@ -27,7 +27,7 @@ export function hsv2rgb(h: number, s: number, v: number): string {
     b = v;
   } else {
     let i = Math.floor(h * 6.0);
-    const f = (h * 6.0) - i;
+    const f = h * 6.0 - i;
     const p = v * (1.0 - s);
     const q = v * (1.0 - s * f);
     const t = v * (1.0 - s * (1.0 - f));
@@ -76,7 +76,7 @@ export function ct2rgb(ct: number | string): string {
   }
 
   // adjusted by 1000K
-  const temp = (1000000 / mired) / 100 + 10;
+  const temp = 1000000 / mired / 100 + 10;
 
   let r = 255;
   if (temp > 66) {
@@ -113,8 +113,8 @@ export function xyY2rgb(xValue: number | string, yValue: number | string, YValue
   let b = 0;
 
   if (y > 0) {
-    let X = x * Y / y;
-    let Z = (1 - x - y) * Y / y;
+    let X = (x * Y) / y;
+    let Z = ((1 - x - y) * Y) / y;
 
     if (X > 1 || Y > 1 || Z > 1) {
       const f = Math.max(X, Y, Z);

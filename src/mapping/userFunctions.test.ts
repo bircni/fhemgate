@@ -45,10 +45,7 @@ describe('resolveConverter', () => {
     const read = () => 1;
     const mapping: Mapping = { reading2homekit: read, homekit2reading: 'name' };
 
-    expect(resolve(mapping, 'homekit2reading', {})).toEqual([
-      'error   homekit2reading: no function named name in {}',
-      'error   homekit2reading disabled.',
-    ]);
+    expect(resolve(mapping, 'homekit2reading', {})).toEqual(['error   homekit2reading: no function named name in {}', 'error   homekit2reading disabled.']);
     expect(mapping).toEqual({ homekit2reading: 'name' });
   });
 });

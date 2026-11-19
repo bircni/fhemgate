@@ -70,8 +70,7 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       if (s.Attributes.eventMap) {
         for (const part of s.Attributes.eventMap.split(' ')) {
           const map = part.split(':') as [string, ...string[]];
-          if (map[1] && (map[1].toLowerCase() === 'on'
-                         || map[1].toLowerCase() === 'off')) {
+          if (map[1] && (map[1].toLowerCase() === 'on' || map[1].toLowerCase() === 'off')) {
             if (!mapping.event_map) {
               mapping.event_map = {};
             }
@@ -176,7 +175,8 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
           valid.push(value);
         }
         // sorted as text. see docs/KNOWN_BUGS.md, 2.
-         
+
+        // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
         mapping.valid = valid.sort();
 
         owner.log.debug('valid: ' + util.inspect(mapping.valid));
@@ -193,7 +193,7 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
           }
 
           let from = match[1] as string;
-          const to = (match[2] !== undefined ? match[3] as string : from).replace(/\+/g, ' ');
+          const to = (match[2] !== undefined ? (match[3] as string) : from).replace(/\+/g, ' ');
 
           const pattern = from.match('^/(.*)/$');
           if (pattern) {

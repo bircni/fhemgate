@@ -38,7 +38,11 @@ const cachedOf = (mapping: Mapping | Mapping[] | undefined): HomekitValue | unde
 
 /** adds the new value of a characteristic to the history of its accessory, if it is one the history has a place for */
 export function recordHistory(
-  accessory: SubscribedAccessory, historyService: HistoryService, mapping: PreparedMapping, value: HomekitValue, state: PluginState,
+  accessory: SubscribedAccessory,
+  historyService: HistoryService,
+  mapping: PreparedMapping,
+  value: HomekitValue,
+  state: PluginState,
 ): void {
   let extra_persist: ExtraPersistedData = {};
   if (historyService.isHistoryLoaded()) {
@@ -61,9 +65,11 @@ export function recordHistory(
       }
     } else if (mapping.characteristic_type === 'MotionDetected') {
       entry.status = value ? 1 : 0;
-    } else if (mapping.characteristic_type === 'CurrentTemperature'
-               || mapping.characteristic_type === 'TargetTemperature'
-               || mapping.characteristic_type === CustomUUIDs.Actuation) {
+    } else if (
+      mapping.characteristic_type === 'CurrentTemperature' ||
+      mapping.characteristic_type === 'TargetTemperature' ||
+      mapping.characteristic_type === CustomUUIDs.Actuation
+    ) {
       const current = accessory.mappings.CurrentTemperature ? cachedOf(accessory.mappings.CurrentTemperature) : undefined;
 
       if (accessory.mappings.TargetTemperature) {
@@ -145,7 +151,7 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
     return;
   }
 
-  log('  ' + 'FakeGatoHistory service with type ' + type + ' for ' + service_name);
+  log('  FakeGatoHistory service with type ' + type + ' for ' + service_name);
   const historyService = new state.historyServiceClass(type, accessory, { size: mapping.size ? mapping.size : 1024, storage: 'fs' });
   accessory.historyService = historyService;
   services.push(historyService);
@@ -184,7 +190,7 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
   }
 
   if (service_name === 'ContactSensor') {
-    log('    ' + 'FakeGatoHistory reset');
+    log('    FakeGatoHistory reset');
     const characteristic = new (Characteristic as unknown as CustomCharacteristicClass)('Reset', EveUUIDs.Reset);
     historyService.addCharacteristic(characteristic);
     characteristic.setProps({ format: Formats.UINT32 });
@@ -218,7 +224,11 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
  * that mapping, whichever it was. See docs/KNOWN_BUGS.md, 18.
  */
 export function addEveCharacteristics(
-  accessory: FhemAccessory, state: PluginState, controlService: NamedService, mapping: PreparedMapping, service_name: string,
+  accessory: FhemAccessory,
+  state: PluginState,
+  controlService: NamedService,
+  mapping: PreparedMapping,
+  service_name: string,
   seen: Record<string, boolean | undefined>,
 ): void {
   const { Formats, Perms } = state.hap;
@@ -226,15 +236,17 @@ export function addEveCharacteristics(
   const log = accessory.log;
   const from = mapping.device + ':' + mapping.reading;
 
-  const answerZero = (name: string) => (callback: (error: null, value: CharacteristicValue) => void): void => {
-    const value = 0;
-    log('query Custom ' + name + ' for ' + from + ': ' + value);
-    callback(null, value);
-  };
+  const answerZero =
+    (name: string) =>
+    (callback: (error: null, value: CharacteristicValue) => void): void => {
+      const value = 0;
+      log('query Custom ' + name + ' for ' + from + ': ' + value);
+      callback(null, value);
+    };
 
   let characteristic: Characteristic;
   if (accessory.mappings.ContactSensorState) {
-    log('    ' + 'Custom TimesOpened characteristic ' + from);
+    log('    Custom TimesOpened characteristic ' + from);
     characteristic = new Custom('TimesOpened', EveUUIDs.TimesOpened);
     const timesOpened = { name: 'Custom TimesOpened', characteristic: characteristic, informId: mapping.device + '-EVE-TimesOpened', log: mapping.log };
     accessory.mappings[EveUUIDs.TimesOpened] = timesOpened;
@@ -242,69 +254,66 @@ export function addEveCharacteristics(
     controlService.addCharacteristic(characteristic);
     characteristic.setProps({ format: Formats.UINT32 });
     characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.NOTIFY] });
-    characteristic
-      .on('get', (callback) => {
-        const historyService = accessory.historyService;
-        if (!historyService) {
-          log.error(accessory.name + ': Custom TimesOpened characteristic requires FakeGatoHistory');
-          callback('no historyService' as unknown as Error);
-          return;
-        }
+    characteristic.on('get', (callback) => {
+      const historyService = accessory.historyService;
+      if (!historyService) {
+        log.error(accessory.name + ': Custom TimesOpened characteristic requires FakeGatoHistory');
+        callback('no historyService' as unknown as Error);
+        return;
+      }
 
-        const value = historyService.extra_persist.TimesOpened;
-        log('query Custom TimesOpened for ' + from + ': ' + value);
-        callback(null, value);
-      });
+      const value = historyService.extra_persist.TimesOpened;
+      log('query Custom TimesOpened for ' + from + ': ' + value);
+      callback(null, value);
+    });
   }
 
-  if ((accessory.mappings.ContactSensorState || accessory.mappings.MotionDetected)
-      && !seen[service_name + '#' + EveUUIDs.LastActivation]) {
+  if ((accessory.mappings.ContactSensorState || accessory.mappings.MotionDetected) && !seen[service_name + '#' + EveUUIDs.LastActivation]) {
     seen[service_name + '#' + EveUUIDs.LastActivation] = true;
-    log('    ' + 'Custom LastActivation characteristic ' + from);
+    log('    Custom LastActivation characteristic ' + from);
     characteristic = new Custom('LastActivation', EveUUIDs.LastActivation);
     accessory.mappings[EveUUIDs.LastActivation] = { characteristic: characteristic };
     controlService.addCharacteristic(characteristic);
     characteristic.setProps({ format: Formats.UINT32 });
     characteristic.setProps({ perms: [Perms.PAIRED_READ] });
     log.debug('      props: ' + util.inspect(characteristic.props));
-    characteristic
-      .on('get', (callback) => {
-        const historyService = accessory.historyService;
-        if (historyService === undefined) {
-          log.error(accessory.name + ': Custom LastActivation characteristic requires FakeGatoHistory');
-          callback('error' as unknown as Error);
-          return;
-        }
-        if (mapping.last_update === undefined) {
-          log.error(accessory.name + ': Custom LastActivation characteristic: last update unknown ');
-          callback('error' as unknown as Error);
-          return;
-        }
+    characteristic.on('get', (callback) => {
+      const historyService = accessory.historyService;
+      if (historyService === undefined) {
+        log.error(accessory.name + ': Custom LastActivation characteristic requires FakeGatoHistory');
+        callback('error' as unknown as Error);
+        return;
+      }
+      if (mapping.last_update === undefined) {
+        log.error(accessory.name + ': Custom LastActivation characteristic: last update unknown ');
+        callback('error' as unknown as Error);
+        return;
+      }
 
-        // an empty history is started with the current state. the time is then still asked from
-        // the history, which answers nothing. see docs/KNOWN_BUGS.md, 19.
-        if (historyService.getInitialTime() === undefined) {
-          const entry = { time: mapping.last_update, status: mapping.cached };
-          mapping.log.info('      adding history entry ' + util.inspect(entry));
-          historyService.addEntry(entry);
-        }
+      // an empty history is started with the current state. the time is then still asked from
+      // the history, which answers nothing. see docs/KNOWN_BUGS.md, 19.
+      if (historyService.getInitialTime() === undefined) {
+        const entry = { time: mapping.last_update, status: mapping.cached };
+        mapping.log.info('      adding history entry ' + util.inspect(entry));
+        historyService.addEntry(entry);
+      }
 
-        const time = mapping.last_update - (historyService.getInitialTime() as number);
+      const time = mapping.last_update - (historyService.getInitialTime() as number);
 
-        log('query Custom LastActivation for ' + from + ': ' + time);
-        callback(null, time);
-      });
+      log('query Custom LastActivation for ' + from + ': ' + time);
+      callback(null, time);
+    });
   }
 
   if (accessory.mappings.ContactSensorState) {
-    log('    ' + 'Custom OpenDuration characteristic ' + from);
+    log('    Custom OpenDuration characteristic ' + from);
     characteristic = new Custom('OpenDuration', EveUUIDs.OpenDuration);
     controlService.addCharacteristic(characteristic);
     characteristic.setProps({ format: Formats.UINT32 });
     characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.PAIRED_WRITE, Perms.NOTIFY] });
     characteristic.on('get', answerZero('OpenDuration'));
 
-    log('    ' + 'Custom ClosedDuration characteristic ' + from);
+    log('    Custom ClosedDuration characteristic ' + from);
     characteristic = new Custom('ClosedDuration', EveUUIDs.ClosedDuration);
     controlService.addCharacteristic(characteristic);
     characteristic.setProps({ format: Formats.UINT32 });

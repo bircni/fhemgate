@@ -98,10 +98,13 @@ export async function startHomebridge(platform: Record<string, unknown>, files: 
     writeFileSync(join(storage, name), content);
   }
   const port = await freePort();
-  writeFileSync(join(storage, 'config.json'), JSON.stringify({
-    bridge: { name: 'fhem2hb e2e', username: '0E:2E:2E:2E:2E:01', port, pin },
-    platforms: [{ platform: 'FHEM', name: 'FHEM', ...platform }],
-  }));
+  writeFileSync(
+    join(storage, 'config.json'),
+    JSON.stringify({
+      bridge: { name: 'fhem2hb e2e', username: '0E:2E:2E:2E:2E:01', port, pin },
+      platforms: [{ platform: 'FHEM', name: 'FHEM', ...platform }],
+    }),
+  );
 
   let output = '';
   const child: ChildProcess = spawn(process.execPath, [homebridgeBin, '-I', '-Q', '-U', storage, '-P', root, '--strict-plugin-resolution'], {
@@ -126,24 +129,26 @@ export async function startHomebridge(platform: Record<string, unknown>, files: 
       if (!response.ok) {
         throw new Error(`homebridge answered ${response.status}`);
       }
-      const { accessories } = await response.json() as HapAccessories;
+      const { accessories } = (await response.json()) as HapAccessories;
       // the bridge itself is accessory 1
-      return accessories.filter((accessory) => accessory.aid !== 1).map((accessory) => {
-        const services = accessory.services.map((service) => ({
-          type: service.type.toUpperCase(),
-          characteristics: service.characteristics.map((characteristic) => {
-            return { ...characteristic, type: characteristic.type.toUpperCase(), aid: accessory.aid };
-          }),
-        }));
-        const information = services.find((service) => service.type === hapType.AccessoryInformation);
-        const name = information?.characteristics.find((characteristic) => characteristic.type === hapType.Name)?.value;
-        return { aid: accessory.aid, name: String(name), services };
-      });
+      return accessories
+        .filter((accessory) => accessory.aid !== 1)
+        .map((accessory) => {
+          const services = accessory.services.map((service) => ({
+            type: service.type.toUpperCase(),
+            characteristics: service.characteristics.map((characteristic) => {
+              return { ...characteristic, type: characteristic.type.toUpperCase(), aid: accessory.aid };
+            }),
+          }));
+          const information = services.find((service) => service.type === hapType.AccessoryInformation);
+          const name = information?.characteristics.find((characteristic) => characteristic.type === hapType.Name)?.value;
+          return { aid: accessory.aid, name: String(name), services };
+        });
     },
 
     async read({ aid, iid }) {
       const response = await fetch(`${hap}/characteristics?id=${aid}.${iid}`);
-      const { characteristics } = await response.json() as { characteristics: { value: unknown }[] };
+      const { characteristics } = (await response.json()) as { characteristics: { value: unknown }[] };
       return characteristics[0]?.value;
     },
 
@@ -151,7 +156,7 @@ export async function startHomebridge(platform: Record<string, unknown>, files: 
       const response = await fetch(`${hap}/characteristics`, {
         method: 'PUT',
         // without pairing, a write is authorized with the pin of the bridge
-        headers: { 'Content-Type': 'application/hap+json', 'Authorization': pin },
+        headers: { 'Content-Type': 'application/hap+json', Authorization: pin },
         body: JSON.stringify({ characteristics: [{ aid, iid, value }] }),
       });
       if (!response.ok) {

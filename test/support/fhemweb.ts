@@ -68,9 +68,11 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
       for (const socket of sockets) {
         socket.destroy();
       }
-      return new Promise((resolve) => server.close(() => {
-        resolve();
-      }));
+      return new Promise((resolve) =>
+        server.close(() => {
+          resolve();
+        }),
+      );
     },
   };
 
@@ -81,7 +83,7 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
     }
 
     if (cmd.startsWith('jsonlist2')) {
-      const devices = cmd.includes('TYPE=siri') ? [] : fhem.options.devices ?? [];
+      const devices = cmd.includes('TYPE=siri') ? [] : (fhem.options.devices ?? []);
       return { body: JSON.stringify({ Arg: cmd.slice(10), Results: devices, totalResultsReturned: devices.length }) };
     }
     if (cmd === '{AttrVal("global","userattr","")}') {

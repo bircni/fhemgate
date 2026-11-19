@@ -16,7 +16,11 @@ class FakeHistory extends hap.Service {
   saved = 0;
   extra: unknown;
 
-  constructor(readonly type: string, readonly accessory: unknown, readonly options: unknown) {
+  constructor(
+    readonly type: string,
+    readonly accessory: unknown,
+    readonly options: unknown,
+  ) {
     super('History', 'E863F007-079E-48FF-8F27-9C2605A29F52');
     FakeHistory.instances.push(this);
   }
@@ -39,13 +43,15 @@ class FakeHistory extends hap.Service {
 
 const world = () => createWorld({ fakeGato: FakeHistory });
 
-const contact = (mapping = '') => device({
-  Internals: { NAME: 'door' }, Readings: { state: 'closed' },
-  Attributes: {
-    genericDeviceType: 'ContactSensor',
-    homebridgeMapping: `ContactSensorState=state,values=closed:CONTACT_DETECTED;/.*/:CONTACT_NOT_DETECTED history=size=2048 ${mapping}`,
-  },
-});
+const contact = (mapping = '') =>
+  device({
+    Internals: { NAME: 'door' },
+    Readings: { state: 'closed' },
+    Attributes: {
+      genericDeviceType: 'ContactSensor',
+      homebridgeMapping: `ContactSensorState=state,values=closed:CONTACT_DETECTED;/.*/:CONTACT_NOT_DETECTED history=size=2048 ${mapping}`,
+    },
+  });
 
 beforeEach(() => {
   vi.useFakeTimers({ now: new Date('2026-08-16T12:10:00Z') });
@@ -93,7 +99,10 @@ describe('a contact sensor with history', () => {
     expect(characteristicOf(serviceOf(services, 'ContactSensor'), 'TimesOpened').value).toBe(4);
 
     w.update('door-state', 'closed');
-    expect(history?.entries).toEqual([{ time: 1786882200, status: 1 }, { time: 1786882200, status: 0 }]);
+    expect(history?.entries).toEqual([
+      { time: 1786882200, status: 1 },
+      { time: 1786882200, status: 0 },
+    ]);
     expect(w.cached['door-EVE-TimesOpened']).toBe(4);
   });
 
@@ -200,18 +209,31 @@ describe('the kind of history', () => {
     ['AirQualitySensor', 'room'],
     ['MotionSensor', 'motion'],
   ])('is chosen by the service: %s gets %s', (genericDeviceType, type) => {
-    world().accessory(device({
-      Internals: { NAME: 'd' }, Readings: { state: '1' }, Attributes: { genericDeviceType, homebridgeMapping: 'history=size=10' },
-    })).getServices();
+    world()
+      .accessory(
+        device({
+          Internals: { NAME: 'd' },
+          Readings: { state: '1' },
+          Attributes: { genericDeviceType, homebridgeMapping: 'history=size=10' },
+        }),
+      )
+      .getServices();
 
     expect(FakeHistory.instances[0]?.type).toBe(type);
     expect(FakeHistory.instances[0]?.options).toEqual({ size: '10', storage: 'fs' });
   });
 
   it('can be given, and has a size of 1024 entries unless told otherwise', () => {
-    world().accessory(device({
-      Internals: { NAME: 'd' }, Readings: { state: 'on' }, PossibleSets: 'on off', Attributes: { homebridgeMapping: 'history=type=energy' },
-    })).getServices();
+    world()
+      .accessory(
+        device({
+          Internals: { NAME: 'd' },
+          Readings: { state: 'on' },
+          PossibleSets: 'on off',
+          Attributes: { homebridgeMapping: 'history=type=energy' },
+        }),
+      )
+      .getServices();
 
     expect(FakeHistory.instances[0]?.type).toBe('energy');
     expect(FakeHistory.instances[0]?.options).toEqual({ size: 1024, storage: 'fs' });
@@ -219,9 +241,14 @@ describe('the kind of history', () => {
 
   it('is unknown for other services', () => {
     const w = world();
-    w.accessory(device({
-      Internals: { NAME: 'd' }, Readings: { state: 'on' }, PossibleSets: 'on off', Attributes: { homebridgeMapping: 'history=size=10' },
-    })).getServices();
+    w.accessory(
+      device({
+        Internals: { NAME: 'd' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'history=size=10' },
+      }),
+    ).getServices();
 
     expect(FakeHistory.instances).toHaveLength(0);
     expect(w.log.errors()).toEqual(['error d: history: no type known for Switch']);
@@ -231,12 +258,14 @@ describe('the kind of history', () => {
 describe('history entries', () => {
   it('records temperature, set point and valve position of a thermostat together', async () => {
     const w = world();
-    w.accessory(device({
-      Internals: { NAME: 'valve', TYPE: 'CUL_HM', DEF: '123456' },
-      Readings: { 'desired-temp': '20.0', 'measured-temp': '19.0', actuator: '15' },
-      Attributes: { subType: 'thermostat', homebridgeMapping: 'history=size=10' },
-      PossibleSets: 'desired-temp:slider,4.5,0.5,30.5',
-    })).getServices();
+    w.accessory(
+      device({
+        Internals: { NAME: 'valve', TYPE: 'CUL_HM', DEF: '123456' },
+        Readings: { 'desired-temp': '20.0', 'measured-temp': '19.0', actuator: '15' },
+        Attributes: { subType: 'thermostat', homebridgeMapping: 'history=size=10' },
+        PossibleSets: 'desired-temp:slider,4.5,0.5,30.5',
+      }),
+    ).getServices();
     const history = FakeHistory.instances[0];
 
     w.update('valve-measured-temp', '19.5');
@@ -254,11 +283,13 @@ describe('history entries', () => {
 
   it('records the readings of sensors', async () => {
     const w = world();
-    w.accessory(device({
-      Internals: { NAME: 'wetter', TYPE: 'netatmo' },
-      Readings: { temperature: '20', humidity: '50', co2: '700', pressure: '1000', power: '5', state: 'ok' },
-      Attributes: { homebridgeMapping: 'history=size=10 MotionDetected=bewegung' },
-    })).getServices();
+    w.accessory(
+      device({
+        Internals: { NAME: 'wetter', TYPE: 'netatmo' },
+        Readings: { temperature: '20', humidity: '50', co2: '700', pressure: '1000', power: '5', state: 'ok' },
+        Attributes: { homebridgeMapping: 'history=size=10 MotionDetected=bewegung' },
+      }),
+    ).getServices();
     const history = FakeHistory.instances[0];
 
     w.update('wetter-temperature', '21.5');
@@ -285,10 +316,13 @@ describe('history entries', () => {
 
   it('records nothing for other characteristics', async () => {
     const w = world();
-    w.accessory(device({
-      Internals: { NAME: 'wetter', TYPE: 'netatmo' }, Readings: { temperature: '20', battery: '80', state: 'ok' },
-      Attributes: { homebridgeMapping: 'history=size=10' },
-    })).getServices();
+    w.accessory(
+      device({
+        Internals: { NAME: 'wetter', TYPE: 'netatmo' },
+        Readings: { temperature: '20', battery: '80', state: 'ok' },
+        Attributes: { homebridgeMapping: 'history=size=10' },
+      }),
+    ).getServices();
 
     w.update('wetter-battery', '70');
     await vi.advanceTimersByTimeAsync(0);

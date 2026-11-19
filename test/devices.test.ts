@@ -19,10 +19,50 @@ const jsFunctions = {
 
 // values fhem could report for a reading
 const readings = [
-  'on', 'off', 'ON', '0', '1', '2', '3', '20', '50', '99', '100', '254', '1500', '21.5', '-5', '0.35',
-  'dim 50', 'dim50%', 'closed', 'open', 'Closed', 'present', 'absent', 'locked', 'ok', 'low', 'A0', '000000',
-  'ff8000', '0.4573,0.41', 'set-on', 'set_off', 'true', 'false', 'PLAYING', 'opening', 'up:on', 'auto',
-  'manual', 'home', 'TV', 'short', 'motion 7 T: 21.5', '',
+  'on',
+  'off',
+  'ON',
+  '0',
+  '1',
+  '2',
+  '3',
+  '20',
+  '50',
+  '99',
+  '100',
+  '254',
+  '1500',
+  '21.5',
+  '-5',
+  '0.35',
+  'dim 50',
+  'dim50%',
+  'closed',
+  'open',
+  'Closed',
+  'present',
+  'absent',
+  'locked',
+  'ok',
+  'low',
+  'A0',
+  '000000',
+  'ff8000',
+  '0.4573,0.41',
+  'set-on',
+  'set_off',
+  'true',
+  'false',
+  'PLAYING',
+  'opening',
+  'up:on',
+  'auto',
+  'manual',
+  'home',
+  'TV',
+  'short',
+  'motion 7 T: 21.5',
+  '',
 ];
 
 // a smaller set for the path from a changed reading to the value of the characteristic
@@ -127,15 +167,17 @@ describe.each(fixtureDevices())('$id', (fixture) => {
 
     const commands: Record<string, string[]> = {};
     for (const [label, mapping] of eachMapping(accessory)) {
-      commands[label] = groupByResult((isWritable(mapping) ? writes : [1]).map((value) => {
-        world.sent.length = 0;
-        world.log.clear();
-        const thrown = outcome(() => {
-          accessory.command(mapping, value);
-        });
-        const errors = world.log.errors();
-        return [value, [thrown === 'undefined' ? '' : thrown, ...world.sent, ...errors].filter(Boolean).join(' | ') || '(nothing)'];
-      }));
+      commands[label] = groupByResult(
+        (isWritable(mapping) ? writes : [1]).map((value) => {
+          world.sent.length = 0;
+          world.log.clear();
+          const thrown = outcome(() => {
+            accessory.command(mapping, value);
+          });
+          const errors = world.log.errors();
+          return [value, [thrown === 'undefined' ? '' : thrown, ...world.sent, ...errors].filter(Boolean).join(' | ') || '(nothing)'];
+        }),
+      );
     }
 
     expect(commands).toMatchSnapshot();

@@ -3,6 +3,6 @@
  * allow it in the name of an accessory.
  */
 export function sanitizeHapName(name: string | number | null | undefined): string {
-  const text = (name === undefined || name === null) ? '' : String(name);
+  const text = name === undefined || name === null ? '' : String(name);
   return text.replace(/[_]/g, '-') || 'FHEM Device';
 }

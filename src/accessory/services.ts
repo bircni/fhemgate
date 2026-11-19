@@ -2,7 +2,7 @@
 // characteristics to fhem
 import util from 'node:util';
 import type { Characteristic, CharacteristicSetCallback, CharacteristicValue, Service } from '@homebridge/hap-nodejs';
-import type { Mapping, PreparedMapping } from '../mapping/types.ts';
+import type { CharacteristicClass, Mapping, PreparedMapping } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import { ct2rgb, rgb2hsv, xyY2rgb, type Hsv } from '../util/color.ts';
 import type { FhemAccessory, NamedService, QueryCallback } from './accessory.ts';
@@ -53,35 +53,38 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   // a mapping for one of these three is handed to HomeKit as it is, which is no text. see docs/KNOWN_BUGS.md, 28.
   log('    manufacturer, model and serial number characteristics for ' + accessory.name);
   informationService
-    .setCharacteristic(Characteristic.Manufacturer, (accessory.mappings.Manufacturer
-      ? accessory.mappings.Manufacturer : ('FHEM:' + accessory.type)) as string)
-    .setCharacteristic(Characteristic.Model, (accessory.mappings.Model
-      ? accessory.mappings.Model : ('FHEM:' + (accessory.model ? accessory.model : '<unknown>'))) as string)
-    .setCharacteristic(Characteristic.SerialNumber, (accessory.mappings.SerialNumber
-      ? accessory.mappings.SerialNumber : (accessory.serial ? accessory.serial : '<unknown>')) as string);
+    .setCharacteristic(Characteristic.Manufacturer, (accessory.mappings.Manufacturer ? accessory.mappings.Manufacturer : 'FHEM:' + accessory.type) as string)
+    .setCharacteristic(
+      Characteristic.Model,
+      (accessory.mappings.Model ? accessory.mappings.Model : 'FHEM:' + (accessory.model ? accessory.model : '<unknown>')) as string,
+    )
+    .setCharacteristic(
+      Characteristic.SerialNumber,
+      (accessory.mappings.SerialNumber ? accessory.mappings.SerialNumber : accessory.serial ? accessory.serial : '<unknown>') as string,
+    );
 
   const firmwareRevision = single('FirmwareRevision');
   if (firmwareRevision) {
     log('    firmware revision characteristic for ' + accessory.name);
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- as it was: add what is not there
-    const characteristic = informationService.getCharacteristic(Characteristic.FirmwareRevision)
-                           || informationService.addCharacteristic(Characteristic.FirmwareRevision);
+    // getCharacteristic only adds what the service knows as optional. the types say it always answers.
+    /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+    const characteristic =
+      informationService.getCharacteristic(Characteristic.FirmwareRevision) || informationService.addCharacteristic(Characteristic.FirmwareRevision);
+    /* eslint-enable @typescript-eslint/no-unnecessary-condition */
 
     accessory.subscribe(firmwareRevision, characteristic);
 
     setQuietly(characteristic, cached[firmwareRevision.informId as string]);
 
-    characteristic
-      .on('get', (callback) => {
-        const mapping = single('FirmwareRevision');
-        if (mapping) {
-          accessory.query(mapping, callback as QueryCallback);
-        }
-      });
+    characteristic.on('get', (callback) => {
+      const mapping = single('FirmwareRevision');
+      if (mapping) {
+        accessory.query(mapping, callback as QueryCallback);
+      }
+    });
   }
 
-   
   const nameCharacteristic = informationService.getCharacteristic(Characteristic.Name);
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- as it was
   if (nameCharacteristic) {
@@ -145,7 +148,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
 
   const seen: Record<string, boolean | undefined> = {};
   const services_hash: Record<string, NamedService | undefined> = {};
-   
+
   for (let characteristic_type in accessory.mappings) {
     const entry = accessory.mappings[characteristic_type];
     const mappings = (Array.isArray(entry) ? entry : [entry]) as PreparedMapping[];
@@ -154,8 +157,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
       continue;
     }
 
-    if (service_name === 'ContactSensor' && characteristic_type === 'CurrentDoorState'
-        && accessory.mappings.history && accessory.mappings.ContactSensorState) {
+    if (service_name === 'ContactSensor' && characteristic_type === 'CurrentDoorState' && accessory.mappings.history && accessory.mappings.ContactSensorState) {
       log.error(accessory.name + ': skipping CurrentDoorState characteristic as ContactSensor is also given and history is enabled');
       continue;
     }
@@ -224,7 +226,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
         if (!service) {
           log.error(accessory.name + ': no ' + each.reading + ' service to link to');
         } else if (each.reading === service_name) {
-          log.error(accessory.name + ': can\'t link ' + each.reading + ' service to itself');
+          log.error(accessory.name + ": can't link " + each.reading + ' service to itself');
         } else {
           service.addLinkedService(controlService);
           log('    linked to ' + service.service_name);
@@ -242,9 +244,9 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
         if (!each.name) {
           each.name = characteristic_type;
         }
-        const known = (CustomUUIDs as Record<string, string | undefined>)[characteristic_type];
-        if (known) {
-          characteristic_type = known;
+        const customUuid = (CustomUUIDs as Record<string, string | undefined>)[characteristic_type];
+        if (customUuid) {
+          characteristic_type = customUuid;
         }
         if (!characteristic_type.match(uuidFormat)) {
           log.error(accessory.name + ': ' + (each.name ? each.name : each.characteristic_type) + ' invalid uuid format: ' + characteristic_type);
@@ -254,28 +256,28 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
         controlService.addCharacteristic(characteristic);
         each.name = 'Custom ' + each.name;
       } else {
-        const characteristicClass = each.characteristic as Parameters<Service['getCharacteristic']>[0];
-         
-        characteristic = controlService.getCharacteristic(characteristicClass)
-                         || controlService.addCharacteristic(characteristicClass as Parameters<Service['addCharacteristic']>[0]);
+        // getCharacteristic only adds what the service knows as optional, and answers nothing for
+        // a characteristic that does not belong to the service. the types say it always answers.
+        const characteristicClass = each.characteristic as CharacteristicClass;
+        /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+        characteristic = controlService.getCharacteristic(characteristicClass) || controlService.addCharacteristic(characteristicClass);
+        /* eslint-enable @typescript-eslint/no-unnecessary-condition */
       }
 
       seen[service_name + '#' + characteristic_type] = true;
 
-      log('    ' + (each.name ? each.name : each.characteristic_type)
-                      + ' characteristic for ' + each.device + ':' + each.reading);
+      log('    ' + (each.name ? each.name : each.characteristic_type) + ' characteristic for ' + each.device + ':' + each.reading);
 
       accessory.subscribe(each, characteristic);
 
       if (each.cached !== undefined) {
         setQuietly(characteristic, each.cached);
         // eslint-disable-next-line @typescript-eslint/no-base-to-string -- logged as it comes
-        log.debug('      initial value is: ' + String(characteristic.value)
-                                                  + ' (' + typeof (characteristic.value) + meaning(each, each.cached) + ')');
+        log.debug('      initial value is: ' + String(characteristic.value) + ' (' + typeof characteristic.value + meaning(each, each.cached) + ')');
       } else if (each.default !== undefined) {
         setQuietly(characteristic, each.default);
         // eslint-disable-next-line @typescript-eslint/no-base-to-string -- logged as it comes
-        log.debug('      no initial value; default is: ' + String(characteristic.value) + ' (' + typeof (characteristic.value) + ')');
+        log.debug('      no initial value; default is: ' + String(characteristic.value) + ' (' + typeof characteristic.value + ')');
       } else {
         log.debug('      no default');
       }

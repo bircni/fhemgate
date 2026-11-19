@@ -44,8 +44,18 @@ export function reading2homekit(mapping: PreparedMapping, reading: unknown): Hom
     }
   }
 
-  mapping.log.info('    caching: ' + (mapping.name ? mapping.name : mapping.characteristic_type) + ': ' + String(value)
-                   + ' (' + 'as ' + typeof (value) + (defined ? '; means ' + defined : '') + '; from \'' + String(orig) + '\')');
+  mapping.log.info(
+    '    caching: ' +
+      (mapping.name ? mapping.name : mapping.characteristic_type) +
+      ': ' +
+      String(value) +
+      ' (as ' +
+      typeof value +
+      (defined ? '; means ' + defined : '') +
+      "; from '" +
+      String(orig) +
+      "')",
+  );
   mapping.cached = value as HomekitValue;
 
   return value as HomekitValue;
@@ -56,8 +66,7 @@ export function reading2homekit(mapping: PreparedMapping, reading: unknown): Hom
 // expected. the arithmetic below is written as it was in homebridge-fhem and relies on JavaScript
 // converting as it goes, so the value is left untyped inside this one function.
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access,
-   @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument, @typescript-eslint/restrict-plus-operands,
-   @typescript-eslint/prefer-optional-chain -- `value && value.match()` skips 0, `value?.match()` fails for it */
+   @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument, @typescript-eslint/restrict-plus-operands */
 
 /** the conversion for a mapping without a `reading2homekit` function. undefined if the reading is to be ignored. */
 function convert(mapping: PreparedMapping, orig: unknown): unknown {
@@ -70,12 +79,14 @@ function convert(mapping: PreparedMapping, orig: unknown): unknown {
     return orig;
   }
 
-  if (reading === 'temperature'
-      || reading === 'measured'
-      || reading === 'measured-temp'
-      || reading === 'desired-temp'
-      || reading === 'desired'
-      || reading === 'desiredTemperature') {
+  if (
+    reading === 'temperature' ||
+    reading === 'measured' ||
+    reading === 'measured-temp' ||
+    reading === 'desired-temp' ||
+    reading === 'desired' ||
+    reading === 'desiredTemperature'
+  ) {
     if (typeof value === 'string' && value.toLowerCase() === 'on') {
       value = 31.0;
     } else if (typeof value === 'string' && value.toLowerCase() === 'off') {
@@ -105,10 +116,14 @@ function convert(mapping: PreparedMapping, orig: unknown): unknown {
     value = toInt(value);
   } else if (reading === 'reachable') {
     value = looselyEqual(toInt(value), true);
-  } else if (reading === 'state' && (mapping.On
-                                     && typeof mapping.values !== 'object'
-                                     && mapping.reading2homekit === undefined
-                                     && mapping.valueOn === undefined && mapping.valueOff === undefined)) {
+  } else if (
+    reading === 'state' &&
+    mapping.On &&
+    typeof mapping.values !== 'object' &&
+    mapping.reading2homekit === undefined &&
+    mapping.valueOn === undefined &&
+    mapping.valueOff === undefined
+  ) {
     if (value.match(/^set-/)) {
       return undefined;
     }
@@ -147,7 +162,8 @@ function convert(mapping: PreparedMapping, orig: unknown): unknown {
       const characteristic = new (mapping.characteristic as unknown as new (value: unknown) => Characteristic)(orig);
 
       format = characteristic.props.format;
-    } else if (mapping.format) { // only for testing !
+    } else if (mapping.format) {
+      // only for testing !
       format = mapping.format;
     }
 
@@ -281,7 +297,7 @@ function convert(mapping: PreparedMapping, orig: unknown): unknown {
     }
 
     if (mapping.max && mapping.maxValue) {
-      value = Math.round(value * mapping.maxValue / mapping.max);
+      value = Math.round((value * mapping.maxValue) / mapping.max);
       mapping.log.debug(mapping.informId + ' value ' + orig + ' scaled to: ' + value);
     }
 
@@ -329,7 +345,7 @@ function convert(mapping: PreparedMapping, orig: unknown): unknown {
     }
 
     if (format && format.match(/bool/i)) {
-      value = toInt(value) ? true : false;
+      value = Boolean(toInt(value));
     }
   }
 

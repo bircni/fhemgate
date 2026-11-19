@@ -55,8 +55,13 @@ export const milight: Rule = ({ s, target }) => {
 
 /** WifiLight takes hue, saturation and brightness together in one `set HSV` */
 export const wifilight: Rule = ({ s, target, state }) => {
-  if (s.Internals.TYPE !== 'WifiLight' || !s.PossibleSets.match(/(^| )HSV\b/)
-      || s.Readings.hue === undefined || s.Readings.saturation === undefined || s.Readings.brightness === undefined) {
+  if (
+    s.Internals.TYPE !== 'WifiLight' ||
+    !s.PossibleSets.match(/(^| )HSV\b/) ||
+    s.Readings.hue === undefined ||
+    s.Readings.saturation === undefined ||
+    s.Readings.brightness === undefined
+  ) {
     return false;
   }
 

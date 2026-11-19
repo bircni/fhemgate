@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "ES2022"
-    ],
+    "lib": ["ES2022"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "strict": true,
@@ -11,19 +9,12 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "noEmit": true,
     "allowJs": false,
     "rewriteRelativeImportExtensions": true,
     "resolveJsonModule": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": [
-    "src",
-    "test",
-    "scripts",
-    "*.ts"
-  ]
+  "include": ["src", "test", "scripts", "*.ts"]
 }

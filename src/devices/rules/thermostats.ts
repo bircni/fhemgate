@@ -6,8 +6,12 @@ import type { Rule } from '../detect.ts';
 /** the opening of the valve in percent, shown with the characteristic Eve knows */
 const actuation = (reading: string): Mapping => ({
   reading: reading,
-  name: 'Actuation', format: 'UINT8', unit: 'PERCENTAGE',
-  maxValue: 100, minValue: 0, minStep: 1,
+  name: 'Actuation',
+  format: 'UINT8',
+  unit: 'PERCENTAGE',
+  maxValue: 100,
+  minValue: 0,
+  minStep: 1,
 });
 
 /** genericDeviceType or subType thermostat. the mappings come from the rules below. */
@@ -34,7 +38,8 @@ export const desiredTemp: Rule = ({ s, target, isHMCCU }) => {
   }
   const targetTemperature: Mapping = { reading: 'desired-temp', cmd: 'desired-temp', delay: true };
   target.mappings.TargetTemperature = targetTemperature;
-  if (s.Readings['desired-temp'] === undefined) { //Comet DECT
+  if (s.Readings['desired-temp'] === undefined) {
+    //Comet DECT
     targetTemperature.reading = 'temperature';
   }
 

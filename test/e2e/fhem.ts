@@ -27,8 +27,9 @@ export interface FhemUnderTest {
   close(): Promise<void>;
 }
 
-const userattr = 'genericDeviceType:security,ignore,switch,outlet,light,blind,thermometer,thermostat,contact,garage,window,lock'
-  + ' homebridgeMapping:textField-long siriName';
+const userattr =
+  'genericDeviceType:security,ignore,switch,outlet,light,blind,thermometer,thermostat,contact,garage,window,lock' +
+  ' homebridgeMapping:textField-long siriName';
 
 /** the device as jsonlist2 of a real fhem reports a dummy */
 export function asJsonlist2(dummy: DummyDevice): FhemDevice {
@@ -95,7 +96,7 @@ async function realFhem(address: string, dummies: DummyDevice[]): Promise<FhemUn
     platformConfig: { server: url.hostname, port: Number(url.port || 80), webname: url.pathname.replace(/^\/|\/$/g, ''), filter: 'room=e2e' },
     wasSet: async (device, _command, reading, value) => {
       const deadline = Date.now() + 15_000;
-      while (await command(`{ReadingsVal("${device}","${reading}","")}`) !== value) {
+      while ((await command(`{ReadingsVal("${device}","${reading}","")}`)) !== value) {
         if (Date.now() > deadline) {
           throw new Error(`${reading} of ${device} in fhem did not become ${value}`);
         }

@@ -7,7 +7,11 @@ import { PluginState } from '../state/pluginState.ts';
 import { FhemAccessory, type AccessoryPlatform, type Execute } from './accessory.ts';
 
 const lamp: Jsonlist2Device = {
-  Internals: { NAME: 'lamp', TYPE: 'dummy', FUUID: 'f-1' }, Readings: { state: { Value: 'on' } }, Attributes: {}, PossibleSets: 'on off', PossibleAttrs: '',
+  Internals: { NAME: 'lamp', TYPE: 'dummy', FUUID: 'f-1' },
+  Readings: { state: { Value: 'on' } },
+  Attributes: {},
+  PossibleSets: 'on off',
+  PossibleAttrs: '',
 };
 
 function create(device: Jsonlist2Device = lamp, execute: Execute = vi.fn<Execute>()) {
@@ -38,8 +42,22 @@ describe('FhemAccessory', () => {
     const { accessory } = create();
 
     expect(Object.keys(accessory)).toEqual([
-      'log', 'connection', 'jsFunctions', 'service_name', 'mappings',
-      'name', 'fuuid', 'alias', 'siriName', 'device', 'type', 'model', 'PossibleSets', 'room', 'serial', 'uuid_base',
+      'log',
+      'connection',
+      'jsFunctions',
+      'service_name',
+      'mappings',
+      'name',
+      'fuuid',
+      'alias',
+      'siriName',
+      'device',
+      'type',
+      'model',
+      'PossibleSets',
+      'room',
+      'serial',
+      'uuid_base',
     ]);
   });
 

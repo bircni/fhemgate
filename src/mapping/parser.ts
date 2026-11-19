@@ -78,7 +78,7 @@ export function parseHomebridgeMapping(target: MappingTarget, homebridgeMapping:
       mapping = {};
       if (existing) {
         // anything without a length is a single mapping and becomes the first of a list
-        const list = (existing as { length?: unknown }).length == null ? [existing as Mapping] : existing as Mapping[];
+        const list = (existing as { length?: unknown }).length == null ? [existing as Mapping] : (existing as Mapping[]);
         target.mappings[characteristic] = list;
         list.push(mapping);
       } else {
@@ -113,9 +113,7 @@ export function parseHomebridgeMapping(target: MappingTarget, homebridgeMapping:
         } else if (name === 'delay') {
           const delay = parseInt(value);
           mapping.delay = isNaN(delay) ? true : delay;
-        } else if (name === 'minValue' || name === 'maxValue' || name === 'minStep'
-                   || name === 'min' || name === 'max'
-                   || name === 'default') {
+        } else if (name === 'minValue' || name === 'maxValue' || name === 'minStep' || name === 'min' || name === 'max' || name === 'default') {
           const number = parseFloat(value);
           // text that is no number is kept as it is
           (mapping as Record<string, unknown>)[name] = isNaN(number) ? value : number;

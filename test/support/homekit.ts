@@ -15,9 +15,10 @@ export function serviceOf(services: Service[], type: string, subtype?: string): 
 
 /** the characteristic of a service, by class or by the name it was given */
 export function characteristicOf(service: Service, type: CharacteristicClass | string): Characteristic {
-  const characteristic = typeof type === 'string'
-    ? service.characteristics.find((candidate) => candidate.displayName === type)
-    : service.characteristics.find((candidate) => candidate.UUID === type.UUID);
+  const characteristic =
+    typeof type === 'string'
+      ? service.characteristics.find((candidate) => candidate.displayName === type)
+      : service.characteristics.find((candidate) => candidate.UUID === type.UUID);
   if (!characteristic) {
     throw new Error(`no such characteristic among ${service.characteristics.map((candidate) => candidate.displayName).join(', ')}`);
   }
@@ -34,20 +35,29 @@ export interface ReadResult {
 /** homekit asks for the value of a characteristic */
 export function read(characteristic: Characteristic): ReadResult {
   const result: ReadResult = { error: undefined, value: undefined, answered: false };
-  characteristic.emit('get', (error, value) => {
-    result.error = error;
-    result.value = value;
-    result.answered = true;
-  }, undefined);
+  characteristic.emit(
+    'get',
+    (error, value) => {
+      result.error = error;
+      result.value = value;
+      result.answered = true;
+    },
+    undefined,
+  );
   return result;
 }
 
 /** homekit, or the plugin itself with the context 'fromFHEM', sets the value of a characteristic */
 export function write(characteristic: Characteristic, value: CharacteristicValue, context?: string): { answered: boolean } {
   const result = { answered: false };
-  characteristic.emit('set', value, () => {
-    result.answered = true;
-  }, context);
+  characteristic.emit(
+    'set',
+    value,
+    () => {
+      result.answered = true;
+    },
+    context,
+  );
   return result;
 }
 

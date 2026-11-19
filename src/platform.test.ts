@@ -6,9 +6,14 @@ import createPluginFor, { createPlugin } from './index.ts';
 import { FhemPlatform, sortByKey, version, type Plugin } from './platform.ts';
 import { PluginState } from './state/pluginState.ts';
 
-const api = () => ({
-  hap, on: vi.fn(), version: 2.7, user: { storagePath: () => '/nonexistent' }, registerPlatform: vi.fn(),
-}) as unknown as API;
+const api = () =>
+  ({
+    hap,
+    on: vi.fn(),
+    version: 2.7,
+    user: { storagePath: () => '/nonexistent' },
+    registerPlatform: vi.fn(),
+  }) as unknown as API;
 
 describe('FhemPlatform', () => {
   it('has no connection and no accessories without a server', () => {

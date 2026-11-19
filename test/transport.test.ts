@@ -58,9 +58,7 @@ describe('connecting', () => {
   it('opens the long poll for all events as JSON', async () => {
     await connect();
 
-    expect(fhem.streams.map(withoutPort)).toEqual([
-      '/fhem?XHR=1&inform=type=status;addglobal=1;filter=.*;since=null;fmt=JSON&timestamp=NOW',
-    ]);
+    expect(fhem.streams.map(withoutPort)).toEqual(['/fhem?XHR=1&inform=type=status;addglobal=1;filter=.*;since=null;fmt=JSON&timestamp=NOW']);
     expect(world.longpoll[baseUrl()]).toMatchObject({ connected: true, connects: 1, disconnects: 0 });
   });
 
@@ -101,10 +99,12 @@ describe('connecting', () => {
     await connect({ userattr: 'siriName' });
     await waitFor(() => exit.mock.calls.length > 0, 'the plugin to exit');
 
-    expect(fhem.commands).toEqual(expect.arrayContaining([
-      '{ addToAttrList( "homebridgeMapping:textField-long" ) }',
-      '{addToAttrList( "genericDeviceType:security,ignore,switch,outlet,light,blind,thermometer,thermostat,contact,garage,window,lock" ) }',
-    ]));
+    expect(fhem.commands).toEqual(
+      expect.arrayContaining([
+        '{ addToAttrList( "homebridgeMapping:textField-long" ) }',
+        '{addToAttrList( "genericDeviceType:security,ignore,switch,outlet,light,blind,thermometer,thermostat,contact,garage,window,lock" ) }',
+      ]),
+    );
     expect(world.log.lines).toContain('info homebridgeMapping attribute created.');
     expect(world.log.lines).toContain('warn genericDeviceType attribute was not known. please restart.');
     expect(exit).toHaveBeenCalledWith(0);
@@ -192,13 +192,16 @@ describe('authentication', () => {
 
 describe('devices', () => {
   it('asks for the devices of the filter and creates an accessory for each, sorted by name', async () => {
-    const platform = await connect({
-      devices: [
-        device({ Internals: { NAME: 'lamp_b' }, Readings: { state: 'on' }, PossibleSets: 'on off' }),
-        device({ Internals: { NAME: 'lamp_a' }, Readings: { state: 'off' }, PossibleSets: 'on off' }),
-        device({ Internals: { NAME: 'timer', TYPE: 'at' } }),
-      ].map((d) => ({ Name: d.Internals.NAME, ...d })),
-    }, { filter: 'room=Wohnzimmer,Küche&x' });
+    const platform = await connect(
+      {
+        devices: [
+          device({ Internals: { NAME: 'lamp_b' }, Readings: { state: 'on' }, PossibleSets: 'on off' }),
+          device({ Internals: { NAME: 'lamp_a' }, Readings: { state: 'off' }, PossibleSets: 'on off' }),
+          device({ Internals: { NAME: 'timer', TYPE: 'at' } }),
+        ].map((d) => ({ Name: d.Internals.NAME, ...d })),
+      },
+      { filter: 'room=Wohnzimmer,Küche&x' },
+    );
     world.log.clear();
 
     const accessories = await accessoriesOf(platform);
@@ -313,18 +316,20 @@ describe('events', () => {
     accessory.subscribe('nodash');
     const before = { ...world.cached };
 
-    fhem.send([
-      '["lamp-state-ts","2026-08-16 12:00:00","x"]',
-      '["#FHEMWEB:WEB","x","x"]',
-      '["nodash","x","x"]',
-      '["lamp-state","set-off","x"]',
-      '["other-state","off","x"]',
-      '["lamp-state","off"]',
-      '[broken',
-      'lamp-state<<off',
-      '["lamp-other","done","x"]',
-      '',
-    ].join('\n'));
+    fhem.send(
+      [
+        '["lamp-state-ts","2026-08-16 12:00:00","x"]',
+        '["#FHEMWEB:WEB","x","x"]',
+        '["nodash","x","x"]',
+        '["lamp-state","set-off","x"]',
+        '["other-state","off","x"]',
+        '["lamp-state","off"]',
+        '[broken',
+        'lamp-state<<off',
+        '["lamp-other","done","x"]',
+        '',
+      ].join('\n'),
+    );
     accessory.subscribe('lamp-other');
     fhem.event('lamp-other', 'done');
     await waitFor(() => world.cached['lamp-other'] === 'done', 'the last event');
@@ -507,10 +512,17 @@ describe('commands', () => {
   it('asks fhem for a reading of another device when the accessory is created', async () => {
     const platform = await connect({
       readings: { 'aussen temperature': '7.5' },
-      devices: [{ Name: 'lamp', ...device({
-        Internals: { NAME: 'lamp' }, Readings: { state: 'on' }, PossibleSets: 'on off',
-        Attributes: { homebridgeMapping: 'CurrentTemperature=aussen:temperature' },
-      }) }],
+      devices: [
+        {
+          Name: 'lamp',
+          ...device({
+            Internals: { NAME: 'lamp' },
+            Readings: { state: 'on' },
+            PossibleSets: 'on off',
+            Attributes: { homebridgeMapping: 'CurrentTemperature=aussen:temperature' },
+          }),
+        },
+      ],
     });
 
     const accessory = await firstAccessoryOf(platform);
@@ -535,12 +547,23 @@ describe('jsFunctions', () => {
   it('loads the file from the homebridge storage directory', async () => {
     writeFileSync(join(storage, 'functions.cjs'), 'module.exports = { half: function(mapping, orig) { return orig / 2 } };');
 
-    const platform = await connect({
-      devices: [{ Name: 'lamp', ...device({
-        Internals: { NAME: 'lamp' }, Readings: { state: 'on', level: '80' }, PossibleSets: 'on off',
-        Attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=level,reading2homekit=half' },
-      }) }],
-    }, { jsFunctions: 'functions.cjs' }, { storagePath: storage });
+    const platform = await connect(
+      {
+        devices: [
+          {
+            Name: 'lamp',
+            ...device({
+              Internals: { NAME: 'lamp' },
+              Readings: { state: 'on', level: '80' },
+              PossibleSets: 'on off',
+              Attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=level,reading2homekit=half' },
+            }),
+          },
+        ],
+      },
+      { jsFunctions: 'functions.cjs' },
+      { storagePath: storage },
+    );
     const accessory = await firstAccessoryOf(platform);
 
     expect((accessory.mappings.Brightness as { cached?: unknown }).cached).toBe(40);

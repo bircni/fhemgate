@@ -52,8 +52,13 @@ function files(directory: string): string[] {
 
 /** every device under test/fixtures/devices */
 export function fixtureDevices(): Fixture[] {
-  return files(fixtures).sort().map((path) => ({
-    id: relative(fixtures, path).replace(/\.json$/, '').split('\\').join('/'),
-    load: () => JSON.parse(readFileSync(path, 'utf8')) as FhemDevice,
-  }));
+  return files(fixtures)
+    .sort()
+    .map((path) => ({
+      id: relative(fixtures, path)
+        .replace(/\.json$/, '')
+        .split('\\')
+        .join('/'),
+      load: () => JSON.parse(readFileSync(path, 'utf8')) as FhemDevice,
+    }));
 }

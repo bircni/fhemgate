@@ -28,7 +28,7 @@ export class Subscriptions {
   readonly byInformId: Record<string, Subscription[] | undefined> = {};
 
   subscribe(accessory: SubscribedAccessory, informId: string, characteristic?: Characteristic, mapping?: PreparedMapping): void {
-    const subscriptions = this.byInformId[informId] ??= [];
+    const subscriptions = (this.byInformId[informId] ??= []);
 
     subscriptions.push({ accessory: accessory, characteristic: characteristic, mapping: mapping });
   }

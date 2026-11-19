@@ -95,7 +95,9 @@ describe('clear', () => {
 describe('parameters', () => {
   it('splits values, cmds and valid into lists', () => {
     expect(parse('X=values=a:1;b:2,cmds=1:a;2:b,valid=1;2').mappings.X).toEqual({
-      values: ['a:1', 'b:2'], cmds: ['1:a', '2:b'], valid: ['1', '2'],
+      values: ['a:1', 'b:2'],
+      cmds: ['1:a', '2:b'],
+      valid: ['1', '2'],
     });
   });
 
@@ -105,14 +107,25 @@ describe('parameters', () => {
 
   it('reads limits and the default as numbers where they are numbers', () => {
     expect(parse('X=minValue=4.5,maxValue=30,minStep=0.5,min=1,max=255,default=7').mappings.X).toEqual({
-      minValue: 4.5, maxValue: 30, minStep: 0.5, min: 1, max: 255, default: 7,
+      minValue: 4.5,
+      maxValue: 30,
+      minStep: 0.5,
+      min: 1,
+      max: 255,
+      default: 7,
     });
     expect(parse('X=default=CLOSED,max=abc').mappings.X).toEqual({ default: 'CLOSED', max: 'abc' });
   });
 
   it('keeps every other parameter as text, with + for a blank', () => {
     expect(parse('X=cmdOn=set+on,factor=0.1,invert=1,part=2,threshold=5,nocache=true,timeout=500').mappings.X).toEqual({
-      cmdOn: 'set on', factor: '0.1', invert: '1', part: '2', threshold: '5', nocache: 'true', timeout: '500',
+      cmdOn: 'set on',
+      factor: '0.1',
+      invert: '1',
+      part: '2',
+      threshold: '5',
+      nocache: 'true',
+      timeout: '500',
     });
   });
 
@@ -146,7 +159,10 @@ describe('parameters', () => {
 describe('services', () => {
   it('keeps the service of an entry for the entries that follow', () => {
     expect(Object.keys(parse('Outlet#On=a Brightness=b Lightbulb#On=c Hue=d').mappings)).toEqual([
-      'Outlet#On', 'Outlet#Brightness', 'Lightbulb#On', 'Lightbulb#Hue',
+      'Outlet#On',
+      'Outlet#Brightness',
+      'Lightbulb#On',
+      'Lightbulb#Hue',
     ]);
   });
 

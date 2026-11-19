@@ -26,10 +26,14 @@ describe('reading a characteristic', () => {
 
   it('asks fhem when the mapping is not cached', () => {
     const world = createWorld({ respond: () => 'off' });
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'lamp' }, Readings: { state: 'on' }, PossibleSets: 'on off',
-      Attributes: { homebridgeMapping: 'On=state,nocache=1,cmdOn=on,cmdOff=off' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'On=state,nocache=1,cmdOn=on,cmdOff=off' },
+      }),
+    );
     const services = accessory.getServices();
 
     const result = read(characteristicOf(serviceOf(services, 'Switch'), Characteristic.On));
@@ -41,10 +45,14 @@ describe('reading a characteristic', () => {
 
   it('answers with an error when fhem returns something the mapping can not convert', () => {
     const world = createWorld({ respond: () => 'set-on' });
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'lamp' }, Readings: { state: 'on' }, PossibleSets: 'on off',
-      Attributes: { homebridgeMapping: 'On=state,nocache=1' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'On=state,nocache=1' },
+      }),
+    );
     const services = accessory.getServices();
 
     expect(read(characteristicOf(serviceOf(services, 'Switch'), Characteristic.On))).toEqual({ error: 1, value: undefined, answered: true });
@@ -52,20 +60,28 @@ describe('reading a characteristic', () => {
 
   it('never answers when fhem does not', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'lamp' }, Readings: { state: 'on' }, PossibleSets: 'on off',
-      Attributes: { homebridgeMapping: 'On=state,nocache=1' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'On=state,nocache=1' },
+      }),
+    );
 
     expect(read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On)).answered).toBe(false);
   });
 
   it('asks fhem for a reading named undefined when a mapping has only a default', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'lamp' }, Readings: { state: 'on' }, PossibleSets: 'on off',
-      Attributes: { homebridgeMapping: 'StatusActive=default=1' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'StatusActive=default=1' },
+      }),
+    );
     const services = accessory.getServices();
     world.sent.length = 0;
 
@@ -76,9 +92,13 @@ describe('reading a characteristic', () => {
 
   it('answers normally for a device that is not reachable, as homekit has no Reachable characteristic any more', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'bulb', TYPE: 'HUEDevice' }, Readings: { state: 'on', reachable: '0' }, PossibleSets: 'on off',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
+        Readings: { state: 'on', reachable: '0' },
+        PossibleSets: 'on off',
+      }),
+    );
 
     const result = read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On));
 
@@ -89,9 +109,13 @@ describe('reading a characteristic', () => {
 
   it('answers unreachable for every characteristic once the reachable mapping is cached as false', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'bulb', TYPE: 'HUEDevice' }, Readings: { state: 'on', reachable: '0' }, PossibleSets: 'on off',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
+        Readings: { state: 'on', reachable: '0' },
+        PossibleSets: 'on off',
+      }),
+    );
     const services = accessory.getServices();
     (accessory.mappings.Reachable as Mapping).cached = false;
 
@@ -100,9 +124,12 @@ describe('reading a characteristic', () => {
 
   it('answers a value that stands for a name', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'door', TYPE: 'CUL_FHTTK', DEF: 'abc' }, Readings: { Window: 'Open', state: 'Open' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'door', TYPE: 'CUL_FHTTK', DEF: 'abc' },
+        Readings: { Window: 'Open', state: 'Open' },
+      }),
+    );
     const sensor = serviceOf(accessory.getServices(), 'ContactSensor');
     world.log.clear();
 
@@ -136,9 +163,14 @@ describe('reading a characteristic', () => {
 
   it('answers the name with the siriName', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'lamp' }, Readings: { state: 'on' }, PossibleSets: 'on off', Attributes: { alias: 'Lampe', siriName: 'Stehlampe' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { alias: 'Lampe', siriName: 'Stehlampe' },
+      }),
+    );
     const name = characteristicOf(serviceOf(accessory.getServices(), 'AccessoryInformation'), Characteristic.Name);
 
     expect(read(name)).toEqual({ error: null, value: 'Stehlampe', answered: true });
@@ -149,9 +181,13 @@ describe('reading a characteristic', () => {
 
   it('answers the firmware revision from its reading', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'plug', TYPE: 'ZWave', DEF: 'c1 2' }, Readings: { state: 'on', firmware: '3.2' }, PossibleSets: 'on off',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'plug', TYPE: 'ZWave', DEF: 'c1 2' },
+        Readings: { state: 'on', firmware: '3.2' },
+        PossibleSets: 'on off',
+      }),
+    );
     const firmware = characteristicOf(serviceOf(accessory.getServices(), 'AccessoryInformation'), Characteristic.FirmwareRevision);
 
     expect(firmware.value).toBe('3.2');
@@ -193,9 +229,13 @@ describe('writing a characteristic', () => {
   it('waits a second with a delayed command and only sends the last value', () => {
     vi.useFakeTimers();
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'dimmer', TYPE: 'CUL_HM', DEF: '123456' }, Readings: { pct: '10', state: '10' }, PossibleSets: 'on off pct',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'dimmer', TYPE: 'CUL_HM', DEF: '123456' },
+        Readings: { pct: '10', state: '10' },
+        PossibleSets: 'on off pct',
+      }),
+    );
     const brightness = characteristicOf(serviceOf(accessory.getServices(), 'Lightbulb'), Characteristic.Brightness);
 
     write(brightness, 20);
@@ -212,10 +252,14 @@ describe('writing a characteristic', () => {
   it('uses the given delay, but at least half a second', () => {
     vi.useFakeTimers();
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'd' }, Readings: { a: '1', b: '1' }, PossibleSets: 'a b',
-      Attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=a,cmd=a,delay=100\nSaturation=b,cmd=b,delay=2000' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'd' },
+        Readings: { a: '1', b: '1' },
+        PossibleSets: 'a b',
+        Attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=a,cmd=a,delay=100\nSaturation=b,cmd=b,delay=2000' },
+      }),
+    );
     const service = serviceOf(accessory.getServices(), 'Lightbulb');
 
     write(characteristicOf(service, Characteristic.Brightness), 5);
@@ -231,9 +275,13 @@ describe('writing a characteristic', () => {
   it('still sends On while a delayed command is waiting', () => {
     vi.useFakeTimers();
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'dimmer', TYPE: 'CUL_HM', DEF: '123456' }, Readings: { pct: '10', state: '10' }, PossibleSets: 'on off pct',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'dimmer', TYPE: 'CUL_HM', DEF: '123456' },
+        Readings: { pct: '10', state: '10' },
+        PossibleSets: 'on off pct',
+      }),
+    );
     const service = serviceOf(accessory.getServices(), 'Lightbulb');
 
     write(characteristicOf(service, Characteristic.Brightness), 20);
@@ -245,10 +293,14 @@ describe('writing a characteristic', () => {
   it('falls back to the default after the timeout of a push button', async () => {
     vi.useFakeTimers();
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'door', TYPE: 'CUL_HM', DEF: '123456' }, Readings: { lock: 'locked', state: 'locked' },
-      Attributes: { model: 'HM-SEC-KEY' }, PossibleSets: 'lock unlock open',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'door', TYPE: 'CUL_HM', DEF: '123456' },
+        Readings: { lock: 'locked', state: 'locked' },
+        Attributes: { model: 'HM-SEC-KEY' },
+        PossibleSets: 'lock unlock open',
+      }),
+    );
     const target = characteristicOf(serviceOf(accessory.getServices(), 'LockMechanism'), Characteristic.TargetDoorState);
     expect(target.value).toBe(Characteristic.TargetDoorState.CLOSED);
 
@@ -264,10 +316,13 @@ describe('writing a characteristic', () => {
 describe('readings without a value in the values list', () => {
   it('are reported as an error every time they arrive', async () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'door', TYPE: 'MAX', type: 'ShutterContact', addr: 'abc' }, Readings: { state: 'closed' },
-      Attributes: { homebridgeMapping: 'ContactSensorState=values=closed:CONTACT_DETECTED;open:CONTACT_NOT_DETECTED' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'door', TYPE: 'MAX', type: 'ShutterContact', addr: 'abc' },
+        Readings: { state: 'closed' },
+        Attributes: { homebridgeMapping: 'ContactSensorState=values=closed:CONTACT_DETECTED;open:CONTACT_NOT_DETECTED' },
+      }),
+    );
     const sensor = characteristicOf(serviceOf(accessory.getServices(), 'ContactSensor'), Characteristic.ContactSensorState);
     world.log.clear();
 
@@ -276,10 +331,7 @@ describe('readings without a value in the values list', () => {
     world.update('door-state', 'tilted');
     await settle();
 
-    expect(world.log.errors()).toEqual([
-      'error door-state value tilted not handled in values',
-      'error door-state value tilted not handled in values',
-    ]);
+    expect(world.log.errors()).toEqual(['error door-state value tilted not handled in values', 'error door-state value tilted not handled in values']);
     expect(sensor.value).toBe(0);
   });
 });
@@ -298,9 +350,13 @@ describe('commands', () => {
 
   it('identifies a hue device with a command that lacks a space', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'bulb', TYPE: 'HUEDevice' }, Readings: { state: 'on', onoff: '1' }, PossibleSets: 'on off toggle alert',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
+        Readings: { state: 'on', onoff: '1' },
+        PossibleSets: 'on off toggle alert',
+      }),
+    );
 
     accessory.identify(() => undefined);
 
@@ -320,10 +376,13 @@ describe('commands', () => {
 
   it('knows two commands that are given by name instead of by mapping', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'bulb', TYPE: 'HUEDevice' }, Readings: { state: 'on', onoff: '1', hue: '100', sat: '10', bri: '100' },
-      PossibleSets: 'on off bri hue:colorpicker,HUE,0,1,65535 sat:slider,0,1,254',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
+        Readings: { state: 'on', onoff: '1', hue: '100', sat: '10', bri: '100' },
+        PossibleSets: 'on off bri hue:colorpicker,HUE,0,1,65535 sat:slider,0,1,254',
+      }),
+    );
 
     accessory.command('xhue', 180);
     accessory.command('xsat', 50);
@@ -343,10 +402,14 @@ describe('commands', () => {
         },
       },
     });
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'd' }, Readings: { a: '1', b: '1' }, PossibleSets: 'a b',
-      Attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=a,cmd=a,homekit2reading=unchanged\nSaturation=b,cmd=b,homekit2reading=fails' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'd' },
+        Readings: { a: '1', b: '1' },
+        PossibleSets: 'a b',
+        Attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=a,cmd=a,homekit2reading=unchanged\nSaturation=b,cmd=b,homekit2reading=fails' },
+      }),
+    );
 
     accessory.command(accessory.mappings.Brightness as Mapping, 5);
     accessory.command(accessory.mappings.Saturation as Mapping, 5);
@@ -357,9 +420,15 @@ describe('commands', () => {
 });
 
 describe('rooms, types and scopes', () => {
-  const inRooms = (room?: string) => createWorld().accessory(device({
-    Internals: { NAME: 'lamp' }, Readings: { state: 'on' }, PossibleSets: 'on off', Attributes: room === undefined ? {} : { room },
-  }));
+  const inRooms = (room?: string) =>
+    createWorld().accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: room === undefined ? {} : { room },
+      }),
+    );
 
   it('finds an accessory in each of its rooms, ignoring the case of the room it has', () => {
     const accessory = inRooms('Wohnzimmer,Licht');
@@ -417,9 +486,13 @@ describe('subscriptions', () => {
 
   it('subscribes every characteristic to its reading', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'dimmer', TYPE: 'CUL_HM', DEF: '123456' }, Readings: { pct: '10', state: '10' }, PossibleSets: 'on off pct',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'dimmer', TYPE: 'CUL_HM', DEF: '123456' },
+        Readings: { pct: '10', state: '10' },
+        PossibleSets: 'on off pct',
+      }),
+    );
     accessory.getServices();
 
     expect(world.subscriptions['dimmer-pct']?.map((subscription) => subscription.characteristic?.displayName)).toEqual(['On', 'Brightness']);
@@ -427,9 +500,13 @@ describe('subscriptions', () => {
 
   it('unsubscribes a single characteristic', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'dimmer', TYPE: 'CUL_HM', DEF: '123456' }, Readings: { pct: '10', state: '10' }, PossibleSets: 'on off pct',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'dimmer', TYPE: 'CUL_HM', DEF: '123456' },
+        Readings: { pct: '10', state: '10' },
+        PossibleSets: 'on off pct',
+      }),
+    );
     const service = serviceOf(accessory.getServices(), 'Lightbulb');
 
     accessory.unsubscribe(accessory.mappings.On as Mapping, characteristicOf(service, Characteristic.On));
@@ -441,10 +518,14 @@ describe('subscriptions', () => {
 
   it('fails to unsubscribe everything at once when a characteristic has several mappings', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'd' }, Readings: { a: '1', b: '1' }, PossibleSets: 'on off',
-      Attributes: { homebridgeMapping: 'clear On=a On=b,subtype=B' },
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'd' },
+        Readings: { a: '1', b: '1' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'clear On=a On=b,subtype=B' },
+      }),
+    );
     accessory.getServices();
 
     accessory.unsubscribe();
@@ -478,11 +559,13 @@ describe('subscriptions', () => {
 
   it('seeds hue, saturation and brightness from the xy colour of a light in xy mode', () => {
     const world = createWorld();
-    const accessory = world.accessory(device({
-      Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
-      Readings: { state: 'on', onoff: '1', bri: '254', hue: '8418', sat: '140', xy: '0.4573,0.41', colormode: 'xy' },
-      PossibleSets: 'on off bri hue sat xy',
-    }));
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
+        Readings: { state: 'on', onoff: '1', bri: '254', hue: '8418', sat: '140', xy: '0.4573,0.41', colormode: 'xy' },
+        PossibleSets: 'on off bri hue sat xy',
+      }),
+    );
     accessory.getServices();
 
     expect(world.cached['bulb-h']).toBeCloseTo(0.1117, 4);

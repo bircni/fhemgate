@@ -77,7 +77,10 @@ export function execute(state: PluginState, log: Logging, connection: FhemConnec
  * answered: the list of devices, or the text if it was no JSON.
  */
 export function fetchDevices(
-  state: PluginState, log: Logging, connection: FhemConnection, filter: string | undefined,
+  state: PluginState,
+  log: Logging,
+  connection: FhemConnection,
+  filter: string | undefined,
   callback: (error: Error | undefined, response?: HttpResponse, devices?: DeviceList) => void,
 ): void {
   const url = devicesUrl(connection.base_url, filter, state.csrfToken[connection.base_url]);

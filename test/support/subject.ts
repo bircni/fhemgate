@@ -144,14 +144,19 @@ export function createWorld(options: WorldOptions = {}): World {
 
     debugPage(url) {
       let page = '';
-      handleDebugRequest({ url }, {
-        write: (chunk) => {
-          page += chunk;
+      handleDebugRequest(
+        { url },
+        {
+          write: (chunk) => {
+            page += chunk;
+          },
+          end: (chunk) => {
+            page += chunk;
+          },
         },
-        end: (chunk) => {
-          page += chunk;
-        },
-      }, state, state.longpoll);
+        state,
+        state.longpoll,
+      );
       return page;
     },
   };

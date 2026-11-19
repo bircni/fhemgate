@@ -56,11 +56,11 @@ export function commandFor(source: CommandSource, target: PreparedMapping | stri
     }
   } else if (c === 'xhue') {
     const hue = source.mappings.Hue as any;
-    value = Math.round(value * hue.max / hue.maxValue);
+    value = Math.round((value * hue.max) / hue.maxValue);
     command = 'set ' + hue.device + ' hue ' + value;
   } else if (c === 'xsat') {
     const saturation = source.mappings.Saturation as any;
-    value = value / 100 * saturation.max;
+    value = (value / 100) * saturation.max;
     command = 'set ' + saturation.device + ' sat ' + value;
   } else {
     if (mapping.characteristic_type === 'On' && value) {
@@ -110,7 +110,7 @@ export function commandFor(source: CommandSource, target: PreparedMapping | stri
         }
 
         if (mapping.max !== undefined && mapping.maxValue != null) {
-          value = Math.round(value * mapping.max / mapping.maxValue);
+          value = Math.round((value * mapping.max) / mapping.maxValue);
         }
       }
     }

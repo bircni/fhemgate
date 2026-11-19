@@ -6,7 +6,8 @@ const fhem = 'http://fhem:8083/fhem';
 describe('urls', () => {
   it('ask for all events since the last one that was seen', () => {
     expect(longpollUrl('http://fhem:8083/fhem', undefined, 17)).toBe(
-      'http://fhem:8083/fhem?XHR=1&inform=type=status;addglobal=1;filter=.*;since=null;fmt=JSON&timestamp=17');
+      'http://fhem:8083/fhem?XHR=1&inform=type=status;addglobal=1;filter=.*;since=null;fmt=JSON&timestamp=17',
+    );
     expect(longpollUrl('http://fhem:8083/fhem', 1786881600500, 17)).toContain(';since=1786881600.5;');
   });
 

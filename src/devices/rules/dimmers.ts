@@ -96,8 +96,22 @@ function fs20State2percent(_mapping: Mapping, orig: string): number {
 }
 
 const fs20Steps = [
-  'dim06%', 'dim12%', 'dim18%', 'dim25%', 'dim31%', 'dim37%', 'dim43%', 'dim50%',
-  'dim56%', 'dim62%', 'dim68%', 'dim75%', 'dim81%', 'dim87%', 'dim93%', 'dim100%',
+  'dim06%',
+  'dim12%',
+  'dim18%',
+  'dim25%',
+  'dim31%',
+  'dim37%',
+  'dim43%',
+  'dim50%',
+  'dim56%',
+  'dim62%',
+  'dim68%',
+  'dim75%',
+  'dim81%',
+  'dim87%',
+  'dim93%',
+  'dim100%',
 ];
 
 function percent2fs20Step(_mapping: Mapping, orig: number): string | undefined {

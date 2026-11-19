@@ -12,7 +12,17 @@ import { harmony, sonos, volume } from './rules/media.ts';
 import { current, energy, power, voltage } from './rules/power.ts';
 import { presence, residents, roommateOrGuest } from './rules/presence.ts';
 import {
-  airQuality, battery, fhttk, firmware, humidity, lightLevel, maxShutterContact, pressure, reachable, temperature, threeStateSensor,
+  airQuality,
+  battery,
+  fhttk,
+  firmware,
+  humidity,
+  lightLevel,
+  maxShutterContact,
+  pressure,
+  reachable,
+  temperature,
+  threeStateSensor,
 } from './rules/sensors.ts';
 import { onOff, setList } from './rules/switches.ts';
 import { desiredTemp, heatingStateDefault, maxDesiredTemperature, pid20Desired, thermostatByType } from './rules/thermostats.ts';
@@ -82,12 +92,7 @@ const rules: Rule[] = [
   firmware,
   reachable,
 
-  firstOf(
-    garage, blind, hmSecWin, hmSecKey, lock, thermostatByType,
-    fhttk, maxShutterContact, threeStateSensor,
-    presence, roommateOrGuest, residents,
-    fs20di,
-  ),
+  firstOf(garage, blind, hmSecWin, hmSecKey, lock, thermostatByType, fhttk, maxShutterContact, threeStateSensor, presence, roommateOrGuest, residents, fs20di),
 
   firstOf(desiredTemp, maxDesiredTemperature, pid20Desired),
 
@@ -149,8 +154,13 @@ export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, stat
 
 /** what is settled only after the homebridgeMapping attribute was applied */
 export function reviseMappings(target: DetectionTarget, s: Jsonlist2Device): void {
-  if (target.mappings.CurrentPosition || target.mappings.TargetTemperature
-      || target.service_name === 'lock' || target.service_name === 'garage' || target.service_name === 'window') {
+  if (
+    target.mappings.CurrentPosition ||
+    target.mappings.TargetTemperature ||
+    target.service_name === 'lock' ||
+    target.service_name === 'garage' ||
+    target.service_name === 'window'
+  ) {
     delete target.mappings.On;
   }
 
@@ -162,8 +172,7 @@ export function reviseMappings(target: DetectionTarget, s: Jsonlist2Device): voi
     const targetVerb = targetCmd ? targetCmd.split(' ')[0] : undefined;
 
     if (!targetVerb || !s.PossibleSets.match('(^| )' + targetVerb + '\\b')) {
-      target.log.error(s.Internals.NAME + ' is NOT a thermostat. set command for target temperature missing: '
-                            + (targetCmd ? targetCmd : ''));
+      target.log.error(s.Internals.NAME + ' is NOT a thermostat. set command for target temperature missing: ' + (targetCmd ? targetCmd : ''));
       delete target.mappings.TargetTemperature;
     }
   }

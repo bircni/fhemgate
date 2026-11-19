@@ -13,10 +13,11 @@ afterEach(() => {
 });
 
 function serve(handler: Parameters<typeof createServer>[1]): Promise<string> {
-  server = createServer(handler);
+  const listening = createServer(handler);
+  server = listening;
   return new Promise((resolve) => {
-    server?.listen(0, '127.0.0.1', () => {
-      resolve(`http://127.0.0.1:${(server?.address() as AddressInfo).port}/`);
+    listening.listen(0, '127.0.0.1', () => {
+      resolve(`http://127.0.0.1:${(listening.address() as AddressInfo).port}/`);
     });
   });
 }
@@ -91,14 +92,18 @@ describe('get', () => {
 
     const events: string[] = [];
     await new Promise<void>((resolve) => {
-      get(url, {}, {
-        onResponse: (response) => events.push(`response ${response.statusCode}`),
-        onData: (chunk) => events.push(`data ${chunk.toString().trim()}`),
-        onEnd: () => {
-          events.push('end');
-          resolve();
+      get(
+        url,
+        {},
+        {
+          onResponse: (response) => events.push(`response ${response.statusCode}`),
+          onData: (chunk) => events.push(`data ${chunk.toString().trim()}`),
+          onEnd: () => {
+            events.push('end');
+            resolve();
+          },
         },
-      });
+      );
     });
 
     expect(events).toEqual(['response 200', 'data one', 'data two', 'end']);
@@ -112,16 +117,20 @@ describe('get', () => {
 
     const events: string[] = [];
     await new Promise<void>((resolve) => {
-      get(url, {}, {
-        onEnd: () => {
-          events.push('end');
-          resolve();
+      get(
+        url,
+        {},
+        {
+          onEnd: () => {
+            events.push('end');
+            resolve();
+          },
+          onError: () => {
+            events.push('error');
+            resolve();
+          },
         },
-        onError: () => {
-          events.push('error');
-          resolve();
-        },
-      });
+      );
     });
 
     expect(events).toEqual(['error']);

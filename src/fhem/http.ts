@@ -58,9 +58,7 @@ export function get(url: string, options: GetOptions, handlers: GetHandlers): vo
 
   let request: http.ClientRequest;
   try {
-    request = url.startsWith('https:')
-      ? https.get(url, { headers, rejectUnauthorized: !options.insecure })
-      : http.get(url, { headers });
+    request = url.startsWith('https:') ? https.get(url, { headers, rejectUnauthorized: !options.insecure }) : http.get(url, { headers });
   } catch (error) {
     // an address that is no url
     queueMicrotask(() => {

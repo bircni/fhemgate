@@ -9,7 +9,12 @@ function detect(device: Partial<Jsonlist2Device> & { TYPE?: string }) {
   const log = createLog();
   const target = { log: log as unknown as DetectionTarget['log'] } as DetectionTarget;
   const s: Jsonlist2Device = {
-    Internals: { NAME: 'dev', TYPE: device.TYPE ?? 'dummy' }, Readings: {}, Attributes: {}, PossibleSets: '', PossibleAttrs: '', ...device,
+    Internals: { NAME: 'dev', TYPE: device.TYPE ?? 'dummy' },
+    Readings: {},
+    Attributes: {},
+    PossibleSets: '',
+    PossibleAttrs: '',
+    ...device,
   };
   const detected = detectMappings(target, s, new PluginState(hap));
   return { detected, target, s, log: log.lines };
@@ -59,7 +64,8 @@ describe('detectMappings', () => {
 
   it('leaves a HMCCU device the HMCCU rule does not know to the other rules', () => {
     const { target } = detect({
-      Internals: { NAME: 'dev', TYPE: 'HMCCUCHN', ccutype: 'X' }, Readings: { '1.ACTUAL_TEMPERATURE': { Value: '20' }, temperature: { Value: '20' } },
+      Internals: { NAME: 'dev', TYPE: 'HMCCUCHN', ccutype: 'X' },
+      Readings: { '1.ACTUAL_TEMPERATURE': { Value: '20' }, temperature: { Value: '20' } },
     });
 
     expect(target.service_name).toBe('thermometer');

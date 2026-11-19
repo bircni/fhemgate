@@ -236,7 +236,6 @@ export class FhemAccessory {
       clearTimeout(timer);
     }
 
-     
     this.log.info(this.name + ' delaying command ' + mapping.characteristic_type + ' with value ' + String(value));
     this.delayed_timers[informId] = setTimeout(() => {
       delete this.delayed_timers?.[informId];
@@ -287,7 +286,7 @@ export class FhemAccessory {
 
     this.log.info('query: ' + (mapping.name ? mapping.name : mapping.characteristic_type) + ' for ' + mapping.informId);
     const cached = mapping.cached;
-    if (typeof target === 'object' && cached !== undefined && (!('nocache' in target))) {
+    if (typeof target === 'object' && cached !== undefined && !('nocache' in target)) {
       let defined: string | undefined = undefined;
       if (mapping.homekit2name !== undefined) {
         defined = mapping.homekit2name[cached as unknown as string];
@@ -296,7 +295,7 @@ export class FhemAccessory {
         }
       }
 
-      mapping.log.info('  cached: ' + cached + ' (as ' + typeof (cached) + (defined ? '; means ' + defined : '') + ')');
+      mapping.log.info('  cached: ' + cached + ' (as ' + typeof cached + (defined ? '; means ' + defined : '') + ')');
 
       if (callback !== undefined) {
         callback(undefined, cached);

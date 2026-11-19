@@ -8,7 +8,7 @@ import { Subscriptions } from './subscriptions.ts';
 
 // offset in milliseconds, for the time in the log. worked out once, so it is off after a change
 // to or from daylight saving time until homebridge is started again.
-const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+const tzoffset = new Date().getTimezoneOffset() * 60000;
 
 /**
  * What the plugin knows while it runs: the readings it has seen and who listens to them.
@@ -39,8 +39,7 @@ export class PluginState {
    * @param noUpdate keep the value in the cache and at the mappings, but do not tell HomeKit
    */
   update(informId: string, orig: unknown, noUpdate?: boolean): void {
-    if (orig === undefined
-        || this.cache.values[informId] === orig) {
+    if (orig === undefined || this.cache.values[informId] === orig) {
       return;
     }
 

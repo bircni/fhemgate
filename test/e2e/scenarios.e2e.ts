@@ -10,12 +10,15 @@ const devices: DummyDevice[] = [
   { name: 'e2e_lamp', setList: 'on off', readings: { state: 'on' }, attributes: { alias: 'Stehlampe', siriName: 'Stehlampe Wohnzimmer' } },
   { name: 'e2e_dimmer', setList: 'on off pct:slider,0,1,100', readingList: 'pct', readings: { state: 'on', pct: '40' } },
   {
-    name: 'e2e_thermostat', setList: 'desired-temp:slider,5,0.5,30', readingList: 'desired-temp',
-    readings: { 'state': 'ok', 'desired-temp': '21', 'temperature': '19.5', 'humidity': '48' },
+    name: 'e2e_thermostat',
+    setList: 'desired-temp:slider,5,0.5,30',
+    readingList: 'desired-temp',
+    readings: { state: 'ok', 'desired-temp': '21', temperature: '19.5', humidity: '48' },
   },
   { name: 'e2e_blind', setList: 'pct:slider,0,1,100', readingList: 'pct', readings: { state: '30', pct: '30' }, attributes: { genericDeviceType: 'blind' } },
   {
-    name: 'e2e_contact', readings: { state: 'closed' },
+    name: 'e2e_contact',
+    readings: { state: 'closed' },
     attributes: { genericDeviceType: 'ContactSensor', homebridgeMapping: 'ContactSensorState=state,values=closed:CONTACT_DETECTED;open:CONTACT_NOT_DETECTED' },
   },
   { name: 'e2e_climate', readings: { state: 'ok', temperature: '21.3', humidity: '55' } },
@@ -55,10 +58,8 @@ function characteristic(device: string, service: string, type: string): HapChara
   return found;
 }
 
-const becomes = (target: HapCharacteristic, value: number) => eventually(
-  `the characteristic to become ${value}`,
-  async () => (Number(await homebridge.read(target)) === value ? true : undefined),
-);
+const becomes = (target: HapCharacteristic, value: number) =>
+  eventually(`the characteristic to become ${value}`, async () => (Number(await homebridge.read(target)) === value ? true : undefined));
 
 beforeAll(async () => {
   fhem = await startFhemWith(devices);
@@ -77,20 +78,22 @@ afterAll(async () => {
 
 describe('what homebridge publishes', () => {
   it('is one accessory per device, with the service of its kind', () => {
-    const services = Object.fromEntries(accessories.map((accessory) => [
-      accessory.name,
-      accessory.services.map((service) => service.type).filter((type) => type !== hapType.AccessoryInformation),
-    ]));
+    const services = Object.fromEntries(
+      accessories.map((accessory) => [
+        accessory.name,
+        accessory.services.map((service) => service.type).filter((type) => type !== hapType.AccessoryInformation),
+      ]),
+    );
 
     expect(services).toEqual({
       'Stehlampe Wohnzimmer': [hapType.Switch],
-      'e2e_dimmer': [hapType.Lightbulb],
-      'e2e_thermostat': [hapType.Thermostat],
-      'e2e_blind': [hapType.WindowCovering],
-      'e2e_contact': [hapType.ContactSensor],
-      'e2e_climate': [hapType.TemperatureSensor],
-      'e2e_lock': [hapType.LockMechanism],
-      'e2e_outlet': [hapType.Outlet],
+      e2e_dimmer: [hapType.Lightbulb],
+      e2e_thermostat: [hapType.Thermostat],
+      e2e_blind: [hapType.WindowCovering],
+      e2e_contact: [hapType.ContactSensor],
+      e2e_climate: [hapType.TemperatureSensor],
+      e2e_lock: [hapType.LockMechanism],
+      e2e_outlet: [hapType.Outlet],
     });
   });
 

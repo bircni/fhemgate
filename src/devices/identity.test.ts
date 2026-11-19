@@ -3,14 +3,28 @@ import { deviceIdentity } from './identity.ts';
 import type { Jsonlist2Device } from './types.ts';
 
 const device = (internals: Record<string, string>, rest: Partial<Jsonlist2Device> = {}): Jsonlist2Device => ({
-  Internals: { NAME: 'dev_1', TYPE: 'dummy', FUUID: 'fuuid-1', ...internals }, Readings: {}, Attributes: {}, PossibleSets: 'on off', PossibleAttrs: '', ...rest,
+  Internals: { NAME: 'dev_1', TYPE: 'dummy', FUUID: 'fuuid-1', ...internals },
+  Readings: {},
+  Attributes: {},
+  PossibleSets: 'on off',
+  PossibleAttrs: '',
+  ...rest,
 });
 
 describe('deviceIdentity', () => {
   it('uses the FUUID where fhem knows nothing better', () => {
     expect(deviceIdentity(device({}), {})).toEqual({
-      name: 'dev-1', fuuid: 'fuuid-1', alias: 'dev_1', siriName: 'dev_1', device: 'dev_1', type: 'dummy',
-      model: '<unknown>', PossibleSets: 'on off', room: undefined, serial: 'fuuid-1', uuid_base: 'fuuid-1',
+      name: 'dev-1',
+      fuuid: 'fuuid-1',
+      alias: 'dev_1',
+      siriName: 'dev_1',
+      device: 'dev_1',
+      type: 'dummy',
+      model: '<unknown>',
+      PossibleSets: 'on off',
+      room: undefined,
+      serial: 'fuuid-1',
+      uuid_base: 'fuuid-1',
     });
   });
 

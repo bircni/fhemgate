@@ -5,7 +5,7 @@ import { createWorld, customUUIDs, hap, hmccu, initializer } from './support/sub
 
 describe('HMCCU datapoints', () => {
   const d = hmccuDevice({
-    Readings: { '1.STATE': '0', '4.STATE': '1', 'ABC:4.LEVEL': '0.5', 'level': '1', '4.LEVEL_2': '0', 'WINDOW_STATE': '0' },
+    Readings: { '1.STATE': '0', '4.STATE': '1', 'ABC:4.LEVEL': '0.5', level: '1', '4.LEVEL_2': '0', WINDOW_STATE: '0' },
     Attributes: { controldatapoint: '4.STATE', statedatapoint: 'ABC:1.LEVEL' },
   });
 
@@ -75,12 +75,16 @@ describe('debug page', () => {
 
   it('lists the connections and what is cached for every subscribed reading', () => {
     const world = createWorld();
-    world.accessory(device({
-      Internals: { NAME: 'valve', TYPE: 'CUL_HM', DEF: '123456' },
-      Readings: { 'desired-temp': '20.0', 'measured-temp': '19.0', mode: 'auto' },
-      Attributes: { subType: 'thermostat' },
-      PossibleSets: 'desired-temp:slider,4.5,0.5,30.5 mode',
-    })).getServices();
+    world
+      .accessory(
+        device({
+          Internals: { NAME: 'valve', TYPE: 'CUL_HM', DEF: '123456' },
+          Readings: { 'desired-temp': '20.0', 'measured-temp': '19.0', mode: 'auto' },
+          Attributes: { subType: 'thermostat' },
+          PossibleSets: 'desired-temp:slider,4.5,0.5,30.5 mode',
+        }),
+      )
+      .getServices();
     world.longpoll['http://fhem:8083/fhem'] = { connected: true, connects: 2, received: 10, received_total: 30, last_event_time: Date.UTC(2026, 7, 16, 12) };
     world.longpoll['http://other:8083/fhem'] = { connected: false, connects: 1, received: 0, received_total: 0 };
 

@@ -4,9 +4,7 @@ import type { Rule } from '../detect.ts';
 
 /** `set on` and `set off` */
 export const onOff: Rule = ({ s, target, isHMCCU }) => {
-  if (isHMCCU || target.mappings.On
-      || !s.PossibleSets.match(/(^| )on\b/)
-      || !s.PossibleSets.match(/(^| )off\b/)) {
+  if (isHMCCU || target.mappings.On || !s.PossibleSets.match(/(^| )on\b/) || !s.PossibleSets.match(/(^| )off\b/)) {
     return false;
   }
 

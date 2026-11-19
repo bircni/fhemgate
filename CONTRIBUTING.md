@@ -10,13 +10,14 @@ bun install
 bun run verify
 ```
 
-`bun run verify` runs everything CI runs, except the job against a real fhem: lint, typecheck,
+`bun run verify` runs everything CI runs, except the job against a real fhem: format check, lint, typecheck,
 tests with coverage, build, a check that the packed plugin installs with npm and loads, and the
 end-to-end tests.
 
 | Script | Does |
 |---|---|
-| `bun run lint` | ESLint, no warnings allowed |
+| `bun run format` | formats the code with oxfmt |
+| `bun run lint` | oxlint with its type-aware rules, no warnings allowed |
 | `bun run typecheck` | TypeScript over `src`, `test` and `scripts` |
 | `bun run test` | all tests |
 | `bun run coverage` | all tests with a coverage report in `coverage/` |

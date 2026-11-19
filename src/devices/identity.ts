@@ -39,9 +39,13 @@ export function deviceIdentity(s: Jsonlist2Device, mappings: Mappings): DeviceId
   const fuuid = s.Internals.FUUID;
   const alias = s.Attributes.alias ? s.Attributes.alias : s.Internals.NAME;
 
-  let model: string | undefined = s.Readings.model ? s.Readings.model.Value
-    : (s.Attributes.model ? s.Attributes.model
-      : (s.Internals.model ? s.Internals.model : '<unknown>'));
+  let model: string | undefined = s.Readings.model
+    ? s.Readings.model.Value
+    : s.Attributes.model
+      ? s.Attributes.model
+      : s.Internals.model
+        ? s.Internals.model
+        : '<unknown>';
 
   let serial: string | undefined = undefined;
   if (type === 'CUL_HM') {

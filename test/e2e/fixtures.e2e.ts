@@ -20,7 +20,9 @@ const functions = {
   },
   notANumber: () => NaN,
 };
-const jsFunctions = `module.exports = {${Object.entries(functions).map(([name, body]) => `${name}: ${body.toString()}`).join(',\n')}};`;
+const jsFunctions = `module.exports = {${Object.entries(functions)
+  .map(([name, body]) => `${name}: ${body.toString()}`)
+  .join(',\n')}};`;
 
 // this fixture ends up with two services of the same type and subtype, which homebridge refuses.
 // it has a test of its own below.
@@ -28,13 +30,15 @@ const REFUSED = 'mapping/linked-services';
 
 /** the fixtures, each with a hardware address of its own: several of the HMCCU ones share theirs */
 function devices(only?: string): FhemDevice[] {
-  return fixtureDevices().filter((fixture) => (only ? fixture.id === only : fixture.id !== REFUSED)).map((fixture, index) => {
-    const device = fixture.load();
-    if (device.Internals.TYPE === 'HMCCUCHN' || device.Internals.TYPE === 'HMCCUDEV') {
-      device.Internals.DEF = `CCU 000E2E${String(index).padStart(8, '0')}:1`;
-    }
-    return { Name: device.Internals.NAME, ...device };
-  });
+  return fixtureDevices()
+    .filter((fixture) => (only ? fixture.id === only : fixture.id !== REFUSED))
+    .map((fixture, index) => {
+      const device = fixture.load();
+      if (device.Internals.TYPE === 'HMCCUCHN' || device.Internals.TYPE === 'HMCCUDEV') {
+        device.Internals.DEF = `CCU 000E2E${String(index).padStart(8, '0')}:1`;
+      }
+      return { Name: device.Internals.NAME, ...device };
+    });
 }
 
 /** what the plugin builds for the devices: by accessory name, the services other than the information, as `type: characteristic types` */
@@ -47,9 +51,16 @@ function expected(group: FhemDevice[]): Record<string, string[]> {
       continue;
     }
     // HomeKit is told the siriName as the name of the accessory
-    services[accessory.siriName] = accessory.getServices()
+    services[accessory.siriName] = accessory
+      .getServices()
       .filter((service) => service instanceof hap.Service && service.UUID !== hap.Service.AccessoryInformation.UUID)
-      .map((service) => `${shortType(service.UUID)}: ${service.characteristics.map((characteristic) => shortType(characteristic.UUID)).sort().join(' ')}`)
+      .map(
+        (service) =>
+          `${shortType(service.UUID)}: ${service.characteristics
+            .map((characteristic) => shortType(characteristic.UUID))
+            .sort()
+            .join(' ')}`,
+      )
       .sort();
   }
   return services;
@@ -78,24 +89,41 @@ describe.skipIf(realFhemUrl !== undefined).each(groups.map((group, index) => ({ 
     while (Object.keys(published).length < Object.keys(built).length && Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, 250));
       const accessories = await homebridge.accessories().catch(() => []);
-      published = Object.fromEntries(accessories.map((accessory) => [
-        accessory.name,
-        accessory.services
-          .filter((service) => service.type !== hapType.AccessoryInformation)
-          .map((service) => `${service.type}: ${service.characteristics.map((characteristic) => characteristic.type).sort().join(' ')}`)
-          .sort(),
-      ]));
+      published = Object.fromEntries(
+        accessories.map((accessory) => [
+          accessory.name,
+          accessory.services
+            .filter((service) => service.type !== hapType.AccessoryInformation)
+            .map(
+              (service) =>
+                `${service.type}: ${service.characteristics
+                  .map((characteristic) => characteristic.type)
+                  .sort()
+                  .join(' ')}`,
+            )
+            .sort(),
+        ]),
+      );
     }
 
     // with the real fakegato-history, which only homebridge has here, the device with a history
     // gets the history service of Eve next to its contact sensor
     if (published.history) {
+      // eslint-disable-next-line vitest/no-conditional-expect -- only one of the two halves has this device
       expect(published.history.map((service) => service.split(':')[0])).toEqual(['80', 'E863F007-079E-48FF-8F27-9C2605A29F52']);
       published.history = built.history ?? [];
     }
 
     expect(Object.keys(built).length).toBeGreaterThan(60);
-    expect(published, homebridge.output().split('\n').filter((line) => /error|warn/i.test(line)).slice(0, 20).join('\n')).toEqual(built);
+    expect(
+      published,
+      homebridge
+        .output()
+        .split('\n')
+        .filter((line) => /error|warn/i.test(line))
+        .slice(0, 20)
+        .join('\n'),
+    ).toEqual(built);
   });
 });
 

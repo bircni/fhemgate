@@ -8,9 +8,15 @@ import type { Rule } from '../detect.ts';
 export const volume: Rule = ({ s, target }) => {
   if (s.Readings.volume) {
     target.mappings[CustomUUIDs.Volume] = {
-      reading: 'volume', cmd: 'volume', delay: true,
-      name: 'Volume', format: 'UINT8', unit: 'PERCENTAGE',
-      minValue: 0, maxValue: 100, minStep: 1,
+      reading: 'volume',
+      cmd: 'volume',
+      delay: true,
+      name: 'Volume',
+      format: 'UINT8',
+      unit: 'PERCENTAGE',
+      minValue: 0,
+      maxValue: 100,
+      minStep: 1,
     };
     return true;
   }
@@ -18,9 +24,16 @@ export const volume: Rule = ({ s, target }) => {
   if (s.Readings.Volume) {
     // SONOS does not send events for its volume unless asked to, so it is not cached
     const mapping: Mapping = {
-      reading: 'Volume', cmd: 'Volume', delay: true, nocache: true,
-      name: 'Volume', format: 'UINT8', unit: 'PERCENTAGE',
-      minValue: 0, maxValue: 100, minStep: 1,
+      reading: 'Volume',
+      cmd: 'Volume',
+      delay: true,
+      nocache: true,
+      name: 'Volume',
+      format: 'UINT8',
+      unit: 'PERCENTAGE',
+      minValue: 0,
+      maxValue: 100,
+      minStep: 1,
     };
     target.mappings[CustomUUIDs.Volume] = mapping;
     if (looselyEqual(s.Attributes.generateVolumeEvent, 1)) {
@@ -33,7 +46,8 @@ export const volume: Rule = ({ s, target }) => {
 };
 
 /** a SONOS player is a switch that plays and pauses */
-export const sonos: Rule = ({ s, target }) => { //FIXME: use sets [Pp]lay/[Pp]ause/[Ss]top
+export const sonos: Rule = ({ s, target }) => {
+  //FIXME: use sets [Pp]lay/[Pp]ause/[Ss]top
   if (s.Internals.TYPE !== 'SONOSPLAYER') {
     return false;
   }

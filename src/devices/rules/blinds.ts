@@ -48,7 +48,8 @@ export const garage: Rule = ({ s, target, genericType }) => {
       const [open, closed] = parts as [string, string];
       target.mappings.CurrentDoorState = { reading: 'state', values: [open + ':OPEN', closed + ':CLOSED'] };
       target.mappings.TargetDoorState = {
-        reading: 'state', values: [open + ':OPEN', closed + ':CLOSED'],
+        reading: 'state',
+        values: [open + ':OPEN', closed + ':CLOSED'],
         cmds: ['OPEN:' + open, 'CLOSED:' + closed],
       };
     }
@@ -57,10 +58,7 @@ export const garage: Rule = ({ s, target, genericType }) => {
 };
 
 export const blind: Rule = ({ s, target, genericType }) => {
-  if (genericType !== 'blind'
-      && s.Internals.type !== 'blind'
-      && s.Attributes.subType !== 'blind'
-      && s.Attributes.subType !== 'blindActuator') {
+  if (genericType !== 'blind' && s.Internals.type !== 'blind' && s.Attributes.subType !== 'blind' && s.Attributes.subType !== 'blindActuator') {
     return false;
   }
 

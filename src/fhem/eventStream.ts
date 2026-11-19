@@ -14,7 +14,7 @@ import { longpollUrl, parseEventLine, reconnectDelayAfterEnd, retryDelayAfterErr
  * @param onConnected called every time FHEMWEB has answered the request
  */
 export function startLongpoll(state: PluginState, connection: FhemConnection, onConnected: () => void): void {
-  const status: ConnectionStatus = state.longpoll[connection.base_url] ??= { connects: 0, disconnects: 0, received_total: 0 };
+  const status: ConnectionStatus = (state.longpoll[connection.base_url] ??= { connects: 0, disconnects: 0, received_total: 0 });
 
   if (status.connected) {
     return;

@@ -5,9 +5,7 @@
 export function longpollUrl(baseUrl: string, lastEventTime: number | undefined, now: number): string {
   const filter = '.*';
   const since = lastEventTime ? lastEventTime / 1000 : 'null';
-  const query = '?XHR=1'
-                + '&inform=type=status;addglobal=1;filter=' + filter + ';since=' + since + ';fmt=JSON'
-                + '&timestamp=' + now;
+  const query = '?XHR=1&inform=type=status;addglobal=1;filter=' + filter + ';since=' + since + ';fmt=JSON&timestamp=' + now;
 
   return encodeURI(baseUrl + query);
 }

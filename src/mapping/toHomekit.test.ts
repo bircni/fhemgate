@@ -11,8 +11,16 @@ function prepared(mapping: Mapping) {
 describe('reading2homekit', () => {
   it('applies part, values, factor, limits, steps and invert in this order', () => {
     const { mapping } = prepared({
-      reading: 'r', format: 'float', part: 1, value2homekit: { low: '10' }, value2homekit_re: [],
-      factor: 2, minValue: 0, maxValue: 30, minStep: 5, invert: true,
+      reading: 'r',
+      format: 'float',
+      part: 1,
+      value2homekit: { low: '10' },
+      value2homekit_re: [],
+      factor: 2,
+      minValue: 0,
+      maxValue: 30,
+      minStep: 5,
+      invert: true,
     });
 
     // 'low' -> '10' -> 20 -> within 0..30 -> a multiple of 5 -> 30 - 20 + 0

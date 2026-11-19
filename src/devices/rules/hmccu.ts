@@ -99,11 +99,11 @@ function level2homekit(mapping: Mapping, orig: string): number | undefined {
 
   value = Math.round(value * (mapping.levelFactor as number));
 
-  return value < 0 ? 0 : (value > 100 ? 100 : value);
+  return value < 0 ? 0 : value > 100 ? 100 : value;
 }
 
 function homekit2level(mapping: Mapping, orig: number): number {
-  return Math.round(orig / (mapping.levelWriteFactor as number) * 1000) / 1000;
+  return Math.round((orig / (mapping.levelWriteFactor as number)) * 1000) / 1000;
 }
 
 // slat position: the datapoint runs 0.0-1.0 (closed to open), homekit wants -90..90 degrees
@@ -115,11 +115,11 @@ function level2tilt(mapping: Mapping, orig: string): number | undefined {
 
   value = Math.round(value * (mapping.levelFactor as number) * 1.8 - 90);
 
-  return value < -90 ? -90 : (value > 90 ? 90 : value);
+  return value < -90 ? -90 : value > 90 ? 90 : value;
 }
 
 function tilt2level(mapping: Mapping, orig: number): number {
-  return Math.round((orig + 90) / 1.8 / (mapping.levelWriteFactor as number) * 1000) / 1000;
+  return Math.round(((orig + 90) / 1.8 / (mapping.levelWriteFactor as number)) * 1000) / 1000;
 }
 
 /**
@@ -133,24 +133,19 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
   const ccutype = s.Internals.ccutype || '';
   const ccurole = (s.Internals.ccurole || s.Attributes.ccurole || '').toUpperCase();
 
-  const hasOnOff = sets.match(/(^| )on\b/) && sets.match(/(^| )off\b/) ? true : false;
+  const hasOnOff = Boolean(sets.match(/(^| )on\b/) && sets.match(/(^| )off\b/));
 
   const LEVEL = hmccuReading(s, 'LEVEL');
   const STATE = hmccuReading(s, 'STATE');
-  const SETPOINT = hmccuReading(s, 'SET_POINT_TEMPERATURE')
-                   || hmccuReading(s, 'SET_TEMPERATURE')
-                   || hmccuReading(s, 'SETPOINT');
+  const SETPOINT = hmccuReading(s, 'SET_POINT_TEMPERATURE') || hmccuReading(s, 'SET_TEMPERATURE') || hmccuReading(s, 'SETPOINT');
   const ACTUAL = hmccuReading(s, 'ACTUAL_TEMPERATURE');
   const HUMIDITY = hmccuReading(s, 'HUMIDITY');
 
   const MOTION = hmccuReading(s, 'MOTION');
   const PRESENCE = hmccuReading(s, 'PRESENCE_DETECTION_STATE');
   const SMOKE = hmccuReading(s, 'SMOKE_DETECTOR_ALARM_STATUS');
-  const WATER = hmccuReading(s, 'WATERLEVEL_DETECTED')
-                || hmccuReading(s, 'MOISTURE_DETECTED');
-  const LUX = hmccuReading(s, 'ILLUMINATION')
-              || hmccuReading(s, 'CURRENT_ILLUMINATION')
-              || hmccuReading(s, 'AVERAGE_ILLUMINATION');
+  const WATER = hmccuReading(s, 'WATERLEVEL_DETECTED') || hmccuReading(s, 'MOISTURE_DETECTED');
+  const LUX = hmccuReading(s, 'ILLUMINATION') || hmccuReading(s, 'CURRENT_ILLUMINATION') || hmccuReading(s, 'AVERAGE_ILLUMINATION');
 
   let type = genericType;
   if (type === undefined) {
@@ -190,9 +185,9 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
       type = 'smoke';
     } else if (WATER) {
       type = 'leak';
-    // a bare LEVEL/STATE datapoint is not enough on its own: sensors have those too, and
-    // guessing actuator from them turns e.g. a window contact into a switch. only fall
-    // back to them when the device also offers a way to actually set the datapoint.
+      // a bare LEVEL/STATE datapoint is not enough on its own: sensors have those too, and
+      // guessing actuator from them turns e.g. a window contact into a switch. only fall
+      // back to them when the device also offers a way to actually set the datapoint.
     } else if (LEVEL && (hasOnOff || sets.match(/(^| )pct\b/))) {
       type = 'light';
     } else if (STATE && hasOnOff) {
@@ -200,10 +195,8 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
     }
   }
 
-  if (type === undefined || !['blind', 'light', 'switch', 'outlet', 'thermostat',
-    'contact', 'motion', 'presence', 'smoke', 'leak'].includes(type)) {
-    log.info(s.Internals.NAME + ' (' + (ccutype || '?') + '/' + (ccurole || '?')
-                              + '): no HMCCU mapping, using generic autodetection');
+  if (type === undefined || !['blind', 'light', 'switch', 'outlet', 'thermostat', 'contact', 'motion', 'presence', 'smoke', 'leak'].includes(type)) {
+    log.info(s.Internals.NAME + ' (' + (ccutype || '?') + '/' + (ccurole || '?') + '): no HMCCU mapping, using generic autodetection');
     return false;
   }
 
@@ -216,7 +209,7 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
     }
 
     // 'set <device> pct' takes a percentage, 'set <device> datapoint' takes the raw datapoint
-    const usePct = sets.match(/(^| )pct\b/) ? true : false;
+    const usePct = Boolean(sets.match(/(^| )pct\b/));
     const levelCmd = usePct ? 'pct' : 'datapoint ' + hmccuDatapoint(s, LEVEL, 'LEVEL');
     const writeFactor = usePct ? 1 : levelFactor;
 
@@ -254,7 +247,8 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
 
         const currentTilt: Mapping = { reading: LEVEL_2, levelFactor: levelFactor };
         const targetTilt: Mapping = {
-          reading: LEVEL_2, delay: true,
+          reading: LEVEL_2,
+          delay: true,
           cmd: 'datapoint ' + slatDatapoint,
           levelFactor: levelFactor,
           levelWriteFactor: levelFactor,
@@ -311,9 +305,7 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
 
     accessory.service_name = 'thermostat';
 
-    const tempCmd = sets.match(/(^| )desired-temp\b/)
-      ? 'desired-temp'
-      : 'datapoint ' + hmccuDatapoint(s, SETPOINT, 'SET_POINT_TEMPERATURE');
+    const tempCmd = sets.match(/(^| )desired-temp\b/) ? 'desired-temp' : 'datapoint ' + hmccuDatapoint(s, SETPOINT, 'SET_POINT_TEMPERATURE');
 
     accessory.mappings.TargetTemperature = { reading: SETPOINT, cmd: tempCmd, delay: true, minValue: 4.5, maxValue: 30.5, minStep: 0.5 };
 
@@ -330,9 +322,13 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
       accessory.mappings.CurrentHeatingCoolingState = { reading: LEVEL, values: ['/^0(\\.0*)?$/:OFF', '/.*/:HEAT'] };
 
       const valve: Mapping = {
-        reading: LEVEL, name: 'Actuation',
-        format: 'UINT8', unit: 'PERCENTAGE',
-        minValue: 0, maxValue: 100, minStep: 1,
+        reading: LEVEL,
+        name: 'Actuation',
+        format: 'UINT8',
+        unit: 'PERCENTAGE',
+        minValue: 0,
+        maxValue: 100,
+        minStep: 1,
         levelFactor: levelFactor,
       };
       accessory.mappings[CustomUUIDs.Actuation] = valve;
@@ -342,7 +338,8 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
     const MODE = hmccuReading(s, 'CONTROL_MODE') || hmccuReading(s, 'SET_POINT_MODE');
     if (MODE && sets.match(/(^| )auto\b/) && sets.match(/(^| )manu\b/)) {
       accessory.mappings.TargetHeatingCoolingState = {
-        reading: MODE, delay: true,
+        reading: MODE,
+        delay: true,
         values: ['/^(0|AUTO|auto|AUTO-MODE)$/:AUTO', '/.*/:HEAT'],
         cmds: ['AUTO:auto', 'HEAT:manu', 'COOL:manu', 'OFF:' + (sets.match(/(^| )off\b/) ? 'off' : 'manu')],
       };
@@ -444,10 +441,18 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
     accessory.mappings[CustomUUIDs.Energy] = { name: 'Energy', reading: ENERGY, format: 'FLOAT', factor: 0.001 };
   }
 
-  log.info(s.Internals.NAME + ' (' + (ccutype || '?') + '/' + (ccurole || '?') + ') mapped as HMCCU ' + type
-            + (LEVEL ? '; LEVEL=' + LEVEL + ' x' + levelFactor : '')
-            + (STATE ? '; STATE=' + STATE : '')
-            + (SETPOINT ? '; setpoint=' + SETPOINT : ''));
+  log.info(
+    s.Internals.NAME +
+      ' (' +
+      (ccutype || '?') +
+      '/' +
+      (ccurole || '?') +
+      ') mapped as HMCCU ' +
+      type +
+      (LEVEL ? '; LEVEL=' + LEVEL + ' x' + levelFactor : '') +
+      (STATE ? '; STATE=' + STATE : '') +
+      (SETPOINT ? '; setpoint=' + SETPOINT : ''),
+  );
 
   return true;
 }

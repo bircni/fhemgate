@@ -143,6 +143,10 @@ This file is written to be executed autonomously. Step 1 of Phase 0 copies it in
   `mapping/linked-services` does that. It is taken out of the comparison and has a test of its
   own. Also seen there: HomeKit is told the siriName as the name of an accessory, not the name
   homebridge logs for it.
+- After the goal, on the owner's word: ESLint was replaced by oxlint with its type-aware rules
+  (`.oxlintrc.json`) and the code is formatted with oxfmt (`.oxfmtrc.json`). Wherever this plan
+  says ESLint it now means oxlint. The commits of the baseline were given conventional commit
+  messages, which changed their hashes; the tag `baseline-m2` was moved along.
 
 **Blocked / needs owner:**
 

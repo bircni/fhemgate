@@ -16,7 +16,10 @@ export interface DebugResponse {
  * Nothing is escaped and nobody is asked for a password. See docs/KNOWN_BUGS.md, 30.
  */
 export function handleDebugRequest(
-  request: { url?: string }, response: DebugResponse, state: PluginState, connections: Record<string, ConnectionStatus | undefined>,
+  request: { url?: string },
+  response: DebugResponse,
+  state: PluginState,
+  connections: Record<string, ConnectionStatus | undefined>,
 ): void {
   if (request.url === '/cached') {
     response.write('<a href="/">home</a><br><br>');
@@ -33,7 +36,6 @@ export function handleDebugRequest(
     response.write('<br>');
 
     for (const [informId, subscriptions] of Object.entries(state.subscriptions.byInformId)) {
-       
       response.write(informId + ': ' + String(state.cache.values[informId]) + '<br>');
 
       for (const subscription of subscriptions ?? []) {
@@ -51,7 +53,7 @@ export function handleDebugRequest(
             defined = '???';
           }
         }
-        response.write('&nbsp;&nbsp;' + mapping.characteristic_type + ': ' + value + ' (' + typeof (value) + (defined ? '; means ' + defined : '') + ')<br>');
+        response.write('&nbsp;&nbsp;' + mapping.characteristic_type + ': ' + value + ' (' + typeof value + (defined ? '; means ' + defined : '') + ')<br>');
       }
       response.write('<br>');
     }
