@@ -15593,18 +15593,18 @@ exports[`mapping/invert-bare-word > converts readings 1`] = `
 {
   "CurrentPosition": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "0.35" "000000" "0.4573,0.41"",
-    "1 <- "1"",
-    "2 <- "2"",
-    "3 <- "3"",
-    "20 <- "20"",
+    "100 <- "0" "0.35" "000000" "0.4573,0.41"",
+    "99 <- "1"",
+    "98 <- "2"",
+    "97 <- "3"",
+    "80 <- "20"",
     "50 <- "50"",
-    "99 <- "99"",
-    "100 <- "100"",
-    "254 <- "254"",
-    "1500 <- "1500"",
-    "22 <- "21.5"",
-    "-4 <- "-5"",
+    "1 <- "99"",
+    "0 <- "100"",
+    "-154 <- "254"",
+    "-1400 <- "1500"",
+    "78 <- "21.5"",
+    "104 <- "-5"",
   ],
   "TargetPosition": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -15633,7 +15633,7 @@ exports[`mapping/invert-bare-word > gets its services 1`] = `
     "log     manufacturer, model and serial number characteristics for invert-bare-word",
     "log     name (siriName) characteristic for invert-bare-word",
     "log   WindowCovering service for invert-bare-word",
-    "log     CurrentPosition characteristic for invert_bare_word:invert",
+    "log     CurrentPosition characteristic for invert_bare_word:position",
     "log     TargetPosition characteristic for invert_bare_word:position",
   ],
   "services": [
@@ -15738,7 +15738,7 @@ exports[`mapping/invert-bare-word > gets its services 1`] = `
             "unit": "percentage",
           },
           "uuid": "0000006D-0000-1000-8000-0026BB765291",
-          "value": 0,
+          "value": 80,
         },
         {
           "name": "Position State",
@@ -15785,8 +15785,7 @@ exports[`mapping/invert-bare-word > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "invert_bare_word-invert": 1,
-    "invert_bare_word-position": 1,
+    "invert_bare_word-position": 2,
   },
 }
 `;
@@ -15802,17 +15801,21 @@ exports[`mapping/invert-bare-word > is detected 1`] = `
     "info homebridgeMapping: CurrentPosition=position,invert",
     "log invert_bare_word is blind",
     "log invert_bare_word has",
-    "log   CurrentPosition [invert]",
+    "log   CurrentPosition [position]",
     "log   TargetPosition [position]",
+    "info     caching: CurrentPosition: 80 (as number; from '20')",
     "info     caching: TargetPosition: 20 (as number; from '20')",
   ],
   "mappings": {
     "CurrentPosition": {
+      "cached": 80,
       "characteristic": "class CurrentPosition",
       "characteristic_type": "CurrentPosition",
       "device": "invert_bare_word",
-      "informId": "invert_bare_word-invert",
-      "reading": "invert",
+      "informId": "invert_bare_word-position",
+      "invert": true,
+      "last_update": 1786881600,
+      "reading": "position",
     },
     "TargetPosition": {
       "cached": 20,
@@ -15842,7 +15845,7 @@ exports[`mapping/invert-bare-word > is detected 1`] = `
 exports[`mapping/invert-bare-word > sends commands 1`] = `
 {
   "CurrentPosition": [
-    "set invert_bare_word undefined 1 <- 1",
+    "set invert_bare_word undefined 99 <- 1",
   ],
   "TargetPosition": [
     "set invert_bare_word position true <- true",
@@ -15864,20 +15867,13 @@ exports[`mapping/invert-bare-word > sends commands 1`] = `
 
 exports[`mapping/invert-bare-word > updates characteristics 1`] = `
 {
-  "invert_bare_word-invert": [
-    "Current Position=0 <- "on" "off" "0"",
-    "Current Position=1 <- "1"",
-    "Current Position=50 <- "50"",
-    "Current Position=100 <- "100"",
-    "Current Position=22 <- "21.5" "closed" "open" "ff8000" """,
-  ],
   "invert_bare_word-position": [
-    "Target Position=20 <- "on" "off"",
-    "Target Position=0 <- "0"",
-    "Target Position=1 <- "1"",
-    "Target Position=50 <- "50"",
-    "Target Position=100 <- "100"",
-    "Target Position=22 <- "21.5" "closed" "open" "ff8000" """,
+    "Current Position=80 Target Position=20 <- "on" "off"",
+    "Current Position=100 Target Position=0 <- "0"",
+    "Current Position=99 Target Position=1 <- "1"",
+    "Current Position=50 Target Position=50 <- "50"",
+    "Current Position=0 Target Position=100 <- "100"",
+    "Current Position=78 Target Position=22 <- "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
