@@ -89,6 +89,9 @@ jobs:
     services:
       fhem:
         image: ghcr.io/fhem/fhem-minimal-docker:5-bookworm
+        # fhem tells the time of a reading without a time zone, so it has to be in the one homebridge runs in
+        env:
+          TZ: UTC
         ports:
           - 8083:8083
     steps:
