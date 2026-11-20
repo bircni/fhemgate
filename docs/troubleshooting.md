@@ -148,6 +148,7 @@ run each as a child bridge. See [several platforms](configuration.md#several-pla
 
 | Log line | Meaning |
 | --- | --- |
+| `Plugin 'homebridge-fhem2hb' tried to register with an incorrect plugin identifier: 'homebridge-fhem'. Please report this to the developer!` | Expected, no need to report it. The plugin registers its platform under the name of homebridge-fhem on purpose, so that a config entry with `"platform": "homebridge-fhem.FHEM"` keeps working. Homebridge notes this at every start. |
 | `no siri device found. please define it.` | The plugin looks for a device of the FHEM module `siri` and notes its version there. Nothing else depends on it. `define siri siri` in FHEM ends the message. |
 | `genericDeviceType attribute was not known to fhem and was created. restart homebridge after giving it to devices.` | First start against this FHEM. Set the attribute where needed and restart Homebridge. |
 | `homebridgeMapping attribute created.` | First start against this FHEM. Nothing to do. |

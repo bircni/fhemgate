@@ -105,35 +105,21 @@ running.
 
 ## Steps
 
-1. Build the package. homebridge-fhem2hb is not published to npm yet, so it is installed from a
-   tarball built from a checkout. This needs [bun](https://bun.sh).
+1. With homebridge stopped, install homebridge-fhem2hb from npm the way homebridge-fhem was
+   installed. For a global installation:
 
    ```sh
-   git clone https://github.com/bircni/fhem2hb.git
-   cd fhem2hb
-   bun install --frozen-lockfile
-   bun run build
-   bun pm pack
-   ```
-
-   This writes `homebridge-fhem2hb-<version>.tgz` into the checkout. It can be copied to the
-   machine homebridge runs on, which needs npm but not bun.
-
-2. With homebridge stopped, install the tarball the way homebridge-fhem was installed. For a
-   global installation:
-
-   ```sh
-   npm install -g ./homebridge-fhem2hb-<version>.tgz
+   npm install -g homebridge-fhem2hb
    ```
 
    Use `sudo` if you needed it to install homebridge-fhem. If your plugins are in a directory of
-   their own, use the command you installed homebridge-fhem with, with the path of the tarball in
-   place of the package name.
+   their own, use the command you installed homebridge-fhem with, with `homebridge-fhem2hb` in
+   place of `homebridge-fhem`.
 
-   > Once the package is published, this step becomes `npm install -g homebridge-fhem2hb`, and
-   > step 1 is not needed.
+   Do not install it from the plugins page of the Homebridge UI while homebridge-fhem is still
+   installed: the UI may restart homebridge with both plugins, which is case 2 above.
 
-3. Still with homebridge stopped, uninstall homebridge-fhem from the same place.
+2. Still with homebridge stopped, uninstall homebridge-fhem from the same place.
 
    ```sh
    npm uninstall -g homebridge-fhem
@@ -142,7 +128,7 @@ running.
    Install first and uninstall second, so that there is no moment in which a start of homebridge
    would find neither plugin.
 
-4. Leave the FHEM entry of `config.json` as it is. One addition is recommended: `neverTimeout`,
+3. Leave the FHEM entry of `config.json` as it is. One addition is recommended: `neverTimeout`,
    so that a fhem that is not reachable at the start makes homebridge wait instead of publishing
    the bridge without the fhem accessories.
 
@@ -163,13 +149,17 @@ running.
    If your `auth` has keys other than `user` and `pass` (or `username` and `password`), see
    [Configuration](#configuration).
 
-5. Start homebridge.
+4. Start homebridge.
 
 ## Check afterwards
 
 In the log of homebridge:
 
 - `this is homebridge-fhem2hb <version>` shows that the new plugin was loaded.
+- `Plugin 'homebridge-fhem2hb' tried to register with an incorrect plugin identifier:
+  'homebridge-fhem'` is expected and needs no report. The plugin registers its platform under the
+  name of homebridge-fhem on purpose, so that an entry with `"platform": "homebridge-fhem.FHEM"`
+  keeps working.
 - `Fetching FHEM devices...` and `got: <n> results` show that fhem answered, with the number of
   devices you expect. The plugin logs one line per device, like `lamp is switch`. The details it
   used to log are only shown when homebridge runs with debug logging (`-D`).

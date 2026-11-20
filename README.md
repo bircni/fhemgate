@@ -1,5 +1,8 @@
 # fhem2hb
 
+[![npm](https://img.shields.io/npm/v/homebridge-fhem2hb)](https://www.npmjs.com/package/homebridge-fhem2hb)
+[![CI](https://github.com/bircni/fhem2hb/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bircni/fhem2hb/actions/workflows/ci.yml)
+
 A [Homebridge](https://homebridge.io) platform plugin that publishes the devices of a
 [FHEM](https://fhem.de) installation to HomeKit. It follows the events of FHEM over a long poll, so
 HomeKit shows a change as soon as FHEM reports it.
@@ -25,6 +28,11 @@ If you have homebridge-fhem installed, remove it first. Then install this plugin
 npm uninstall -g homebridge-fhem
 npm install -g homebridge-fhem2hb
 ```
+
+With the [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x), search for
+`homebridge-fhem2hb` on its Plugins page and install it there. When moving from homebridge-fhem,
+follow [moving from homebridge-fhem](docs/migration.md) instead, so that HomeKit keeps your
+accessories.
 
 ## Configure
 
