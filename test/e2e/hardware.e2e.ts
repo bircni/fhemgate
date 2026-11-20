@@ -2,7 +2,7 @@
 // the eventMap attribute does. the stand-in serves them as fhem would list them, so these
 // tests do not run against a real fhem.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { fixtureDevices } from '../support/devices.ts';
+import { fixtureDevices, hmccuDevice } from '../support/devices.ts';
 import type { FhemDevice } from '../support/types.ts';
 import { asJsonlist2, realFhemUrl, type StandIn } from './fhem.ts';
 import { eveType, hapType, type TypeName } from './homebridge.ts';
@@ -49,6 +49,10 @@ const hmccuDevices: FhemDevice[] = [
   }),
 );
 
+// characteristics HomeKit does not define, which follow the hue and the saturation the plugin works out
+const workedOutHue = 'E863F1C1-079E-48FF-8F27-9C2605A29F52';
+const workedOutSaturation = 'E863F1C2-079E-48FF-8F27-9C2605A29F52';
+
 const devices: FhemDevice[] = [
   fixture('presence/presence'),
   fixture('presence/roommate'),
@@ -79,7 +83,32 @@ const devices: FhemDevice[] = [
   fixture('sensor/co20-voc'),
   fixture('sensor/luminosity'),
   fixture('switch/fs20-eventmap'),
+  // with the serial number as an attribute, which HomeMatic devices have once they are paired
+  fixture('dimmer/cul_hm-dimmer', (device) => {
+    device.Attributes.serialNr = 'MEQ0123456';
+  }),
   ...hmccuDevices,
+  // HMCCU: a reading without a channel, set by a datapoint without one
+  hmccuDevice({
+    Internals: { NAME: 'e2e_hw_ccu_bare', FUUID: 'e2e-hw-ccu-bare', DEF: 'CCU 000E2E00000101:3' },
+    Attributes: { genericDeviceType: 'switch' },
+    Readings: { STATE: 'false' },
+    PossibleSets: 'datapoint',
+  }),
+  // the same, with the channel named by an attribute
+  hmccuDevice({
+    Internals: { NAME: 'e2e_hw_ccu_pinned', FUUID: 'e2e-hw-ccu-pinned', DEF: 'CCU 000E2E00000102:3' },
+    Attributes: { genericDeviceType: 'switch', statedatapoint: '3.STATE' },
+    Readings: { STATE: 'true' },
+    PossibleSets: 'datapoint',
+  }),
+  // a ccuscaleval attribute that scales something else than the level
+  hmccuDevice({
+    Internals: { NAME: 'e2e_hw_ccu_dimmer', FUUID: 'e2e-hw-ccu-dimmer', DEF: 'CCU 000E2E00000103:4', ccutype: 'HmIP-BDT' },
+    Attributes: { ccuscaleval: 'ACTUAL_TEMPERATURE:0:100:0:1' },
+    Readings: { '4.LEVEL': '0.6' },
+    PossibleSets: 'pct on off',
+  }),
 
   // the eventMap attribute, for a mapping with values and for one that says by itself that it is an On
   asJsonlist2({
@@ -97,6 +126,27 @@ const devices: FhemDevice[] = [
     setList: 'on off rgb:colorpicker,RGB',
     readingList: 'rgb',
     readings: { state: 'on', rgb: 'FF0000', colormode: 'hs', xy: '0.6,0.3' },
+  }),
+  // one that is in colour temperature mode when homebridge starts. the ct mapping has the plugin look at the reading.
+  asJsonlist2({
+    name: 'e2e_hw_ct',
+    setList: 'on off rgb:colorpicker,RGB',
+    readingList: 'rgb',
+    readings: { state: 'on', rgb: 'FF0000', colormode: 'ct', ct: '500' },
+    attributes: { homebridgeMapping: 'ct=reading=ct' },
+  }),
+  // one whose worked out hue and saturation are shown, in degrees and percent
+  asJsonlist2({
+    name: 'e2e_hw_worked_out',
+    setList: 'on off rgb:colorpicker,RGB',
+    readingList: 'rgb',
+    readings: { state: 'on', rgb: 'FF0000', colormode: 'ct', ct: '366' },
+    attributes: {
+      homebridgeMapping:
+        'CT=ct,name=CT,format=UINT16 ' +
+        `${workedOutHue}=h,name=WorkedOutHue,format=FLOAT,factor=360,minStep=1 ` +
+        `${workedOutSaturation}=s,name=WorkedOutSaturation,format=FLOAT,factor=100,minStep=1`,
+    },
   }),
   asJsonlist2({
     name: 'e2e_hw_on',
@@ -232,6 +282,10 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['hmip_swsd_smoke', 'SmokeSensor', undefined, 'SmokeDetected', 1],
       ['hmip_swd_leak', 'LeakSensor', undefined, 'LeakDetected', 0],
       ['hmip_swd_leak', 'LeakSensor', undefined, 'StatusLowBattery', 1],
+      ['e2e_hw_ccu_bare', 'Switch', undefined, 'On', 0],
+      ['e2e_hw_ccu_pinned', 'Switch', undefined, 'On', 1],
+      // LEVEL runs from 0 to 1, as nothing scales it
+      ['e2e_hw_ccu_dimmer', 'Lightbulb', undefined, 'Brightness', 60],
     ])('shows %s in %s (%s) %s as %d', (device, service, name, type, value) => {
       expect(Number(world.named(device, service, type, name).value)).toBe(value);
     });
@@ -256,6 +310,10 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
     it('names the type of a HMCCU device as its model and its address at the ccu as its serial number', () => {
       expect(world.named('hmip_psm_power', 'AccessoryInformation', 'Model').value).toBe('FHEM:HmIP-PSM');
       expect(world.named('hmip_psm_power', 'AccessoryInformation', 'SerialNumber').value).toBe('CCU 000E2E00000004:1');
+    });
+
+    it('takes the serial number of a HomeMatic device from its serialNr attribute', () => {
+      expect(world.named('cul_hm_dimmer', 'AccessoryInformation', 'SerialNumber').value).toBe('MEQ0123456');
     });
 
     it('gives a HMCCU thermostat the range of a HomeMatic IP thermostat for its target temperature', () => {
@@ -327,6 +385,9 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['hmip_etrv_thermostat', 'Thermostat', undefined, 'TargetHeatingCoolingState', 0, 'off'],
       ['hmip_etrv_datapoint_only', 'Thermostat', undefined, 'TargetTemperature', 19.5, 'datapoint 1.SET_POINT_TEMPERATURE 19.5'],
       ['hmip_wth_wall_thermostat', 'Thermostat', undefined, 'TargetHeatingCoolingState', 3, 'auto'],
+      // a reading without a channel is set by the datapoint alone, or with the channel an attribute names
+      ['e2e_hw_ccu_bare', 'Switch', undefined, 'On', true, 'datapoint STATE true'],
+      ['e2e_hw_ccu_pinned', 'Switch', undefined, 'On', false, 'datapoint 3.STATE false'],
     ])('to %s %s (%s) %s as %s reaches fhem as: set %s', async (device, service, name, type, value, command) => {
       await world.homebridge.write(world.named(device, service, type, name), value);
 
@@ -455,6 +516,27 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       await world.becomes(target, expected);
     });
 
+    it('of a HMCCU level that is no number changes nothing', async () => {
+      const brightness = world.named('hmip_bdt_dimmer', 'Lightbulb', 'Brightness');
+      const tilt = world.named('hmip_bbl_venetian', 'WindowCovering', 'CurrentHorizontalTiltAngle');
+      const before = world.homebridge.notifications().length;
+
+      await world.fhem.change('hmip_bdt_dimmer', '4.LEVEL', 'unknown');
+      await world.fhem.change('hmip_bbl_venetian', '4.LEVEL_2', 'unknown');
+      // the events after them have arrived, so they have as well
+      await world.notifies(brightness, 40, () => world.fhem.change('hmip_bdt_dimmer', '4.LEVEL', '0.4'));
+      await world.notifies(tilt, 0, () => world.fhem.change('hmip_bbl_venetian', '4.LEVEL_2', '0.5'));
+
+      const told = (target: { aid: number; iid: number }) =>
+        world.homebridge
+          .notifications()
+          .slice(before)
+          .filter((notification) => notification.aid === target.aid && notification.iid === target.iid)
+          .map((notification) => Number(notification.value));
+      expect(told(brightness)).toEqual([40]);
+      expect(told(tilt)).toEqual([0]);
+    });
+
     it('is left alone while it only says that a command is on its way', async () => {
       const on = world.named('e2e_hw_on', 'Switch', 'On');
 
@@ -487,6 +569,33 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
 
       // the red the light started with would give 800000
       await world.fhem.wasTold('set e2e_hw_xy rgb 5c6280');
+    });
+
+    it('has them worked out for the colour temperature it has when homebridge starts', async () => {
+      await world.homebridge.write(world.named('e2e_hw_ct', 'Lightbulb', 'Brightness'), 50);
+
+      // the warm white of 500 mired at half its brightness. the red of its rgb reading would give 800000.
+      await world.fhem.wasTold('set e2e_hw_ct rgb 805937');
+    });
+
+    // what the plugin works out is shown by two characteristics that follow it
+    it.each([
+      // 2000 kelvin, a warm white
+      ['500', 28, 57],
+      // no colour temperature is taken for white
+      ['abc', 0, 0],
+      ['-1000', 0, 100],
+      // just below and just above 5600 kelvin, where the white turns from yellowish to bluish
+      ['179', 60, 1],
+      ['178', 300, 2],
+      // 10000 kelvin, a cold white
+      ['100', 222, 23],
+      ['-100', 0, 100],
+    ])('has a colour temperature of %s worked out as a hue of %d degrees with a saturation of %d percent', async (ct, hue, saturation) => {
+      await world.fhem.change('e2e_hw_worked_out', 'ct', ct);
+
+      await world.becomes(world.characteristic('e2e_hw_worked_out', hapType.Lightbulb, workedOutHue), hue);
+      await world.becomes(world.characteristic('e2e_hw_worked_out', hapType.Lightbulb, workedOutSaturation), saturation);
     });
 
     it('has them worked out for a colour temperature from 5600 kelvin on', async () => {

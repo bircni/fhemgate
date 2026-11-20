@@ -6,7 +6,7 @@
 // it before the plugin sees a value.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DummyDevice } from './fhem.ts';
-import { hapType, type TypeName } from './homebridge.ts';
+import { eveType, hapType, type TypeName } from './homebridge.ts';
 import { eventually, servicesByName, startWorld, type World } from './world.ts';
 
 // the file the jsFunctions option of the platform names
@@ -17,6 +17,10 @@ const functions = `module.exports = {
     throw new Error('boom');
   },
 };`;
+
+// characteristics HomeKit does not define, which the mappings below make up
+const noteUuid = 'E863F1AA-079E-48FF-8F27-9C2605A29F52';
+const blobUuid = 'E863F1BB-079E-48FF-8F27-9C2605A29F52';
 
 const devices: DummyDevice[] = [
   { name: 'e2e_m_other', readings: { state: 'ok', temperature: '18.5' } },
@@ -251,6 +255,169 @@ const devices: DummyDevice[] = [
     readings: { state: 'on' },
     attributes: { homebridgeMapping: 'On=cmdOn=an nonsense #On=cmdOn=never On=a=b=c' },
   },
+
+  // a delay below half a second
+  {
+    name: 'e2e_m_quick',
+    setList: 'on off bright',
+    readingList: 'bright',
+    readings: { state: 'on', bright: '5' },
+    attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=bright::bright,delay=100' },
+  },
+
+  // invert with only a maxValue to count back from
+  {
+    name: 'e2e_m_countdown',
+    setList: 'on off left',
+    readingList: 'left',
+    readings: { state: 'on', left: '30' },
+    attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=left::left,invert=true,maxValue=80' },
+  },
+
+  { name: 'e2e_m_suffix_long', setList: 'on off', readings: { state: 'off' }, attributes: { homebridgeMapping: 'On=commandSuffix=7' } },
+
+  // clear for one characteristic, which is then defined anew: nothing of what the detection made stays
+  {
+    name: 'e2e_m_rebuilt',
+    setList: 'on off pct:slider,0,1,100 level',
+    readingList: 'pct level',
+    readings: { state: 'on', pct: '50', level: '20' },
+    attributes: { homebridgeMapping: 'Brightness=clear,level::level' },
+  },
+
+  // a reading that is above what HomeKit takes for the characteristic
+  {
+    name: 'e2e_m_over',
+    setList: 'on off level',
+    readingList: 'level',
+    readings: { state: 'on', level: '150' },
+    attributes: { genericDeviceType: 'light', homebridgeMapping: 'Brightness=level::level' },
+  },
+
+  // a default for a reading that says nothing
+  {
+    name: 'e2e_m_default',
+    readings: { state: 'ok', temp: '18' },
+    attributes: { genericDeviceType: 'thermometer', homebridgeMapping: 'CurrentTemperature=temp,default=7' },
+  },
+
+  // values that hand on the reading as it is, next to one with a name
+  {
+    name: 'e2e_m_quality',
+    readings: { state: 'ok', level: 'bad' },
+    attributes: { genericDeviceType: 'AirQualitySensor', homebridgeMapping: 'AirQuality=level,values=bad:POOR;/^\\d$/:#' },
+  },
+
+  // a value that stands for no text, and a default with a blank in it
+  {
+    name: 'e2e_m_label',
+    setList: 'on off',
+    readings: { state: 'on', label: 'none' },
+    attributes: {
+      genericDeviceType: 'switch',
+      homebridgeMapping: `ConfiguredName=label,values=none:;/.*/:# ${noteUuid}=name=Note,format=STRING,default=not+known`,
+    },
+  },
+
+  // a custom characteristic without a name of its own
+  {
+    name: 'e2e_m_unnamed',
+    setList: 'on off',
+    readings: { state: 'on', watt: '17.5' },
+    attributes: { homebridgeMapping: 'E863F10D-079E-48FF-8F27-9C2605A29F52=watt,name=,format=FLOAT' },
+  },
+
+  // the modes of a thermostat that are not said with valid: from values and default, and all of
+  // them when the commands do not name them one by one
+  {
+    name: 'e2e_m_modes_reported',
+    setList: 'target:slider,18,0.5,25',
+    readingList: 'target',
+    readings: { state: 'ok', target: '20', mode: 'auto' },
+    attributes: {
+      genericDeviceType: 'thermostat',
+      homebridgeMapping: 'TargetTemperature=target::target TargetHeatingCoolingState=mode,values=auto:AUTO;off:OFF,default=HEAT',
+    },
+  },
+  {
+    name: 'e2e_m_modes_any',
+    setList: 'target:slider,18,0.5,25 mode:auto,manual',
+    readingList: 'target mode',
+    readings: { state: 'ok', target: '20', mode: 'auto' },
+    attributes: {
+      genericDeviceType: 'thermostat',
+      homebridgeMapping: 'TargetTemperature=target::target TargetHeatingCoolingState=mode,values=auto:AUTO;/.*/:HEAT,cmds=AUTO:mode+auto;/^[012]$/:mode+manual',
+    },
+  },
+
+  // an On that tells on from off by itself, with a state that only says that a command is on its way
+  {
+    name: 'e2e_m_pending',
+    readings: { state: 'set-on' },
+    attributes: { genericDeviceType: 'switch', homebridgeMapping: 'clear On=state,On=1,cmdOn=an,cmdOff=aus' },
+  },
+
+  // a history for a contact that is also shown as a door
+  {
+    name: 'e2e_m_window',
+    readings: { state: 'closed', contact: 'closed (to VCCU)' },
+    attributes: { genericDeviceType: 'contact', subType: 'threeStateSensor', homebridgeMapping: 'history=size=1024' },
+  },
+  // a history for a contact whose reading is not there yet
+  {
+    name: 'e2e_m_unseen',
+    readings: { state: 'ok' },
+    attributes: {
+      genericDeviceType: 'ContactSensor',
+      homebridgeMapping: 'ContactSensorState=door,values=closed:CONTACT_DETECTED;open:CONTACT_NOT_DETECTED history=size=1024',
+    },
+  },
+
+  // a service that is to be linked to itself
+  {
+    name: 'e2e_m_selflink',
+    setList: 'power',
+    readingList: 'power',
+    readings: { state: 'ok', power: 'on' },
+    attributes: {
+      genericDeviceType: 'Television',
+      homebridgeMapping: 'clear Television#Active=power,values=on:ACTIVE;off:INACTIVE,cmds=ACTIVE:power+on;INACTIVE:power+off linkedTo=Television',
+    },
+  },
+
+  // the JSON form with pairs that have a line break in them
+  {
+    name: 'e2e_m_pairs',
+    setList: 'an aus',
+    readings: { state: 'an' },
+    attributes: {
+      genericDeviceType: 'switch',
+      homebridgeMapping: JSON.stringify({
+        On: { reading: 'state', values: ['an:1\n', 'an:1', 'aus:0'], cmds: ['1:an\n'], cmdOn: 'an', cmdOff: 'aus' },
+      }),
+    },
+  },
+
+  // functions that answer something else than the characteristic holds
+  {
+    name: 'e2e_m_typed',
+    setList: 'on off',
+    readings: { state: 'on', akku: '80', label: 'Kino', blob: 'AQID', fw: '1.2.3' },
+    attributes: {
+      genericDeviceType: 'switch',
+      homebridgeMapping: JSON.stringify({
+        On: { reading: 'state', cmdOn: 'on', cmdOff: 'off' },
+        // an object for a text
+        ConfiguredName: { reading: 'label', reading2homekit: '{return orig === "broken" ? {text: orig} : orig}' },
+        // HomeKit hands on data as it is
+        [blobUuid]: { reading: 'blob', name: 'Blob', format: 'DATA' },
+        // no text for the firmware revision
+        FirmwareRevision: { reading: 'fw', reading2homekit: '{return {version: orig}}' },
+        // true and false for a number
+        'Battery#StatusLowBattery': { reading: 'akku', reading2homekit: '{return Number(orig) < 20}' },
+      }),
+    },
+  },
 ];
 
 let world: World;
@@ -319,6 +486,21 @@ describe('what homebridge publishes', () => {
     ['e2e_m_json', 'Lightbulb', undefined, 'Brightness', 50],
     // 128 of 255, by the function from the file
     ['e2e_m_functions', 'Lightbulb', undefined, 'Brightness', 50],
+    // 30, counted back from the maxValue of 80
+    ['e2e_m_countdown', 'Lightbulb', undefined, 'Brightness', 50],
+    // from the reading of the mapping that took the place of the detected one
+    ['e2e_m_rebuilt', 'Lightbulb', undefined, 'Brightness', 20],
+    // 150, which is more than a brightness can be
+    ['e2e_m_over', 'Lightbulb', undefined, 'Brightness', 100],
+    ['e2e_m_default', 'TemperatureSensor', undefined, 'CurrentTemperature', 18],
+    ['e2e_m_quality', 'AirQualitySensor', undefined, 'AirQuality', 5],
+    ['e2e_m_unnamed', 'Switch', undefined, 'Power', 17.5],
+    // set-on says nothing about the state
+    ['e2e_m_pending', 'Switch', undefined, 'On', 0],
+    ['e2e_m_pairs', 'Switch', undefined, 'On', 1],
+    // false, from a function that answers true or false
+    ['e2e_m_typed', 'BatteryService', undefined, 'StatusLowBattery', 0],
+    ['e2e_m_modes_reported', 'Thermostat', undefined, 'TargetHeatingCoolingState', 3],
   ])('shows %s in %s (%s) %s as %d', (device, service, name, type, value) => {
     expect(Number(world.named(device, service, type, name).value)).toBe(value);
   });
@@ -331,6 +513,15 @@ describe('what homebridge publishes', () => {
 
   it('offers only the values a mapping lists as valid', () => {
     expect(world.named('e2e_m_thermostat', 'Thermostat', 'TargetHeatingCoolingState')['valid-values']).toEqual([1, 3]);
+  });
+
+  it('offers the modes the values and the default of a mapping name, when it has no commands', () => {
+    // auto, off, and heat as the default
+    expect(world.named('e2e_m_modes_reported', 'Thermostat', 'TargetHeatingCoolingState')['valid-values']).toEqual([0, 1, 3]);
+  });
+
+  it('offers every mode when the commands of a mapping do not name them one by one', () => {
+    expect(world.named('e2e_m_modes_any', 'Thermostat', 'TargetHeatingCoolingState')['valid-values']).toEqual([0, 1, 2, 3]);
   });
 
   it('gives a device one service per subtype', () => {
@@ -374,6 +565,26 @@ describe('what homebridge publishes', () => {
     expect(world.named('e2e_m_custom', 'Switch', 'Voltage')).toMatchObject({ description: 'Spannung', format: 'float' });
   });
 
+  it('names a characteristic HomeKit does not define by its uuid when the mapping gives it no name', () => {
+    expect(world.named('e2e_m_unnamed', 'Switch', 'Power')).toMatchObject({ description: eveType.Power, format: 'float' });
+  });
+
+  it('shows the default of a mapping with blanks where it has a +', () => {
+    expect(world.characteristic('e2e_m_label', hapType.Switch, noteUuid)).toMatchObject({ value: 'not known', format: 'string', perms: ['pr', 'ev'] });
+  });
+
+  it('shows no text for a reading the values of a mapping give none', () => {
+    expect(world.characteristic('e2e_m_label', hapType.Switch, hapType.ConfiguredName).value).toBe('');
+  });
+
+  it('hands on data as the reading holds it', () => {
+    expect(world.characteristic('e2e_m_typed', hapType.Switch, blobUuid)).toMatchObject({ value: 'AQID', format: 'data' });
+  });
+
+  it('shows the highest value HomeKit takes for a reading that is above it', () => {
+    expect(logged(/initial value 150 is not accepted by HomeKit, using 100/)).toHaveLength(1);
+  });
+
   it('leaves out a characteristic that is cleared, and keeps the others of the detection', () => {
     expect(world.characteristicsOf('e2e_m_clear', hapType.Lightbulb)).toEqual([hapType.On]);
   });
@@ -396,6 +607,45 @@ describe('what homebridge publishes', () => {
 
     expect(await world.homebridge.read(world.named('e2e_m_info', 'AccessoryInformation', 'FirmwareRevision'))).toBe('2.0.1');
     expect(logged(/This callback function has already been called|threw an error from the characteristic/)).toEqual([]);
+  });
+
+  it('tells HomeKit no firmware revision when the function of the mapping answers no text', () => {
+    expect(world.named('e2e_m_typed', 'AccessoryInformation', 'FirmwareRevision').value).toBe('0.0.0');
+    expect(logged(/e2e-m-typed: the firmware reading "1\.2\.3" holds no version number\. HomeKit is not told a firmware revision\./)).toHaveLength(1);
+  });
+
+  it('shows a contact with a history as a contact only, not as a door as well', () => {
+    expect(world.characteristicsOf('e2e_m_window', hapType.ContactSensor)).toEqual([
+      hapType.ContactSensorState,
+      eveType.TimesOpened,
+      eveType.LastActivation,
+      eveType.OpenDuration,
+      eveType.ClosedDuration,
+    ]);
+    expect(logged(/e2e-m-window: skipping CurrentDoorState characteristic as ContactSensor is also given and history is enabled/)).toHaveLength(1);
+  });
+
+  it('does not link a service to itself', () => {
+    expect(world.service('e2e_m_selflink', hapType.Television).linked ?? []).toEqual([]);
+    expect(logged(/e2e-m-selflink: can't link Television service to itself/)).toHaveLength(1);
+  });
+
+  it('reports the pairs of values and cmds it can not read and goes on with the others', () => {
+    const output = world.homebridge.output();
+
+    expect(output).toMatch(/values: format wrong for an:1\n/);
+    expect(output).toMatch(/cmds: format wrong for 1:an\n/);
+  });
+
+  it('says in the log what a value means in HomeKit, and ??? for one the mapping has no name for', async () => {
+    const quality = world.named('e2e_m_quality', 'AirQualitySensor', 'AirQuality');
+    expect(logged(/caching: AirQuality: 5 \(as number; means POOR; from 'bad'\)/).length).toBeGreaterThan(0);
+
+    await world.notifies(quality, 2, () => world.fhem.change('e2e_m_quality', 'level', '2'));
+    expect(logged(/caching: AirQuality: 2 \(as number; means \?\?\?; from '2'\)/)).toHaveLength(1);
+
+    expect(await world.homebridge.read(quality)).toBe(2);
+    expect(logged(/cached: 2 \(as number; means \?\?\?\)/).length).toBeGreaterThan(0);
   });
 
   it('takes the accessory category a mapping names', () => {
@@ -427,6 +677,16 @@ describe('a read of a characteristic', () => {
   it('is answered with an error when the function that converts the reading fails', async () => {
     expect(await world.homebridge.read(world.named('e2e_m_failing', 'Lightbulb', 'Brightness'))).toBeUndefined();
     expect(logged(/e2e_m_failing-level reading2homekit: Error: boom/).length).toBeGreaterThan(0);
+  });
+
+  it('of the last activation of a contact fails before fhem was heard about its reading, and is answered from then on', async () => {
+    const lastActivation = world.named('e2e_m_unseen', 'ContactSensor', 'LastActivation');
+
+    // homebridge read it when it listed the accessories, before fhem had answered for the reading
+    expect(logged(/e2e-m-unseen: Custom LastActivation characteristic: last update unknown/)).toHaveLength(1);
+
+    await world.notifies(world.named('e2e_m_unseen', 'ContactSensor', 'ContactSensorState'), 1, () => world.fhem.change('e2e_m_unseen', 'door', 'open'));
+    expect(await world.homebridge.answer(lastActivation)).toEqual({ value: 0 });
   });
 
   it('asks fhem every time for a mapping with nocache', async () => {
@@ -467,6 +727,14 @@ describe('a value HomeKit writes', () => {
     // by the functions of the mapping and of the file
     ['e2e_m_json', 'Lightbulb', undefined, 'Brightness', 80, 'helligkeit 204', 'helligkeit', '204'],
     ['e2e_m_functions', 'Lightbulb', undefined, 'Brightness', 80, 'level 204', 'level', '204'],
+    // 20, counted back from the maxValue of 80
+    ['e2e_m_countdown', 'Lightbulb', undefined, 'Brightness', 20, 'left 60', 'left', '60'],
+    ['e2e_m_suffix_long', 'Switch', undefined, 'On', true, 'on 7', 'state', 'on 7'],
+    ['e2e_m_rebuilt', 'Lightbulb', undefined, 'Brightness', 40, 'level 40', 'level', '40'],
+    // the number of the mode matches the regular expression in cmds
+    ['e2e_m_modes_any', 'Thermostat', undefined, 'TargetHeatingCoolingState', 1, 'mode manual', 'mode', 'manual'],
+    ['e2e_m_pairs', 'Switch', undefined, 'On', false, 'aus', 'state', 'aus'],
+    ['e2e_m_selflink', 'Television', undefined, 'Active', 0, 'power off', 'power', 'off'],
   ])('to %s %s (%s) %s as %s reaches fhem as: set %s', async (device, service, name, type, value, command, reading, expected) => {
     await world.homebridge.write(world.named(device, service, type, name), value);
 
@@ -483,6 +751,27 @@ describe('a value HomeKit writes', () => {
 
     expect(logged(/e2e-m-delay delaying command Brightness/)).toHaveLength(3);
     expect(logged(/executing: .*set%20e2e_m_delay%20bright/)).toHaveLength(1);
+  });
+
+  it('waits half a second at least, also when the delay of the mapping is shorter', async () => {
+    const started = Date.now();
+    await world.homebridge.write(world.named('e2e_m_quick', 'Lightbulb', 'Brightness'), 60);
+    await world.fhem.wasSet('e2e_m_quick', 'bright 60', 'bright', '60');
+    const waited = Date.now() - started;
+
+    // timers of node may be a millisecond early
+    expect(waited).toBeGreaterThanOrEqual(495);
+    // and not the second a delay without a number waits
+    expect(waited).toBeLessThan(950);
+  });
+
+  it('to switch a light on is not sent while a delayed command waits, which switches it on itself', async () => {
+    await world.homebridge.write(world.named('e2e_m_delay', 'Lightbulb', 'Brightness'), 60);
+    await world.homebridge.write(world.named('e2e_m_delay', 'Lightbulb', 'On'), true);
+
+    await world.fhem.wasSet('e2e_m_delay', 'bright 60', 'bright', '60');
+    expect(logged(/e2e-m-delay: skipping set cmd for On with value (true|1)/)).toHaveLength(1);
+    expect(logged(/executing: .*set%20e2e_m_delay%20on/)).toEqual([]);
   });
 
   it('falls back to the default after the timeout, like a push button', async () => {
@@ -556,6 +845,8 @@ describe('a reading that changes in fhem', () => {
     ['e2e_m_multi', 'akku', '45', 'e2e_m_multi', 'BatteryService', undefined, 'BatteryLevel', 45],
     ['e2e_m_multi', 'charging', 'no', 'e2e_m_multi', 'BatteryService', undefined, 'ChargingState', 0],
     ['e2e_m_multi', 'temperature2', '-12.5', 'e2e_m_multi', 'TemperatureSensor', 'aussen', 'CurrentTemperature', -12.5],
+    // cut to minValue
+    ['e2e_m_multi', 'temperature2', '-45', 'e2e_m_multi', 'TemperatureSensor', 'aussen', 'CurrentTemperature', -30],
     ['e2e_m_tv', 'input', 'hdmi2', 'e2e_m_tv', 'Television', undefined, 'ActiveIdentifier', 2],
     ['e2e_m_tv', 'power', 'on', 'e2e_m_tv', 'Television', undefined, 'Active', 1],
     ['e2e_m_custom', 'watt', '20.5', 'e2e_m_custom', 'Switch', undefined, 'Power', 20.5],
@@ -565,6 +856,12 @@ describe('a reading that changes in fhem', () => {
     ['e2e_m_json', 'schalter', 'aus', 'e2e_m_json', 'Lightbulb', undefined, 'On', 0],
     ['e2e_m_json', 'helligkeit', '255', 'e2e_m_json', 'Lightbulb', undefined, 'Brightness', 100],
     ['e2e_m_functions', 'level', '255', 'e2e_m_functions', 'Lightbulb', undefined, 'Brightness', 100],
+    ['e2e_m_countdown', 'left', '80', 'e2e_m_countdown', 'Lightbulb', undefined, 'Brightness', 0],
+    // no number, so the default
+    ['e2e_m_default', 'temp', 'n/a', 'e2e_m_default', 'TemperatureSensor', undefined, 'CurrentTemperature', 7],
+    ['e2e_m_pending', 'state', 'on', 'e2e_m_pending', 'Switch', undefined, 'On', 1],
+    // true, from a function that answers true or false
+    ['e2e_m_typed', 'akku', '10', 'e2e_m_typed', 'BatteryService', undefined, 'StatusLowBattery', 1],
   ])('%s %s = %s is told to HomeKit as %s %s (%s) %s = %d', async (source, reading, value, device, service, name, type, expected) => {
     const target = world.named(device, service, type, name);
 
@@ -589,6 +886,36 @@ describe('a reading that changes in fhem', () => {
 
     // SINGLE_PRESS both times
     expect(presses().slice(before)).toEqual([0, 0]);
+  });
+
+  it('is told to HomeKit as text for a characteristic that holds text', async () => {
+    const name = world.characteristic('e2e_m_label', hapType.Switch, hapType.ConfiguredName);
+
+    await world.notifies(name, 'Kino', () => world.fhem.change('e2e_m_label', 'label', 'Kino'));
+    await world.becomes(name, 'Kino');
+  });
+
+  it('changes nothing when the function of the mapping answers what the characteristic can not hold', async () => {
+    const name = world.characteristic('e2e_m_typed', hapType.Switch, hapType.ConfiguredName);
+    expect(name.value).toBe('Kino');
+
+    await world.fhem.change('e2e_m_typed', 'label', 'broken');
+    await eventually(
+      'the plugin to say that it keeps the value',
+      () => (logged(/e2e_m_typed-label: \[object Object\] is no value for Configured Name, which keeps the one it has/).length ? true : undefined),
+      world.homebridge,
+    );
+    expect(await world.homebridge.read(name)).toBe('Kino');
+  });
+
+  it('is reported when it lacks the part the mapping names, and the other parts are still used', async () => {
+    const temperature = world.named('e2e_m_parts', 'TemperatureSensor', 'CurrentTemperature');
+    const humidity = world.named('e2e_m_parts', 'TemperatureSensor', 'CurrentRelativeHumidity');
+
+    await world.notifies(temperature, 23.5, () => world.fhem.change('e2e_m_parts', 'measurement', 'T: 23.5'));
+
+    expect(logged(/e2e_m_parts-measurement value T: 23\.5 has no part 3/)).toHaveLength(1);
+    expect(await world.homebridge.read(humidity)).toBe(65);
   });
 
   it('is reported once when the values of the mapping do not cover it, and changes nothing', async () => {

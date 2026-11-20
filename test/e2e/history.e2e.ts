@@ -193,6 +193,16 @@ describe('a reading that changes in fhem', () => {
 
     await eventually('the plugin to add the entry', () => (logged(entry).length ? true : undefined), world.homebridge);
   });
+
+  it('is not handed to the history when it is a concentration that is no number', async () => {
+    const entries = () => logged(/adding history entry \{ time: \d+, ppm: /).length;
+    const before = entries();
+
+    // HomeKit is told that the quality of the air is not known
+    await world.notifies(world.named('e2e_h_air', 'AirQualitySensor', 'AirQuality'), 0, () => world.fhem.change('e2e_h_air', 'co2', 'n/a'));
+
+    expect(entries()).toBe(before);
+  });
 });
 
 describe('homebridge starting again', () => {
