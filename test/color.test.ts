@@ -1,6 +1,8 @@
 // the colour conversions between what fhem reports and hue, saturation and brightness
 import { describe, expect, it } from 'vitest';
-import { color, sortByKey } from './support/subject.ts';
+import { device as fhemDevice } from './support/devices.ts';
+import { characteristicOf, read, serviceOf, write } from './support/homekit.ts';
+import { color, createWorld, hap, sortByKey } from './support/subject.ts';
 
 describe('rgb2hex', () => {
   it('formats three components or a list of them as six hex digits', () => {
@@ -110,6 +112,48 @@ describe('ct2rgb', () => {
   it('stays within a byte for the warmest light', () => {
     expect(color.ct2rgb(1000)).toBe('ff890e');
     expect(color.ct2rgb(1001)).toBe('ff890e');
+  });
+});
+
+describe('a light that is set with rgb and has not reported a colour yet', () => {
+  const { Hue, Saturation, Brightness } = hap.Characteristic;
+  const strip = () => fhemDevice({ Internals: { NAME: 'strip' }, Readings: { state: 'on' }, PossibleSets: 'on off rgb:colorpicker,RGB' });
+
+  it('is set to the colour HomeKit asks for at full saturation and brightness, also after fhem was asked for the colour it has', () => {
+    // fhem answers with nothing when it is asked for a reading the device does not have
+    const world = createWorld({ respond: () => '' });
+    const light = serviceOf(world.accessory(strip()).getServices(), 'Lightbulb');
+
+    // homebridge reads every characteristic when it lists its accessories
+    for (const type of [Hue, Saturation, Brightness]) {
+      read(characteristicOf(light, type));
+    }
+    write(characteristicOf(light, Hue), 120);
+
+    expect(world.sent.at(-1)).toBe('set strip rgb 00ff00');
+  });
+
+  it('is published and read without a word in the log', () => {
+    const world = createWorld({ respond: () => '' });
+    const light = serviceOf(world.accessory(strip()).getServices(), 'Lightbulb');
+
+    for (const type of [Hue, Saturation, Brightness]) {
+      read(characteristicOf(light, type));
+    }
+
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('reports a reading that is no colour, and keeps the colour it had worked out before', () => {
+    const world = createWorld();
+    const light = serviceOf(world.accessory({ ...strip(), Readings: { rgb: { Value: '0000ff', Time: '2026-08-16 12:00:00' } } }).getServices(), 'Lightbulb');
+
+    world.update('strip-rgb', 'on');
+    write(characteristicOf(light, Saturation), 50);
+
+    expect(world.log.errors()).toContain('error strip-rgb not a number: on');
+    // still blue, with half of its saturation
+    expect(world.sent.at(-1)).toBe('set strip rgb 8080ff');
   });
 });
 

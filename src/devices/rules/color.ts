@@ -162,14 +162,28 @@ export const rgb: Rule = ({ s, target, state }) => {
   return true;
 };
 
-/** hue, saturation or brightness of an rgb reading in the range of the characteristic. the fraction is kept in the cache. */
-function rgb2component(state: PluginState, mapping: Mapping, index: 0 | 1 | 2, suffix: string, orig: string): number {
-  const hsv = rgb2hsv(orig) as Hsv;
-  const value = toInt((hsv[index] as number) * (mapping.maxValue as number));
+/**
+ * Hue, saturation or brightness of an rgb reading in the range of the characteristic. The
+ * fraction is kept in the cache.
+ *
+ * A light that has not reported a colour yet has no rgb reading, and fhem answers with nothing
+ * when it is asked for it. That says nothing about the light: there is no value for HomeKit, and
+ * the fractions stay as they are. So do they for a reading that is no colour, which is reported
+ * as no number.
+ */
+function rgb2component(state: PluginState, mapping: Mapping, index: 0 | 1 | 2, suffix: string, orig: string | undefined): number | undefined {
+  if (!orig) {
+    return undefined;
+  }
 
-  state.cache.values[mapping.device + suffix] = hsv[index];
+  const fraction = (rgb2hsv(orig) as Hsv)[index];
+  if (fraction === undefined || isNaN(fraction)) {
+    return NaN;
+  }
 
-  return value;
+  state.cache.values[mapping.device + suffix] = fraction;
+
+  return toInt(fraction * (mapping.maxValue as number));
 }
 
 /** the rgb colour after one of hue, saturation and brightness changed, or undefined if it stays the same */
