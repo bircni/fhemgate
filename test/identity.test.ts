@@ -2,12 +2,12 @@
 // by the serial number, so these rules decide whether rooms and automations survive an update.
 import { describe, expect, it } from 'vitest';
 import { device, type DeviceOptions } from './support/devices.ts';
-import { createWorld, hap, sanitizeHapName } from './support/subject.ts';
+import { createWorld, hap, sanitizeHapName, type World } from './support/subject.ts';
 
 const FUUID = '5f0d1e7a-f33f-1a2b-3c4d-000000000001';
 
-function accessoryFor(options: DeviceOptions) {
-  return createWorld().accessory(device({ Readings: { state: 'on' }, PossibleSets: 'on off', ...options }));
+function accessoryFor(options: DeviceOptions, world = createWorld()) {
+  return world.accessory(device({ Readings: { state: 'on' }, PossibleSets: 'on off', ...options }));
 }
 
 describe('names', () => {
@@ -122,5 +122,34 @@ describe('information service', () => {
     const information = accessoryFor({ Internals: { FUUID: undefined as unknown as string } }).getServices()[0];
 
     expect(information?.getCharacteristic(hap.Characteristic.SerialNumber).value).toBe('<unknown>');
+  });
+});
+
+describe('a device that is no accessory', () => {
+  const skipped = (options: DeviceOptions, world?: World) => accessoryFor(options, world).skipped;
+
+  it('says why', () => {
+    expect(skipped({})).toBeUndefined();
+    expect(skipped({ Attributes: { genericDeviceType: 'ignore' } })).toBe('ignored');
+    expect(skipped({ Internals: { TYPE: 'structure' } })).toBe('ignored');
+    expect(skipped({ Internals: { TYPE: 'harmony', id: '1' } })).toBe('ignored');
+    expect(skipped({ Readings: {}, PossibleSets: '' })).toBe('undetected');
+  });
+
+  it.each([
+    ['Readings', 'noReadings'],
+    ['Attributes', 'noAttributes'],
+  ] as const)('says when fhem listed it without %s', (part, reason) => {
+    const s = device({ Readings: { state: 'on' }, PossibleSets: 'on off' });
+    delete (s as Partial<typeof s>)[part];
+
+    expect(createWorld().accessory(s).skipped).toBe(reason);
+  });
+
+  it('is published already', () => {
+    const world = createWorld();
+    accessoryFor({ Internals: { NAME: 'twice' } }, world).getServices();
+
+    expect(skipped({ Internals: { NAME: 'twice' } }, world)).toBe('duplicate');
   });
 });

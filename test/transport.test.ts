@@ -271,6 +271,18 @@ describe('authentication', () => {
 });
 
 describe('devices', () => {
+  it('leaves out the device behind a harmony hub also when its genericDisplayType names a service', async () => {
+    const hub = device({ Internals: { NAME: 'hub', TYPE: 'harmony', id: '7' }, Attributes: { genericDisplayType: 'switch' }, Readings: { state: 'on' } });
+    const platform = await connect({
+      devices: [
+        { Name: 'hub', ...hub },
+        { Name: 'lamp', ...lamp() },
+      ],
+    });
+
+    expect((await accessoriesOf(platform)).map((accessory) => accessory.name)).toEqual(['lamp']);
+  });
+
   it('asks for the devices of the filter and creates an accessory for each, sorted by name', async () => {
     const platform = await connect(
       {

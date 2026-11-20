@@ -50,6 +50,9 @@ export interface DetectionContext {
   state: PluginState;
 }
 
+/** whether a device gets an accessory: `ignored` is a device left out on purpose, `undetected` one nothing was recognised of */
+export type Detection = 'detected' | 'ignored' | 'undetected';
+
 /**
  * Looks at one thing a device can have or be and adds the mappings for it. Answers whether it
  * applied, or `stop` if the device is not to be published at all.
@@ -122,11 +125,11 @@ const rules: Rule[] = [
 ];
 
 /**
- * Fills in the service and the mappings of the target for the device. Answers false for a
- * device that gets no accessory. Nothing is logged for a device that is skipped on purpose
- * beyond a note.
+ * Fills in the service and the mappings of the target for the device. Answers whether the device
+ * gets an accessory, and if not whether it is left out on purpose or because nothing was
+ * recognised. Nothing is logged for a device that is left out on purpose beyond a note.
  */
-export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, state: PluginState): boolean {
+export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, state: PluginState): Detection {
   let genericType = s.Attributes.genericDeviceType;
   if (genericType === undefined) {
     genericType = s.Attributes.genericDisplayType;
@@ -134,14 +137,14 @@ export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, stat
 
   if (genericType === 'ignore') {
     target.log.info('ignoring ' + s.Internals.NAME);
-    return false;
+    return 'ignored';
   }
 
   target.service_name = genericType;
 
   if ((s.Internals.TYPE === 'structure' || s.Internals.TYPE === 'SVG' || s.Internals.TYPE === 'THRESHOLD') && genericType === undefined) {
     target.log.info('ignoring ' + s.Internals.NAME + ' (' + s.Internals.TYPE + ') without genericDeviceType');
-    return false;
+    return 'ignored';
   }
 
   target.mappings = {};
@@ -156,16 +159,16 @@ export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, stat
   const context: DetectionContext = { s, genericType, isHMCCU, target, state };
   for (const rule of rules) {
     if (rule(context) === 'stop') {
-      return false;
+      return 'ignored';
     }
   }
 
   if (target.service_name === undefined) {
     target.log.error(s.Internals.NAME + ': no service type detected');
-    return false;
+    return 'undetected';
   }
 
-  return true;
+  return 'detected';
 }
 
 /** what is settled only after the homebridgeMapping attribute was applied */
