@@ -211,6 +211,33 @@ function hsvComponent2rgb(state: PluginState, mapping: Mapping, orig: number): s
   return value;
 }
 
+// what HomeKit allows for a colour temperature, in mired
+const homekitMinMired = 140;
+const homekitMaxMired = 500;
+
+/**
+ * A light with a `ct` reading that is set with `set ct <mired>`, like a HUEDevice: HomeKit counts
+ * the colour temperature in mired as well. The range comes from the widget of the set command,
+ * `colorpicker,CT,<min>,<step>,<max>` or `slider,<min>,<step>,<max>`, as far as HomeKit allows it.
+ */
+export const colorTemperature: Rule = ({ s, target }) => {
+  const match = s.PossibleSets.match(/(^| )ct(:(colorpicker,CT|slider),(\d+),\d+,(\d+))?( |$)/);
+  if (!match || !s.Readings.ct) {
+    return false;
+  }
+
+  if (!target.service_name) {
+    target.service_name = 'light';
+  }
+  const mapping: Mapping = { reading: 'ct', cmd: 'ct', delay: true };
+  if (match[4] !== undefined && match[5] !== undefined) {
+    mapping.minValue = Math.max(parseInt(match[4]), homekitMinMired);
+    mapping.maxValue = Math.min(parseInt(match[5]), homekitMaxMired);
+  }
+  target.mappings.ColorTemperature = mapping;
+  return true;
+};
+
 /** the colour mode and the xy colour of a light are kept, to follow colours that are set as xy or colour temperature */
 export const colorMode: Rule = ({ s, target }) => {
   if (s.Readings.colormode) {

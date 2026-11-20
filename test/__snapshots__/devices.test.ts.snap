@@ -3434,6 +3434,12 @@ exports[`color/hue-color-ct > converts readings 1`] = `
     "591 <- "1500"",
     "-2 <- "-5"",
   ],
+  "ColorTemperature": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "153 <- "0" "1" "2" "3" "20" "50" "99" "100" "21.5" "-5" "0.35" "000000" "0.4573,0.41"",
+    "254 <- "254"",
+    "500 <- "1500"",
+  ],
   "Hue": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "0 <- "0" "1" "2" "3" "20" "50" "21.5" "-5" "0.35" "000000" "0.4573,0.41"",
@@ -3718,6 +3724,22 @@ exports[`color/hue-color-ct > gets its services 1`] = `
           "uuid": "0000002F-0000-1000-8000-0026BB765291",
           "value": 55,
         },
+        {
+          "name": "Color Temperature",
+          "props": {
+            "format": "int",
+            "maxValue": 500,
+            "minStep": 1,
+            "minValue": 153,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+          },
+          "uuid": "000000CE-0000-1000-8000-0026BB765291",
+          "value": 366,
+        },
       ],
       "linked": [],
       "name": "hue_color_ct",
@@ -3728,6 +3750,7 @@ exports[`color/hue-color-ct > gets its services 1`] = `
   "subscriptions": {
     "hue_color_ct-bri": 1,
     "hue_color_ct-colormode": 1,
+    "hue_color_ct-ct": 1,
     "hue_color_ct-hue": 1,
     "hue_color_ct-onoff": 1,
     "hue_color_ct-reachable": 1,
@@ -3759,6 +3782,19 @@ exports[`color/hue-color-ct > is detected 1`] = `
       "last_update": 1786881600,
       "reading": "bri",
       "reading2homekit": "[function]",
+    },
+    "ColorTemperature": {
+      "cached": 366,
+      "characteristic": "class ColorTemperature",
+      "characteristic_type": "ColorTemperature",
+      "cmd": "ct",
+      "delay": true,
+      "device": "hue_color_ct",
+      "informId": "hue_color_ct-ct",
+      "last_update": 1786881600,
+      "maxValue": 500,
+      "minValue": 153,
+      "reading": "ct",
     },
     "Hue": {
       "cached": 46,
@@ -3851,6 +3887,21 @@ exports[`color/hue-color-ct > sends commands 1`] = `
     "set hue_color_ct pct 90 <- 90",
     "set hue_color_ct pct 359 <- 359",
   ],
+  "ColorTemperature": [
+    "set hue_color_ct ct true <- true",
+    "set hue_color_ct ct false <- false",
+    "set hue_color_ct ct 0 <- 0",
+    "set hue_color_ct ct 1 <- 1",
+    "set hue_color_ct ct 2 <- 2",
+    "set hue_color_ct ct 3 <- 3",
+    "set hue_color_ct ct 10 <- 10",
+    "set hue_color_ct ct 50 <- 50",
+    "set hue_color_ct ct 100 <- 100",
+    "set hue_color_ct ct 21.5 <- 21.5",
+    "set hue_color_ct ct -90 <- -90",
+    "set hue_color_ct ct 90 <- 90",
+    "set hue_color_ct ct 359 <- 359",
+  ],
   "Hue": [
     "set hue_color_ct hue true <- true",
     "set hue_color_ct hue false <- false",
@@ -3917,6 +3968,10 @@ exports[`color/hue-color-ct > updates characteristics 1`] = `
   ],
   "hue_color_ct-colormode": [
     "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+  "hue_color_ct-ct": [
+    "Color Temperature=366 <- "on" "off"",
+    "Color Temperature=153 <- "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
   "hue_color_ct-hue": [
     "Hue=46 <- "on" "off"",
@@ -4413,6 +4468,12 @@ exports[`color/hue-color-xy > converts readings 1`] = `
     "591 <- "1500"",
     "-2 <- "-5"",
   ],
+  "ColorTemperature": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "153 <- "0" "1" "2" "3" "20" "50" "99" "100" "21.5" "-5" "0.35" "000000" "0.4573,0.41"",
+    "254 <- "254"",
+    "500 <- "1500"",
+  ],
   "Hue": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "0 <- "0" "1" "2" "3" "20" "50" "21.5" "-5" "0.35" "000000" "0.4573,0.41"",
@@ -4697,6 +4758,22 @@ exports[`color/hue-color-xy > gets its services 1`] = `
           "uuid": "0000002F-0000-1000-8000-0026BB765291",
           "value": 55,
         },
+        {
+          "name": "Color Temperature",
+          "props": {
+            "format": "int",
+            "maxValue": 500,
+            "minStep": 1,
+            "minValue": 153,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+          },
+          "uuid": "000000CE-0000-1000-8000-0026BB765291",
+          "value": 366,
+        },
       ],
       "linked": [],
       "name": "hue_color_xy",
@@ -4707,6 +4784,7 @@ exports[`color/hue-color-xy > gets its services 1`] = `
   "subscriptions": {
     "hue_color_xy-bri": 1,
     "hue_color_xy-colormode": 1,
+    "hue_color_xy-ct": 1,
     "hue_color_xy-hue": 1,
     "hue_color_xy-onoff": 1,
     "hue_color_xy-reachable": 1,
@@ -4738,6 +4816,19 @@ exports[`color/hue-color-xy > is detected 1`] = `
       "last_update": 1786881600,
       "reading": "bri",
       "reading2homekit": "[function]",
+    },
+    "ColorTemperature": {
+      "cached": 366,
+      "characteristic": "class ColorTemperature",
+      "characteristic_type": "ColorTemperature",
+      "cmd": "ct",
+      "delay": true,
+      "device": "hue_color_xy",
+      "informId": "hue_color_xy-ct",
+      "last_update": 1786881600,
+      "maxValue": 500,
+      "minValue": 153,
+      "reading": "ct",
     },
     "Hue": {
       "cached": 46,
@@ -4830,6 +4921,21 @@ exports[`color/hue-color-xy > sends commands 1`] = `
     "set hue_color_xy pct 90 <- 90",
     "set hue_color_xy pct 359 <- 359",
   ],
+  "ColorTemperature": [
+    "set hue_color_xy ct true <- true",
+    "set hue_color_xy ct false <- false",
+    "set hue_color_xy ct 0 <- 0",
+    "set hue_color_xy ct 1 <- 1",
+    "set hue_color_xy ct 2 <- 2",
+    "set hue_color_xy ct 3 <- 3",
+    "set hue_color_xy ct 10 <- 10",
+    "set hue_color_xy ct 50 <- 50",
+    "set hue_color_xy ct 100 <- 100",
+    "set hue_color_xy ct 21.5 <- 21.5",
+    "set hue_color_xy ct -90 <- -90",
+    "set hue_color_xy ct 90 <- 90",
+    "set hue_color_xy ct 359 <- 359",
+  ],
   "Hue": [
     "set hue_color_xy hue true <- true",
     "set hue_color_xy hue false <- false",
@@ -4896,6 +5002,10 @@ exports[`color/hue-color-xy > updates characteristics 1`] = `
   ],
   "hue_color_xy-colormode": [
     "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
+  "hue_color_xy-ct": [
+    "Color Temperature=366 <- "on" "off"",
+    "Color Temperature=153 <- "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
   "hue_color_xy-hue": [
     "Hue=46 <- "on" "off"",

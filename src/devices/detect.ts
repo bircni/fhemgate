@@ -4,7 +4,7 @@ import type { Logging } from 'homebridge';
 import type { Mapping, Mappings } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import { doorState, garage, blind, hmSecWin, positionState, window } from './rules/blinds.ts';
-import { colorMode, hue, milight, rgb, saturation, wifilight } from './rules/color.ts';
+import { colorMode, colorTemperature, hue, milight, rgb, saturation, wifilight } from './rules/color.ts';
 import { fs20di, fs20Dimmer, homematicDimmer, hueBrightness, zwaveDimmer } from './rules/dimmers.ts';
 import { hmSecKey, lock } from './rules/locks.ts';
 import { harmony, sonos, volume } from './rules/media.ts';
@@ -74,6 +74,7 @@ const rules: Rule[] = [
   saturation,
   firstOf(milight, wifilight),
   rgb,
+  colorTemperature,
   colorMode,
 
   volume,
