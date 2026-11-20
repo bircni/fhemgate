@@ -128,18 +128,19 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that homebridge is connected 
       await world.fhem.wasSet('e2e_c_words', 'farbe grün 50%', 'state', 'farbe grün 50%');
     });
 
+    // fhem takes a semicolon for the end of a command
     it('with a semicolon reaches fhem as two commands', async () => {
       await world.notifies(on('e2e_c_other'), 1, () => world.homebridge.write(on('e2e_c_chars'), true));
 
       expect(world.fhem.fake.commands).toContain('set e2e_c_chars on;set e2e_c_other on');
     });
 
-    it('is cut short at an ampersand, and loses the csrf token behind a hash sign, so that fhem refuses it', async () => {
+    it('reaches fhem whole with an ampersand and a hash sign in it, and with the csrf token behind it', async () => {
       await world.homebridge.write(on('e2e_c_chars'), false);
 
-      await world.fhem.wasTold('set e2e_c_chars text a');
-      expect(world.fhem.fake.requests.at(-1)?.url).toBe('/fhem?cmd=set%20e2e_c_chars%20text%20a&b');
-      await says(world.homebridge, / {2}400: Bad Request/);
+      await world.fhem.wasSet('e2e_c_chars', 'text a&b#c', 'state', 'text a&b#c');
+      expect(world.fhem.fake.requests.map((request) => request.url)).toContain('/fhem?cmd=set%20e2e_c_chars%20text%20a%26b%23c&fwcsrf=csrf_fake_token&XHR=1');
+      expect(logged(world.homebridge, /400: Bad Request/)).toEqual([]);
     });
   });
 

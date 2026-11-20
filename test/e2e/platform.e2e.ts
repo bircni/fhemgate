@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, inject, it } from 'vitest';
 import { asJsonlist2, realFhemUrl, startStandIn, type StandIn } from './fhem.ts';
 import { hapType, startHomebridge, type HapAccessory, type Homebridge } from './homebridge.ts';
-import { eventually, notifying, published, worldOf, type World } from './world.ts';
+import { eventually, notifying, published, servicesByName, worldOf, type World } from './world.ts';
 
 const lamp = (name: string, room: string) => asJsonlist2({ name, setList: 'on off', readings: { state: 'off' } }, room);
 
@@ -175,6 +175,8 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     return { fhem, homebridge };
   }
 
+  const names = (accessories: HapAccessory[]) => accessories.map((accessory) => accessory.name).sort();
+
   const says = (homebridge: Homebridge, pattern: RegExp) =>
     eventually(`homebridge to log ${String(pattern)}`, () => (logged(homebridge, pattern).length ? true : undefined), homebridge, 60_000);
 
@@ -184,11 +186,13 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     }
   });
 
-  it('ends homebridge when ssl is not true or false', async () => {
-    const { homebridge } = await start([lamp('e2e_p_lamp', 'a')], {}, { ssl: 'yes' });
+  it('takes an ssl that is neither true nor false for false, says so and goes on', async () => {
+    const { fhem, homebridge } = await start([lamp('e2e_p_lamp', 'a')], {}, { ssl: 'yes' });
 
-    expect(await homebridge.exited()).toBe(0);
-    expect(logged(homebridge, /config: value for ssl has to be boolean\./)).toHaveLength(1);
+    expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
+    expect(logged(homebridge, /config: value for ssl has to be boolean\. taking "yes" as false\./)).toHaveLength(1);
+    // asked without TLS, which is all the stand-in speaks here
+    expect(fhem.fake.streams).toHaveLength(1);
   });
 
   it('asks over https when ssl is true', async () => {
@@ -200,46 +204,64 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     expect(fhem.fake.requests).toEqual([]);
   });
 
-  it('creates the attributes fhem does not know yet, and then ends homebridge', async () => {
+  it('creates the attributes fhem does not know yet, says that homebridge is to be restarted for them, and goes on', async () => {
     const { fhem, homebridge } = await start([lamp('e2e_p_lamp', 'a')], { userattr: 'siriName' });
 
-    expect(await homebridge.exited()).toBe(0);
+    expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
     expect(fhem.fake.commands).toContain('{ addToAttrList( "homebridgeMapping:textField-long" ) }');
     expect(fhem.fake.commands).toContain(
       '{addToAttrList( "genericDeviceType:security,ignore,switch,outlet,light,blind,thermometer,thermostat,contact,garage,window,lock" ) }',
     );
+    await says(homebridge, /genericDeviceType attribute was not known to fhem and was created\. restart homebridge after giving it to devices\./);
     expect(logged(homebridge, /homebridgeMapping attribute created\./)).toHaveLength(1);
-    expect(logged(homebridge, /genericDeviceType attribute was not known\. please restart\./)).toHaveLength(1);
+    // homebridge still answers
+    expect(names(await homebridge.accessories())).toEqual(['e2e_p_lamp']);
   });
 
-  it('never hands homebridge its accessories when fhem refuses to list the devices', async () => {
-    const { homebridge } = await start([lamp('e2e_p_lamp', 'a')], { answer: (cmd) => (cmd === 'jsonlist2' ? { status: 500, body: 'no' } : undefined) });
+  it('asks fhem for the devices again when it does not list them, and hands homebridge no empty list meanwhile', async () => {
+    // refused once, then answered with something that is no list of devices
+    const answers = [
+      { status: 500, body: 'no' },
+      { status: 200, body: '<html>busy</html>' },
+    ];
+    const { homebridge } = await start([lamp('e2e_p_lamp', 'a')], { answer: (cmd) => (cmd === 'jsonlist2' ? answers.shift() : undefined) });
 
-    await says(homebridge, /There was a problem connecting to FHEM/);
+    await says(homebridge, /fetching the devices failed for the 1\. time, trying again in: 3000msec/);
     expect(logged(homebridge, / {2}500: Internal Server Error/)).toHaveLength(1);
+    // homebridge still waits for the platform
     await expect(homebridge.accessories()).rejects.toThrow('fetch failed');
+
+    await says(homebridge, /fetching the devices failed for the 2\. time, trying again in: 6000msec/);
+    expect(logged(homebridge, / {2}the answer is no list of devices/)).toHaveLength(1);
+
+    expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
   });
 
-  it('opens the long poll again and again when it lacks the password FHEMWEB asks for', async () => {
-    const { fhem, homebridge } = await start([lamp('e2e_p_lamp', 'a')], { auth: { user: 'homebridge', pass: 'secret' } });
+  it.each([
+    ['lacks the password FHEMWEB asks for', { auth: { user: 'homebridge', pass: 'secret' } }, '401 Unauthorized'],
+    ['is refused by FHEMWEB', { forbidden: true }, '403 Forbidden'],
+  ])('reports a long poll that %s as failed authentication, waits longer every time and asks nothing else', async (_what, fhemOptions, status) => {
+    const { fhem, homebridge } = await start([lamp('e2e_p_lamp', 'a')], fhemOptions);
+    const refused = (pause: number) =>
+      new RegExp(
+        `longpoll refused by fhem with ${status}: authentication failed\\. check user and password \\(auth\\) of the platform\\. retry in: ${pause}msec`,
+      );
 
-    await eventually('the plugin to open the long poll for the fourth time', () =>
-      fhem.fake.requests.filter((request) => request.url.includes('inform=')).length > 3 ? true : undefined,
-    );
-    // with a pause that grows by half a second every time
-    const pauses = logged(homebridge, /longpoll ended, reconnect in: /).map((line) => line.replace(/^.*reconnect in: /, ''));
-    expect(pauses.slice(0, 3)).toEqual(['200msec', '700msec', '1200msec']);
-    await says(homebridge, / {2}401: Unauthorized/);
+    await says(homebridge, refused(3000));
+    await says(homebridge, refused(6000));
+
+    expect(logged(homebridge, /longpoll ended, reconnect in: /)).toEqual([]);
+    expect(fhem.fake.requests.every((request) => request.url.includes('inform='))).toBe(true);
     expect(fhem.fake.streams).toEqual([]);
   });
 
-  it('fails for a scope that is a list', async () => {
-    const { homebridge } = await start([lamp('e2e_p_lamp', 'a')], {}, { scope: ['siri'] });
+  it('takes a scope that is a list', async () => {
+    const { homebridge } = await start([lamp('e2e_p_lamp', 'a')], {}, { scope: ['alexa', 'siri'] });
 
-    await says(homebridge, /TypeError: scopes\.grep is not a function/);
+    expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
   });
 
-  it('publishes nothing when a mapping of one device names a service HomeKit does not know, as the README does', async () => {
+  it('knows the battery service by the name it had before HAP-NodeJS 2, which the README uses', async () => {
     const { homebridge } = await start([
       lamp('e2e_p_lamp', 'a'),
       asJsonlist2({
@@ -250,11 +272,25 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
       }),
     ]);
 
-    await says(homebridge, /Cannot add a Service with the same UUID/);
-    // the service of the README is called Battery by now, and the plugin makes a second switch of what it does not know
-    expect(logged(homebridge, /e2e-p-battery: service name BatteryService unknown/)).toHaveLength(1);
-    expect(logged(homebridge, /switch service \(default\) for e2e-p-battery/)).toHaveLength(1);
-    expect(logged(homebridge, /e2e_p_lamp is switch/)).toHaveLength(1);
-    expect(await homebridge.accessories().catch(() => [])).toEqual([]);
+    expect(servicesByName(await published(homebridge, 2))).toEqual({
+      e2e_p_battery: [hapType.Switch, hapType.BatteryService],
+      e2e_p_lamp: [hapType.Switch],
+    });
+  });
+
+  it('skips a mapping that names a service HomeKit does not know, and publishes the rest of the device and the others', async () => {
+    const { homebridge } = await start([
+      lamp('e2e_p_lamp', 'a'),
+      asJsonlist2({
+        name: 'e2e_p_unknown',
+        setList: 'on off',
+        readings: { state: 'on', level: '80' },
+        attributes: { genericDeviceType: 'switch', homebridgeMapping: 'On=state,cmdOn=on,cmdOff=off Akku#BatteryLevel=level' },
+      }),
+    ]);
+
+    expect(servicesByName(await published(homebridge, 2))).toEqual({ e2e_p_lamp: [hapType.Switch], e2e_p_unknown: [hapType.Switch] });
+    expect(logged(homebridge, /e2e-p-unknown: service name Akku unknown/)).toHaveLength(1);
+    expect(logged(homebridge, /Cannot add a Service with the same UUID/)).toEqual([]);
   });
 });
