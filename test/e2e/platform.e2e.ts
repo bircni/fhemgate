@@ -458,7 +458,7 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
 
     const accessories = await published(homebridge, 3);
     expect(names(accessories)).toEqual(['e2e_p_lamp', 'e2e_p_quality', 'e2e_p_unseen']);
-    // a read asks fhem for the reading, which it answers with nothing once the read is over
+    // a read asks fhem for the reading, which it answers with nothing
     await homebridge.answer(
       worldOf(fhem, homebridge, accessories, (device) => device).characteristic('e2e_p_unseen', hapType.TemperatureSensor, hapType.CurrentTemperature),
     );
@@ -468,7 +468,17 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     expect(await page('/')).toBe('<a href="/cached">cached</a><br><a href="/subscriptions">subscriptions</a>');
 
     // the answer is the line after the question, and empty
-    await says(homebridge, /\[FHEM\] {3}value: $/m);
+    await eventually(
+      'fhem to answer the question for the reading',
+      () => {
+        const lines = homebridge.output().split('\n');
+        const asked = lines
+          .map((line, index) => (/executing: .*ReadingsVal\(%22e2e_p_unseen%22%2C%22later%22/.test(line) ? index : -1))
+          .filter((index) => index >= 0);
+        return asked.some((index) => /\[FHEM\] {3}value: $/.test(lines[index + 1] ?? '')) ? true : undefined;
+      },
+      homebridge,
+    );
     let cached = await page('/cached');
     expect(cached).toContain(`http://127.0.0.1:${fhem.fake.port}/fhem<br>&nbsp;&nbsp;connected: true; connects: 1<br>`);
     expect(cached).not.toContain('last event: ');

@@ -441,18 +441,31 @@ export class FhemAccessory {
         return;
       }
       if (value === undefined) {
-        callback(1);
+        // fhem has no such reading: the default of the mapping, if it has one. nothing is made up
+        // from the empty answer and kept at the mapping.
+        if (mapping === undefined) {
+          callback(undefined, '');
+        } else if (mapping.default !== undefined) {
+          callback(undefined, mapping.default);
+        } else {
+          callback(1);
+        }
         return;
       }
 
-      // the read that waited gets the value as its answer, so HomeKit is not told again
-      this.#state.update(informId, value, true);
+      // the read that waited gets the value as its answer, so HomeKit is not told again. an event
+      // that arrived while fhem was asked is newer, and is the answer then.
+      const newer = this.#state.cache.get(informId) !== before;
+      const answer = newer ? this.#state.cache.get(informId) : value;
+      if (!newer) {
+        this.#state.update(informId, value, true);
+      }
       // without a mapping there is nothing to convert the reading with
-      const converted = mapping ? reading2homekit(mapping, value) : value;
+      const converted = mapping ? reading2homekit(mapping, answer) : answer;
       if (converted === undefined) {
         callback(1);
       } else {
-        callback(undefined, converted);
+        callback(undefined, converted as HomekitValue);
       }
     });
     return undefined;
