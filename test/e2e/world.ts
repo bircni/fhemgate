@@ -219,9 +219,9 @@ async function startWorldFor<Fhem extends FhemUnderTest>(
   }
 
   const homebridge = await startHomebridge({ ...fhem.platformConfig, ...options.platform }, options.files);
-  const listed = await published(homebridge, options.publishes ?? devices.length);
+  await published(homebridge, options.publishes ?? devices.length);
   await quiet(homebridge);
-  const accessories = await homebridge.readAll(listed);
+  const accessories = await homebridge.readAll(await homebridge.accessories());
   await homebridge.subscribe(notifying(accessories));
 
   // HomeKit is told the siriName of a device as the name of its accessory, or its alias, or the name it has in fhem

@@ -467,7 +467,8 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
 
     expect(await page('/')).toBe('<a href="/cached">cached</a><br><a href="/subscriptions">subscriptions</a>');
 
-    await says(homebridge, /executing: .*ReadingsVal\(%22e2e_p_unseen%22%2C%22later%22/);
+    // the answer is the line after the question, and empty
+    await says(homebridge, /\[FHEM\] {3}value: $/m);
     let cached = await page('/cached');
     expect(cached).toContain(`http://127.0.0.1:${fhem.fake.port}/fhem<br>&nbsp;&nbsp;connected: true; connects: 1<br>`);
     expect(cached).not.toContain('last event: ');

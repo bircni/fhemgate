@@ -416,7 +416,7 @@ export class FhemAccessory {
     // HomeKit is not left waiting when fhem takes its time: it gets the value last seen, or an
     // error if there never was one, and the answer of fhem is published when it comes
     if (callback === undefined) {
-      this.#ask(informId, cmd);
+      this.#askInBackground(informId, cmd);
       return undefined;
     }
 
@@ -432,44 +432,61 @@ export class FhemAccessory {
       }
     }, QUERY_TIMEOUT);
 
-    this.execute(cmd, (result) => {
+    const before = this.#state.cache.get(informId);
+    this.#ask(cmd, (value) => {
       clearTimeout(timer);
-      const value = result.replace(/[\r\n]/g, '');
-      this.log.debug('  value: ' + value);
-
-      // the read that waited gets the value as its answer. one that was answered meanwhile is
-      // told with an update like any change in fhem. fhem answers with nothing for a reading it
-      // does not have, which is no value of the reading.
-      if (value !== '') {
-        this.#state.update(informId, value, !timedOut);
+      if (timedOut) {
+        // the read was answered meanwhile: this is an answer nobody waits for any more
+        this.#take(informId, value, before);
+        return;
+      }
+      if (value === undefined) {
+        callback(1);
+        return;
       }
 
-      if (!timedOut) {
-        // without a mapping there is nothing to convert the reading with
-        const converted = mapping ? reading2homekit(mapping, value) : value;
-        if (converted === undefined) {
-          callback(1);
-        } else {
-          callback(undefined, converted);
-        }
+      // the read that waited gets the value as its answer, so HomeKit is not told again
+      this.#state.update(informId, value, true);
+      // without a mapping there is nothing to convert the reading with
+      const converted = mapping ? reading2homekit(mapping, value) : value;
+      if (converted === undefined) {
+        callback(1);
+      } else {
+        callback(undefined, converted);
       }
     });
     return undefined;
   }
 
   /**
-   * Asks fhem for a reading nobody waits for, and takes the answer like any value of fhem. Not
-   * when fhem has no such reading and answers nothing, and not when an event arrived meanwhile,
-   * which is newer. A characteristic that tells of the presses of a button is not told of it.
+   * Asks fhem for a reading. The answer is undefined when fhem has no such reading: it answers
+   * with nothing then, which is no value of the reading.
    */
-  #ask(informId: string, cmd: string): void {
-    const before = this.#state.cache.get(informId);
+  #ask(cmd: string, answered: (value: string | undefined) => void): void {
     this.execute(cmd, (result) => {
-      const value = result.replace(/[\r\n]/g, '');
-      this.log.debug('  value: ' + value);
-      if (value !== '' && this.#state.cache.get(informId) === before) {
-        this.#state.answer(informId, value);
-      }
+      this.log.debug('  value: ' + result);
+      answered(result === '' ? undefined : result);
+    });
+  }
+
+  /**
+   * Takes an answer nobody waits for like any value of fhem: not when it is none, and not when an
+   * event arrived meanwhile, which is newer. A characteristic that tells of the presses of a
+   * button is not told of it.
+   *
+   * @param before what the cache held when fhem was asked
+   */
+  #take(informId: string, value: string | undefined, before: unknown): void {
+    if (value !== undefined && this.#state.cache.get(informId) === before) {
+      this.#state.answer(informId, value);
+    }
+  }
+
+  /** asks fhem for a reading nobody waits for, see #take */
+  #askInBackground(informId: string, cmd: string): void {
+    const before = this.#state.cache.get(informId);
+    this.#ask(cmd, (value) => {
+      this.#take(informId, value, before);
     });
   }
 
@@ -486,7 +503,7 @@ export class FhemAccessory {
       return;
     }
     this.#refreshed.set(informId, now);
-    this.#ask(informId, cmd);
+    this.#askInBackground(informId, cmd);
   }
 
   isInRoom(room: string | undefined): boolean {

@@ -228,10 +228,12 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       const reading = mapping.reading as string;
       let orig: unknown = undefined;
       if (device !== owner.device) {
-        // what the plugin has seen of the reading of the other device. fhem is asked all the same,
-        // and what it answers is told like any change.
-        orig = environment.cached[mapping.informId];
-        owner.query(mapping);
+        // what the plugin has seen of the reading of the other device, or else what fhem answers,
+        // which is told like any change
+        orig = mapping.nocache ? undefined : environment.cached[mapping.informId];
+        if (orig === undefined) {
+          owner.query(mapping);
+        }
       } else if (s.Readings[reading]?.Value) {
         orig = s.Readings[reading].Value;
       }
@@ -249,7 +251,8 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         }
       }
 
-      if (s.Readings[reading]?.Time) {
+      // the time of a reading of the device itself. one of another device is stamped when it changes.
+      if (device === owner.device && s.Readings[reading]?.Time) {
         const date = new Date(s.Readings[reading].Time);
         mapping.last_update = toInt(date.getTime() / 1000);
       }

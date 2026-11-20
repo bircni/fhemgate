@@ -667,7 +667,7 @@ describe('a read of a characteristic', () => {
 
   it('is answered from what the plugin has seen, and fhem is asked in the background once a minute at most', async () => {
     const temperature = world.named('e2e_m_parts', 'TemperatureSensor', 'CurrentTemperature');
-    // the test read every characteristic when homebridge listed the accessories, which was the first read of this minute
+    // homebridge read every characteristic when it first listed the accessories, which was the first read of this minute
     const before = asked('e2e_m_parts');
     expect(before).toBeGreaterThan(0);
 
@@ -686,7 +686,10 @@ describe('a read of a characteristic', () => {
     const lastActivation = world.named('e2e_m_unseen', 'ContactSensor', 'LastActivation');
 
     await world.notifies(world.named('e2e_m_unseen', 'ContactSensor', 'ContactSensorState'), 1, () => world.fhem.change('e2e_m_unseen', 'door', 'open'));
-    expect(await world.homebridge.answer(lastActivation)).toEqual({ value: 0 });
+    // the seconds from the start of the history to the change, which may be one when the second turns between them
+    const { value, status } = await world.homebridge.answer(lastActivation);
+    expect(status).toBeUndefined();
+    expect([0, 1]).toContain(value);
   });
 
   it('asks fhem every time for a mapping with nocache', async () => {

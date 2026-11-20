@@ -521,12 +521,13 @@ describe('devices', () => {
 });
 
 describe('the reading of another device', () => {
-  const thermometer = (mapping: string) => ({
-    Name: 'heating',
-    ...device({ Internals: { NAME: 'heating' }, Readings: { state: 'ok' }, Attributes: { genericDeviceType: 'thermometer', homebridgeMapping: mapping } }),
+  const thermometer = (mapping: string, name = 'heating') => ({
+    Name: name,
+    ...device({ Internals: { NAME: name }, Readings: { state: 'ok' }, Attributes: { genericDeviceType: 'thermometer', homebridgeMapping: mapping } }),
   });
-  const temperatureOf = (accessory: Accessory) =>
-    characteristicOf(serviceOf(accessory.getServices(), 'TemperatureSensor'), hap.Characteristic.CurrentTemperature).value;
+  const temperature = (accessory: Accessory) =>
+    characteristicOf(serviceOf(accessory.getServices(), 'TemperatureSensor'), hap.Characteristic.CurrentTemperature);
+  const temperatureOf = (accessory: Accessory) => temperature(accessory).value;
   const answered = (value = '') => waitFor(() => world.log.debugLines.some((line) => line.includes('value: ' + value)), 'fhem to answer');
 
   it('is shown to HomeKit once fhem answered the question for it, which nobody waits for', async () => {
@@ -565,8 +566,7 @@ describe('the reading of another device', () => {
       Name: 'a_sensor',
       ...device({ Internals: { NAME: 'a_sensor' }, Readings: { temperature: '18.5' }, Attributes: { genericDeviceType: 'thermometer' } }),
     };
-    const heating = { ...thermometer('CurrentTemperature=a_sensor:temperature'), Name: 'b_heating' };
-    heating.Internals.NAME = 'b_heating';
+    const heating = thermometer('CurrentTemperature=a_sensor:temperature', 'b_heating');
     const platform = await connect({ devices: [sensor, heating], readings: { 'a_sensor temperature': '18.5' } });
 
     const [, built] = await accessoriesOf(platform);
@@ -574,16 +574,42 @@ describe('the reading of another device', () => {
     expect(temperatureOf(built as Accessory)).toBe(18.5);
   });
 
-  it('caches no answer of nothing for a read that waits for it', async () => {
+  it('answers a read that waits with an error when fhem has no such reading, and asks again on the next', async () => {
     const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature')] }));
-    world.cached['other-temperature'] = undefined;
+    const asked = () => fhem.commands.filter((cmd) => cmd.includes('ReadingsVal("other","temperature"')).length;
+    // the question asked while the accessory was built
+    await answered();
+    const before = asked();
 
-    await characteristicOf(serviceOf(accessory.getServices(), 'TemperatureSensor'), hap.Characteristic.CurrentTemperature)
-      .handleGetRequest()
-      .catch(() => undefined);
+    await expect(temperature(accessory).handleGetRequest()).rejects.toBeDefined();
+    await expect(temperature(accessory).handleGetRequest()).rejects.toBeDefined();
 
     expect(world.cached['other-temperature']).toBeUndefined();
+    expect(asked()).toBe(before + 2);
   });
+
+  it('takes an answer that comes after the read gave up waiting like one nobody waits for', async () => {
+    const platform = await connect({
+      devices: [thermometer('CurrentTemperature=other:temperature,nocache=true')],
+      readings: { 'other temperature': '18.5' },
+      holds: (cmd) => cmd.includes('ReadingsVal'),
+    });
+    const accessory = await firstAccessoryOf(platform);
+    await waitFor(() => fhem.held() > 0, 'the question asked while the accessory was built');
+    fhem.release();
+    await answered('18.5');
+
+    // fhem takes longer than a read waits
+    await temperature(accessory).handleGetRequest();
+    expect(world.log.debugLines.some((line) => line.includes('query: no answer from fhem for other-temperature within 2 seconds'))).toBe(true);
+    fhem.event('other-temperature', '21');
+    await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
+    await waitFor(() => fhem.held() > 0, 'the read to be held');
+    fhem.release();
+    await waitFor(() => world.log.debugLines.filter((line) => line.includes('value: 18.5')).length >= 2, 'fhem to answer the read');
+
+    expect(temperatureOf(accessory)).toBe(21);
+  }, 10_000);
 
   it('tells HomeKit of no press of a button when fhem answers for it', async () => {
     const platform = await connect({
