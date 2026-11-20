@@ -4,8 +4,9 @@
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, inject, it } from 'vitest';
+import { selfSignedCertificate } from '../support/tls.ts';
 import { asJsonlist2, realFhemUrl, startStandIn, type StandIn } from './fhem.ts';
-import { hapType, startHomebridge, type HapAccessory, type Homebridge } from './homebridge.ts';
+import { freePort, hapType, startHomebridge, type HapAccessory, type HapCharacteristic, type Homebridge } from './homebridge.ts';
 import { eventually, notifying, published, servicesByName, worldOf, type World } from './world.ts';
 
 const lamp = (name: string, room: string) => asJsonlist2({ name, setList: 'on off', readings: { state: 'off' } }, room);
@@ -292,5 +293,125 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     expect(servicesByName(await published(homebridge, 2))).toEqual({ e2e_p_lamp: [hapType.Switch], e2e_p_unknown: [hapType.Switch] });
     expect(logged(homebridge, /e2e-p-unknown: service name Akku unknown/)).toHaveLength(1);
     expect(logged(homebridge, /Cannot add a Service with the same UUID/)).toEqual([]);
+  });
+
+  it('leaves out what fhem lists that it can not make an accessory of, and publishes the rest', async () => {
+    const good = lamp('e2e_p_lamp', 'a');
+    // an entry that is nothing, and one that has a name and nothing else
+    const results = [null, { Name: 'e2e_p_broken' }, { Name: 'e2e_p_lamp', ...good }];
+    const { homebridge } = await start([good], {
+      answer: (cmd) => (cmd === 'jsonlist2' ? { body: JSON.stringify({ Arg: '', Results: results, totalResultsReturned: results.length }) } : undefined),
+    });
+
+    expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
+    expect(logged(homebridge, /no accessory created for e2e_p_broken: /)).toHaveLength(1);
+    expect(logged(homebridge, /no accessory created for a device without a name: /)).toHaveLength(1);
+  });
+
+  describe('with a FHEMWEB that has a certificate nobody vouches for', () => {
+    const certificate = selfSignedCertificate();
+    const auth = { user: 'homebridge', pass: 'secret' };
+
+    it.each<[string, { auth?: typeof auth; rejectUnauthorized?: boolean }]>([
+      ['with auth', { auth }],
+      ['when rejectUnauthorized is false', { rejectUnauthorized: false }],
+    ])('does not check the certificate %s', async (_when, platform) => {
+      const { fhem, homebridge } = await start([lamp('e2e_p_lamp', 'a')], { tls: certificate, auth: platform.auth }, { ssl: true, ...platform });
+
+      expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
+      expect(fhem.fake.streams).toHaveLength(1);
+    });
+
+    it.each<[string, { auth?: typeof auth; rejectUnauthorized?: boolean }]>([
+      ['without auth', {}],
+      ['with auth when rejectUnauthorized is true', { auth, rejectUnauthorized: true }],
+    ])('checks the certificate %s, says what to do about it and sends nothing', async (_when, platform) => {
+      const { fhem, homebridge } = await start([lamp('e2e_p_lamp', 'a')], { tls: certificate, auth: platform.auth }, { ssl: true, ...platform });
+
+      await says(
+        homebridge,
+        /longpoll error: .*the certificate of fhem is not trusted\. make node trust it, or set rejectUnauthorized to false for the platform/,
+      );
+      // neither the password nor anything else got as far as FHEMWEB
+      expect(fhem.fake.requests).toEqual([]);
+    });
+  });
+
+  it('serves the debug page on the port and the address of debugPort and debugHost', async () => {
+    const debugPort = await freePort();
+    const { homebridge } = await start([lamp('e2e_p_lamp', 'a')], {}, { debugPort, debugHost: '127.0.0.1' });
+    await published(homebridge);
+
+    await says(homebridge, new RegExp(`debug server listening on http://127\\.0\\.0\\.1:${debugPort}`));
+    const page = await (await fetch(`http://127.0.0.1:${debugPort}/cached`)).text();
+    expect(page).toContain('e2e_p_lamp-state: off');
+  });
+
+  it('refuses javascript in a mapping when allowInlineFunctions is false, and publishes the device with the rest of the mapping', async () => {
+    const { homebridge } = await start(
+      [
+        asJsonlist2({
+          name: 'e2e_p_code',
+          setList: 'on off',
+          readings: { state: 'on', level: '40' },
+          attributes: {
+            genericDeviceType: 'light',
+            homebridgeMapping: JSON.stringify({ Brightness: { reading: 'level', reading2homekit: '{return 1}' } }),
+          },
+        }),
+      ],
+      {},
+      { allowInlineFunctions: false },
+    );
+
+    const world = worldOf(undefined as never, homebridge, await published(homebridge), (device) => device);
+    // the reading as it is, not what the function would make of it
+    expect(world.characteristic('e2e_p_code', hapType.Lightbulb, hapType.Brightness).value).toBe(40);
+    expect(logged(homebridge, /reading2homekit: JavaScript in a mapping is refused, as allowInlineFunctions is false for this platform/)).toHaveLength(1);
+  });
+
+  it('logs one line per device, and neither reads nor requests, when homebridge does not run with debug', async () => {
+    const fhem = await startStandIn([lamp('e2e_p_lamp', 'a')]);
+    const homebridge = await startHomebridge(fhem.platformConfig, {}, undefined, { debug: false });
+    started.push({ stop: () => homebridge.stop() }, { stop: () => fhem.close() });
+
+    const [accessory] = await published(homebridge);
+    const on = accessory?.services.flatMap((service) => service.characteristics).find((characteristic) => characteristic.type === hapType.On);
+    expect(await homebridge.read(on as HapCharacteristic)).toBe(0);
+    await homebridge.subscribe([on as HapCharacteristic]);
+    await fhem.change('e2e_p_lamp', 'state', 'on');
+    await eventually('the change to arrive', () => (homebridge.notifications().length ? true : undefined), homebridge);
+
+    expect(logged(homebridge, /e2e_p_lamp/).map((line) => line.replace(/^.*\[FHEM\] /, ''))).toEqual(['e2e_p_lamp is switch']);
+    expect(logged(homebridge, /query: |cached: |caching: |executing: |starting longpoll|mappings for/)).toEqual([]);
+  });
+
+  it('publishes a device under the identity it was first published with, also when fhem reports another one after a restart', async () => {
+    // a lamp of a hue bridge is known by its uniqueid, which fhem only has once the bridge has answered
+    const hue = (uniqueid?: string) => {
+      const device = lamp('e2e_p_hue', 'a');
+      return { ...device, Internals: { ...device.Internals, TYPE: 'HUEDevice', FUUID: 'e2e-p-hue-fuuid', ...(uniqueid ? { uniqueid } : {}) } };
+    };
+    const serial = async (homebridge: Homebridge) => {
+      const [accessory] = await published(homebridge);
+      const information = accessory?.services.find((service) => service.type === hapType.AccessoryInformation);
+      return information?.characteristics.find((characteristic) => characteristic.type === hapType.SerialNumber)?.value;
+    };
+
+    const { fhem, homebridge: first } = await start([hue('00:17:88:01:02:03:04:05-0b')]);
+    expect(await serial(first)).toBe('00:17:88:01:02:03:04:05-0b');
+    expect(JSON.parse(readFileSync(join(first.storage, 'fhem2hb-identities.json'), 'utf8'))).toEqual({
+      version: 1,
+      identities: { 'e2e-p-hue-fuuid': '00:17:88:01:02:03:04:05-0b' },
+    });
+    await first.stop({ untilExited: true });
+    await fhem.close();
+
+    // without the uniqueid the lamp would be known by its FUUID
+    const early = await startStandIn([hue()]);
+    const again = await startHomebridge(early.platformConfig, {}, first.storage);
+    started.push({ stop: () => again.stop() }, { stop: () => early.close() });
+
+    expect(await serial(again)).toBe('00:17:88:01:02:03:04:05-0b');
   });
 });

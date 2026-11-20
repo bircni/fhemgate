@@ -234,6 +234,16 @@ const devices: DummyDevice[] = [
     attributes: { homebridgeMapping: 'AccessoryCategory=FAN SerialNumber=serial=ABC123 Manufacturer=value=ACME FirmwareRevision=fw' },
   },
 
+  // a button has no state: every event is a press
+  {
+    name: 'e2e_m_remote',
+    readings: { state: 'ok', button: 'short' },
+    attributes: {
+      genericDeviceType: 'StatelessProgrammableSwitch',
+      homebridgeMapping: 'ProgrammableSwitchEvent=button,values=short:SINGLE_PRESS;long:LONG_PRESS',
+    },
+  },
+
   // entries the parser can not read, and one that is commented out
   {
     name: 'e2e_m_syntax',
@@ -560,6 +570,25 @@ describe('a reading that changes in fhem', () => {
 
     await world.notifies(target, expected, () => world.fhem.change(source, reading, value));
     await world.becomes(target, expected);
+  });
+
+  it('is told to HomeKit as a press of a button every time, also when it is the same press as the one before', async () => {
+    const event = world.named('e2e_m_remote', 'StatelessProgrammableSwitch', 'ProgrammableSwitchEvent');
+    const presses = () =>
+      world.homebridge
+        .notifications()
+        .filter((notification) => notification.aid === event.aid && notification.iid === event.iid)
+        .map((notification) => notification.value);
+    const before = presses().length;
+
+    // the reading has this value already
+    await world.fhem.change('e2e_m_remote', 'button', 'short');
+    await eventually('the first press to be told', () => (presses().length === before + 1 ? true : undefined), world.homebridge);
+    await world.fhem.change('e2e_m_remote', 'button', 'short');
+    await eventually('the second press to be told', () => (presses().length === before + 2 ? true : undefined), world.homebridge);
+
+    // SINGLE_PRESS both times
+    expect(presses().slice(before)).toEqual([0, 0]);
   });
 
   it('is reported once when the values of the mapping do not cover it, and changes nothing', async () => {

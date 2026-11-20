@@ -97,6 +97,14 @@ describe('what homebridge publishes', () => {
   });
 });
 
+describe('a thermostat without a command for its mode', () => {
+  it('offers heating as its only mode', () => {
+    const mode = world.characteristic('e2e_thermostat', hapType.Thermostat, hapType.TargetHeatingCoolingState);
+
+    expect(mode).toMatchObject({ value: 1, 'valid-values': [1] });
+  });
+});
+
 describe('a value HomeKit writes', () => {
   it.each([
     ['e2e_lamp', hapType.Switch, hapType.On, false, 'off', 'state', 'off'],

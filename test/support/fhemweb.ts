@@ -1,6 +1,7 @@
 // a stand-in for FHEMWEB, the web server of fhem the plugin talks to. it speaks just enough
 // of the protocol: the long poll stream of events, and commands sent as ?cmd=.
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { createServer as createTlsServer, type Server as TlsServer } from 'node:https';
 import type { AddressInfo, Socket } from 'node:net';
 import type { FhemDevice } from './types.ts';
 
@@ -17,6 +18,8 @@ export interface FakeFhemOptions {
   readings?: Record<string, string>;
   /** user and password, if FHEMWEB asks for them */
   auth?: { user: string; pass: string };
+  /** key and certificate, as PEM, for a FHEMWEB that is reached with https */
+  tls?: { key: string; cert: string };
   /** refuses every request, as FHEMWEB does for an address it does not allow */
   forbidden?: boolean;
   /** takes commands and never answers them, as a fhem that hangs. the event streams stay as they are. */
@@ -150,7 +153,7 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
     response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' }).end(body);
   }
 
-  const server: Server = createServer(handle);
+  const server: Server | TlsServer = options.tls ? createTlsServer(options.tls, handle) : createServer(handle);
   server.on('connection', (socket) => {
     sockets.add(socket);
     socket.on('close', () => sockets.delete(socket));
