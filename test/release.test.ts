@@ -1,5 +1,6 @@
 // the parts of scripts/release.ts that decide something without touching the repository
 import { describe, expect, it } from 'vitest';
+import { releaseOfTag, supportsTrustedPublishing, TRUSTED_PUBLISHING_NPM } from '../scripts/release-tag.ts';
 import {
   compareVersions,
   distTag,
@@ -239,5 +240,34 @@ describe('the command line', () => {
     expect(() => parseArguments(['patch', '--notes-from'])).toThrow('--notes-from needs a ref');
     expect(() => parseArguments(['patch', '--notes-from='])).toThrow('--notes-from needs a ref');
     expect(() => parseArguments(['patch', '--notes-from', '--dry-run'])).toThrow('--notes-from needs a ref');
+  });
+});
+
+describe('a pushed tag', () => {
+  const pkg = { name: 'homebridge-fhem2hb', version: '0.1.0' };
+
+  it('publishes a release under latest and a prerelease under next', () => {
+    expect(releaseOfTag('v0.1.0', pkg)).toEqual({ distTag: 'latest', prerelease: false });
+    expect(releaseOfTag('v1.0.0-rc.1', { ...pkg, version: '1.0.0-rc.1' })).toEqual({ distTag: 'next', prerelease: true });
+  });
+
+  it('is refused unless it is v and the version of package.json', () => {
+    expect(() => releaseOfTag('v0.1.1', pkg)).toThrow('the tag v0.1.1 is not v0.1.0');
+    expect(() => releaseOfTag('0.1.0', pkg)).toThrow('is not v0.1.0');
+    expect(() => releaseOfTag('v0.5.54', pkg)).toThrow('is not v0.1.0');
+    expect(() => releaseOfTag('vnext', { ...pkg, version: 'next' })).toThrow('no version');
+  });
+
+  it('is refused for a private package', () => {
+    expect(() => releaseOfTag('v0.1.0', { ...pkg, private: true })).toThrow('"private": true');
+  });
+
+  it('is published only by an npm that can use trusted publishing', () => {
+    expect(supportsTrustedPublishing(TRUSTED_PUBLISHING_NPM)).toBe(true);
+    expect(supportsTrustedPublishing('11.20.0')).toBe(true);
+    expect(supportsTrustedPublishing('12.0.0')).toBe(true);
+    expect(supportsTrustedPublishing('11.5.0')).toBe(false);
+    expect(supportsTrustedPublishing('10.9.2')).toBe(false);
+    expect(supportsTrustedPublishing('npm')).toBe(false);
   });
 });
