@@ -2,7 +2,7 @@
 // controller does. homebridge runs in insecure mode, which lets it be asked without pairing.
 import { spawn } from 'node:child_process';
 import { closeSync, existsSync, mkdtempSync, openSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { connect, createServer, type AddressInfo, type Socket } from 'node:net';
+import { connect, createServer, type Socket } from 'node:net';
 import { join } from 'node:path';
 import { inject } from 'vitest';
 
@@ -206,17 +206,40 @@ export interface Homebridge {
   stop(options?: { untilExited?: boolean }): Promise<void>;
 }
 
-/** a port of this machine nothing listens on */
-export function freePort(): Promise<number> {
+/** whether nothing listens on this port, on any address of this machine */
+function isFree(port: number): Promise<boolean> {
   return new Promise((resolve) => {
     const server = createServer();
-    server.listen(0, '127.0.0.1', () => {
-      const { port } = server.address() as AddressInfo;
+    server.once('error', () => {
+      resolve(false);
+    });
+    server.listen(port, () => {
       server.close(() => {
-        resolve(port);
+        resolve(true);
       });
     });
   });
+}
+
+// a file starts where the one before it in this worker did not, as that one may still be closing
+let nextPort = Math.floor(Math.random() * 1000);
+
+/**
+ * A port of this machine nothing listens on.
+ *
+ * The test files run side by side, and a port the system hands out and that is closed again
+ * can be handed to another file before it is used here. So every worker takes its ports from
+ * a thousand of its own, below the ones the system hands out by itself.
+ */
+export async function freePort(): Promise<number> {
+  const worker = Number(process.env.VITEST_POOL_ID ?? 0) % 20;
+  for (let attempt = 0; attempt < 1000; attempt++) {
+    const port = 10_000 + worker * 1000 + (nextPort++ % 1000);
+    if (await isFree(port)) {
+      return port;
+    }
+  }
+  throw new Error('found no free port');
 }
 
 /** the notifications homebridge sends down a connection that asked for them */
