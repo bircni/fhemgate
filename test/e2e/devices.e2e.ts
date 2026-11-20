@@ -210,7 +210,6 @@ describe('what homebridge publishes', () => {
     ['e2e_bri', 'Lightbulb', ['On', 'Brightness']],
     ['e2e_color', 'Lightbulb', ['On', 'Hue', 'Saturation']],
     ['e2e_rgb', 'Lightbulb', ['On', 'Hue', 'Saturation', 'Brightness']],
-    ['e2e_rgb_new', 'Lightbulb', ['On', 'Hue', 'Saturation', 'Brightness']],
     ['e2e_sat', 'Lightbulb', ['On', 'Saturation']],
     ['e2e_ct', 'Lightbulb', ['On', 'ColorTemperature']],
     // HoldPosition, as it has a stop command
@@ -226,6 +225,11 @@ describe('what homebridge publishes', () => {
     ['e2e_avr', 'Switch', ['On', 'Volume']],
   ])('gives %s a %s with these characteristics: %s', (device, service, characteristics) => {
     expect(world.characteristicsOf(device, uuids[service])).toEqual(types(characteristics));
+  });
+
+  // a real fhem and the stand-in do not agree on the order of these, the other colour lights have theirs held above
+  it('gives e2e_rgb_new, which has not reported a colour yet, the characteristics of a colour light', () => {
+    expect(new Set(world.characteristicsOf('e2e_rgb_new', uuids.Lightbulb))).toEqual(new Set(types(['On', 'Hue', 'Saturation', 'Brightness'])));
   });
 
   it.each<[string, TypeName, TypeName, number]>([

@@ -215,6 +215,8 @@ describe('homebridge starting again', () => {
     world = worldOf(fhem, again, await published(again, devices.length), (device) => device);
     await again.subscribe([door('TimesOpened')]);
 
+    // the history is read from disk in the background
+    await eventually('the history to be loaded', () => (logged(/e2e-h-door: FakeGatoHistory extra persisted data loaded/).length ? true : undefined), again);
     expect(logged(/e2e-h-door: FakeGatoHistory extra persisted data loaded/)).toHaveLength(1);
     expect(await again.read(door('TimesOpened'))).toBe(2);
     const { history } = await persistedWith({ status: 0 }, ofDoor);

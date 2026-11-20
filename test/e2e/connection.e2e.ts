@@ -51,7 +51,8 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that can not be reached when 
     const homebridge = await startHomebridge({ server: '127.0.0.1', port });
     stops.push(() => homebridge.stop());
 
-    await says(homebridge, new RegExp(`longpoll error: Error: connect ECONNREFUSED 127\\.0\\.0\\.1:${port}, retry in: 3000msec`));
+    // the first attempt can meet whoever had the port a moment ago, so the wait is not part of what is looked for
+    await says(homebridge, new RegExp(`longpoll error: Error: connect ECONNREFUSED 127\\.0\\.0\\.1:${port}, retry in: \\d+msec`));
     await expect(homebridge.accessories()).rejects.toThrow('fetch failed');
 
     const fhem = await startStandIn([lamp('e2e_c_late')], { port });
