@@ -9,6 +9,7 @@ import type { Jsonlist2Device } from './devices/types.ts';
 import { describeError, execute, fetchDevices, type FhemConnection } from './fhem/client.ts';
 import { startLongpoll } from './fhem/eventStream.ts';
 import { retryDelayAfterError } from './fhem/protocol.ts';
+import { configFindings } from './migration.ts';
 import type { PluginState } from './state/pluginState.ts';
 
 const require = createRequire(import.meta.url);
@@ -90,6 +91,10 @@ export class FhemPlatform implements StaticPlatformPlugin {
 
     this.scope = config.scope;
     this.allowInlineFunctions = !isSwitchedOff(config.allowInlineFunctions);
+
+    for (const finding of configFindings(config)) {
+      log[finding.level](finding.text);
+    }
 
     this.#startDebugServer();
 
