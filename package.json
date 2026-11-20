@@ -1,7 +1,7 @@
 {
   "name": "homebridge-fhemgate",
   "displayName": "FHEM",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "a fhem platform plugin for homebridge, maintained successor of homebridge-fhem",
   "keywords": [
     "fhem",
