@@ -2,7 +2,7 @@ import * as hap from '@homebridge/hap-nodejs';
 import type { API, Logging } from 'homebridge';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLog } from '../test/support/log.ts';
 import createPluginFor, { createPlugin } from './index.ts';
 import { FhemPlatform, sortByKey, version, type Plugin } from './platform.ts';
@@ -18,7 +18,7 @@ const api = () =>
   }) as unknown as API;
 
 describe('FhemPlatform', () => {
-  it('has no connection and no accessories without a server', () => {
+  it('has no connection and no accessories without a server', async () => {
     const log = createLog();
     const plugin: Plugin = { state: new PluginState(hap), storagePath: () => '/nonexistent', debugServers: new Map() };
     const platform = new FhemPlatform(log as unknown as Logging, { platform: 'FHEM', debugPort: false }, api(), plugin);
@@ -26,8 +26,10 @@ describe('FhemPlatform', () => {
 
     platform.accessories(answered);
 
-    expect(platform.connection).toBeUndefined();
-    expect(answered).toHaveBeenCalledWith([]);
+    expect(platform.servers[0]?.connection).toBeUndefined();
+    await vi.waitFor(() => {
+      expect(answered).toHaveBeenCalledWith([]);
+    });
     expect(log.lines).toEqual(['error incomplete configuration ']);
   });
 
@@ -97,6 +99,35 @@ describe('FhemPlatform', () => {
     expect(platform.config.debugPort).toBe('yes');
     expect(plugin.debugServers.size).toBe(0);
     expect(log.lines[0]).toBe('error config: value for debugPort has to be a port number or false. the debug server is not started.');
+  });
+
+  describe('with several fhem', () => {
+    const start = (config: Record<string, unknown>) => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      const plugin: Plugin = { state: new PluginState(hap), storagePath: () => '/nonexistent', debugServers: new Map() };
+      const log = createLog();
+      const platform = new FhemPlatform(log as unknown as Logging, { platform: 'FHEM', debugPort: false, ...config }, api(), plugin);
+      return { platform, log };
+    };
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('looks at what the entry says about a fhem only when the entry is one', () => {
+      const unused = {
+        auth: { user: 'u', pass: 'p', bearer: 'x' },
+        connections: [{ server: '127.0.0.1', port: 1, auth: { user: 'u', pass: 'p', bearer: 'y' } }],
+      };
+
+      expect(start(unused).log.lines.filter((line) => line.includes('bearer'))).toHaveLength(1);
+      // each line says which fhem it is about
+      expect(
+        start({ ...unused, server: '127.0.0.1', port: 2 })
+          .log.lines.filter((line) => line.includes('bearer'))
+          .map((line) => line.slice(0, 22)),
+      ).toEqual(['warn [127.0.0.1:2] con', 'warn [127.0.0.1:1] con']);
+    });
   });
 
   it('knows its version', () => {

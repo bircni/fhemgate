@@ -78,7 +78,7 @@ describe('connecting', () => {
   it('keeps the csrf token out of the log, also out of what is logged for debugging', async () => {
     const platform = await connect({ csrfToken: 'csrf_42', answer: (cmd) => (cmd === 'boom' ? { status: 500, body: 'no' } : undefined) });
 
-    platform.execute('boom');
+    platform.servers[0]?.execute('boom');
     await waitFor(() => world.log.lines.includes('log   500: Internal Server Error'), 'the refusal');
     await accessoriesOf(platform);
 
@@ -137,7 +137,7 @@ describe('connecting', () => {
     const platform = world.platform({ server: '127.0.0.1', port: fhem.port });
     await waitFor(() => fhem.commands.some((cmd) => cmd.startsWith('{$defs{siri}')), 'the version to be noted');
 
-    expect(platform.siri_device).toBe('siri');
+    expect(platform.servers[0]?.siri_device).toBe('siri');
     expect(fhem.commands.at(-1)).toMatch(/^\{\$defs\{siri\}->\{"homebridge-fhem version"\} = "\d+\.\d+\.\d+.*"\}$/);
   });
 
@@ -146,9 +146,9 @@ describe('connecting', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     world = createWorld();
 
-    expect(world.platform({ server: 'fhem.invalid' }).connection?.base_url).toBe('http://fhem.invalid:8083/fhem');
-    expect(world.platform({ server: 'fhem.invalid', port: 8088, webname: 'haus' }).connection?.base_url).toBe('http://fhem.invalid:8088/haus');
-    expect(world.platform({ server: 'fhem.invalid', ssl: true }).connection?.base_url).toBe('https://fhem.invalid:8083/fhem');
+    expect(world.platform({ server: 'fhem.invalid' }).servers[0]?.connection?.base_url).toBe('http://fhem.invalid:8083/fhem');
+    expect(world.platform({ server: 'fhem.invalid', port: 8088, webname: 'haus' }).servers[0]?.connection?.base_url).toBe('http://fhem.invalid:8088/haus');
+    expect(world.platform({ server: 'fhem.invalid', ssl: true }).servers[0]?.connection?.base_url).toBe('https://fhem.invalid:8083/fhem');
     expect(exit).not.toHaveBeenCalled();
   });
 
@@ -157,8 +157,8 @@ describe('connecting', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     world = createWorld();
 
-    expect(world.platform({ server: 'fhem.invalid', ssl: 'true' }).connection?.base_url).toBe('https://fhem.invalid:8083/fhem');
-    expect(world.platform({ server: 'fhem.invalid', ssl: 'no' }).connection?.base_url).toBe('http://fhem.invalid:8083/fhem');
+    expect(world.platform({ server: 'fhem.invalid', ssl: 'true' }).servers[0]?.connection?.base_url).toBe('https://fhem.invalid:8083/fhem');
+    expect(world.platform({ server: 'fhem.invalid', ssl: 'no' }).servers[0]?.connection?.base_url).toBe('http://fhem.invalid:8083/fhem');
 
     expect(world.log.lines).toEqual([
       'warn config: value for ssl has to be boolean. taking "true" as true.',
@@ -173,11 +173,11 @@ describe('connecting', () => {
     world = createWorld();
     const auth = { user: 'fhem', pass: 'secret' };
 
-    expect(world.platform({ server: 'fhem.invalid', ssl: true }).connection?.rejectUnauthorized).toBeUndefined();
-    expect(world.platform({ server: 'fhem.invalid', ssl: true, auth }).connection?.rejectUnauthorized).toBeUndefined();
-    expect(world.platform({ server: 'fhem.invalid', ssl: true, auth, rejectUnauthorized: true }).connection?.rejectUnauthorized).toBe(true);
-    expect(world.platform({ server: 'fhem.invalid', ssl: true, auth, rejectUnauthorized: false }).connection?.rejectUnauthorized).toBe(false);
-    expect(world.platform({ server: 'fhem.invalid', ssl: true, rejectUnauthorized: 'false' }).connection?.rejectUnauthorized).toBe(false);
+    expect(world.platform({ server: 'fhem.invalid', ssl: true }).servers[0]?.connection?.rejectUnauthorized).toBeUndefined();
+    expect(world.platform({ server: 'fhem.invalid', ssl: true, auth }).servers[0]?.connection?.rejectUnauthorized).toBeUndefined();
+    expect(world.platform({ server: 'fhem.invalid', ssl: true, auth, rejectUnauthorized: true }).servers[0]?.connection?.rejectUnauthorized).toBe(true);
+    expect(world.platform({ server: 'fhem.invalid', ssl: true, auth, rejectUnauthorized: false }).servers[0]?.connection?.rejectUnauthorized).toBe(false);
+    expect(world.platform({ server: 'fhem.invalid', ssl: true, rejectUnauthorized: 'false' }).servers[0]?.connection?.rejectUnauthorized).toBe(false);
   });
 
   it('does not connect without a server', async () => {
@@ -187,7 +187,7 @@ describe('connecting', () => {
     const platform = world.platform({});
 
     expect(world.log.lines).toEqual(['error incomplete configuration ']);
-    expect(platform.connection).toBeUndefined();
+    expect(platform.servers[0]?.connection).toBeUndefined();
     expect(await accessoriesOf(platform)).toEqual([]);
   });
 
@@ -239,7 +239,7 @@ describe('authentication', () => {
     expect(world.log.errors().at(-1)).toBe(refusal(18000));
     expect(fhem.requests.every((request) => request.url.includes('inform='))).toBe(true);
     expect(world.csrfToken[baseUrl()]).toBeUndefined();
-    expect(platform.connection?.dead).toBeUndefined();
+    expect(platform.servers[0]?.connection?.dead).toBeUndefined();
     expect(world.longpoll[baseUrl()]).toMatchObject({ connected: false, connects: 6, disconnects: 6 });
   });
 
@@ -271,6 +271,43 @@ describe('authentication', () => {
 });
 
 describe('devices', () => {
+  it('publishes the devices of every fhem of the entry, and a device two of them list from the first', async () => {
+    const other = await startFakeFhem({
+      devices: [
+        { Name: 'lamp', ...lamp() },
+        { Name: 'fan', ...device({ Internals: { NAME: 'fan' }, Readings: { state: 'on' }, PossibleSets: 'on off' }) },
+      ],
+    });
+    try {
+      const platform = await connect(
+        { devices: [{ Name: 'lamp', ...lamp() }], holds: (cmd) => cmd === 'jsonlist2' },
+        { connections: [{ server: '127.0.0.1', port: other.port }] },
+      );
+      await waitFor(() => other.commands.includes('jsonlist2 TYPE=siri'), 'the second fhem to be connected');
+
+      const listed = accessoriesOf(platform);
+      await waitFor(() => fhem.commands.includes('jsonlist2'), 'the first fhem to be asked for its devices');
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      // the second is asked only once the first has answered
+      expect(other.commands).not.toContain('jsonlist2');
+      fhem.release();
+      const accessories = await listed;
+
+      expect(accessories.map((accessory) => [accessory.name, accessory.fhem === platform.servers[0] ? 'first' : 'second'])).toEqual([
+        ['lamp', 'first'],
+        ['fan', 'second'],
+      ]);
+      // the lines of each fhem start with its server
+      const lines = world.log.lines.map((line) => line.replace(/127\.0\.0\.1:\d+/, '127.0.0.1:PORT'));
+      expect(lines).toContain('warn [127.0.0.1:PORT] lamp is already published');
+      expect(lines).toContain('log [127.0.0.1:PORT] fan is switch');
+    } finally {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      await other.close();
+      vi.useRealTimers();
+    }
+  });
+
   it('leaves out the device behind a harmony hub also when its genericDisplayType names a service', async () => {
     const hub = device({ Internals: { NAME: 'hub', TYPE: 'harmony', id: '7' }, Attributes: { genericDisplayType: 'switch' }, Readings: { state: 'on' } });
     const platform = await connect({
@@ -299,7 +336,7 @@ describe('devices', () => {
     const accessories = await accessoriesOf(platform);
 
     expect(accessories.map((accessory) => accessory.name)).toEqual(['lamp-a', 'lamp-b']);
-    expect(accessories[0]?.fhem).toBe(platform);
+    expect(accessories[0]?.fhem).toBe(platform.servers[0]);
     expect(fhem.commands.at(-1)).toBe('jsonlist2 room=Wohnzimmer,Küche&x');
     expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=jsonlist2%20room%3DWohnzimmer%2CK%C3%BCche%26x&fwcsrf=csrf_fake_token&XHR=1');
     // one line for each device. what it is made of is logged for debugging.
@@ -684,7 +721,7 @@ describe('reconnecting', () => {
     const platform = await connect({
       answer: (cmd) => (cmd === 'jsonlist2 TYPE=siri' ? { body: JSON.stringify({ Results: [{ Name: 'siri' }], totalResultsReturned: 1 }) } : undefined),
     });
-    expect(platform.siri_device).toBe('siri');
+    expect(platform.servers[0]?.siri_device).toBe('siri');
     await waitFor(() => fhem.commands.some((cmd) => cmd.startsWith('{$defs{siri}')), 'the version to be noted');
 
     fhem.endStreams();
@@ -716,7 +753,7 @@ describe('reconnecting', () => {
       'error longpoll error: (error), retry in: 9000msec',
       'error longpoll error: (error), retrys exhausted',
     ]);
-    expect(platform.connection?.dead).toBe(true);
+    expect(platform.servers[0]?.connection?.dead).toBe(true);
     expect(await accessoriesOf(platform)).toEqual([]);
   });
 
@@ -745,7 +782,7 @@ describe('reconnecting', () => {
           `or set rejectUnauthorized to false for the platform), retry in: ${pause}msec`,
       ),
     );
-    expect(platform.connection?.dead).toBeUndefined();
+    expect(platform.servers[0]?.connection?.dead).toBeUndefined();
   });
 
   it('keeps trying with neverTimeout', async () => {
@@ -762,7 +799,7 @@ describe('reconnecting', () => {
     }
 
     expect(world.log.errors().at(-1)).toMatch(/retry in: 30000msec$/);
-    expect(platform.connection?.dead).toBeUndefined();
+    expect(platform.servers[0]?.connection?.dead).toBeUndefined();
   });
 });
 
@@ -878,7 +915,7 @@ describe('commands', () => {
     const platform = await connect({ answer: (cmd) => (cmd === 'list' ? { body: 'a\r\nb\nc\n' } : undefined) });
 
     const result = await new Promise((resolve) => {
-      platform.execute('list', resolve);
+      platform.servers[0]?.execute('list', resolve);
     });
 
     expect(result).toBe('abc');
@@ -887,7 +924,7 @@ describe('commands', () => {
   it('sends a command whole, also with characters that separate commands and parameters in a url', async () => {
     const platform = await connect();
 
-    platform.execute('set lamp on;set other off&x=1#y %?');
+    platform.servers[0]?.execute('set lamp on;set other off&x=1#y %?');
     await waitFor(() => fhem.requests.some((request) => request.url.includes('set%20lamp')), 'the command');
 
     expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=set%20lamp%20on%3Bset%20other%20off%26x%3D1%23y%20%25%3F&fwcsrf=csrf_fake_token&XHR=1');
@@ -899,7 +936,7 @@ describe('commands', () => {
     const answered = vi.fn();
     world.log.clear();
 
-    platform.execute('boom', answered);
+    platform.servers[0]?.execute('boom', answered);
     await waitFor(() => world.log.lines.length === 2, 'the report');
 
     expect(world.log.lines.map(withoutPort)).toEqual([
@@ -975,13 +1012,13 @@ describe('jsFunctions', () => {
 
     const platform = await connect({}, { jsFunctions: join(storage, 'absolute.cjs') });
 
-    expect(Object.keys(platform.jsFunctions as object)).toEqual(['one']);
+    expect(Object.keys(platform.servers[0]?.jsFunctions as object)).toEqual(['one']);
   });
 
   it('goes on without the functions when the file can not be loaded', async () => {
     const platform = await connect({}, { jsFunctions: 'missing.cjs' }, { storagePath: storage });
 
-    expect(platform.jsFunctions).toBeUndefined();
+    expect(platform.servers[0]?.jsFunctions).toBeUndefined();
     expect(world.log.lines[0]).toMatch(/^error {3}jsFunctions: Error: Cannot find module/);
   });
 });

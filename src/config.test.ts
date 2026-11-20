@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import type { Logging } from 'homebridge';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLog } from '../test/support/log.ts';
-import { baseUrl, isSwitchedOff, loadJsFunctions, optionalSwitch, type FhemPlatformConfig } from './config.ts';
+import { baseUrl, connectionConfigs, isSwitchedOff, loadJsFunctions, optionalSwitch, type ConnectionConfig, type FhemPlatformConfig } from './config.ts';
 import { PLATFORM_NAME } from './settings.ts';
 
 const logging = () => {
@@ -16,13 +16,40 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe('connectionConfigs', () => {
+  it('is the entry itself, then the connections it lists', () => {
+    const second = { server: 'b' };
+    const config = { platform: 'FHEM', server: 'a', connections: [second] };
+
+    expect(connectionConfigs(config)).toEqual([config, second]);
+  });
+
+  it('is only the connections when the entry names no server', () => {
+    const first = { server: 'a' };
+
+    expect(connectionConfigs({ platform: 'FHEM', connections: [first] })).toEqual([first]);
+  });
+
+  it('is the entry itself without connections, also when it names no server, which is reported for it', () => {
+    const config = { platform: 'FHEM' };
+
+    expect(connectionConfigs(config)).toEqual([config]);
+    expect(connectionConfigs({ ...config, connections: [] })).toEqual([{ ...config, connections: [] }]);
+  });
+
+  it('leaves out what is no connection', () => {
+    expect(connectionConfigs({ platform: 'FHEM', connections: [null, 'b', { server: 'c' }] as never })).toEqual([{ server: 'c' }]);
+    expect(connectionConfigs({ platform: 'FHEM', server: 'a', connections: 'b' as never })).toHaveLength(1);
+  });
+});
+
 describe('baseUrl', () => {
   it('defaults to port 8083 and the webname fhem', () => {
-    expect(baseUrl({ platform: 'FHEM', server: 'fhem.local' }, logging().logging)).toBe('http://fhem.local:8083/fhem');
+    expect(baseUrl({ server: 'fhem.local' }, logging().logging)).toBe('http://fhem.local:8083/fhem');
   });
 
   it('uses the port, the webname and https as configured', () => {
-    const config = { platform: 'FHEM', server: '192.0.2.1', port: '8088', webname: 'haus', ssl: true };
+    const config = { server: '192.0.2.1', port: '8088', webname: 'haus', ssl: true };
 
     expect(baseUrl(config, logging().logging)).toBe('https://192.0.2.1:8088/haus');
   });
@@ -31,7 +58,7 @@ describe('baseUrl', () => {
     const exit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const { log, logging: target } = logging();
 
-    expect(baseUrl({ platform: 'FHEM', server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('https://fhem:8083/fhem');
+    expect(baseUrl({ server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('https://fhem:8083/fhem');
 
     expect(exit).not.toHaveBeenCalled();
     expect(log.lines).toEqual([`warn config: value for ssl has to be boolean. taking ${JSON.stringify(ssl)} as true.`]);
@@ -41,7 +68,7 @@ describe('baseUrl', () => {
     const exit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const { log, logging: target } = logging();
 
-    expect(baseUrl({ platform: 'FHEM', server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('http://fhem:8083/fhem');
+    expect(baseUrl({ server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('http://fhem:8083/fhem');
 
     expect(exit).not.toHaveBeenCalled();
     expect(log.lines).toEqual([`error config: value for ssl has to be boolean. taking ${JSON.stringify(ssl)} as false.`]);
@@ -50,7 +77,7 @@ describe('baseUrl', () => {
   it.each([false, undefined, null, '', 0])('says nothing about %j for ssl', (ssl) => {
     const { log, logging: target } = logging();
 
-    expect(baseUrl({ platform: 'FHEM', server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('http://fhem:8083/fhem');
+    expect(baseUrl({ server: 'fhem', ssl: ssl as unknown as boolean }, target)).toBe('http://fhem:8083/fhem');
     expect(log.lines).toEqual([]);
   });
 });
@@ -102,6 +129,7 @@ describe('config.schema.json', () => {
     title?: string;
     default?: unknown;
     properties?: Record<string, SchemaProperty>;
+    items?: SchemaProperty;
   }
 
   const schema = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'config.schema.json'), 'utf8')) as {
@@ -129,6 +157,7 @@ describe('config.schema.json', () => {
     allowInlineFunctions: true,
     debugPort: true,
     debugHost: true,
+    connections: true,
   };
 
   const all = (properties: Record<string, SchemaProperty>): SchemaProperty[] =>
@@ -141,6 +170,28 @@ describe('config.schema.json', () => {
 
   it('has a field for every option of the platform, so that the UI drops none on saving', () => {
     expect(Object.keys(schema.schema.properties).sort()).toEqual(Object.keys(options).sort());
+  });
+
+  it('offers for each connection the fields the entry has for its fhem, alike', () => {
+    const connection: Record<keyof ConnectionConfig, true> = {
+      server: true,
+      port: true,
+      filter: true,
+      ssl: true,
+      webname: true,
+      auth: true,
+      rejectUnauthorized: true,
+      jsFunctions: true,
+      scope: true,
+      neverTimeout: true,
+      allowInlineFunctions: true,
+    };
+    const items = schema.schema.properties.connections?.items?.properties ?? {};
+
+    expect(Object.keys(items).sort()).toEqual(Object.keys(connection).sort());
+    for (const key of Object.keys(connection)) {
+      expect(items[key]).toEqual(schema.schema.properties[key]);
+    }
   });
 
   it('gives every default in the type of its option', () => {

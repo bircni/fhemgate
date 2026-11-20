@@ -26,7 +26,7 @@ the configuration, to the filter result or to an attribute of a device, restart 
 | --- | --- | --- | --- |
 | `platform` | text | | Has to be `FHEM`. |
 | `name` | text | | The name of the platform in the log of Homebridge. |
-| `server` | text | | Host name or address of FHEM. Required: without it the platform logs `incomplete configuration` and publishes nothing. |
+| `server` | text | | Host name or address of FHEM. Required unless the entry has `connections`: without it the entry logs `incomplete configuration` and publishes nothing of its own. |
 | `port` | number | `8083` | The port of FHEMWEB. |
 | `webname` | text | `fhem` | The `webname` of the FHEMWEB instance, the path in its address. |
 | `ssl` | boolean | `false` | `true` to talk https to FHEMWEB. |
@@ -39,12 +39,12 @@ the configuration, to the filter result or to an attribute of a device, restart 
 | `neverTimeout` | boolean | `false` | `true` to keep trying for ever when FHEM can not be reached while Homebridge starts. |
 | `debugPort` | number or `false` | `8282` | The port of the [debug page](#debug-page). `false` or `0` switches it off. |
 | `debugHost` | text | all addresses | The address the debug page listens on. |
+| `connections` | list | none | More FHEM servers for this entry, see [several FHEM servers](#several-fhem-servers). |
 
 Notes:
 
 - The settings form of the Homebridge UI offers `siriName=.+` as `filter`, which selects every
-  device with a `siriName` attribute. It does not offer `webname`, `scope` and `jsFunctions`: set
-  those in the JSON editor.
+  device with a `siriName` attribute.
 - `ssl` has to be `true` or `false`. The text `"true"` or `"1"` is taken as `true` with a warning in
   the log, any other text as `false` with an error.
 - `auth` also takes the names `username` and `password`.
@@ -115,9 +115,30 @@ certificate Node.js trusts, set `"rejectUnauthorized": true`.
 When the certificate is refused, the log says `the certificate of fhem is not trusted` and the
 plugin keeps trying.
 
+## Several FHEM servers
+
+One entry can publish the devices of several FHEM servers. `connections` lists the others, each
+with the options of the table above that are about one FHEM: `server`, `port`, `webname`, `ssl`,
+`rejectUnauthorized`, `auth`, `filter`, `scope`, `jsFunctions`, `allowInlineFunctions` and
+`neverTimeout`. A connection takes none of them from the entry, not even `allowInlineFunctions`: give each
+connection `"allowInlineFunctions": false` that is to refuse JavaScript.
+
+```json
+{
+  "platform": "FHEM",
+  "server": "127.0.0.1",
+  "filter": "room=HomeKit",
+  "connections": [{ "server": "192.168.1.20", "port": 8088, "webname": "garden" }]
+}
+```
+
+An entry without `server` publishes only the devices of its connections. Device names have to
+differ between them: a device whose name another FHEM of the entry already published is left out,
+with `<name> is already published` in the log. The entry itself is asked before its connections.
+
 ## Several platforms
 
-Each FHEM installation, or each part of one, is an entry of its own:
+Each FHEM installation, or each part of one, can also be an entry of its own:
 
 ```json
 {
@@ -187,7 +208,7 @@ The plugin does what FHEM tells it to. Two things reach further than the devices
   of a function between braces, and the plugin runs it inside Homebridge with the rights Homebridge
   has. **Whoever can set attributes in FHEM can therefore run code on the machine Homebridge runs
   on.** If FHEM is not as protected as Homebridge, or you do not use this, set
-  `"allowInlineFunctions": false` for the platform. Mappings with such a function then lose it,
+  `"allowInlineFunctions": false` for the platform, and for each of its `connections`. Mappings with such a function then lose it,
   with a line in the log, and everything else goes on working. Functions from the `jsFunctions`
   file are not affected: that file lies on the Homebridge machine.
 - The `jsFunctions` file is loaded as code. Keep it where only the Homebridge user can write.

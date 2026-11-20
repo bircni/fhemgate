@@ -2,7 +2,7 @@
 // starts. everything here only reports: nothing stops the platform or homebridge.
 import { readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
-import type { FhemPlatformConfig } from './config.ts';
+import type { ConnectionConfig } from './config.ts';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.ts';
 
 /** the plugin this one replaces. it registers the platform FHEM as well. */
@@ -90,7 +90,7 @@ export interface ConfigFinding {
  * request for digest authentication. It also took a `bearer` token. This plugin sends user and
  * password with every request, as basic authentication, and nothing else.
  */
-export function configFindings(config: FhemPlatformConfig): ConfigFinding[] {
+export function connectionFindings(config: ConnectionConfig): ConfigFinding[] {
   const findings: ConfigFinding[] = [];
 
   const auth = config.auth as Record<string, unknown> | null | undefined;
@@ -117,12 +117,20 @@ export function configFindings(config: FhemPlatformConfig): ConfigFinding[] {
     }
   }
 
-  // the plugin registers its platform under the name of homebridge-fhem as well, see index.ts
-  if (typeof config.platform === 'string' && config.platform.startsWith(OLD_PLUGIN_NAME + '.')) {
+  return findings;
+}
+
+/**
+ * What the name a platform was configured under means. The plugin registers its platform under
+ * the name of homebridge-fhem as well, see index.ts.
+ */
+export function platformFindings(platform: unknown): ConfigFinding[] {
+  const findings: ConfigFinding[] = [];
+  if (typeof platform === 'string' && platform.startsWith(OLD_PLUGIN_NAME + '.')) {
     findings.push({
       level: 'info',
       text:
-        `config: this platform is configured as "platform": "${config.platform}", which names ${OLD_PLUGIN_NAME}. ${PLUGIN_NAME} answers to that name. ` +
+        `config: this platform is configured as "platform": "${platform}", which names ${OLD_PLUGIN_NAME}. ${PLUGIN_NAME} answers to that name. ` +
         'leave it as it is: homebridge makes the identity of every accessory from it, and with another name HomeKit takes them all for new ones.',
     });
   }

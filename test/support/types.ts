@@ -93,21 +93,25 @@ export interface PlatformConfig {
   allowInlineFunctions?: unknown;
   rejectUnauthorized?: unknown;
   auth?: { user: string; pass: string; sendImmediately?: boolean };
+  connections?: PlatformConfig[];
+}
+
+/** one fhem of a platform */
+export interface Server {
+  connection?: { base_url: string; dead?: boolean; rejectUnauthorized?: boolean };
+  filter?: string;
+  scope?: unknown;
+  jsFunctions?: unknown;
+  siri_device?: string;
+  execute(cmd: string, callback?: (result: string) => void): void;
+  checkAndSetGenericDeviceType(): void;
 }
 
 export interface Platform {
   log: unknown;
   config: PlatformConfig;
-  connection?: { base_url: string; dead?: boolean; rejectUnauthorized?: boolean };
-  server?: string;
-  port?: number | string;
-  filter?: string;
-  scope?: unknown;
-  jsFunctions?: unknown;
-  siri_device?: string;
+  servers: Server[];
   accessories(callback: (accessories: Accessory[]) => void): void;
-  execute(cmd: string, callback?: (result: string) => void): void;
-  checkAndSetGenericDeviceType(): void;
   shutdown(): void;
 }
 

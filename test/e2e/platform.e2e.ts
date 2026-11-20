@@ -21,7 +21,13 @@ const logged = (homebridge: Homebridge, pattern: RegExp) =>
     .split('\n')
     .filter((line) => pattern.test(line));
 
-describe.skipIf(realFhemUrl !== undefined)('several FHEM platforms in one homebridge', () => {
+/** what a homebridge is configured with for several fhem: a platform for each, or one platform with all of them as connections */
+const layouts: [string, (platforms: Record<string, unknown>[]) => Record<string, unknown>[]][] = [
+  ['several FHEM platforms in one homebridge', (platforms) => platforms],
+  ['one FHEM platform with several connections', ([first, ...others]) => [{ ...first, connections: others }]],
+];
+
+describe.skipIf(realFhemUrl !== undefined).each(layouts)('%s', (_title, layout) => {
   const basic = `Basic ${Buffer.from('homebridge:secret').toString('base64')}`;
 
   /** asks for user and password, hands out a csrf token and has a siri device */
@@ -60,21 +66,23 @@ describe.skipIf(realFhemUrl !== undefined)('several FHEM platforms in one homebr
     const functions = join(mkdtempSync(join(inject('e2eDirectory'), 'functions-')), 'functions.cjs');
     writeFileSync(functions, 'module.exports = { half: (mapping, orig) => Math.round(Number(orig) / 2) };');
 
-    homebridge = await startHomebridge([
-      {
-        ...first.platformConfig,
-        webname: 'custom',
-        auth: { user: 'homebridge', pass: 'secret' },
-        filter: 'room=a',
-        scope: 'alexa,siri',
-        jsFunctions: functions,
-      },
-      { ...second.platformConfig, filter: 'room=b', neverTimeout: true, jsFunctions: 'missing.cjs' },
-      // user and password under their other names, and a scope without siri
-      { ...third.platformConfig, auth: { username: 'homebridge', password: 'secret' }, scope: 'alexa' },
-      // no server
-      {},
-    ]);
+    homebridge = await startHomebridge(
+      layout([
+        {
+          ...first.platformConfig,
+          webname: 'custom',
+          auth: { user: 'homebridge', pass: 'secret' },
+          filter: 'room=a',
+          scope: 'alexa,siri',
+          jsFunctions: functions,
+        },
+        { ...second.platformConfig, filter: 'room=b', neverTimeout: true, jsFunctions: 'missing.cjs' },
+        // user and password under their other names, and a scope without siri
+        { ...third.platformConfig, auth: { username: 'homebridge', password: 'secret' }, scope: 'alexa' },
+        // no server
+        {},
+      ]),
+    );
     accessories = await published(homebridge, 4);
     await homebridge.subscribe(notifying(accessories));
     atFirst = worldOf(first, homebridge, accessories, (device) => device);

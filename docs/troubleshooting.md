@@ -35,7 +35,7 @@ Homebridge.
    | `ignoring <device>` | it has `genericDeviceType ignore`, or is a `structure`, `SVG` or `THRESHOLD` without `genericDeviceType` |
    | `<device>: no service type detected` | the plugin does not know what it is. Set [`genericDeviceType`](devices.md#saying-what-a-device-is-genericdevicetype). |
    | `no accessory created for <device>` | as above, or with an error behind it: the mapping of the device can not be used |
-   | `<device> is already published` | another FHEM platform has published it |
+   | `<device> is already published` | another FHEM platform, or another connection of this entry, has published it |
    | `ignoring <device> for siri` | the platform has a [`scope`](configuration.md#scope) without `siri` |
 
 A device with a mapping the plugin can not use does not stop the others: it is left out and named
