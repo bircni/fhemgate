@@ -1,7 +1,7 @@
 // starts a real homebridge that loads the built plugin, and talks to it the way a HomeKit
 // controller does. homebridge runs in insecure mode, which lets it be asked without pairing.
 import { spawn } from 'node:child_process';
-import { closeSync, existsSync, mkdtempSync, openSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, mkdtempSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { connect, createServer, type Socket } from 'node:net';
 import { join } from 'node:path';
 import { inject } from 'vitest';
@@ -189,12 +189,14 @@ export interface Homebridge {
   /** the accessories homebridge publishes, without the bridge itself. rejects while homebridge is not up yet. */
   accessories(): Promise<HapAccessory[]>;
   /**
-   * The accessories with the values homebridge answers a controller that reads every
+   * The accessories, with the values homebridge answers a controller that reads every
    * characteristic, which asks the plugin. What it lists with the accessories may be what the
    * characteristics held a moment ago: HAP-NodeJS asks the plugin for that only when it was not
    * asked for its accessories in the last five seconds.
    */
-  accessoriesAsRead(): Promise<HapAccessory[]>;
+  readAll(accessories: HapAccessory[]): Promise<HapAccessory[]>;
+  /** how long the log is, in bytes */
+  logSize(): number;
   /** the value homebridge answers a controller that reads the characteristic. undefined if the read is answered with an error. */
   read(characteristic: HapCharacteristic): Promise<unknown>;
   /** what homebridge answers a controller that reads the characteristic: the value, or the HAP status of the error */
@@ -362,30 +364,36 @@ export async function startHomebridge(
   const notifications: HapNotification[] = [];
   const listeners: Socket[] = [];
 
-  const answer: Homebridge['answer'] = async ({ aid, iid }) => {
-    const response = await fetch(`${hap}/characteristics?id=${aid}.${iid}`);
-    const { characteristics } = (await response.json()) as { characteristics: { value?: unknown; status?: number }[] };
-    return { value: characteristics[0]?.value, status: characteristics[0]?.status };
+  /** what homebridge answers a controller that reads the characteristics, in their order */
+  const read = async (characteristics: HapCharacteristic[]) => {
+    const response = await fetch(`${hap}/characteristics?id=${characteristics.map(({ aid, iid }) => `${aid}.${iid}`).join(',')}`);
+    const answered = (await response.json()) as { characteristics: { aid: number; iid: number; value?: unknown; status?: number }[] };
+    const byId = new Map(answered.characteristics.map((each) => [`${each.aid}.${each.iid}`, each]));
+    return characteristics.map(({ aid, iid }) => byId.get(`${aid}.${iid}`));
   };
 
-  const created: Homebridge = {
+  const answer: Homebridge['answer'] = async (characteristic) => {
+    const [answered] = await read([characteristic]);
+    return { value: answered?.value, status: answered?.status };
+  };
+
+  return {
     storage,
     output,
+    logSize: () => statSync(logFile).size,
 
-    async accessoriesAsRead() {
-      const accessories = await created.accessories();
+    async readAll(accessories) {
       const readable = accessories.flatMap((accessory) =>
         accessory.services.flatMap((service) => service.characteristics.filter((characteristic) => characteristic.perms?.includes('pr'))),
       );
-      const response = await fetch(`${hap}/characteristics?id=${readable.map(({ aid, iid }) => `${aid}.${iid}`).join(',')}`);
-      const { characteristics } = (await response.json()) as { characteristics: { aid: number; iid: number; value?: unknown; status?: number }[] };
-      for (const read of characteristics) {
-        const found = readable.find(({ aid, iid }) => aid === read.aid && iid === read.iid);
+      const answers = await read(readable);
+      readable.forEach((characteristic, index) => {
+        const answered = answers[index];
         // a read that fails leaves what is listed, as a controller shows it
-        if (found && !read.status) {
-          found.value = read.value;
+        if (answered && !answered.status) {
+          characteristic.value = answered.value;
         }
-      }
+      });
       return accessories;
     },
 
@@ -473,7 +481,6 @@ export async function startHomebridge(
       await Promise.race([told, exited]);
     },
   };
-  return created;
 }
 
 /** the files in the storage directory of homebridge whose names end as given */

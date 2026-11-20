@@ -228,7 +228,10 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       const reading = mapping.reading as string;
       let orig: unknown = undefined;
       if (device !== owner.device) {
-        orig = owner.query(mapping);
+        // what the plugin has seen of the reading of the other device. fhem is asked all the same,
+        // and what it answers is told like any change.
+        orig = environment.cached[mapping.informId];
+        owner.query(mapping);
       } else if (s.Readings[reading]?.Value) {
         orig = s.Readings[reading].Value;
       }

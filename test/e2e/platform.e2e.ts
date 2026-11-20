@@ -458,7 +458,7 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
 
     const accessories = await published(homebridge, 3);
     expect(names(accessories)).toEqual(['e2e_p_lamp', 'e2e_p_quality', 'e2e_p_unseen']);
-    // a read asks fhem for the reading, which it answers with nothing
+    // a read asks fhem for the reading, which it answers with nothing once the read is over
     await homebridge.answer(
       worldOf(fhem, homebridge, accessories, (device) => device).characteristic('e2e_p_unseen', hapType.TemperatureSensor, hapType.CurrentTemperature),
     );
@@ -467,20 +467,14 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
 
     expect(await page('/')).toBe('<a href="/cached">cached</a><br><a href="/subscriptions">subscriptions</a>');
 
-    let cached = await eventually(
-      'fhem to answer the read',
-      async () => {
-        const shown = await page('/cached');
-        return shown.includes('e2e_p_unseen-later: <br><br>') ? shown : undefined;
-      },
-      homebridge,
-    );
+    await says(homebridge, /executing: .*ReadingsVal\(%22e2e_p_unseen%22%2C%22later%22/);
+    let cached = await page('/cached');
     expect(cached).toContain(`http://127.0.0.1:${fhem.fake.port}/fhem<br>&nbsp;&nbsp;connected: true; connects: 1<br>`);
     expect(cached).not.toContain('last event: ');
     expect(cached).toContain('e2e_p_lamp-state: off<br>&nbsp;&nbsp;On: false (boolean)<br>');
     expect(cached).toContain('e2e_p_quality-level: bad<br>&nbsp;&nbsp;AirQuality: 5 (number; means POOR)<br>');
-    // fhem answered with nothing, and there is no value for HomeKit
-    expect(cached).toContain('e2e_p_unseen-later: <br><br>');
+    // fhem answered with nothing, which is no value of the reading
+    expect(cached).toContain('e2e_p_unseen-later: undefined<br><br>');
     expect(cached).not.toContain('e2e_p_twice');
 
     await fhem.change('e2e_p_quality', 'level', '2');

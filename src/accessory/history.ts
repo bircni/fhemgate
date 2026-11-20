@@ -320,8 +320,9 @@ export function addEveCharacteristics(
         return;
       }
 
-      // an empty history is started with the current state
-      if (historyService.getInitialTime() === undefined) {
+      // an empty history is started with the current state. one that is still being read from disk
+      // only seems empty.
+      if (historyService.isHistoryLoaded() && historyService.getInitialTime() === undefined) {
         const entry = { time: mapping.last_update, status: mapping.cached };
         mapping.log.debug('      adding history entry ' + util.inspect(entry));
         historyService.addEntry(entry);

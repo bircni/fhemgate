@@ -521,7 +521,7 @@ describe('devices', () => {
 });
 
 describe('the reading of another device', () => {
-  const thermostat = (mapping: string) => ({
+  const thermometer = (mapping: string) => ({
     Name: 'heating',
     ...device({ Internals: { NAME: 'heating' }, Readings: { state: 'ok' }, Attributes: { genericDeviceType: 'thermometer', homebridgeMapping: mapping } }),
   });
@@ -530,14 +530,14 @@ describe('the reading of another device', () => {
   const answered = (value = '') => waitFor(() => world.log.debugLines.some((line) => line.includes('value: ' + value)), 'fhem to answer');
 
   it('is shown to HomeKit once fhem answered the question for it, which nobody waits for', async () => {
-    const platform = await connect({ devices: [thermostat('CurrentTemperature=other:temperature')], readings: { 'other temperature': '18.5' } });
+    const platform = await connect({ devices: [thermometer('CurrentTemperature=other:temperature')], readings: { 'other temperature': '18.5' } });
     const accessory = await firstAccessoryOf(platform);
 
     await waitFor(() => temperatureOf(accessory) === 18.5, 'the answer to be shown');
   });
 
   it('is not made up when fhem has no such reading', async () => {
-    const accessory = await firstAccessoryOf(await connect({ devices: [thermostat('CurrentTemperature=other:temperature')] }));
+    const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature')] }));
     await answered();
 
     expect(temperatureOf(accessory)).toBe(0);
@@ -546,7 +546,7 @@ describe('the reading of another device', () => {
 
   it('keeps an event that arrived while fhem was asked, which is newer', async () => {
     const platform = await connect({
-      devices: [thermostat('CurrentTemperature=other:temperature')],
+      devices: [thermometer('CurrentTemperature=other:temperature')],
       readings: { 'other temperature': '18.5' },
       holds: (cmd) => cmd.includes('ReadingsVal'),
     });
@@ -560,9 +560,34 @@ describe('the reading of another device', () => {
     expect(temperatureOf(accessory)).toBe(21);
   });
 
+  it('starts with what the plugin has seen of the reading, when the other device was built first', async () => {
+    const sensor = {
+      Name: 'a_sensor',
+      ...device({ Internals: { NAME: 'a_sensor' }, Readings: { temperature: '18.5' }, Attributes: { genericDeviceType: 'thermometer' } }),
+    };
+    const heating = { ...thermometer('CurrentTemperature=a_sensor:temperature'), Name: 'b_heating' };
+    heating.Internals.NAME = 'b_heating';
+    const platform = await connect({ devices: [sensor, heating], readings: { 'a_sensor temperature': '18.5' } });
+
+    const [, built] = await accessoriesOf(platform);
+
+    expect(temperatureOf(built as Accessory)).toBe(18.5);
+  });
+
+  it('caches no answer of nothing for a read that waits for it', async () => {
+    const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature')] }));
+    world.cached['other-temperature'] = undefined;
+
+    await characteristicOf(serviceOf(accessory.getServices(), 'TemperatureSensor'), hap.Characteristic.CurrentTemperature)
+      .handleGetRequest()
+      .catch(() => undefined);
+
+    expect(world.cached['other-temperature']).toBeUndefined();
+  });
+
   it('tells HomeKit of no press of a button when fhem answers for it', async () => {
     const platform = await connect({
-      devices: [thermostat('CurrentTemperature=state ProgrammableSwitchEvent=other:button,values=/.*/:SINGLE_PRESS')],
+      devices: [thermometer('CurrentTemperature=state ProgrammableSwitchEvent=other:button,values=/.*/:SINGLE_PRESS')],
       readings: { 'other button': 'pressed' },
     });
     const button = characteristicOf(

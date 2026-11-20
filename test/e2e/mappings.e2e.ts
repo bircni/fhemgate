@@ -437,6 +437,7 @@ const logged = (pattern: RegExp) =>
     .split('\n')
     .filter((line) => pattern.test(line));
 
+// what homebridge answers a controller that reads each characteristic once it has listed the accessories
 describe('what homebridge publishes', () => {
   it.each<[string, TypeName, string | undefined, TypeName, number]>([
     // the range of the reading is cut to minValue and maxValue
@@ -666,8 +667,9 @@ describe('a read of a characteristic', () => {
 
   it('is answered from what the plugin has seen, and fhem is asked in the background once a minute at most', async () => {
     const temperature = world.named('e2e_m_parts', 'TemperatureSensor', 'CurrentTemperature');
-    // homebridge read every characteristic when it listed the accessories, which may have been the first read of this minute
+    // the test read every characteristic when homebridge listed the accessories, which was the first read of this minute
     const before = asked('e2e_m_parts');
+    expect(before).toBeGreaterThan(0);
 
     expect(await world.homebridge.read(temperature)).toBe(21.5);
     expect(await world.homebridge.read(temperature)).toBe(21.5);
@@ -684,10 +686,7 @@ describe('a read of a characteristic', () => {
     const lastActivation = world.named('e2e_m_unseen', 'ContactSensor', 'LastActivation');
 
     await world.notifies(world.named('e2e_m_unseen', 'ContactSensor', 'ContactSensorState'), 1, () => world.fhem.change('e2e_m_unseen', 'door', 'open'));
-    // the seconds since the history started, which a read when homebridge listed the accessories may have started
-    const { value, status } = await world.homebridge.answer(lastActivation);
-    expect(status).toBeUndefined();
-    expect(value).toBeGreaterThanOrEqual(0);
+    expect(await world.homebridge.answer(lastActivation)).toEqual({ value: 0 });
   });
 
   it('asks fhem every time for a mapping with nocache', async () => {

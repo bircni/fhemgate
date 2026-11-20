@@ -54,7 +54,7 @@ export function published(homebridge: Homebridge, atLeast = 1): Promise<HapAcces
 export async function quiet(homebridge: Homebridge): Promise<void> {
   const until = performance.now() + 20_000;
   let before = -1;
-  for (let now = homebridge.output().length; now !== before; now = homebridge.output().length) {
+  for (let now = homebridge.logSize(); now !== before; now = homebridge.logSize()) {
     if (performance.now() > until) {
       // a real fhem can send events all the time. what the tests then see is what has arrived so far.
       process.stderr.write('homebridge did not stop logging for a second within twenty seconds\n');
@@ -219,9 +219,9 @@ async function startWorldFor<Fhem extends FhemUnderTest>(
   }
 
   const homebridge = await startHomebridge({ ...fhem.platformConfig, ...options.platform }, options.files);
-  await published(homebridge, options.publishes ?? devices.length);
+  const listed = await published(homebridge, options.publishes ?? devices.length);
   await quiet(homebridge);
-  const accessories = await homebridge.accessoriesAsRead();
+  const accessories = await homebridge.readAll(listed);
   await homebridge.subscribe(notifying(accessories));
 
   // HomeKit is told the siriName of a device as the name of its accessory, or its alias, or the name it has in fhem

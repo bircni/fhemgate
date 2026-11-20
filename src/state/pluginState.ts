@@ -42,10 +42,21 @@ export class PluginState {
    * every characteristic that is subscribed to the reading and hands it to HomeKit.
    *
    * @param noUpdate keep the value in the cache and at the mappings, but do not tell HomeKit
-   * @param answer the value is what fhem answered when it was asked, no change that happened. a
-   *   characteristic that tells of the presses of a button is not told of it.
    */
-  update(informId: string, orig: unknown, noUpdate?: boolean, answer = false): void {
+  update(informId: string, orig: unknown, noUpdate?: boolean): void {
+    this.#take(informId, orig, noUpdate ? 'quiet' : 'event');
+  }
+
+  /**
+   * What fhem answered when it was asked for a reading, which is no change that happened: as an
+   * update, but a characteristic that tells of the presses of a button is not told of it.
+   */
+  answer(informId: string, orig: unknown): void {
+    this.#take(informId, orig, 'answer');
+  }
+
+  /** @param source an event, an answer, or a value HomeKit is not to be told of */
+  #take(informId: string, orig: unknown, source: 'event' | 'answer' | 'quiet'): void {
     if (orig === undefined) {
       return;
     }
@@ -71,7 +82,7 @@ export class PluginState {
 
         const characteristic = typeof mapping.characteristic === 'object' ? mapping.characteristic : undefined;
         const eventOnly = characteristic !== undefined && this.#isEventOnly(characteristic);
-        if ((repeated && !eventOnly && !mapping.nocache) || (answer && eventOnly)) {
+        if ((repeated && !eventOnly && !mapping.nocache) || (source === 'answer' && eventOnly)) {
           return;
         }
 
@@ -87,7 +98,7 @@ export class PluginState {
           recordHistory(accessory, accessory.historyService, mapping, value, this);
         }
 
-        if (!noUpdate && characteristic) {
+        if (source !== 'quiet' && characteristic) {
           const accepted = acceptableValue(characteristic, value);
           if (accepted === undefined) {
             mapping.log.debug(informId + ': ' + String(value) + ' is no value for ' + characteristic.displayName + ', which keeps the one it has');

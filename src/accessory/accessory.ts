@@ -415,34 +415,34 @@ export class FhemAccessory {
 
     // HomeKit is not left waiting when fhem takes its time: it gets the value last seen, or an
     // error if there never was one, and the answer of fhem is published when it comes
-    let timedOut = false;
-    const timer =
-      callback &&
-      setTimeout(() => {
-        timedOut = true;
-        if (cached !== undefined) {
-          this.log.debug('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds, answering with the last value');
-          callback(undefined, cached);
-        } else {
-          this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
-          callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
-        }
-      }, QUERY_TIMEOUT);
+    if (callback === undefined) {
+      this.#ask(informId, cmd);
+      return undefined;
+    }
 
-    const before = this.#state.cache.get(informId);
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      if (cached !== undefined) {
+        this.log.debug('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds, answering with the last value');
+        callback(undefined, cached);
+      } else {
+        this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
+        callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
+      }
+    }, QUERY_TIMEOUT);
+
     this.execute(cmd, (result) => {
       clearTimeout(timer);
       const value = result.replace(/[\r\n]/g, '');
       this.log.debug('  value: ' + value);
 
-      if (callback === undefined) {
-        this.#answered(informId, value, before);
-        return;
-      }
-
       // the read that waited gets the value as its answer. one that was answered meanwhile is
-      // told with an update like any change in fhem.
-      this.#state.update(informId, value, !timedOut);
+      // told with an update like any change in fhem. fhem answers with nothing for a reading it
+      // does not have, which is no value of the reading.
+      if (value !== '') {
+        this.#state.update(informId, value, !timedOut);
+      }
 
       if (!timedOut) {
         // without a mapping there is nothing to convert the reading with
@@ -458,16 +458,19 @@ export class FhemAccessory {
   }
 
   /**
-   * Takes what fhem answered to a question nobody waits for, like any value of fhem. Not when
-   * fhem has no such reading and answers nothing, and not when an event arrived meanwhile, which
-   * is newer. A characteristic that tells of the presses of a button is not told of it.
-   *
-   * @param before what the cache held when fhem was asked
+   * Asks fhem for a reading nobody waits for, and takes the answer like any value of fhem. Not
+   * when fhem has no such reading and answers nothing, and not when an event arrived meanwhile,
+   * which is newer. A characteristic that tells of the presses of a button is not told of it.
    */
-  #answered(informId: string, value: string, before: unknown): void {
-    if (value !== '' && this.#state.cache.get(informId) === before) {
-      this.#state.update(informId, value, false, true);
-    }
+  #ask(informId: string, cmd: string): void {
+    const before = this.#state.cache.get(informId);
+    this.execute(cmd, (result) => {
+      const value = result.replace(/[\r\n]/g, '');
+      this.log.debug('  value: ' + value);
+      if (value !== '' && this.#state.cache.get(informId) === before) {
+        this.#state.answer(informId, value);
+      }
+    });
   }
 
   /**
@@ -483,11 +486,7 @@ export class FhemAccessory {
       return;
     }
     this.#refreshed.set(informId, now);
-
-    const before = this.#state.cache.get(informId);
-    this.execute(cmd, (result) => {
-      this.#answered(informId, result.replace(/[\r\n]/g, ''), before);
-    });
+    this.#ask(informId, cmd);
   }
 
   isInRoom(room: string | undefined): boolean {
