@@ -1,6 +1,7 @@
 // what homebridge-fhem 0.5.55 made the identity of an accessory from, written down from its
 // index.js (https://github.com/justme-1968/homebridge-fhem, branch master, commit 80d5cc6) so that
-// the tests can hold this plugin against it. Nothing here uses the code under test.
+// the tests can hold this plugin against it. Nothing here uses the code under test. The index.js
+// of 0.5.54, the last version published to npm, is the same file.
 //
 // The lines named are those of that index.js. Keep this as it is there, also where it could be
 // written shorter: it is the record of what the installations that move to this plugin had.
