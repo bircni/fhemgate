@@ -188,6 +188,8 @@ export interface Homebridge {
   output(): string;
   /** the accessories homebridge publishes, without the bridge itself. rejects while homebridge is not up yet. */
   accessories(): Promise<HapAccessory[]>;
+  /** when homebridge was last asked for its accessories, in milliseconds of performance.now() */
+  listedAt(): number;
   /** the value homebridge answers a controller that reads the characteristic. undefined if the read is answered with an error. */
   read(characteristic: HapCharacteristic): Promise<unknown>;
   /** what homebridge answers a controller that reads the characteristic: the value, or the HAP status of the error */
@@ -355,6 +357,7 @@ export async function startHomebridge(
   const notifications: HapNotification[] = [];
   const listeners: Socket[] = [];
 
+  let listedAt = 0;
   const answer: Homebridge['answer'] = async ({ aid, iid }) => {
     const response = await fetch(`${hap}/characteristics?id=${aid}.${iid}`);
     const { characteristics } = (await response.json()) as { characteristics: { value?: unknown; status?: number }[] };
@@ -365,7 +368,10 @@ export async function startHomebridge(
     storage,
     output,
 
+    listedAt: () => listedAt,
+
     async accessories() {
+      listedAt = performance.now();
       const response = await fetch(`${hap}/accessories`);
       if (!response.ok) {
         throw new Error(`homebridge answered ${response.status}`);

@@ -45,6 +45,25 @@ export function published(homebridge: Homebridge, atLeast = 1): Promise<HapAcces
   );
 }
 
+/**
+ * Resolves once homebridge has logged nothing new for a second, or after twenty seconds, and
+ * reads the characteristics again when it is next asked for its accessories. HAP-NodeJS reads
+ * them only when it was not asked for the last five seconds, and hands out what they hold
+ * otherwise.
+ */
+export async function settled(homebridge: Homebridge): Promise<void> {
+  const until = performance.now() + 20_000;
+  let before = -1;
+  while (homebridge.output().length !== before && performance.now() < until) {
+    before = homebridge.output().length;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  const reread = homebridge.listedAt() + 5100 - performance.now();
+  if (reread > 0) {
+    await new Promise((resolve) => setTimeout(resolve, reread));
+  }
+}
+
 /** the services of the accessories other than the accessory information, by accessory name */
 export function servicesByName(accessories: HapAccessory[]): Record<string, string[]> {
   return Object.fromEntries(
@@ -199,7 +218,11 @@ async function startWorldFor<Fhem extends FhemUnderTest>(
   }
 
   const homebridge = await startHomebridge({ ...fhem.platformConfig, ...options.platform }, options.files);
-  const accessories = await published(homebridge, options.publishes ?? devices.length);
+  await published(homebridge, options.publishes ?? devices.length);
+  // the platform publishes the accessories as soon as fhem listed the devices, and homebridge reads
+  // every characteristic when it is asked for them. what fhem answers then comes in a moment later.
+  await settled(homebridge);
+  const accessories = await homebridge.accessories();
   await homebridge.subscribe(notifying(accessories));
 
   // HomeKit is told the siriName of a device as the name of its accessory, or its alias, or the name it has in fhem

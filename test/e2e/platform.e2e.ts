@@ -247,11 +247,11 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     const { fhem, homebridge } = await start([lamp('e2e_p_lamp', 'a')], { userattr: 'siriName' });
 
     expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
+    await says(homebridge, /genericDeviceType attribute was not known to fhem and was created\. restart homebridge after giving it to devices\./);
     expect(fhem.fake.commands).toContain('{ addToAttrList( "homebridgeMapping:textField-long" ) }');
     expect(fhem.fake.commands).toContain(
       '{addToAttrList( "genericDeviceType:security,ignore,switch,outlet,light,blind,thermometer,thermostat,contact,garage,window,lock" ) }',
     );
-    await says(homebridge, /genericDeviceType attribute was not known to fhem and was created\. restart homebridge after giving it to devices\./);
     expect(logged(homebridge, /homebridgeMapping attribute created\./)).toHaveLength(1);
     // homebridge still answers
     expect(names(await homebridge.accessories())).toEqual(['e2e_p_lamp']);

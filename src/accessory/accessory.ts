@@ -434,9 +434,9 @@ export class FhemAccessory {
       const value = result.replace(/[\r\n]/g, '');
       this.log.debug('  value: ' + value);
 
-      // the read that waited gets the value as its answer. one that was answered meanwhile is
-      // told with an update like any change in fhem.
-      this.#state.update(informId, value, !timedOut);
+      // the read that waited gets the value as its answer. one that was answered meanwhile, and a
+      // question nobody waits for, are told with an update like any change in fhem.
+      this.#state.update(informId, value, callback !== undefined && !timedOut);
 
       if (callback !== undefined && !timedOut) {
         // without a mapping there is nothing to convert the reading with
