@@ -77,11 +77,13 @@ const devices: DummyDevice[] = [
     readings: { state: 'on', hue: '32768', sat: '127' },
   },
   { name: 'e2e_rgb', setList: 'on off rgb:colorpicker,RGB', readingList: 'rgb', readings: { state: 'on', rgb: 'FF0000' } },
+  // white tones, set and reported in mired
+  { name: 'e2e_ct', setList: 'on off ct:colorpicker,CT,153,1,500', readingList: 'ct', readings: { state: 'on', ct: '366' } },
 
   // ---- blinds
   {
     name: 'e2e_shutter',
-    setList: 'position:slider,0,1,100',
+    setList: 'position:slider,0,1,100 stop',
     readingList: 'position',
     readings: { state: 'ok', position: '20', motor: 'stop' },
     attributes: { genericDeviceType: 'blind' },
@@ -150,6 +152,7 @@ describe('what homebridge publishes', () => {
       e2e_bri: 'Lightbulb',
       e2e_color: 'Lightbulb',
       e2e_rgb: 'Lightbulb',
+      e2e_ct: 'Lightbulb',
       e2e_shutter: 'WindowCovering',
       e2e_lux: 'LightSensor',
       e2e_air: 'AirQualitySensor',
@@ -187,7 +190,9 @@ describe('what homebridge publishes', () => {
     ['e2e_bri', 'Lightbulb', ['On', 'Brightness']],
     ['e2e_color', 'Lightbulb', ['On', 'Hue', 'Saturation']],
     ['e2e_rgb', 'Lightbulb', ['On', 'Hue', 'Saturation', 'Brightness']],
-    ['e2e_shutter', 'WindowCovering', ['CurrentPosition', 'PositionState', 'TargetPosition']],
+    ['e2e_ct', 'Lightbulb', ['On', 'ColorTemperature']],
+    // HoldPosition, as it has a stop command
+    ['e2e_shutter', 'WindowCovering', ['HoldPosition', 'CurrentPosition', 'PositionState', 'TargetPosition']],
     ['e2e_lux', 'LightSensor', ['CurrentAmbientLightLevel']],
     ['e2e_air', 'AirQualitySensor', ['AirQuality', 'CarbonDioxideLevel']],
     ['e2e_weather', 'TemperatureSensor', ['CurrentTemperature', 'BatteryLevel', 'StatusLowBattery', 'CurrentRelativeHumidity', 'AirPressure']],
@@ -235,6 +240,7 @@ describe('what homebridge publishes', () => {
     ['e2e_rgb', 'Lightbulb', 'Hue', 0],
     ['e2e_rgb', 'Lightbulb', 'Saturation', 100],
     ['e2e_rgb', 'Lightbulb', 'Brightness', 100],
+    ['e2e_ct', 'Lightbulb', 'ColorTemperature', 366],
     ['e2e_shutter', 'WindowCovering', 'CurrentPosition', 20],
     ['e2e_shutter', 'WindowCovering', 'TargetPosition', 20],
     ['e2e_shutter', 'WindowCovering', 'PositionState', 2],
@@ -262,6 +268,14 @@ describe('what homebridge publishes', () => {
 
   it('shows the firmware reading as the firmware revision of the accessory', () => {
     expect(world.named('e2e_door', 'AccessoryInformation', 'FirmwareRevision').value).toBe('1.2.3');
+  });
+
+  it('takes the range of the colour temperature from the widget of the set command', () => {
+    expect(world.named('e2e_ct', 'Lightbulb', 'ColorTemperature')).toMatchObject({ minValue: 153, maxValue: 500 });
+  });
+
+  it('offers the modes a thermostat with a mode command has: off, heat and auto', () => {
+    expect(world.named('e2e_heating', 'Thermostat', 'TargetHeatingCoolingState')['valid-values']).toEqual([0, 1, 3]);
   });
 
   it('takes the range of the target temperature from the values the set command lists', () => {
@@ -315,7 +329,10 @@ describe('a value HomeKit writes', () => {
     ['e2e_rgb', 'Lightbulb', 'Hue', 120, 'rgb 00ff00', 'rgb', '00ff00'],
     ['e2e_rgb', 'Lightbulb', 'Saturation', 50, 'rgb 80ff80', 'rgb', '80ff80'],
     ['e2e_rgb', 'Lightbulb', 'Brightness', 50, 'rgb 408040', 'rgb', '408040'],
+    ['e2e_ct', 'Lightbulb', 'ColorTemperature', 250, 'ct 250', 'ct', '250'],
     ['e2e_shutter', 'WindowCovering', 'TargetPosition', 70, 'position 70', 'position', '70'],
+    // stops the blind where it is
+    ['e2e_shutter', 'WindowCovering', 'HoldPosition', true, 'stop', 'state', 'stop'],
     ['e2e_plug', 'Outlet', 'On', false, 'off', 'state', 'off'],
     ['e2e_avr', 'Switch', 'Volume', 30, 'volume 30', 'volume', '30'],
   ])('to %s %s/%s as %s reaches fhem as: set %s', async (device, service, type, value, command, reading, expected) => {
@@ -372,6 +389,7 @@ describe('a reading that changes in fhem', () => {
     // two thirds of the 359 the hue is scaled to
     ['e2e_rgb', 'rgb', '0000FF', 'Lightbulb', 'Hue', 239],
     ['e2e_rgb', 'rgb', '0000CC', 'Lightbulb', 'Brightness', 80],
+    ['e2e_ct', 'ct', '200', 'Lightbulb', 'ColorTemperature', 200],
     ['e2e_shutter', 'position', '55', 'WindowCovering', 'CurrentPosition', 55],
     ['e2e_shutter', 'motor', 'up', 'WindowCovering', 'PositionState', 1],
     ['e2e_shutter', 'motor', 'down', 'WindowCovering', 'PositionState', 0],
@@ -397,5 +415,18 @@ describe('a reading that changes in fhem', () => {
 
     await world.notifies(target, expected, () => world.fhem.change(device, reading, value));
     await world.becomes(target, expected);
+  });
+
+  it('is shown as firmware revision by the version in it, and the last version stays when a reading holds none', async () => {
+    const revision = world.named('e2e_door', 'AccessoryInformation', 'FirmwareRevision');
+    const door = world.named('e2e_door', 'GarageDoorOpener', 'CurrentDoorState');
+
+    await world.fhem.change('e2e_door', 'firmware', 'V2.5.1-beta');
+    await world.becomes(revision, '2.5.1');
+
+    await world.fhem.change('e2e_door', 'firmware', 'unknown');
+    // the event after it has arrived, so the one without a version has as well
+    await world.notifies(door, 1, () => world.fhem.change('e2e_door', 'doorState', 'closed'));
+    expect(await world.homebridge.read(revision)).toBe('2.5.1');
   });
 });

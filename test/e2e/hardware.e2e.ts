@@ -31,8 +31,14 @@ const devices: FhemDevice[] = [
   }),
   fixture('color/wifilight-hsv'),
   fixture('color/milight-rgbw'),
-  fixture('blind/somfy'),
-  fixture('blind/duofern'),
+  // without a genericDeviceType: the plugin knows the shutters of these two modules by itself
+  fixture('blind/somfy', (device) => {
+    delete device.Attributes.genericDeviceType;
+  }),
+  fixture('blind/duofern', (device) => {
+    delete device.Attributes.genericDeviceType;
+  }),
+  fixture('color/hue-color-ct'),
   fixture('thermostat/max-heating'),
   fixture('thermostat/pid20'),
   fixture('thermostat/comet-dect'),
@@ -112,6 +118,8 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['somfy', 'WindowCovering', undefined, 'CurrentPosition', 100],
       ['duofern', 'WindowCovering', undefined, 'CurrentPosition', 70],
       ['duofern', 'WindowCovering', undefined, 'PositionState', 2],
+      // the colour temperature in mired, as the lamp reports it
+      ['hue_color_ct', 'Lightbulb', undefined, 'ColorTemperature', 366],
       ['max_heating', 'Thermostat', undefined, 'TargetTemperature', 21],
       ['max_heating', 'Thermostat', undefined, 'CurrentTemperature', 20.3],
       ['max_heating', 'Thermostat', undefined, 'Actuation', 42],
@@ -142,6 +150,15 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
 
     it('converts luminosity to lux', () => {
       expect(world.named('luminosity', 'LightSensor', 'CurrentAmbientLightLevel').value).toBeCloseTo(200);
+    });
+
+    it('gives a shutter with a stop command the characteristic HomeKit stops a blind with', () => {
+      expect(world.characteristicsOf('duofern', hapType.WindowCovering)).toContain(hapType.HoldPosition);
+      expect(world.characteristicsOf('somfy', hapType.WindowCovering)).toContain(hapType.HoldPosition);
+    });
+
+    it('takes the range of the colour temperature of a hue lamp from its set command', () => {
+      expect(world.named('hue_color_ct', 'Lightbulb', 'ColorTemperature')).toMatchObject({ minValue: 153, maxValue: 500 });
     });
 
     it('takes the range of the target temperature of a MAX thermostat from its set command', () => {
@@ -182,6 +199,8 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['milight_rgbw', 'Lightbulb', undefined, 'Saturation', 30, 'saturation 30'],
       ['somfy', 'WindowCovering', undefined, 'TargetPosition', 30, 'pos 70'],
       ['duofern', 'WindowCovering', undefined, 'TargetPosition', 60, 'position 40'],
+      ['duofern', 'WindowCovering', undefined, 'HoldPosition', true, 'stop'],
+      ['hue_color_ct', 'Lightbulb', undefined, 'ColorTemperature', 300, 'ct 300'],
       ['max_heating', 'Thermostat', undefined, 'TargetTemperature', 22, 'desiredTemperature 22'],
       ['pid20', 'Thermostat', undefined, 'TargetTemperature', 22, 'desired 22'],
       ['comet_dect', 'Thermostat', undefined, 'TargetTemperature', 23, 'desired-temp 23'],
@@ -218,6 +237,7 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['somfy', 'position', '100', 'WindowCovering', undefined, 'CurrentPosition', 0],
       ['duofern', 'position', '100', 'WindowCovering', undefined, 'CurrentPosition', 0],
       ['duofern', 'moving', 'up', 'WindowCovering', undefined, 'PositionState', 1],
+      ['hue_color_ct', 'ct', '250', 'Lightbulb', undefined, 'ColorTemperature', 250],
       // off and on are what a MAX thermostat calls its lowest and highest temperature, cut to its range
       ['max_heating', 'desiredTemperature', 'off', 'Thermostat', undefined, 'TargetTemperature', 5],
       ['max_heating', 'desiredTemperature', 'on', 'Thermostat', undefined, 'TargetTemperature', 30],
