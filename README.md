@@ -251,3 +251,94 @@ json version replaces all build in defaults for a device. e.g.:
 ```
 { "PositionState": { "reading": "motor", "values": [...] }, "On": { "reading": "state", "valueOn": "/on|dim/", "valueOff": "off" } }
 ```
+
+## troubleshooting
+
+### the log is too long, or says too little
+
+At the usual log level the plugin writes one line per device when homebridge starts, what HomeKit
+writes to a device, and warnings and errors. Reads, the events of fhem, the mappings of each
+device and the urls that are asked are logged for debugging only. To see them start homebridge with
+`-D`, or switch on the debug mode in the settings of the homebridge UI (for a child bridge: in the
+settings of that bridge). There is no option of the plugin for this, the log level is the one of
+homebridge.
+
+### a value in HomeKit is not the one in fhem
+
+The plugin follows the events fhem sends. Check with the event monitor of fhem that the reading
+does create an event when it changes: a reading that is set without one, as some older modules
+do, is not seen. A read from
+HomeKit is answered with the last value at once, and fhem is asked for the reading in the
+background at most once a minute, so a missed event corrects itself when the Home app is opened
+again. `nocache=1` on a mapping asks fhem on every read instead and makes reads slower; it is only
+meant for readings that never create events.
+
+When nothing arrives from fhem for a quarter of an hour the plugin checks the connection and
+opens it again if needed. This shows in the log as `longpoll: nothing arrived for 15 minutes ...`.
+
+### fhem runs in docker, or on another machine
+
+`server` is the address homebridge reaches fhem under. With homebridge in one container and fhem in
+another, `127.0.0.1` is the homebridge container itself: use the name of the fhem container or the
+address of the host. FHEMWEB also has to accept connections from the address homebridge comes
+from. With `ssl` and without `auth` the certificate of fhem is checked, so one that fhem made
+itself needs `"rejectUnauthorized": false`; see the platform config above.
+
+### homebridge starts before fhem
+
+When fhem can not be reached the plugin tries again four times with a growing pause and then gives
+up, and homebridge goes on without the devices of fhem. `"neverTimeout": true` makes it keep
+trying. homebridge waits for the plugin in both cases, so on a machine that starts both, start fhem
+first.
+
+### blinds
+
+A device is a blind with `genericDeviceType blind`. DUOFERN and SOMFY devices with a `position`
+command are blinds without it. The position is read from `position` and set with `set position`
+(`set pos` for SOMFY), or from and with `pct` for other devices. HomeKit counts how far a blind is
+open, 100 is open. If your device counts the other way round, add `invert`:
+```
+  attr <blind> genericDeviceType blind
+  attr <blind> homebridgeMapping CurrentPosition=position,invert TargetPosition=position,cmd=position,invert
+```
+A blind with a `stop` command can be stopped from HomeKit. For a blind that only knows `up`, `down`
+and a few fixed positions, name the commands:
+```
+  attr <blind> homebridgeMapping TargetPosition=state,cmds=0:down;;50:go-my;;100:up
+```
+(`;;` is how a `;` is written in a fhem command; in the attribute itself it is a single `;`.)
+
+### a thermostat offers modes it does not have
+
+Without a mapping for `TargetHeatingCoolingState` a thermostat is shown as heating only. With one,
+HomeKit offers the modes the mapping has commands for. `valid` says it directly:
+```
+  attr <thermostat> homebridgeMapping TargetHeatingCoolingState=mode,values=off:OFF;;manual:HEAT,cmds=OFF:mode+off;;HEAT:mode+manual,valid=OFF;;HEAT
+```
+The names of the modes are `OFF`, `HEAT`, `COOL` and `AUTO`; the numbers 0 to 3 work as well.
+
+### the battery is shown as low although it is fine
+
+A `battery` reading of `ok` is a good battery, any other text a low one, and a number is taken
+for the level in percent, low up to 20. Some devices report `1` for a good battery and `0` for an
+empty one, which then reads as 1 or 0 percent. Drop the level and say what the two values mean:
+```
+  attr <device> homebridgeMapping BatteryLevel=clear StatusLowBattery=clear
+                                  StatusLowBattery=battery,values=0:BATTERY_LEVEL_LOW;;1:BATTERY_LEVEL_NORMAL
+```
+
+### a device is new in HomeKit after a restart and has lost its room
+
+HomeKit recognises an accessory by a serial number the plugin works out from the device. The one a
+device was first published with is kept in `fhem2hb-identities.json` in the storage directory of
+homebridge and used from then on. Deleting that file makes the plugin work the identities out anew.
+To give a device a fixed identity yourself use `SerialNumber=serial=<text>` in its homebridgeMapping.
+
+### homebridge can not be added to HomeKit, or everything shows "no response"
+
+A HomeKit bridge takes 149 accessories. The plugin warns in the log when a platform publishes more.
+Use `filter` to publish fewer devices, or define several FHEM platforms with different filters and
+run each as a child bridge.
+
+One device with a mapping the plugin can not use no longer stops the others: it is left out and
+named in the log with the error.

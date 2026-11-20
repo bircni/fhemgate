@@ -1468,3 +1468,42 @@ describe('a roller shutter', () => {
     expect(world.sent).toEqual(['set blind stop']);
   });
 });
+
+describe('what the troubleshooting section of the README recommends', () => {
+  const sensor = (battery: string, homebridgeMapping: string) =>
+    device({
+      Internals: { NAME: 'sensor' },
+      Readings: { state: 'closed', battery },
+      Attributes: { genericDeviceType: 'ContactSensor', homebridgeMapping },
+    });
+
+  it.each([
+    ['1', Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL],
+    ['0', Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW],
+  ])('shows a battery reading of %s, where 1 is good and 0 is empty, as it is meant', (battery, expected) => {
+    const mapping = 'BatteryLevel=clear StatusLowBattery=clear StatusLowBattery=battery,values=0:BATTERY_LEVEL_LOW;1:BATTERY_LEVEL_NORMAL';
+    const services = createWorld().accessory(sensor(battery, mapping)).getServices();
+    const characteristics = services.flatMap((service) => service.characteristics);
+
+    expect(characteristics.find((characteristic) => characteristic.UUID === Characteristic.StatusLowBattery.UUID)?.value).toBe(expected);
+    expect(characteristics.some((characteristic) => characteristic.UUID === Characteristic.BatteryLevel.UUID)).toBe(false);
+  });
+
+  it('sets a blind that only knows a few commands with cmds', () => {
+    const world = createWorld();
+    const blind = device({
+      Internals: { NAME: 'blind', TYPE: 'SOMFY' },
+      Readings: { state: 'up' },
+      PossibleSets: 'up down stop go-my',
+      Attributes: { genericDeviceType: 'blind', homebridgeMapping: 'TargetPosition=state,cmds=0:down;50:go-my;100:up' },
+    });
+    const accessory = world.accessory(blind);
+    accessory.getServices();
+
+    for (const position of [0, 50, 100]) {
+      accessory.command(accessory.mappings.TargetPosition as Mapping, position);
+    }
+
+    expect(world.sent).toEqual(['set blind down', 'set blind go-my', 'set blind up']);
+  });
+});
