@@ -1327,3 +1327,60 @@ describe('the modes a thermostat offers', () => {
     expect(target.props.validValues).toEqual([OFF, HEAT, COOL, AUTO]);
   });
 });
+
+describe('the colour temperature of a light', () => {
+  const bulb = (sets: string, readings: Record<string, string> = { ct: '366 (2732K)' }) =>
+    device({
+      Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
+      Readings: { state: 'on', onoff: '1', bri: '254', ...readings },
+      PossibleSets: `on:noArg off:noArg bri:slider,0,1,254 pct:slider,0,1,100 ${sets}`,
+    });
+  const temperature = (sets: string, readings?: Record<string, string>) => {
+    const world = createWorld();
+    const light = serviceOf(world.accessory(bulb(sets, readings)).getServices(), 'Lightbulb');
+    return { world, light };
+  };
+
+  it('is shown in mired as fhem reports it, within the range of the set command', () => {
+    const { light } = temperature('ct:colorpicker,CT,153,1,454');
+    const ct = characteristicOf(light, Characteristic.ColorTemperature);
+
+    expect(ct.value).toBe(366);
+    expect(ct.props).toMatchObject({ minValue: 153, maxValue: 454 });
+  });
+
+  it('follows the reading', () => {
+    const { world, light } = temperature('ct:colorpicker,CT,153,1,500');
+
+    world.update('bulb-ct', '250 (4000K)');
+
+    expect(characteristicOf(light, Characteristic.ColorTemperature).value).toBe(250);
+  });
+
+  it('is set with the ct command, after the second a slider waits', () => {
+    vi.useFakeTimers();
+    const { world, light } = temperature('ct:colorpicker,CT,153,1,500');
+
+    write(characteristicOf(light, Characteristic.ColorTemperature), 200);
+    write(characteristicOf(light, Characteristic.ColorTemperature), 300);
+    vi.advanceTimersByTime(1000);
+
+    expect(world.sent).toEqual(['set bulb ct 300']);
+  });
+
+  it('keeps to what HomeKit allows when the set command allows more', () => {
+    const { light } = temperature('ct:slider,100,1,650');
+
+    expect(characteristicOf(light, Characteristic.ColorTemperature).props).toMatchObject({ minValue: 140, maxValue: 500 });
+  });
+
+  it.each([
+    ['has no ct command', 'effect:none,colorloop', { ct: '366' }],
+    ['only has a command that ends in ct', 'pct:slider,0,1,100 effect:none', { ct: '366' }],
+    ['has no ct reading', 'ct:colorpicker,CT,153,1,500', {}],
+  ])('is left out for a light that %s', (_what, sets, readings) => {
+    const { light } = temperature(sets, readings);
+
+    expect(light.characteristics.map((characteristic) => characteristic.displayName)).not.toContain('Color Temperature');
+  });
+});
