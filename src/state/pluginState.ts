@@ -42,8 +42,10 @@ export class PluginState {
    * every characteristic that is subscribed to the reading and hands it to HomeKit.
    *
    * @param noUpdate keep the value in the cache and at the mappings, but do not tell HomeKit
+   * @param answer the value is what fhem answered when it was asked, no change that happened. a
+   *   characteristic that tells of the presses of a button is not told of it.
    */
-  update(informId: string, orig: unknown, noUpdate?: boolean): void {
+  update(informId: string, orig: unknown, noUpdate?: boolean, answer = false): void {
     if (orig === undefined) {
       return;
     }
@@ -68,8 +70,8 @@ export class PluginState {
         }
 
         const characteristic = typeof mapping.characteristic === 'object' ? mapping.characteristic : undefined;
-        const eventOnly = characteristic !== undefined && this.isEventOnly(characteristic);
-        if (repeated && !eventOnly && !mapping.nocache) {
+        const eventOnly = characteristic !== undefined && this.#isEventOnly(characteristic);
+        if ((repeated && !eventOnly && !mapping.nocache) || (answer && eventOnly)) {
           return;
         }
 
@@ -103,7 +105,7 @@ export class PluginState {
   }
 
   /** whether the characteristic reports things that happen, like the press of a button, and has no state of its own */
-  isEventOnly(characteristic: Characteristic): boolean {
+  #isEventOnly(characteristic: Characteristic): boolean {
     const { ProgrammableSwitchEvent, ButtonEvent } = this.hap.Characteristic;
     return characteristic.UUID === ProgrammableSwitchEvent.UUID || characteristic.UUID === ButtonEvent.UUID;
   }

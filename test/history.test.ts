@@ -43,13 +43,14 @@ class FakeHistory extends hap.Service {
 
 const world = () => createWorld({ fakeGato: FakeHistory });
 
-const contact = (mapping = '') =>
+/** a door contact that follows the reading, which the device has as closed */
+const contact = (mapping = '', reading = 'state') =>
   device({
     Internals: { NAME: 'door' },
     Readings: { state: 'closed' },
     Attributes: {
       genericDeviceType: 'ContactSensor',
-      homebridgeMapping: `ContactSensorState=state,values=closed:CONTACT_DETECTED;/.*/:CONTACT_NOT_DETECTED history=size=2048 ${mapping}`,
+      homebridgeMapping: `ContactSensorState=${reading},values=closed:CONTACT_DETECTED;/.*/:CONTACT_NOT_DETECTED history=size=2048 ${mapping}`,
     },
   });
 
@@ -151,15 +152,7 @@ describe('a contact sensor with history', () => {
 
   it('fails to answer the last activation before fhem was heard about the reading', () => {
     const w = world();
-    const unseen = device({
-      Internals: { NAME: 'door' },
-      Readings: { state: 'closed' },
-      Attributes: {
-        genericDeviceType: 'ContactSensor',
-        homebridgeMapping: 'ContactSensorState=door,values=closed:CONTACT_DETECTED;/.*/:CONTACT_NOT_DETECTED history=size=2048',
-      },
-    });
-    const sensor = serviceOf(w.accessory(unseen).getServices(), 'ContactSensor');
+    const sensor = serviceOf(w.accessory(contact('', 'door')).getServices(), 'ContactSensor');
 
     expect(read(characteristicOf(sensor, 'LastActivation'))).toMatchObject({ error: 'error', answered: true });
     expect(w.log.errors()).toContain('error door: Custom LastActivation characteristic: last update unknown ');

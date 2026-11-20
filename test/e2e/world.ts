@@ -1,4 +1,5 @@
 // a fhem with dummy devices and a homebridge that publishes them, and how a test looks at the two
+import { setTimeout as sleep } from 'node:timers/promises';
 import type { FakeFhemOptions } from '../support/fhemweb.ts';
 import type { FhemDevice } from '../support/types.ts';
 import { startFhemWith, startStandIn, type DummyDevice, type FhemUnderTest, type StandIn } from './fhem.ts';
@@ -46,26 +47,21 @@ export function published(homebridge: Homebridge, atLeast = 1): Promise<HapAcces
 }
 
 /**
- * Resolves once homebridge has logged nothing new for a second, or after twenty seconds, and
- * reads the characteristics again when it is next asked for its accessories. HAP-NodeJS reads
- * them only when it was not asked for the last five seconds, and hands out what they hold
- * otherwise.
+ * Resolves once homebridge has logged nothing new for a second, or after twenty seconds: the
+ * platform publishes the accessories as soon as fhem listed the devices, and what fhem answers
+ * then comes in a moment later.
  */
-export async function settled(homebridge: Homebridge): Promise<void> {
+export async function quiet(homebridge: Homebridge): Promise<void> {
   const until = performance.now() + 20_000;
   let before = -1;
-  while (homebridge.output().length !== before) {
+  for (let now = homebridge.output().length; now !== before; now = homebridge.output().length) {
     if (performance.now() > until) {
       // a real fhem can send events all the time. what the tests then see is what has arrived so far.
       process.stderr.write('homebridge did not stop logging for a second within twenty seconds\n');
-      break;
+      return;
     }
-    before = homebridge.output().length;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-  const reread = homebridge.listedAt() + 5100 - performance.now();
-  if (reread > 0) {
-    await new Promise((resolve) => setTimeout(resolve, reread));
+    before = now;
+    await sleep(1000);
   }
 }
 
@@ -224,10 +220,8 @@ async function startWorldFor<Fhem extends FhemUnderTest>(
 
   const homebridge = await startHomebridge({ ...fhem.platformConfig, ...options.platform }, options.files);
   await published(homebridge, options.publishes ?? devices.length);
-  // the platform publishes the accessories as soon as fhem listed the devices, and homebridge reads
-  // every characteristic when it is asked for them. what fhem answers then comes in a moment later.
-  await settled(homebridge);
-  const accessories = await homebridge.accessories();
+  await quiet(homebridge);
+  const accessories = await homebridge.accessoriesAsRead();
   await homebridge.subscribe(notifying(accessories));
 
   // HomeKit is told the siriName of a device as the name of its accessory, or its alias, or the name it has in fhem

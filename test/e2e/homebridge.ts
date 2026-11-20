@@ -188,8 +188,13 @@ export interface Homebridge {
   output(): string;
   /** the accessories homebridge publishes, without the bridge itself. rejects while homebridge is not up yet. */
   accessories(): Promise<HapAccessory[]>;
-  /** when homebridge was last asked for its accessories, in milliseconds of performance.now() */
-  listedAt(): number;
+  /**
+   * The accessories with the values homebridge answers a controller that reads every
+   * characteristic, which asks the plugin. What it lists with the accessories may be what the
+   * characteristics held a moment ago: HAP-NodeJS asks the plugin for that only when it was not
+   * asked for its accessories in the last five seconds.
+   */
+  accessoriesAsRead(): Promise<HapAccessory[]>;
   /** the value homebridge answers a controller that reads the characteristic. undefined if the read is answered with an error. */
   read(characteristic: HapCharacteristic): Promise<unknown>;
   /** what homebridge answers a controller that reads the characteristic: the value, or the HAP status of the error */
@@ -357,23 +362,35 @@ export async function startHomebridge(
   const notifications: HapNotification[] = [];
   const listeners: Socket[] = [];
 
-  let listedAt = 0;
   const answer: Homebridge['answer'] = async ({ aid, iid }) => {
     const response = await fetch(`${hap}/characteristics?id=${aid}.${iid}`);
     const { characteristics } = (await response.json()) as { characteristics: { value?: unknown; status?: number }[] };
     return { value: characteristics[0]?.value, status: characteristics[0]?.status };
   };
 
-  return {
+  const created: Homebridge = {
     storage,
     output,
 
-    listedAt: () => listedAt,
+    async accessoriesAsRead() {
+      const accessories = await created.accessories();
+      const readable = accessories.flatMap((accessory) =>
+        accessory.services.flatMap((service) => service.characteristics.filter((characteristic) => characteristic.perms?.includes('pr'))),
+      );
+      const response = await fetch(`${hap}/characteristics?id=${readable.map(({ aid, iid }) => `${aid}.${iid}`).join(',')}`);
+      const { characteristics } = (await response.json()) as { characteristics: { aid: number; iid: number; value?: unknown; status?: number }[] };
+      for (const read of characteristics) {
+        const found = readable.find(({ aid, iid }) => aid === read.aid && iid === read.iid);
+        // a read that fails leaves what is listed, as a controller shows it
+        if (found && !read.status) {
+          found.value = read.value;
+        }
+      }
+      return accessories;
+    },
 
     async accessories() {
       const response = await fetch(`${hap}/accessories`);
-      // homebridge takes its time when it answers, which is after the request arrived
-      listedAt = performance.now();
       if (!response.ok) {
         throw new Error(`homebridge answered ${response.status}`);
       }
@@ -456,6 +473,7 @@ export async function startHomebridge(
       await Promise.race([told, exited]);
     },
   };
+  return created;
 }
 
 /** the files in the storage directory of homebridge whose names end as given */

@@ -1,5 +1,5 @@
 import util from 'node:util';
-import type { Characteristic, CharacteristicValue, Service } from '@homebridge/hap-nodejs';
+import type { Characteristic, Service } from '@homebridge/hap-nodejs';
 import type { Logging } from 'homebridge';
 import { detectMappings, reviseMappings, type Detection } from '../devices/detect.ts';
 import { deviceIdentity } from '../devices/identity.ts';
@@ -436,7 +436,7 @@ export class FhemAccessory {
       this.log.debug('  value: ' + value);
 
       if (callback === undefined) {
-        this.#answered(mapping, informId, value, before);
+        this.#answered(informId, value, before);
         return;
       }
 
@@ -458,24 +458,15 @@ export class FhemAccessory {
   }
 
   /**
-   * Takes what fhem answered to a question nobody waits for, as asked while the accessory was
-   * built: it goes to the cache, and to the characteristic of the mapping that asked. Not when
-   * fhem has no such reading and answers nothing, not when an event arrived meanwhile, which is
-   * newer, and not to a characteristic that only tells of presses of a button.
+   * Takes what fhem answered to a question nobody waits for, like any value of fhem. Not when
+   * fhem has no such reading and answers nothing, and not when an event arrived meanwhile, which
+   * is newer. A characteristic that tells of the presses of a button is not told of it.
+   *
+   * @param before what the cache held when fhem was asked
    */
-  #answered(mapping: PreparedMapping | undefined, informId: string, value: string, before: unknown): void {
-    if (value === '' || this.#state.cache.get(informId) !== before) {
-      return;
-    }
-    this.#state.update(informId, value, true);
-
-    const characteristic = mapping?.characteristic;
-    if (mapping === undefined || typeof characteristic !== 'object' || this.#state.isEventOnly(characteristic)) {
-      return;
-    }
-    const converted = reading2homekit(mapping, value);
-    if (converted !== undefined) {
-      characteristic.updateValue(converted as CharacteristicValue);
+  #answered(informId: string, value: string, before: unknown): void {
+    if (value !== '' && this.#state.cache.get(informId) === before) {
+      this.#state.update(informId, value, false, true);
     }
   }
 
@@ -495,12 +486,7 @@ export class FhemAccessory {
 
     const before = this.#state.cache.get(informId);
     this.execute(cmd, (result) => {
-      const value = result.replace(/[\r\n]/g, '');
-      // fhem answers with nothing for a reading it does not have. and an event that arrived while
-      // fhem was asked is newer than the answer.
-      if (value !== '' && this.#state.cache.get(informId) === before) {
-        this.#state.update(informId, value);
-      }
+      this.#answered(informId, result.replace(/[\r\n]/g, ''), before);
     });
   }
 
