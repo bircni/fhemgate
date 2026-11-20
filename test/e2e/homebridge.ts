@@ -371,8 +371,9 @@ export async function startHomebridge(
     listedAt: () => listedAt,
 
     async accessories() {
-      listedAt = performance.now();
       const response = await fetch(`${hap}/accessories`);
+      // homebridge takes its time when it answers, which is after the request arrived
+      listedAt = performance.now();
       if (!response.ok) {
         throw new Error(`homebridge answered ${response.status}`);
       }

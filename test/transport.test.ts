@@ -520,6 +520,68 @@ describe('devices', () => {
   });
 });
 
+describe('the reading of another device', () => {
+  const thermostat = (mapping: string) => ({
+    Name: 'heating',
+    ...device({ Internals: { NAME: 'heating' }, Readings: { state: 'ok' }, Attributes: { genericDeviceType: 'thermometer', homebridgeMapping: mapping } }),
+  });
+  const valueOf = (accessory: Accessory, type: typeof hap.Characteristic.CurrentTemperature) =>
+    accessory
+      .getServices()
+      .flatMap((service) => service.characteristics)
+      .find((characteristic) => characteristic.UUID === type.UUID)?.value;
+
+  it('is shown to HomeKit once fhem answered the question for it, which nobody waits for', async () => {
+    const platform = await connect({ devices: [thermostat('CurrentTemperature=other:temperature')], readings: { 'other temperature': '18.5' } });
+    const accessory = await firstAccessoryOf(platform);
+
+    await waitFor(() => valueOf(accessory, hap.Characteristic.CurrentTemperature) === 18.5, 'the answer to be shown');
+  });
+
+  it('is not made up when fhem has no such reading', async () => {
+    const platform = await connect({ devices: [thermostat('CurrentTemperature=other:temperature')] });
+    const accessory = await firstAccessoryOf(platform);
+    await waitFor(() => world.log.debugLines.some((line) => line.includes('value: ')), 'fhem to answer');
+
+    expect(valueOf(accessory, hap.Characteristic.CurrentTemperature)).toBe(0);
+    expect(world.cached['other-temperature']).toBeUndefined();
+  });
+
+  it('keeps an event that arrived while fhem was asked, which is newer', async () => {
+    const platform = await connect({
+      devices: [thermostat('CurrentTemperature=other:temperature')],
+      readings: { 'other temperature': '18.5' },
+      holds: (cmd) => cmd.includes('ReadingsVal'),
+    });
+    const accessory = await firstAccessoryOf(platform);
+    fhem.event('other-temperature', '21');
+    await waitFor(() => valueOf(accessory, hap.Characteristic.CurrentTemperature) === 21, 'the event to be shown');
+
+    fhem.release();
+    await waitFor(() => world.log.debugLines.some((line) => line.includes('value: 18.5')), 'fhem to answer');
+
+    expect(valueOf(accessory, hap.Characteristic.CurrentTemperature)).toBe(21);
+  });
+
+  it('tells HomeKit of no press of a button when fhem answers for it', async () => {
+    const platform = await connect({
+      devices: [thermostat('CurrentTemperature=state ProgrammableSwitchEvent=other:button,values=/.*/:SINGLE_PRESS')],
+      readings: { 'other button': 'pressed' },
+    });
+    const accessory = await firstAccessoryOf(platform);
+    const button = accessory
+      .getServices()
+      .flatMap((service) => service.characteristics)
+      .find((each) => each.UUID === hap.Characteristic.ProgrammableSwitchEvent.UUID);
+    const told = vi.fn();
+    button?.on('change', told);
+    await waitFor(() => world.log.debugLines.some((line) => line.includes('value: pressed')), 'fhem to answer');
+
+    expect(button).toBeDefined();
+    expect(told).not.toHaveBeenCalled();
+  });
+});
+
 describe('events', () => {
   async function published(options: FakeFhemOptions = {}): Promise<{ platform: Platform; accessory: Accessory }> {
     const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }], ...options });

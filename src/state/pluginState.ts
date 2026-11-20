@@ -68,7 +68,7 @@ export class PluginState {
         }
 
         const characteristic = typeof mapping.characteristic === 'object' ? mapping.characteristic : undefined;
-        const eventOnly = characteristic !== undefined && this.#isEventOnly(characteristic);
+        const eventOnly = characteristic !== undefined && this.isEventOnly(characteristic);
         if (repeated && !eventOnly && !mapping.nocache) {
           return;
         }
@@ -103,7 +103,7 @@ export class PluginState {
   }
 
   /** whether the characteristic reports things that happen, like the press of a button, and has no state of its own */
-  #isEventOnly(characteristic: Characteristic): boolean {
+  isEventOnly(characteristic: Characteristic): boolean {
     const { ProgrammableSwitchEvent, ButtonEvent } = this.hap.Characteristic;
     return characteristic.UUID === ProgrammableSwitchEvent.UUID || characteristic.UUID === ButtonEvent.UUID;
   }

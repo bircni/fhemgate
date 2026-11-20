@@ -1,5 +1,5 @@
 import util from 'node:util';
-import type { Characteristic, Service } from '@homebridge/hap-nodejs';
+import type { Characteristic, CharacteristicValue, Service } from '@homebridge/hap-nodejs';
 import type { Logging } from 'homebridge';
 import { detectMappings, reviseMappings, type Detection } from '../devices/detect.ts';
 import { deviceIdentity } from '../devices/identity.ts';
@@ -429,16 +429,22 @@ export class FhemAccessory {
         }
       }, QUERY_TIMEOUT);
 
+    const before = this.#state.cache.get(informId);
     this.execute(cmd, (result) => {
       clearTimeout(timer);
       const value = result.replace(/[\r\n]/g, '');
       this.log.debug('  value: ' + value);
 
-      // the read that waited gets the value as its answer. one that was answered meanwhile, and a
-      // question nobody waits for, are told with an update like any change in fhem.
-      this.#state.update(informId, value, callback !== undefined && !timedOut);
+      if (callback === undefined) {
+        this.#answered(mapping, informId, value, before);
+        return;
+      }
 
-      if (callback !== undefined && !timedOut) {
+      // the read that waited gets the value as its answer. one that was answered meanwhile is
+      // told with an update like any change in fhem.
+      this.#state.update(informId, value, !timedOut);
+
+      if (!timedOut) {
         // without a mapping there is nothing to convert the reading with
         const converted = mapping ? reading2homekit(mapping, value) : value;
         if (converted === undefined) {
@@ -449,6 +455,28 @@ export class FhemAccessory {
       }
     });
     return undefined;
+  }
+
+  /**
+   * Takes what fhem answered to a question nobody waits for, as asked while the accessory was
+   * built: it goes to the cache, and to the characteristic of the mapping that asked. Not when
+   * fhem has no such reading and answers nothing, not when an event arrived meanwhile, which is
+   * newer, and not to a characteristic that only tells of presses of a button.
+   */
+  #answered(mapping: PreparedMapping | undefined, informId: string, value: string, before: unknown): void {
+    if (value === '' || this.#state.cache.get(informId) !== before) {
+      return;
+    }
+    this.#state.update(informId, value, true);
+
+    const characteristic = mapping?.characteristic;
+    if (mapping === undefined || typeof characteristic !== 'object' || this.#state.isEventOnly(characteristic)) {
+      return;
+    }
+    const converted = reading2homekit(mapping, value);
+    if (converted !== undefined) {
+      characteristic.updateValue(converted as CharacteristicValue);
+    }
   }
 
   /**

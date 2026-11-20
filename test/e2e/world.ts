@@ -54,7 +54,12 @@ export function published(homebridge: Homebridge, atLeast = 1): Promise<HapAcces
 export async function settled(homebridge: Homebridge): Promise<void> {
   const until = performance.now() + 20_000;
   let before = -1;
-  while (homebridge.output().length !== before && performance.now() < until) {
+  while (homebridge.output().length !== before) {
+    if (performance.now() > until) {
+      // a real fhem can send events all the time. what the tests then see is what has arrived so far.
+      process.stderr.write('homebridge did not stop logging for a second within twenty seconds\n');
+      break;
+    }
     before = homebridge.output().length;
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
