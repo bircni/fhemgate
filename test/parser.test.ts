@@ -151,8 +151,9 @@ describe('parameters', () => {
     expect(current).toEqual({ reading: 'pct', invert: true });
   });
 
-  it('takes a lone invert for the name of a reading', () => {
-    expect(parse('CurrentPosition=pct,invert').mappings.CurrentPosition).toEqual({ reading: 'invert' });
+  it('takes a lone invert as the parameter it is, not as the name of a reading', () => {
+    expect(parse('CurrentPosition=pct,invert').mappings.CurrentPosition).toEqual({ reading: 'pct', invert: true });
+    expect(parse('CurrentPosition=invert,pct').mappings.CurrentPosition).toEqual({ reading: 'pct', invert: true });
   });
 });
 
@@ -172,12 +173,19 @@ describe('services', () => {
     expect(mappings['Fan#Active']).toEqual({ reading: 'speed' });
   });
 
-  it('does not find a category, as the accessory class of homekit has none any more', () => {
+  it('takes the category of the accessory from the categories of homekit', () => {
     const { mappings, log, accessory } = parse('AccessoryCategory=FAN');
 
     expect(mappings).toEqual({});
+    expect(accessory.category).toBe(3);
+    expect(log).toEqual(['info using category: 3 (FAN)']);
+  });
+
+  it('reports a category homekit does not know, also when it is the number of one', () => {
+    const { log, accessory } = parse('AccessoryCategory=VACUUM AccessoryCategory=3');
+
     expect(accessory.category).toBeUndefined();
-    expect(log).toEqual(['error unknown category: FAN']);
+    expect(log).toEqual(['error unknown category: VACUUM', 'error unknown category: 3']);
   });
 });
 
@@ -196,9 +204,21 @@ describe('json', () => {
     expect(log[0]).toMatch(/^error {3}fromHomebridgeMapping JSON.parse: SyntaxError/);
   });
 
-  it('is only recognised on a single line', () => {
+  it('is recognised on several lines as well', () => {
     const { mappings, log } = parse('{"On":\n{"reading":"a"}}');
 
-    expect({ mappings, log }).toMatchSnapshot();
+    expect(mappings).toEqual({ On: { reading: 'a' } });
+    expect(log).toEqual([]);
+  });
+
+  it('is recognised as fhem stores an attribute that was typed into its editor', () => {
+    const { mappings, log } = parse('\n{\n  "On": {\n    "reading": "a",\n    "cmdOn": "an"\n  }\n}\n', { Brightness: { reading: 'pct' } });
+
+    expect(mappings).toEqual({ On: { reading: 'a', cmdOn: 'an' } });
+    expect(log).toEqual([]);
+  });
+
+  it('leaves entries alone that only have braces in them', () => {
+    expect(parse('On=state,reading2homekit={return+orig}').mappings).toEqual({ On: { reading: 'state', reading2homekit: '{return orig}' } });
   });
 });

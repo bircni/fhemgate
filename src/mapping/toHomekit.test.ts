@@ -38,7 +38,23 @@ describe('reading2homekit', () => {
     const { mapping, log } = prepared({ reading: 'r', format: 'float', value2homekit: { low: '10' }, value2homekit_re: [] });
 
     expect(reading2homekit(mapping, 'high')).toBeUndefined();
-    expect(log.lines).toEqual(['error d-r value high not handled in values']);
+    expect(log.lines).toEqual(['warn d-r value high not handled in values']);
+  });
+
+  it('warns about a value that is not in the values of the mapping once, however often it arrives', () => {
+    const { mapping, log } = prepared({ reading: 'r', format: 'float', value2homekit: { low: '10' }, value2homekit_re: [] });
+    const other = prepared({ reading: 'r', format: 'float', value2homekit: { low: '10' }, value2homekit_re: [] });
+
+    for (const value of ['high', 'low', 'high', 'higher', 'high']) {
+      reading2homekit(mapping, value);
+    }
+    reading2homekit(other.mapping, 'high');
+
+    expect(log.lines.filter((line) => !line.startsWith('info '))).toEqual([
+      'warn d-r value high not handled in values',
+      'warn d-r value higher not handled in values',
+    ]);
+    expect(other.log.lines).toEqual(['warn d-r value high not handled in values']);
   });
 
   it('remembers the converted value at the mapping', () => {

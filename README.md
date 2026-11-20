@@ -10,10 +10,48 @@ it replaces homebridge-fhem and can not be installed next to it.
 the project is under active restructuring and is not published yet.
 
 uses longpoll and an internal cache to avoid roundtrips to fhem.
-a debug browser is available at port 8282 (or 8283).
 
 add one (or more) FHEM platforms to config.json and set the filter(s) to a fhem devspec that
 includes the devices that should be bridged to homekit.
+
+## platform config
+```
+{ "platform": "FHEM", "name": "FHEM", "server": "127.0.0.1", "port": 8083, "filter": "room=HomeKit" }
+```
+- server: host name or address of fhem
+- port: the port of FHEMWEB, 8083 if not given
+- filter: the fhem devspec of the devices to bridge. all devices if not given
+- ssl: true to talk https to FHEMWEB
+- rejectUnauthorized: with ssl, whether fhem has to show a certificate that is trusted. true: always.
+  false: never, e.g. for the self-signed certificate of a fhem with `attr WEB HTTPS 1`.
+  if not given, it is as it was in homebridge-fhem: **with auth the certificate is not checked**,
+  without auth it is. without the check the connection is encrypted, but anybody in the network
+  can pose as fhem and is sent user and password. set it to true if fhem has a certificate that
+  node trusts
+- webname: the webname of the FHEMWEB instance, fhem if not given
+- auth: user and password of FHEMWEB: `{ "user": "...", "pass": "..." }`
+- jsFunctions: a file with functions for reading2homekit and homekit2reading, see below
+- neverTimeout: true to keep trying for ever when fhem can not be reached while homebridge starts
+- allowInlineFunctions: false to refuse JavaScript in mappings, see [who is trusted](#who-is-trusted).
+  it is allowed if not given
+- debugPort: the port of the debug browser, which shows the cached readings and the subscriptions
+  of all FHEM platforms. 8282 if not given, or 8283 when that is taken. false or 0 switches the
+  debug browser off
+- debugHost: the address the debug browser listens on. all addresses of the machine if not given,
+  so that **anybody who reaches the port can read the names and readings of the devices**. set it
+  to `127.0.0.1` to reach it from the machine homebridge runs on only
+
+## who is trusted
+the plugin does what fhem tells it to. two things reach further than the devices themselves:
+
+- a homebridgeMapping can carry JavaScript: `reading2homekit` and `homekit2reading` take the body of a
+  function between braces, e.g. `reading2homekit={return+orig*2}`, and the plugin runs it inside
+  homebridge with the rights homebridge has. **whoever can set attributes in fhem can therefore run
+  code on the machine homebridge runs on.** if fhem is not as protected as homebridge, or you do not
+  use this, set `"allowInlineFunctions": false` for the platform. mappings with such a function then
+  lose it, with a line in the log, and everything else goes on working. functions from the
+  jsFunctions file are not affected: that file lies on the homebridge machine.
+- the jsFunctions file is loaded as code. keep it where only the homebridge user can write.
 
 ## directly (automatically) supports:
 - switches (devices with set on and set off commands)
@@ -203,6 +241,8 @@ examples:
                                 BatteryService#StatusLowBattery=battery,threshold=20,values=0:BATTERY_LEVEL_LOW;;1:BATTERY_LEVEL_NORMAL
                                 BatteryService#ChargingState=charging
 ```
+  `BatteryService` is what the `Battery` service was called before. both names work, as do the other
+  service and characteristic names HAP-NodeJS has renamed since.
 
 
 instead of the format described above homebridgeMapping can also contain the same data encoded as json

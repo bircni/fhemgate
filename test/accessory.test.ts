@@ -58,7 +58,8 @@ describe('reading a characteristic', () => {
     expect(read(characteristicOf(serviceOf(services, 'Switch'), Characteristic.On))).toEqual({ error: 1, value: undefined, answered: true });
   });
 
-  it('never answers when fhem does not', () => {
+  it('answers with an error after ten seconds when fhem does not answer', () => {
+    vi.useFakeTimers();
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -69,10 +70,61 @@ describe('reading a characteristic', () => {
       }),
     );
 
-    expect(read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On)).answered).toBe(false);
+    const result = read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On));
+    vi.advanceTimersByTime(9999);
+    expect(result.answered).toBe(false);
+
+    vi.advanceTimersByTime(1);
+    expect(result).toEqual({ error: hap.HAPStatus.OPERATION_TIMED_OUT, value: undefined, answered: true });
+    expect(world.log.errors()).toEqual(['error query: no answer from fhem for lamp-state within 10 seconds']);
   });
 
-  it('answers a mapping that has only a default with that default, kept under a reading named undefined', () => {
+  it('answers once: an answer of fhem that comes after the ten seconds is only cached', () => {
+    vi.useFakeTimers();
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'On=state,nocache=1' },
+      }),
+    );
+    let late: ((result: string) => void) | undefined;
+    accessory.execute = (_cmd, answer) => {
+      late = answer;
+    };
+    const answered = vi.fn();
+
+    accessory.query(accessory.mappings.On as Mapping, answered);
+    vi.advanceTimersByTime(10000);
+    late?.('off');
+
+    expect(answered).toHaveBeenCalledExactlyOnceWith(hap.HAPStatus.OPERATION_TIMED_OUT);
+    expect(world.cached['lamp-state']).toBe('off');
+  });
+
+  it('does not wait for the ten seconds when fhem answers', () => {
+    vi.useFakeTimers();
+    const world = createWorld({ respond: () => 'off' });
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'lamp' },
+        Readings: { state: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'On=state,nocache=1' },
+      }),
+    );
+    const answered = vi.fn();
+
+    accessory.query(accessory.mappings.On as Mapping, answered);
+    vi.advanceTimersByTime(10000);
+
+    expect(answered).toHaveBeenCalledExactlyOnceWith(undefined, false);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('answers a mapping that has only a default with that default, without asking fhem or subscribing to a reading', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -89,11 +141,12 @@ describe('reading a characteristic', () => {
 
     expect(result).toEqual({ error: undefined, value: 1, answered: true });
     expect(world.sent).toEqual([]);
-    expect((accessory.mappings.StatusActive as Mapping).informId).toBe('lamp-undefined');
-    expect(Object.keys(world.subscriptions)).toContain('lamp-undefined');
+    expect(accessory.mappings.StatusActive as Mapping).not.toHaveProperty('informId');
+    expect(Object.keys(world.subscriptions)).toEqual(['lamp-state']);
+    expect(world.log.lines).toContain('log   StatusActive [default 1]');
   });
 
-  it('answers normally for a device that is not reachable, as homekit has no Reachable characteristic any more', () => {
+  it('answers unreachable for a device that is not reachable, and normally once it is again', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -102,12 +155,31 @@ describe('reading a characteristic', () => {
         PossibleSets: 'on off',
       }),
     );
+    const on = characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On);
 
-    const result = read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On));
+    expect((accessory.mappings.Reachable as Mapping).cached).toBe(false);
+    expect(world.subscriptions['bulb-reachable']).toHaveLength(1);
+    expect(read(on)).toEqual({ error: 'unreachable', value: undefined, answered: true });
 
-    expect(result).toEqual({ error: undefined, value: true, answered: true });
-    expect((accessory.mappings.Reachable as Mapping).cached).toBeUndefined();
-    expect(world.subscriptions['bulb-reachable']).toBeUndefined();
+    world.update('bulb-reachable', '1');
+    expect(read(on)).toEqual({ error: undefined, value: true, answered: true });
+
+    world.update('bulb-reachable', '0');
+    expect(read(on)).toEqual({ error: 'unreachable', value: undefined, answered: true });
+  });
+
+  it('answers normally for a device that is reachable', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'bulb', TYPE: 'HUEDevice' },
+        Readings: { state: 'on', reachable: '1' },
+        PossibleSets: 'on off',
+      }),
+    );
+
+    expect(read(characteristicOf(serviceOf(accessory.getServices(), 'Switch'), Characteristic.On))).toEqual({ error: undefined, value: true, answered: true });
+    expect((accessory.mappings.Reachable as Mapping).cached).toBe(true);
   });
 
   it('answers unreachable for every characteristic once the reachable mapping is cached as false', () => {
@@ -140,17 +212,19 @@ describe('reading a characteristic', () => {
     expect(world.log.lines).toEqual(['info query: ContactSensorState for door-Window', 'info   cached: 1 (as number; means CONTACT_NOT_DETECTED)']);
   });
 
-  it('asks for a reading given by its name, but fails on the answer', () => {
+  it('asks fhem for a reading given by its name and answers its text', () => {
     const world = createWorld({ respond: () => '42' });
     const accessory = world.accessory(lamp());
     const answered = vi.fn();
+    world.log.clear();
 
-    // without a mapping there is nothing to convert the answer with, or to log to
-    expect(() => accessory.query('level', answered)).toThrow(TypeError);
+    expect(accessory.query('level', answered)).toBeUndefined();
 
     expect(world.sent).toEqual(['{ReadingsVal("lamp","level","")}']);
-    expect(answered).not.toHaveBeenCalled();
-    expect(world.cached.undefined).toBe('42');
+    expect(answered).toHaveBeenCalledExactlyOnceWith(undefined, '42');
+    expect(world.cached['lamp-level']).toBe('42');
+    expect(world.cached).not.toHaveProperty('undefined');
+    expect(world.log.lines).toEqual(['info query: level for lamp-level', 'info   not cached', 'info   value: 42']);
   });
 
   it('answers 1 as error when there is neither a reading nor a default', () => {
@@ -180,6 +254,23 @@ describe('reading a characteristic', () => {
     expect(write(name, 'Anders').answered).toBe(true);
     expect(accessory.siriName).toBe('Stehlampe');
     expect(world.sent).toEqual([]);
+  });
+
+  it('shows manufacturer, model and serial number as their mappings give them: as text, a default or a reading', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'plug' },
+        Readings: { state: 'on', typ: 'P-100' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'Manufacturer=value=ACME+Corp Model=typ SerialNumber=default=4711' },
+      }),
+    );
+    const information = serviceOf(accessory.getServices(), 'AccessoryInformation');
+
+    expect(characteristicOf(information, Characteristic.Manufacturer).value).toBe('ACME Corp');
+    expect(characteristicOf(information, Characteristic.Model).value).toBe('P-100');
+    expect(characteristicOf(information, Characteristic.SerialNumber).value).toBe('4711');
   });
 
   it('answers the firmware revision from its reading', () => {
@@ -275,7 +366,7 @@ describe('writing a characteristic', () => {
     expect(world.sent).toEqual(['set d a 5', 'set d b 6']);
   });
 
-  it('still sends On while a delayed command is waiting', () => {
+  it('does not switch on while a delayed command is waiting, but does switch off', () => {
     vi.useFakeTimers();
     const world = createWorld();
     const accessory = world.accessory(
@@ -288,9 +379,19 @@ describe('writing a characteristic', () => {
     const service = serviceOf(accessory.getServices(), 'Lightbulb');
 
     write(characteristicOf(service, Characteristic.Brightness), 20);
-    write(characteristicOf(service, Characteristic.On), true);
+    expect(write(characteristicOf(service, Characteristic.On), true).answered).toBe(true);
 
-    expect(world.sent).toEqual(['set dimmer on']);
+    expect(world.sent).toEqual([]);
+    expect(world.log.lines.at(-1)).toBe('info dimmer: skipping set cmd for On with value true');
+
+    vi.advanceTimersByTime(1000);
+    expect(world.sent).toEqual(['set dimmer pct 20']);
+
+    // nothing is waiting any more
+    write(characteristicOf(service, Characteristic.On), true);
+    write(characteristicOf(service, Characteristic.Brightness), 30);
+    write(characteristicOf(service, Characteristic.On), false);
+    expect(world.sent).toEqual(['set dimmer pct 20', 'set dimmer on', 'set dimmer off']);
   });
 
   it('falls back to the default after the timeout of a push button', async () => {
@@ -316,8 +417,45 @@ describe('writing a characteristic', () => {
   });
 });
 
+describe('the heating state of a thermostat', () => {
+  const thermostat = (readings: Record<string, string>) =>
+    device({
+      Internals: { NAME: 'valve', TYPE: 'CUL_HM', DEF: '123456' },
+      Readings: { 'desired-temp': '21.0', 'measured-temp': '19.0', ...readings },
+      PossibleSets: 'desired-temp:slider,4.5,0.5,30.5',
+    });
+
+  it('follows the valve: off while it is closed, heating while it is open', async () => {
+    const world = createWorld();
+    const services = world.accessory(thermostat({ actuator: '0' })).getServices();
+    const state = characteristicOf(serviceOf(services, 'Thermostat'), Characteristic.CurrentHeatingCoolingState);
+    expect(state.value).toBe(Characteristic.CurrentHeatingCoolingState.OFF);
+
+    const seen: unknown[] = [];
+    for (const position of ['12', '0 %', '0.5', '0.0', '100']) {
+      world.update('valve-actuator', position);
+      await settle();
+      seen.push(state.value);
+    }
+
+    const { OFF, HEAT } = Characteristic.CurrentHeatingCoolingState;
+    expect(seen).toEqual([HEAT, OFF, HEAT, OFF, HEAT]);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('is heating when the thermostat reports no valve position', () => {
+    const world = createWorld();
+    const accessory = world.accessory(thermostat({}));
+    const state = characteristicOf(serviceOf(accessory.getServices(), 'Thermostat'), Characteristic.CurrentHeatingCoolingState);
+
+    expect(accessory.mappings.CurrentHeatingCoolingState).toMatchObject({ default: Characteristic.CurrentHeatingCoolingState.HEAT });
+    expect(accessory.mappings.CurrentHeatingCoolingState).not.toHaveProperty('reading');
+    expect(read(state)).toEqual({ error: undefined, value: Characteristic.CurrentHeatingCoolingState.HEAT, answered: true });
+  });
+});
+
 describe('readings without a value in the values list', () => {
-  it('are reported as an error every time they arrive', async () => {
+  it('are reported once as a warning, however often they arrive', async () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -334,7 +472,7 @@ describe('readings without a value in the values list', () => {
     world.update('door-state', 'tilted');
     await settle();
 
-    expect(world.log.errors()).toEqual(['error door-state value tilted not handled in values', 'error door-state value tilted not handled in values']);
+    expect(world.log.lines.filter((line) => !line.startsWith('info '))).toEqual(['warn door-state value tilted not handled in values']);
     expect(sensor.value).toBe(0);
   });
 });
@@ -351,7 +489,7 @@ describe('commands', () => {
     expect(identified).toHaveBeenCalledOnce();
   });
 
-  it('identifies a hue device with a command that lacks a space', () => {
+  it('identifies a hue device by letting it blink once', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -363,7 +501,7 @@ describe('commands', () => {
 
     accessory.identify(() => undefined);
 
-    expect(world.sent).toEqual(['set bulbalert select']);
+    expect(world.sent).toEqual(['set bulb alert select']);
   });
 
   it('does not identify a device that can not toggle', () => {
@@ -377,7 +515,7 @@ describe('commands', () => {
     expect(identified).toHaveBeenCalledOnce();
   });
 
-  it('knows two commands that are given by name instead of by mapping', () => {
+  it('takes a command that is given by name instead of by mapping', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -390,10 +528,11 @@ describe('commands', () => {
     accessory.command('xhue', 180);
     accessory.command('xsat', 50);
 
-    expect(world.sent).toEqual(['set bulb hue 32859', 'set bulb sat 127']);
-    expect(() => {
-      accessory.command('other', 1);
-    }).toThrow(TypeError);
+    accessory.command('bri', 100);
+    accessory.command('toggle');
+
+    expect(world.sent).toEqual(['set bulb hue 32859', 'set bulb sat 127', 'set bulb bri 100', 'set bulb toggle']);
+    expect(world.log.lines.at(-1)).toBe('info bulb sending command toggle with value undefined');
   });
 
   it('sends nothing when a converter leaves the value unchanged or fails', () => {
@@ -419,6 +558,112 @@ describe('commands', () => {
 
     expect(world.sent).toEqual([]);
     expect(world.log.errors()).toEqual(['error d-b homekit2reading: Error: boom']);
+  });
+});
+
+describe('javascript in a mapping', () => {
+  const doubled = () =>
+    device({
+      Internals: { NAME: 'd' },
+      Readings: { a: '4', b: '4' },
+      PossibleSets: 'a b',
+      Attributes: {
+        genericDeviceType: 'light',
+        homebridgeMapping: 'Brightness=a,cmd=a,reading2homekit={return+orig*2},homekit2reading={return+orig/2}\nSaturation=b,cmd=b,reading2homekit=twice',
+      },
+    });
+  const jsFunctions = { twice: (_mapping: Mapping, orig: string) => Number(orig) * 2 };
+
+  it('is run unless the platform says otherwise', () => {
+    const world = createWorld({ jsFunctions });
+    const accessory = world.accessory(doubled());
+
+    expect((accessory.mappings.Brightness as Mapping).cached).toBe(8);
+    accessory.command(accessory.mappings.Brightness as Mapping, 50);
+    expect(world.sent).toEqual(['set d a 25']);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('is refused when the platform does not allow it, while the rest of the mapping and the named functions go on working', () => {
+    const world = createWorld({ jsFunctions });
+    const accessory = world.accessory(doubled(), { allowInlineFunctions: false });
+
+    expect(world.log.errors()).toEqual([
+      'error   reading2homekit: JavaScript in a mapping is refused, as allowInlineFunctions is false for this platform',
+      'error   reading2homekit disabled.',
+      'error   homekit2reading: JavaScript in a mapping is refused, as allowInlineFunctions is false for this platform',
+      'error   homekit2reading disabled.',
+    ]);
+    expect(accessory.mappings.Brightness).not.toHaveProperty('reading2homekit');
+    expect(accessory.mappings.Brightness).not.toHaveProperty('homekit2reading');
+    expect((accessory.mappings.Brightness as Mapping).cached).toBe(4);
+    expect((accessory.mappings.Saturation as Mapping).cached).toBe(8);
+    accessory.command(accessory.mappings.Brightness as Mapping, 50);
+    expect(world.sent).toEqual(['set d a 50']);
+  });
+});
+
+describe('services of the same type', () => {
+  const kinds = (services: { constructor: { name: string }; subtype?: string }[]) =>
+    services.map((service) => `${service.constructor.name}(${service.subtype ?? ''})`);
+
+  it('are told apart by their subtypes', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'strip' },
+        Readings: { a: 'on', b: 'off' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'clear Outlet(a)#On=a Outlet(b)#On=b' },
+      }),
+    );
+
+    expect(kinds(accessory.getServices())).toEqual(['AccessoryInformation()', 'Switch()', 'Outlet(a)', 'Outlet(b)']);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('are not created twice without a subtype: the mapping that asks for it is skipped and the others stay', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'strip' },
+        Readings: { a: 'on', b: 'off', c: 'on' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'clear Outlet(a)#On=a Outlet#OutletInUse=b Lightbulb#On=c' },
+      }),
+    );
+
+    const services = accessory.getServices();
+
+    expect(kinds(services)).toEqual(['AccessoryInformation()', 'Switch()', 'Outlet(a)', 'Lightbulb()']);
+    expect(world.log.errors()).toEqual([
+      'error strip: Outlet#OutletInUse needs another Outlet service without a subtype. give it a subtype of its own. the mapping is skipped.',
+    ]);
+    expect(characteristicOf(serviceOf(services, 'Lightbulb'), Characteristic.On).value).toBe(true);
+    // what homebridge does with the services: it takes them all
+    const published = new hap.Accessory('strip', hap.uuid.generate('strip'));
+    expect(() => {
+      for (const service of services.slice(1)) {
+        published.addService(service);
+      }
+    }).not.toThrow();
+  });
+
+  it('are not created twice with the same subtype under two names of the service', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      device({
+        Internals: { NAME: 'strip' },
+        Readings: { a: 'on', b: 'off' },
+        PossibleSets: 'on off',
+        Attributes: { homebridgeMapping: 'clear outlet(a)#On=a Outlet(a)#OutletInUse=b' },
+      }),
+    );
+
+    expect(kinds(accessory.getServices())).toEqual(['AccessoryInformation()', 'Switch()', 'Outlet(a)']);
+    expect(world.log.errors()).toEqual([
+      'error strip: Outlet(a)#OutletInUse needs another Outlet service with the subtype a, which another one has. give it a subtype of its own. the mapping is skipped.',
+    ]);
   });
 });
 
@@ -465,11 +710,15 @@ describe('rooms, types and scopes', () => {
     expect(accessory.isInScope('google')).toBe(false);
   });
 
-  it('fails when the scope of the platform is a list', () => {
+  it('takes the scopes of the platform as a list as well', () => {
     const accessory = inRooms();
-    accessory.fhem = { scope: ['siri'] };
 
-    expect(() => accessory.isInScope('siri')).toThrow(TypeError);
+    accessory.fhem = { scope: ['alexa', 'siri'] };
+    expect(accessory.isInScope('siri')).toBe(true);
+    expect(accessory.isInScope('google')).toBe(false);
+
+    accessory.fhem = { scope: [] };
+    expect(accessory.isInScope('siri')).toBe(false);
   });
 });
 
@@ -519,7 +768,7 @@ describe('subscriptions', () => {
     expect(world.subscriptions['dimmer-pct']).toBeUndefined();
   });
 
-  it('fails to unsubscribe everything at once when a characteristic has several mappings', () => {
+  it('unsubscribes everything at once, also for a characteristic with several mappings', () => {
     const world = createWorld();
     const accessory = world.accessory(
       device({
@@ -531,21 +780,28 @@ describe('subscriptions', () => {
     );
     accessory.getServices();
 
+    expect(Object.keys(world.subscriptions)).toEqual(['d-a', 'd-b']);
+
     accessory.unsubscribe();
 
-    // the list of mappings has no reading id, so nothing is found for it
-    expect(Object.keys(world.subscriptions)).toEqual(['d-a', 'd-b']);
+    expect(world.subscriptions).toEqual({});
   });
 
-  it('unsubscribes everything at once only for characteristics without a characteristic object', () => {
+  it('unsubscribes everything at once, with or without a characteristic, and leaves other accessories alone', () => {
     const world = createWorld();
     const accessory = world.accessory(lamp());
     accessory.getServices();
     accessory.subscribe('lamp-state');
+    const other = world.accessory(device({ Internals: { NAME: 'other' }, Readings: { state: 'on' }, PossibleSets: 'on off' }));
+    other.getServices();
+    other.subscribe('lamp-state');
 
     accessory.unsubscribe();
 
-    expect(world.subscriptions['lamp-state']?.map((subscription) => subscription.characteristic?.displayName)).toEqual(['On']);
+    expect(Object.keys(world.subscriptions)).toEqual(['lamp-state', 'other-state']);
+    expect(world.subscriptions['lamp-state']?.map((subscription) => subscription.accessory)).toEqual([other]);
+    expect(world.published('lamp')).toBeNull();
+    expect(world.published('other')).toBe(other);
   });
 
   it('can subscribe to a reading by its id alone', () => {
@@ -574,5 +830,193 @@ describe('subscriptions', () => {
     expect(world.cached['bulb-h']).toBeCloseTo(0.1117, 4);
     expect(world.cached['bulb-s']).toBeCloseTo(0.7137, 4);
     expect(world.cached['bulb-v']).toBe(1);
+  });
+});
+
+describe('the residents as a security system', () => {
+  const residents = (state: string) => device({ Internals: { NAME: 'rr', TYPE: 'RESIDENTS' }, Readings: { state } });
+  const { SecuritySystemCurrentState: Current, SecuritySystemTargetState: Target } = Characteristic;
+
+  it('is disarmed in both states when the residents come home', async () => {
+    const world = createWorld();
+    const system = serviceOf(world.accessory(residents('gone')).getServices(), 'SecuritySystem');
+    const current = characteristicOf(system, Current);
+    const target = characteristicOf(system, Target);
+    expect([current.value, target.value]).toEqual([Current.AWAY_ARM, Target.AWAY_ARM]);
+    world.log.clear();
+
+    world.update('rr-state', 'home');
+    await settle();
+
+    expect([current.value, target.value]).toEqual([Current.DISARMED, Target.DISARM]);
+    expect(world.log.lines.filter((line) => !line.startsWith('info '))).toEqual([]);
+  });
+
+  it.each([
+    ['home', Current.DISARMED, Target.DISARM],
+    ['gotosleep', Current.NIGHT_ARM, Target.NIGHT_ARM],
+    ['absent', Current.STAY_ARM, Target.STAY_ARM],
+    ['gone', Current.AWAY_ARM, Target.AWAY_ARM],
+  ])('shows the state %s as %i and %i', (state, current, target) => {
+    const world = createWorld();
+    const accessory = world.accessory(residents(state));
+
+    expect((accessory.mappings.SecuritySystemCurrentState as Mapping).cached).toBe(current);
+    expect((accessory.mappings.SecuritySystemTargetState as Mapping).cached).toBe(target);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('only names values and commands its two characteristics have', () => {
+    const accessory = createWorld().accessory(residents('home'));
+
+    for (const [type, constants] of [
+      ['SecuritySystemCurrentState', Current],
+      ['SecuritySystemTargetState', Target],
+    ] as const) {
+      const mapping = accessory.mappings[type] as Mapping & { values: string[]; cmds?: string[] };
+      const named = [...mapping.values.map((pair) => pair.split(':').at(-1)), ...(mapping.cmds ?? []).map((pair) => pair.split(':')[0])];
+      for (const name of named) {
+        expect(constants, `${type} ${name}`).toHaveProperty(name as string);
+      }
+    }
+  });
+});
+
+describe('mappings for the accessory information', () => {
+  const plug = () =>
+    device({
+      Internals: { NAME: 'plug' },
+      Readings: { state: 'on', fw: '2.0.1' },
+      PossibleSets: 'on off',
+      Attributes: { homebridgeMapping: 'Manufacturer=value=ACME Model=value=P-100 SerialNumber=serial=4711 FirmwareRevision=fw' },
+    });
+  const names = (service: { characteristics: { displayName: string }[] }) => service.characteristics.map((characteristic) => characteristic.displayName);
+
+  it('are shown there and nowhere else', () => {
+    const world = createWorld();
+    const services = world.accessory(plug()).getServices();
+    const information = serviceOf(services, 'AccessoryInformation');
+
+    expect(names(serviceOf(services, 'Switch'))).toEqual(['Name', 'On']);
+    expect(characteristicOf(information, Characteristic.Manufacturer).value).toBe('ACME');
+    expect(characteristicOf(information, Characteristic.Model).value).toBe('P-100');
+    expect(characteristicOf(information, Characteristic.SerialNumber).value).toBe('4711');
+    expect(characteristicOf(information, Characteristic.FirmwareRevision).value).toBe('2.0.1');
+    expect(Object.fromEntries(Object.entries(world.subscriptions).map(([informId, list]) => [informId, list?.length]))).toEqual({
+      'plug-state': 1,
+      'plug-fw': 1,
+    });
+  });
+
+  it('answer a read of the firmware revision once, the way HomeKit reads it', async () => {
+    const world = createWorld();
+    const information = serviceOf(world.accessory(plug()).getServices(), 'AccessoryInformation');
+    const firmware = characteristicOf(information, Characteristic.FirmwareRevision);
+    const warned = vi.fn();
+    firmware.on('characteristic-warning', warned);
+
+    expect(await firmware.handleGetRequest()).toBe('2.0.1');
+    await settle();
+
+    expect(warned).not.toHaveBeenCalled();
+    expect(vi.mocked(console.warn).mock.calls.flat().join(' ')).not.toContain('already');
+  });
+
+  it('follow the firmware revision when its reading changes', async () => {
+    const world = createWorld();
+    const information = serviceOf(world.accessory(plug()).getServices(), 'AccessoryInformation');
+
+    world.update('plug-fw', '2.1.0');
+    await settle();
+
+    expect(characteristicOf(information, Characteristic.FirmwareRevision).value).toBe('2.1.0');
+  });
+
+  it('still become a characteristic of a service that is named for them', () => {
+    const world = createWorld();
+    const outlet = device({ Internals: { NAME: 'plug' }, Readings: { state: 'on', fw: '2.0.1' }, PossibleSets: 'on off' });
+    outlet.Attributes.homebridgeMapping = 'Outlet#FirmwareRevision=fw';
+
+    expect(names(serviceOf(world.accessory(outlet).getServices(), 'Outlet'))).toEqual(['Name', 'On', 'Firmware Revision']);
+  });
+});
+
+describe('names of services and characteristics', () => {
+  const kinds = (services: { constructor: { name: string }; subtype?: string }[]) => services.map((service) => service.constructor.name);
+  const switched = (homebridgeMapping: string) =>
+    device({
+      Internals: { NAME: 'plug' },
+      Readings: { state: 'on', level: '15', charging: '1', nr: '2' },
+      PossibleSets: 'on off',
+      Attributes: { genericDeviceType: 'switch', homebridgeMapping },
+    });
+
+  it('are still known by the name HAP-NodeJS had for them before it renamed them, as in the example of the README', () => {
+    const world = createWorld();
+    const accessory = world.accessory(
+      switched(
+        'On=state,cmdOn=on,cmdOff=off BatteryService#BatteryLevel=level ' +
+          'BatteryService#StatusLowBattery=level,threshold=20,values=0:BATTERY_LEVEL_LOW;1:BATTERY_LEVEL_NORMAL BatteryService#ChargingState=charging',
+      ),
+    );
+
+    const services = accessory.getServices();
+
+    expect(kinds(services)).toEqual(['AccessoryInformation', 'Switch', 'Battery']);
+    const battery = serviceOf(services, 'Battery');
+    expect(characteristicOf(battery, Characteristic.BatteryLevel).value).toBe(15);
+    expect(characteristicOf(battery, Characteristic.StatusLowBattery).value).toBe(Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW);
+    expect(characteristicOf(battery, Characteristic.ChargingState).value).toBe(Characteristic.ChargingState.CHARGING);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it('are known by their older name for characteristics as well, with the names of their values', () => {
+    const world = createWorld();
+    const accessory = world.accessory(switched('Label#LabelNamespace=nr,values=2:ARABIC_NUMERALS;/.*/:DOTS LabelIndex=nr'));
+
+    const label = serviceOf(accessory.getServices(), 'ServiceLabel');
+
+    expect(characteristicOf(label, Characteristic.ServiceLabelNamespace).value).toBe(Characteristic.ServiceLabelNamespace.ARABIC_NUMERALS);
+    expect(characteristicOf(label, Characteristic.ServiceLabelIndex).value).toBe(2);
+    expect(world.log.errors()).toEqual([]);
+  });
+
+  it.each([
+    ['Service', 'BatteryService', 'Battery'],
+    ['Service', 'Slat', 'Slats'],
+    ['Service', 'Label', 'ServiceLabel'],
+    ['Service', 'Relay', 'CloudRelay'],
+    ['Service', 'TunneledBTLEAccessoryService', 'Tunnel'],
+    ['Service', 'CameraEventRecordingManagement', 'CameraRecordingManagement'],
+    ['Characteristic', 'LabelIndex', 'ServiceLabelIndex'],
+    ['Characteristic', 'LabelNamespace', 'ServiceLabelNamespace'],
+    ['Characteristic', 'PairingPairings', 'ListPairings'],
+    ['Characteristic', 'SelectedStreamConfiguration', 'SelectedRTPStreamConfiguration'],
+  ] as const)('the %s %s is %s by now', (kind, older, current) => {
+    const classes = hap[kind] as unknown as Record<string, unknown>;
+    const accessory = createWorld().accessory(switched(''));
+
+    expect(classes[older]).toBeUndefined();
+    expect(classes[current]).toBeTypeOf('function');
+    expect(kind === 'Service' ? accessory.serviceOfName(older)?.constructor : accessory.characteristicOfName(older)).toBe(classes[current]);
+  });
+
+  it('skip a mapping of a switch that names a service HomeKit does not know, so that homebridge takes the accessory', () => {
+    const world = createWorld();
+    const accessory = world.accessory(switched('On=state,cmdOn=on,cmdOff=off NoSuchService#BatteryLevel=level'));
+
+    const services = accessory.getServices();
+
+    expect(kinds(services)).toEqual(['AccessoryInformation', 'Switch']);
+    expect(world.log.errors()).toEqual([
+      'error plug: service name NoSuchService unknown',
+      'error plug: NoSuchService#BatteryLevel needs another NoSuchService service without a subtype. give it a subtype of its own. the mapping is skipped.',
+    ]);
+    const published = new hap.Accessory('plug', hap.uuid.generate('plug'));
+    expect(() => {
+      for (const service of services.slice(1)) {
+        published.addService(service);
+      }
+    }).not.toThrow();
   });
 });

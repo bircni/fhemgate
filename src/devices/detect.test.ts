@@ -35,8 +35,8 @@ describe('detectMappings', () => {
     expect(target.service_name).toBe('outlet');
   });
 
-  it('does not look at the genericDisplayType', () => {
-    expect(detect({ PossibleSets: 'on off', Attributes: { genericDisplayType: 'light' } }).target.service_name).toBe('switch');
+  it('uses the genericDisplayType when there is no genericDeviceType', () => {
+    expect(detect({ PossibleSets: 'on off', Attributes: { genericDisplayType: 'light' } }).target.service_name).toBe('light');
   });
 
   it('skips a device that is to be ignored before it has mappings', () => {
@@ -69,6 +69,69 @@ describe('detectMappings', () => {
     });
 
     expect(target.service_name).toBe('thermometer');
+  });
+
+  it('takes a blind that is set with pct for a blind, unless its type says otherwise', () => {
+    const blind = { PossibleSets: 'on off pct', Readings: { pct: { Value: '40' } }, Attributes: { subType: 'blindActuator' } };
+
+    expect(detect(blind).target.service_name).toBe('blind');
+    expect(detect({ ...blind, Attributes: { ...blind.Attributes, genericDeviceType: 'light' } }).target.service_name).toBe('light');
+  });
+});
+
+describe('a window', () => {
+  const skylight = { PossibleSets: 'pct:slider,0,1,100', Readings: { pct: { Value: '10' } }, Attributes: { genericDeviceType: 'window' } };
+
+  it('that is set with pct gets its position from pct and no brightness', () => {
+    const { target, s } = detect(skylight);
+    reviseMappings(target, s);
+
+    expect(target.service_name).toBe('window');
+    expect(target.mappings).toEqual({ CurrentPosition: { reading: 'pct' }, TargetPosition: { reading: 'pct', cmd: 'pct', delay: true } });
+  });
+
+  it('has no brightness with any command a dimmer is set with', () => {
+    for (const PossibleSets of ['on off dim:slider,0,1,99', 'on off dim06% dim100%', 'on off bri:slider,0,1,254']) {
+      expect(detect({ ...skylight, PossibleSets }).target.mappings, PossibleSets).not.toHaveProperty('Brightness');
+    }
+  });
+
+  it('leaves the brightness of what is no window alone', () => {
+    expect(detect({ ...skylight, Attributes: {} }).target.mappings).toHaveProperty('Brightness');
+  });
+});
+
+describe('an FS20 dimmer', () => {
+  const step = (percent: number) => {
+    const { target } = detect({ PossibleSets: 'on off dim06% dim50% dim100%', Readings: { state: { Value: 'dim50%' } } });
+    return (target.mappings.Brightness as { homekit2reading: (value: number) => unknown }).homekit2reading(percent);
+  };
+
+  it.each([
+    [0, 'off'],
+    [1, 'dim06%'],
+    [6, 'dim06%'],
+    [9, 'dim06%'],
+    [10, 'dim12%'],
+    [25, 'dim25%'],
+    [50, 'dim50%'],
+    [53, 'dim50%'],
+    [54, 'dim56%'],
+    [75, 'dim75%'],
+    [96, 'dim93%'],
+    [97, 'dim100%'],
+    [100, 'dim100%'],
+  ])('sends a brightness of %i as %s, the nearest of its sixteen steps', (percent, command) => {
+    expect(step(percent)).toBe(command);
+  });
+
+  it('reads back the step it sent', () => {
+    const { target } = detect({ PossibleSets: 'on off dim06% dim50% dim100%', Readings: { state: { Value: 'dim50%' } } });
+    const brightness = target.mappings.Brightness as { reading2homekit: (value: string) => number; homekit2reading: (value: number) => string };
+
+    for (const percent of [6, 12, 18, 25, 31, 37, 43, 50, 56, 62, 68, 75, 81, 87, 93, 100]) {
+      expect(brightness.reading2homekit(brightness.homekit2reading(percent)), `${percent}`).toBe(percent);
+    }
   });
 });
 

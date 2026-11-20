@@ -86,13 +86,17 @@ export interface PlatformConfig {
   jsFunctions?: string;
   scope?: unknown;
   neverTimeout?: boolean;
+  debugPort?: unknown;
+  debugHost?: string;
+  allowInlineFunctions?: unknown;
+  rejectUnauthorized?: unknown;
   auth?: { user: string; pass: string; sendImmediately?: boolean };
 }
 
 export interface Platform {
   log: unknown;
   config: PlatformConfig;
-  connection?: { base_url: string; dead?: boolean };
+  connection?: { base_url: string; dead?: boolean; rejectUnauthorized?: boolean };
   server?: string;
   port?: number | string;
   filter?: string;

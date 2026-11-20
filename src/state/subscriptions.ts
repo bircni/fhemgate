@@ -47,6 +47,19 @@ export class Subscriptions {
     }
   }
 
+  /** removes every subscription of the accessory */
+  unsubscribeAll(accessory: SubscribedAccessory): void {
+    for (const [informId, subscriptions] of Object.entries(this.byInformId)) {
+      const remaining = (subscriptions ?? []).filter((subscription) => subscription.accessory !== accessory);
+
+      if (remaining.length) {
+        this.byInformId[informId] = remaining;
+      } else {
+        delete this.byInformId[informId];
+      }
+    }
+  }
+
   /** the accessory that is subscribed to a reading of the device, if there is one */
   publishedAccessory(device: string): SubscribedAccessory | null {
     for (const subscriptions of Object.values(this.byInformId)) {

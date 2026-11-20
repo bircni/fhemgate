@@ -54,6 +54,34 @@ describe('prepareMappings', () => {
     expect(mapping.homekit2cmd_re).toEqual([{ re: '1|4', to: 'zu' }]);
   });
 
+  it('names a value that is given as its number, and nothing the class only inherits', () => {
+    const mapping: Mapping = { values: ['zu:0', 'auf:1', 'halb:7', 'leer:'] };
+
+    prepare({ CurrentHeatingCoolingState: mapping });
+
+    expect(mapping.homekit2name).toEqual({ 0: 'OFF', 1: 'HEAT' });
+  });
+
+  it('replaces the names in a list of valid values by their numbers and keeps the numbers', () => {
+    const mapping: Mapping = { valid: ['OFF', 'HEAT', '3'] };
+
+    prepare({ TargetHeatingCoolingState: mapping });
+
+    expect(mapping.valid).toEqual([0, 1, 3]);
+  });
+
+  it('leaves out a valid value that is neither a name nor a number, and sorts the others as numbers', () => {
+    const mapping: Mapping = { valid: ['10', 'x', '9', 'ARMED'] };
+
+    const { log } = prepare({ SecuritySystemTargetState: mapping });
+
+    expect(mapping.valid).toEqual([9, 10]);
+    expect(log).toEqual([
+      'error valid: x is neither a number nor the name of a value of SecuritySystemTargetState',
+      'error valid: ARMED is neither a number nor the name of a value of SecuritySystemTargetState',
+    ]);
+  });
+
   it('takes the first value from the reading of the device and notes when it last changed', () => {
     const mapping: Mapping = { reading: 'level' };
 
@@ -73,15 +101,14 @@ describe('prepareMappings', () => {
     expect(mapping.informId).toBe('other-level');
   });
 
-  it('gives a mapping with only a default an id for a reading named undefined, and its default as first value', () => {
+  it('gives a mapping with only a default no id for events', () => {
     const mapping: Mapping = { default: 'CLOSED' };
 
     const { environment } = prepare({ TargetDoorState: mapping });
 
     expect(mapping.default).toBe(1);
-    expect(mapping.informId).toBe('dev-undefined');
-    expect(environment.update).not.toHaveBeenCalled();
-    expect(environment.reading2homekit).toHaveBeenCalledWith(mapping, undefined);
+    expect(mapping).not.toHaveProperty('informId');
+    expect(environment.reading2homekit).not.toHaveBeenCalled();
   });
 
   it('collects the events that mean on or off from the eventMap attribute', () => {

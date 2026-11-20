@@ -25,31 +25,32 @@ export interface CommandSource {
 
 /**
  * The fhem command for a value of the characteristic of the mapping, or undefined if nothing is
- * to be sent. Instead of a mapping the name of one of three commands can be given: `identify`,
- * `xhue` and `xsat`.
+ * to be sent. Instead of a mapping a name can be given: `identify`, `xhue` and `xsat` for what
+ * the plugin itself knows how to do, or the name of a set command of the device, which the value
+ * is appended to.
  */
 export function commandFor(source: CommandSource, target: PreparedMapping | string, valueFromHomekit?: unknown): string | undefined {
   const mapping = target as PreparedMapping;
   let value: any = valueFromHomekit;
 
-  if (mapping.readOnly) {
-    // the command is not known yet at this point and a blank is missing.
-    source.log.info(source.name + ' NOT sending command ' + undefined + ' with value ' + value + 'for readOnly characteristic');
-    return undefined;
-  }
-
   let c: any = target;
   if (typeof target === 'object') {
     c = target.cmd;
-  } else {
+  }
+
+  if (mapping.readOnly) {
+    source.log.info(source.name + ' NOT sending command ' + c + ' with value ' + value + ' for readOnly characteristic');
+    return undefined;
+  }
+
+  if (typeof target !== 'object') {
     source.log.info(source.name + ' sending command ' + c + ' with value ' + value);
   }
 
   let command: string;
   if (c === 'identify') {
     if (source.type === 'HUEDevice') {
-      // the blank after the device is missing.
-      command = 'set ' + source.device + 'alert select';
+      command = 'set ' + source.device + ' alert select';
     } else {
       command = 'set ' + source.device + ' toggle; sleep 1; set ' + source.device + ' toggle';
     }
@@ -61,11 +62,13 @@ export function commandFor(source: CommandSource, target: PreparedMapping | stri
     const saturation = source.mappings.Saturation as any;
     value = (value / 100) * saturation.max;
     command = 'set ' + saturation.device + ' sat ' + value;
+  } else if (typeof target === 'string') {
+    // any other name is a set command of the device
+    command = 'set ' + source.device + ' ' + target + (value === undefined ? '' : ' ' + value);
   } else {
     if (mapping.characteristic_type === 'On' && value) {
-      // meant to skip switching on while a delayed command is waiting, but the timers are kept
-      // in an object, which has no length.
-      if (source.delayed_timers?.length) {
+      // a delayed command that is waiting, like a new brightness, switches the device on itself
+      if (source.delayed_timers && Object.keys(source.delayed_timers).length) {
         mapping.log.info(source.name + ': skipping set cmd for ' + mapping.characteristic_type + ' with value ' + value);
         return undefined;
       }

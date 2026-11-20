@@ -1,5 +1,9 @@
 // the reading2homekit and homekit2reading parameters of a mapping can name a function from the
-// jsFunctions file of the platform, or carry the body of a function between braces
+// jsFunctions file of the platform, or carry the body of a function between braces.
+//
+// a body between braces is code from an attribute of a fhem device that runs inside homebridge:
+// whoever may set attributes in fhem may run code here. the platform option
+// allowInlineFunctions switches that off.
 import util from 'node:util';
 import type { Logging } from 'homebridge';
 import type { Converter, Mapping } from './types.ts';
@@ -9,20 +13,32 @@ type UserFunction = (mapping: Mapping, value: unknown) => unknown;
 /**
  * Replaces the text of a converter parameter of the mapping with the function it stands for.
  * The function gets the mapping and the value to convert.
+ *
+ * @param allowInline whether the body of a function between braces is accepted. A mapping that
+ *   carries one is left without the converter otherwise.
  */
-export function resolveConverter(mapping: Mapping, parameter: 'reading2homekit' | 'homekit2reading', jsFunctions: unknown, log: Logging): void {
+export function resolveConverter(
+  mapping: Mapping,
+  parameter: 'reading2homekit' | 'homekit2reading',
+  jsFunctions: unknown,
+  log: Logging,
+  allowInline = true,
+): void {
   const given = mapping[parameter];
   if (given === undefined || typeof given === 'function') {
     return;
   }
 
   if (given.match(/^{.*}$/)) {
-    try {
-      // the attributes of fhem devices are trusted to carry code.
-      // eslint-disable-next-line @typescript-eslint/no-implied-eval
-      mapping[parameter] = new Function('mapping', 'orig', given).bind(null, mapping) as Converter;
-    } catch (err) {
-      log.error('  ' + parameter + ': ' + String(err));
+    if (!allowInline) {
+      log.error('  ' + parameter + ': JavaScript in a mapping is refused, as allowInlineFunctions is false for this platform');
+    } else {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-implied-eval -- the configuration allows code in mappings
+        mapping[parameter] = new Function('mapping', 'orig', given).bind(null, mapping) as Converter;
+      } catch (err) {
+        log.error('  ' + parameter + ': ' + String(err));
+      }
     }
   } else if (typeof jsFunctions === 'object') {
     const named = (jsFunctions as Record<string, unknown>)[given];
@@ -35,7 +51,6 @@ export function resolveConverter(mapping: Mapping, parameter: 'reading2homekit' 
 
   if (mapping[parameter] !== undefined && typeof mapping[parameter] !== 'function') {
     log.error('  ' + parameter + ' disabled.');
-    // for homekit2reading the text stays and reading2homekit goes as well.
-    delete mapping.reading2homekit;
+    delete mapping[parameter];
   }
 }

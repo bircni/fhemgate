@@ -31,9 +31,25 @@ export interface PrepareEnvironment {
   update: (informId: string, value: unknown) => void;
   /** converts a reading with a mapping */
   reading2homekit: (mapping: PreparedMapping, reading: unknown) => HomekitValue | undefined;
+  /** false if the platform accepts no JavaScript between braces in a mapping */
+  allowInlineFunctions?: boolean;
 }
 
 type ValueNames = Record<string, unknown> | undefined;
+
+/** the name a characteristic class gives one of its values, e.g. `HEAT` for 1 */
+function nameOfValue(names: Record<string, unknown>, value: string | number): string | undefined {
+  if (value === '') {
+    return undefined;
+  }
+  // the values are the numbers the class itself defines. what it inherits is none of them.
+  for (const [name, defined] of Object.entries(names)) {
+    if (typeof defined === 'number' && looselyEqual(value, defined)) {
+      return name;
+    }
+  }
+  return undefined;
+}
 
 export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environment: PrepareEnvironment): void {
   // the key changes within a list of mappings: the first mapping of a list is stored under
@@ -55,7 +71,7 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       }
 
       mapping.characteristic = owner.characteristicOfName(characteristic_type);
-      // for a mapping with only a default this ends in `-undefined`.
+      // a mapping with only a default has no reading to hear from. its id is removed again below.
       mapping.informId = device + '-' + mapping.reading;
       mapping.characteristic_type = characteristic_type;
       mapping.log = owner.log;
@@ -64,7 +80,8 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       if (parts[1]) {
         characteristic_type = parts[1];
       }
-      const names = environment.characteristics[characteristic_type] as ValueNames;
+      // the class the owner found knows the names of its values, also when the mapping calls it by an older name
+      const names = (mapping.characteristic ?? environment.characteristics[characteristic_type]) as ValueNames;
 
       //FIXME: better integrate eventMap
       if (s.Attributes.eventMap) {
@@ -118,12 +135,10 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
             mapping.homekit2name[names[to] as string] = to;
             to = names[to] as HomekitValue;
           } else if (names) {
-            // walks over everything the class has, also what every class inherits. a number
-            // that matches such a property gets its name.
-            for (const defined in names) {
-              if (looselyEqual(to, names[defined])) {
-                mapping.homekit2name[to] = defined;
-              }
+            // a value given as its number gets its name for the log
+            const name = nameOfValue(names, to);
+            if (name !== undefined) {
+              mapping.homekit2name[to] = name;
             }
           }
 
@@ -150,34 +165,24 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
 
       if (typeof mapping.valid === 'object') {
         owner.log.debug('valid: ' + util.inspect(mapping.valid));
-        const valid: (string | number)[] = [];
-        for (let value of mapping.valid) {
-          let mapped: string | number | undefined = undefined;
-          if (names?.[value] !== undefined) {
-            mapped = names[value] as number;
-          } else if (names) {
-            // a number is replaced by the name of the first property with that value.
-            for (const defined in names) {
-              if (looselyEqual(value, names[defined])) {
-                mapped = defined;
-                break;
-              }
-            }
+        const valid: number[] = [];
+        for (const value of mapping.valid) {
+          // HomeKit takes numbers only: a name is replaced by its number
+          const named = names?.[value];
+          if (typeof named === 'number') {
+            owner.log.debug('  ' + value + ' -> ' + named);
+            valid.push(named);
+            continue;
           }
 
-          if (mapped !== undefined) {
-            owner.log.debug('  ' + value + ' -> ' + mapped);
-            value = mapped;
-          } else {
-            value = toInt(value);
+          const number = toInt(value);
+          if (isNaN(number)) {
+            owner.log.error('valid: ' + value + ' is neither a number nor the name of a value of ' + characteristic_type);
+            continue;
           }
-
-          valid.push(value);
+          valid.push(number);
         }
-        // sorted as text.
-
-        // eslint-disable-next-line @typescript-eslint/require-array-sort-compare
-        mapping.valid = valid.sort();
+        mapping.valid = valid.sort((a, b) => a - b);
 
         owner.log.debug('valid: ' + util.inspect(mapping.valid));
       }
@@ -216,8 +221,9 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         }
       }
 
-      resolveConverter(mapping, 'reading2homekit', owner.jsFunctions, owner.log);
-      resolveConverter(mapping, 'homekit2reading', owner.jsFunctions, owner.log);
+      const allowInline = environment.allowInlineFunctions !== false;
+      resolveConverter(mapping, 'reading2homekit', owner.jsFunctions, owner.log, allowInline);
+      resolveConverter(mapping, 'homekit2reading', owner.jsFunctions, owner.log, allowInline);
 
       const reading = mapping.reading as string;
       let orig: unknown = undefined;
@@ -227,10 +233,7 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         orig = s.Readings[reading].Value;
       }
 
-      // meant for a mapping with only a default, but the default is looked for at the list of
-      // mappings, where there is none. so such a mapping keeps an id that ends in `-undefined`
-      // and starts with its default as value.
-      if (orig === undefined && device === owner.device && (mappings as { default?: unknown }).default !== undefined) {
+      if (orig === undefined && device === owner.device && mapping.default !== undefined) {
         delete mapping.informId;
       } else {
         const informId = mapping.informId;

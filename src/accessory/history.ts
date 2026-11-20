@@ -4,6 +4,7 @@ import type { Characteristic, CharacteristicValue, Service } from '@homebridge/h
 import type { HomekitValue, Mapping, PreparedMapping } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import type { SubscribedAccessory } from '../state/subscriptions.ts';
+import { toFloat } from '../util/loose.ts';
 import type { FhemAccessory, NamedService } from './accessory.ts';
 import { CustomUUIDs, EveUUIDs } from './customCharacteristics.ts';
 import type { CustomCharacteristicClass } from './services.ts';
@@ -93,8 +94,14 @@ export function recordHistory(
     } else if (mapping.characteristic_type === 'CurrentRelativeHumidity') {
       entry.humidity = value;
     } else if (mapping.characteristic_type === 'AirQuality') {
-      // the level of the air quality, not a concentration.
-      entry.ppm = value;
+      // the value is the level of the air quality. the history takes the concentration it was
+      // judged from, which is the reading itself.
+      const ppm = toFloat(state.cache.values[mapping.informId as string]);
+      if (isNaN(ppm)) {
+        entry = undefined;
+      } else {
+        entry.ppm = ppm;
+      }
     } else if (mapping.characteristic_type === CustomUUIDs.AirPressure) {
       entry.pressure = value;
     } else if (mapping.characteristic_type === CustomUUIDs.Power) {
@@ -217,24 +224,35 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
   }
 }
 
+/** the mapping of a characteristic, the first one if it has several */
+const firstOf = (mapping: Mapping | Mapping[] | undefined): PreparedMapping | undefined =>
+  (Array.isArray(mapping) ? mapping[0] : mapping) as PreparedMapping | undefined;
+
 /**
- * Adds the characteristics Eve reads the counters of a contact or motion sensor from.
+ * Adds the characteristics Eve reads the counters of a contact or motion sensor from. They are
+ * added to the service that has the contact or motion characteristic and read from its mapping.
  *
- * They are added to the service the last mapping of the accessory ended up on, and read from
- * that mapping, whichever it was.
+ * @param fallbackService the service to use when the sensor mapping got no characteristic
  */
 export function addEveCharacteristics(
   accessory: FhemAccessory,
   state: PluginState,
-  controlService: NamedService,
-  mapping: PreparedMapping,
-  service_name: string,
+  services: Service[],
+  fallbackService: NamedService,
   seen: Record<string, boolean | undefined>,
 ): void {
+  const mapping = firstOf(accessory.mappings.ContactSensorState) ?? firstOf(accessory.mappings.MotionDetected);
+  if (!mapping) {
+    return;
+  }
+
   const { Formats, Perms } = state.hap;
   const Custom = state.hap.Characteristic as unknown as CustomCharacteristicClass;
   const log = accessory.log;
   const from = mapping.device + ':' + mapping.reading;
+  const controlService =
+    (services as NamedService[]).find((service) => service.characteristics.includes(mapping.characteristic as Characteristic)) ?? fallbackService;
+  const service_name = controlService.service_name as string;
 
   const answerZero =
     (name: string) =>
@@ -290,15 +308,17 @@ export function addEveCharacteristics(
         return;
       }
 
-      // an empty history is started with the current state. the time is then still asked from
-      // the history, which answers nothing.
+      // an empty history is started with the current state
       if (historyService.getInitialTime() === undefined) {
         const entry = { time: mapping.last_update, status: mapping.cached };
         mapping.log.info('      adding history entry ' + util.inspect(entry));
         historyService.addEntry(entry);
       }
 
-      const time = mapping.last_update - (historyService.getInitialTime() as number);
+      // the history may only know its start once the entry was written. until then the
+      // last change is its start.
+      const initialTime = historyService.getInitialTime();
+      const time = initialTime === undefined ? 0 : mapping.last_update - initialTime;
 
       log('query Custom LastActivation for ' + from + ': ' + time);
       callback(null, time);

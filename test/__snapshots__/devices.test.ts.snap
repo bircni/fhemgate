@@ -48,7 +48,7 @@ exports[`blind/cul_hm-blindactuator > gets its services 1`] = `
     "log   information service for cul-hm-blindactuator",
     "log     manufacturer, model and serial number characteristics for cul-hm-blindactuator",
     "log     name (siriName) characteristic for cul-hm-blindactuator",
-    "log   Lightbulb service for cul-hm-blindactuator",
+    "log   WindowCovering service for cul-hm-blindactuator",
     "log     PositionState characteristic for cul_hm_blindactuator:motor",
     "log     CurrentPosition characteristic for cul_hm_blindactuator:pct",
     "log     TargetPosition characteristic for cul_hm_blindactuator:pct",
@@ -142,17 +142,20 @@ exports[`blind/cul_hm-blindactuator > gets its services 1`] = `
           "value": "cul_hm_blindactuator",
         },
         {
-          "name": "On",
+          "name": "Current Position",
           "props": {
-            "format": "bool",
+            "format": "uint8",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
             "perms": [
               "ev",
               "pr",
-              "pw",
             ],
+            "unit": "percentage",
           },
-          "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": false,
+          "uuid": "0000006D-0000-1000-8000-0026BB765291",
+          "value": 40,
         },
         {
           "name": "Position State",
@@ -175,22 +178,6 @@ exports[`blind/cul_hm-blindactuator > gets its services 1`] = `
           "value": 2,
         },
         {
-          "name": "Current Position",
-          "props": {
-            "format": "uint8",
-            "maxValue": 100,
-            "minStep": 1,
-            "minValue": 0,
-            "perms": [
-              "ev",
-              "pr",
-            ],
-            "unit": "percentage",
-          },
-          "uuid": "0000006D-0000-1000-8000-0026BB765291",
-          "value": 40,
-        },
-        {
           "name": "Target Position",
           "props": {
             "format": "uint8",
@@ -210,8 +197,8 @@ exports[`blind/cul_hm-blindactuator > gets its services 1`] = `
       ],
       "linked": [],
       "name": "cul_hm_blindactuator",
-      "type": "Lightbulb",
-      "uuid": "00000043-0000-1000-8000-0026BB765291",
+      "type": "WindowCovering",
+      "uuid": "0000008C-0000-1000-8000-0026BB765291",
     },
   ],
   "subscriptions": {
@@ -229,7 +216,7 @@ exports[`blind/cul_hm-blindactuator > is detected 1`] = `
   "fuuid": "6d3c7020-f33f-44e1-6447-8e5402fc772b",
   "homekit_uuid": "8477d2f8-8850-4edf-8619-19c48578a85e",
   "log": [
-    "log cul_hm_blindactuator is light",
+    "log cul_hm_blindactuator is blind",
     "log cul_hm_blindactuator has",
     "log   PositionState [motor]",
     "log   CurrentPosition [pct]",
@@ -300,7 +287,7 @@ exports[`blind/cul_hm-blindactuator > is detected 1`] = `
   "room": undefined,
   "sent": [],
   "serial": "CUL_HM.6A4B5C",
-  "service_name": "light",
+  "service_name": "blind",
   "siriName": "cul_hm_blindactuator",
   "type": "CUL_HM",
   "uuid_base": "CUL_HM.6A4B5C",
@@ -677,7 +664,7 @@ exports[`blind/cul_hm-blindactuator-inverse > gets its services 1`] = `
     "log   information service for cul-hm-blindactuator-inverse",
     "log     manufacturer, model and serial number characteristics for cul-hm-blindactuator-inverse",
     "log     name (siriName) characteristic for cul-hm-blindactuator-inverse",
-    "log   Lightbulb service for cul-hm-blindactuator-inverse",
+    "log   WindowCovering service for cul-hm-blindactuator-inverse",
     "log     PositionState characteristic for cul_hm_blindactuator_inverse:motor",
     "log     CurrentPosition characteristic for cul_hm_blindactuator_inverse:pct",
     "log     TargetPosition characteristic for cul_hm_blindactuator_inverse:pct",
@@ -771,17 +758,20 @@ exports[`blind/cul_hm-blindactuator-inverse > gets its services 1`] = `
           "value": "cul_hm_blindactuator_inverse",
         },
         {
-          "name": "On",
+          "name": "Current Position",
           "props": {
-            "format": "bool",
+            "format": "uint8",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
             "perms": [
               "ev",
               "pr",
-              "pw",
             ],
+            "unit": "percentage",
           },
-          "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": false,
+          "uuid": "0000006D-0000-1000-8000-0026BB765291",
+          "value": 60,
         },
         {
           "name": "Position State",
@@ -804,22 +794,6 @@ exports[`blind/cul_hm-blindactuator-inverse > gets its services 1`] = `
           "value": 1,
         },
         {
-          "name": "Current Position",
-          "props": {
-            "format": "uint8",
-            "maxValue": 100,
-            "minStep": 1,
-            "minValue": 0,
-            "perms": [
-              "ev",
-              "pr",
-            ],
-            "unit": "percentage",
-          },
-          "uuid": "0000006D-0000-1000-8000-0026BB765291",
-          "value": 60,
-        },
-        {
           "name": "Target Position",
           "props": {
             "format": "uint8",
@@ -839,8 +813,8 @@ exports[`blind/cul_hm-blindactuator-inverse > gets its services 1`] = `
       ],
       "linked": [],
       "name": "cul_hm_blindactuator_inverse",
-      "type": "Lightbulb",
-      "uuid": "00000043-0000-1000-8000-0026BB765291",
+      "type": "WindowCovering",
+      "uuid": "0000008C-0000-1000-8000-0026BB765291",
     },
   ],
   "subscriptions": {
@@ -858,7 +832,7 @@ exports[`blind/cul_hm-blindactuator-inverse > is detected 1`] = `
   "fuuid": "1cbcd573-f33f-7ba9-5156-566a9260d028",
   "homekit_uuid": "5b16f6b2-9034-4f35-bbd6-d364a675ffe8",
   "log": [
-    "log cul_hm_blindactuator_inverse is light",
+    "log cul_hm_blindactuator_inverse is blind",
     "log cul_hm_blindactuator_inverse has",
     "log   PositionState [motor]",
     "log   CurrentPosition [pct]",
@@ -931,7 +905,7 @@ exports[`blind/cul_hm-blindactuator-inverse > is detected 1`] = `
   "room": undefined,
   "sent": [],
   "serial": "CUL_HM.6A4B5D",
-  "service_name": "light",
+  "service_name": "blind",
   "siriName": "cul_hm_blindactuator_inverse",
   "type": "CUL_HM",
   "uuid_base": "CUL_HM.6A4B5D",
@@ -1799,6 +1773,293 @@ exports[`blind/generic-window > sends commands 1`] = `{}`;
 
 exports[`blind/generic-window > updates characteristics 1`] = `{}`;
 
+exports[`blind/generic-window-pct > converts readings 1`] = `
+{
+  "CurrentPosition": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "0.35" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100"",
+    "254 <- "254"",
+    "1500 <- "1500"",
+    "22 <- "21.5"",
+    "-4 <- "-5"",
+  ],
+  "TargetPosition": [
+    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "0.35" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "100 <- "100"",
+    "254 <- "254"",
+    "1500 <- "1500"",
+    "22 <- "21.5"",
+    "-4 <- "-5"",
+  ],
+}
+`;
+
+exports[`blind/generic-window-pct > gets its services 1`] = `
+{
+  "displayName": "80ddb699-f33f-d392-0a5b-61fe2b16fd76",
+  "log": [
+    "log creating services for generic-window-pct",
+    "log   information service for generic-window-pct",
+    "log     manufacturer, model and serial number characteristics for generic-window-pct",
+    "log     name (siriName) characteristic for generic-window-pct",
+    "log   Window service for generic-window-pct",
+    "log     CurrentPosition characteristic for generic_window_pct:pct",
+    "log     TargetPosition characteristic for generic_window_pct:pct",
+  ],
+  "services": [
+    {
+      "characteristics": [
+        {
+          "name": "Identify",
+          "props": {
+            "format": "bool",
+            "perms": [
+              "pw",
+            ],
+          },
+          "uuid": "00000014-0000-1000-8000-0026BB765291",
+          "value": false,
+        },
+        {
+          "name": "Manufacturer",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000020-0000-1000-8000-0026BB765291",
+          "value": "FHEM:dummy",
+        },
+        {
+          "name": "Model",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000021-0000-1000-8000-0026BB765291",
+          "value": "FHEM:<unknown>",
+        },
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "Unnamed Service",
+        },
+        {
+          "name": "Serial Number",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000030-0000-1000-8000-0026BB765291",
+          "value": "80ddb699-f33f-d392-0a5b-61fe2b16fd76",
+        },
+        {
+          "name": "Firmware Revision",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000052-0000-1000-8000-0026BB765291",
+          "value": "0.0.0",
+        },
+      ],
+      "linked": [],
+      "name": "",
+      "type": "AccessoryInformation",
+      "uuid": "0000003E-0000-1000-8000-0026BB765291",
+    },
+    {
+      "characteristics": [
+        {
+          "name": "Name",
+          "props": {
+            "format": "string",
+            "perms": [
+              "pr",
+            ],
+          },
+          "uuid": "00000023-0000-1000-8000-0026BB765291",
+          "value": "generic_window_pct",
+        },
+        {
+          "name": "Current Position",
+          "props": {
+            "format": "uint8",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "0000006D-0000-1000-8000-0026BB765291",
+          "value": 10,
+        },
+        {
+          "name": "Position State",
+          "props": {
+            "format": "uint8",
+            "maxValue": 2,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+            ],
+            "validValues": [
+              0,
+              1,
+              2,
+            ],
+          },
+          "uuid": "00000072-0000-1000-8000-0026BB765291",
+          "value": 0,
+        },
+        {
+          "name": "Target Position",
+          "props": {
+            "format": "uint8",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
+            "perms": [
+              "ev",
+              "pr",
+              "pw",
+            ],
+            "unit": "percentage",
+          },
+          "uuid": "0000007C-0000-1000-8000-0026BB765291",
+          "value": 10,
+        },
+      ],
+      "linked": [],
+      "name": "generic_window_pct",
+      "type": "Window",
+      "uuid": "0000008B-0000-1000-8000-0026BB765291",
+    },
+  ],
+  "subscriptions": {
+    "generic_window_pct-pct": 2,
+  },
+}
+`;
+
+exports[`blind/generic-window-pct > is detected 1`] = `
+{
+  "alias": "generic_window_pct",
+  "category": undefined,
+  "device": "generic_window_pct",
+  "fuuid": "80ddb699-f33f-d392-0a5b-61fe2b16fd76",
+  "homekit_uuid": "a149167b-85de-4d6e-bace-7a0a4f645a17",
+  "log": [
+    "log generic_window_pct is window",
+    "log generic_window_pct has",
+    "log   CurrentPosition [pct]",
+    "log   TargetPosition [pct]",
+    "info     caching: CurrentPosition: 10 (as number; from '10')",
+    "info     caching: TargetPosition: 10 (as number; from '10')",
+  ],
+  "mappings": {
+    "CurrentPosition": {
+      "cached": 10,
+      "characteristic": "class CurrentPosition",
+      "characteristic_type": "CurrentPosition",
+      "device": "generic_window_pct",
+      "informId": "generic_window_pct-pct",
+      "last_update": 1786881600,
+      "reading": "pct",
+    },
+    "TargetPosition": {
+      "cached": 10,
+      "characteristic": "class TargetPosition",
+      "characteristic_type": "TargetPosition",
+      "cmd": "pct",
+      "delay": true,
+      "device": "generic_window_pct",
+      "informId": "generic_window_pct-pct",
+      "last_update": 1786881600,
+      "reading": "pct",
+    },
+  },
+  "model": "<unknown>",
+  "name": "generic-window-pct",
+  "published": true,
+  "room": undefined,
+  "sent": [],
+  "serial": "80ddb699-f33f-d392-0a5b-61fe2b16fd76",
+  "service_name": "window",
+  "siriName": "generic_window_pct",
+  "type": "dummy",
+  "uuid_base": "80ddb699-f33f-d392-0a5b-61fe2b16fd76",
+}
+`;
+
+exports[`blind/generic-window-pct > sends commands 1`] = `
+{
+  "CurrentPosition": [
+    "set generic_window_pct undefined 1 <- 1",
+  ],
+  "TargetPosition": [
+    "set generic_window_pct pct true <- true",
+    "set generic_window_pct pct false <- false",
+    "set generic_window_pct pct 0 <- 0",
+    "set generic_window_pct pct 1 <- 1",
+    "set generic_window_pct pct 2 <- 2",
+    "set generic_window_pct pct 3 <- 3",
+    "set generic_window_pct pct 10 <- 10",
+    "set generic_window_pct pct 50 <- 50",
+    "set generic_window_pct pct 100 <- 100",
+    "set generic_window_pct pct 21.5 <- 21.5",
+    "set generic_window_pct pct -90 <- -90",
+    "set generic_window_pct pct 90 <- 90",
+    "set generic_window_pct pct 359 <- 359",
+  ],
+}
+`;
+
+exports[`blind/generic-window-pct > updates characteristics 1`] = `
+{
+  "generic_window_pct-pct": [
+    "Current Position=10 Target Position=10 <- "on" "off"",
+    "Current Position=0 Target Position=0 <- "0"",
+    "Current Position=1 Target Position=1 <- "1"",
+    "Current Position=50 Target Position=50 <- "50"",
+    "Current Position=100 Target Position=100 <- "100"",
+    "Current Position=22 Target Position=22 <- "21.5" "closed" "open" "ff8000" """,
+  ],
+}
+`;
+
 exports[`blind/hm-sec-win > converts readings 1`] = `
 {
   "CurrentPosition": [
@@ -2464,7 +2725,7 @@ exports[`blind/internals-type-blind > gets its services 1`] = `
     "log   information service for internals-type-blind",
     "log     manufacturer, model and serial number characteristics for internals-type-blind",
     "log     name (siriName) characteristic for internals-type-blind",
-    "log   Lightbulb service for internals-type-blind",
+    "log   WindowCovering service for internals-type-blind",
     "log     PositionState characteristic for internals_type_blind:direction",
     "log     CurrentPosition characteristic for internals_type_blind:pct",
     "log     TargetPosition characteristic for internals_type_blind:pct",
@@ -2558,17 +2819,20 @@ exports[`blind/internals-type-blind > gets its services 1`] = `
           "value": "internals_type_blind",
         },
         {
-          "name": "On",
+          "name": "Current Position",
           "props": {
-            "format": "bool",
+            "format": "uint8",
+            "maxValue": 100,
+            "minStep": 1,
+            "minValue": 0,
             "perms": [
               "ev",
               "pr",
-              "pw",
             ],
+            "unit": "percentage",
           },
-          "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": false,
+          "uuid": "0000006D-0000-1000-8000-0026BB765291",
+          "value": 0,
         },
         {
           "name": "Position State",
@@ -2591,22 +2855,6 @@ exports[`blind/internals-type-blind > gets its services 1`] = `
           "value": 0,
         },
         {
-          "name": "Current Position",
-          "props": {
-            "format": "uint8",
-            "maxValue": 100,
-            "minStep": 1,
-            "minValue": 0,
-            "perms": [
-              "ev",
-              "pr",
-            ],
-            "unit": "percentage",
-          },
-          "uuid": "0000006D-0000-1000-8000-0026BB765291",
-          "value": 0,
-        },
-        {
           "name": "Target Position",
           "props": {
             "format": "uint8",
@@ -2626,8 +2874,8 @@ exports[`blind/internals-type-blind > gets its services 1`] = `
       ],
       "linked": [],
       "name": "internals_type_blind",
-      "type": "Lightbulb",
-      "uuid": "00000043-0000-1000-8000-0026BB765291",
+      "type": "WindowCovering",
+      "uuid": "0000008C-0000-1000-8000-0026BB765291",
     },
   ],
   "subscriptions": {
@@ -2645,7 +2893,7 @@ exports[`blind/internals-type-blind > is detected 1`] = `
   "fuuid": "7ec597d3-f33f-2305-a2bf-98c8dc39a234",
   "homekit_uuid": "1562483c-ec15-413c-8c38-f685ac2c9f86",
   "log": [
-    "log internals_type_blind is light",
+    "log internals_type_blind is blind",
     "log internals_type_blind has",
     "log   PositionState [direction]",
     "log   CurrentPosition [pct]",
@@ -2716,7 +2964,7 @@ exports[`blind/internals-type-blind > is detected 1`] = `
   "room": undefined,
   "sent": [],
   "serial": "7ec597d3-f33f-2305-a2bf-98c8dc39a234",
-  "service_name": "light",
+  "service_name": "blind",
   "siriName": "internals_type_blind",
   "type": "ROLLO",
   "uuid_base": "7ec597d3-f33f-2305-a2bf-98c8dc39a234",
@@ -3487,6 +3735,8 @@ exports[`color/hue-color-ct > gets its services 1`] = `
     "log   information service for hue-color-ct",
     "log     manufacturer, model and serial number characteristics for hue-color-ct",
     "log     name (siriName) characteristic for hue-color-ct",
+    "info   hue_color_ct has reachability [reachable]",
+    "info     caching: Reachable: true (as boolean; from '1')",
     "log   Lightbulb service for hue-color-ct",
     "log     On characteristic for hue_color_ct:onoff",
     "log     Brightness characteristic for hue_color_ct:bri",
@@ -3657,6 +3907,7 @@ exports[`color/hue-color-ct > gets its services 1`] = `
     "hue_color_ct-colormode": 1,
     "hue_color_ct-hue": 1,
     "hue_color_ct-onoff": 1,
+    "hue_color_ct-reachable": 1,
     "hue_color_ct-sat": 1,
     "hue_color_ct-xy": 1,
   },
@@ -3865,6 +4116,9 @@ exports[`color/hue-color-ct > updates characteristics 1`] = `
     "On=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=true <- "1"",
   ],
+  "hue_color_ct-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
   "hue_color_ct-sat": [
     "Saturation=55 <- "on" "off"",
     "Saturation=0 <- "0" "1"",
@@ -3982,6 +4236,8 @@ exports[`color/hue-color-hs-off > gets its services 1`] = `
     "log   information service for hue-color-hs-off",
     "log     manufacturer, model and serial number characteristics for hue-color-hs-off",
     "log     name (siriName) characteristic for hue-color-hs-off",
+    "info   hue_color_hs_off has reachability [reachable]",
+    "info     caching: Reachable: false (as boolean; from '0')",
     "log   Lightbulb service for hue-color-hs-off",
     "log     On characteristic for hue_color_hs_off:onoff",
     "log     Brightness characteristic for hue_color_hs_off:bri",
@@ -4151,6 +4407,7 @@ exports[`color/hue-color-hs-off > gets its services 1`] = `
     "hue_color_hs_off-bri": 1,
     "hue_color_hs_off-hue": 1,
     "hue_color_hs_off-onoff": 1,
+    "hue_color_hs_off-reachable": 1,
     "hue_color_hs_off-sat": 1,
   },
 }
@@ -4342,6 +4599,9 @@ exports[`color/hue-color-hs-off > updates characteristics 1`] = `
     "On=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=true <- "1"",
   ],
+  "hue_color_hs_off-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
   "hue_color_hs_off-sat": [
     "Saturation=100 <- "on" "off"",
     "Saturation=0 <- "0" "1"",
@@ -4501,6 +4761,8 @@ exports[`color/hue-color-xy > gets its services 1`] = `
     "log   information service for hue-color-xy",
     "log     manufacturer, model and serial number characteristics for hue-color-xy",
     "log     name (siriName) characteristic for hue-color-xy",
+    "info   hue_color_xy has reachability [reachable]",
+    "info     caching: Reachable: true (as boolean; from '1')",
     "log   Lightbulb service for hue-color-xy",
     "log     On characteristic for hue_color_xy:onoff",
     "log     Brightness characteristic for hue_color_xy:bri",
@@ -4671,6 +4933,7 @@ exports[`color/hue-color-xy > gets its services 1`] = `
     "hue_color_xy-colormode": 1,
     "hue_color_xy-hue": 1,
     "hue_color_xy-onoff": 1,
+    "hue_color_xy-reachable": 1,
     "hue_color_xy-sat": 1,
     "hue_color_xy-xy": 1,
   },
@@ -4878,6 +5141,9 @@ exports[`color/hue-color-xy > updates characteristics 1`] = `
   "hue_color_xy-onoff": [
     "On=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=true <- "1"",
+  ],
+  "hue_color_xy-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
   "hue_color_xy-sat": [
     "Saturation=55 <- "on" "off"",
@@ -5351,6 +5617,8 @@ exports[`color/hue-white > gets its services 1`] = `
     "log   information service for hue-white",
     "log     manufacturer, model and serial number characteristics for hue-white",
     "log     name (siriName) characteristic for hue-white",
+    "info   hue_white has reachability [reachable]",
+    "info     caching: Reachable: true (as boolean; from '1')",
     "log   Lightbulb service for hue-white",
     "log     On characteristic for hue_white:onoff",
     "log     Brightness characteristic for hue_white:bri",
@@ -5483,6 +5751,7 @@ exports[`color/hue-white > gets its services 1`] = `
   "subscriptions": {
     "hue_white-bri": 1,
     "hue_white-onoff": 1,
+    "hue_white-reachable": 1,
   },
 }
 `;
@@ -5598,6 +5867,9 @@ exports[`color/hue-white > updates characteristics 1`] = `
   "hue_white-onoff": [
     "On=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=true <- "1"",
+  ],
+  "hue_white-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -6583,19 +6855,17 @@ exports[`color/rgb-lowercase > is detected 1`] = `
 exports[`color/rgb-lowercase > sends commands 1`] = `
 {
   "Brightness": [
-    "set rgb_lowercase rgb 02f8fa <- true",
-    "set rgb_lowercase rgb 000000 <- false",
+    "set rgb_lowercase rgb 030000 <- true",
+    "set rgb_lowercase rgb 000000 <- false -90",
     "(nothing) <- 0",
     "set rgb_lowercase rgb 030303 <- 1",
     "set rgb_lowercase rgb 050505 <- 2",
     "set rgb_lowercase rgb 080808 <- 3",
     "set rgb_lowercase rgb 1a1a1a <- 10",
     "set rgb_lowercase rgb 808080 <- 50",
-    "set rgb_lowercase rgb ffffff <- 100",
+    "set rgb_lowercase rgb ffffff <- 100 359",
     "set rgb_lowercase rgb 373737 <- 21.5",
-    "set rgb_lowercase rgb a1a1b <- -90",
-    "set rgb_lowercase rgb e6e610 <- 90",
-    "set rgb_lowercase rgb 969340 <- 359",
+    "set rgb_lowercase rgb e6e6e6 <- 90",
   ],
   "Hue": [
     "set rgb_lowercase rgb ff0400 <- true 1",
@@ -6939,19 +7209,17 @@ exports[`color/rgb-uppercase > is detected 1`] = `
 exports[`color/rgb-uppercase > sends commands 1`] = `
 {
   "Brightness": [
-    "set rgb_uppercase RGB 02f8fa <- true",
-    "set rgb_uppercase RGB 000000 <- false",
+    "set rgb_uppercase RGB 030000 <- true",
+    "set rgb_uppercase RGB 000000 <- false -90",
     "(nothing) <- 0",
     "set rgb_uppercase RGB 030303 <- 1",
     "set rgb_uppercase RGB 050505 <- 2",
     "set rgb_uppercase RGB 080808 <- 3",
     "set rgb_uppercase RGB 1a1a1a <- 10",
     "set rgb_uppercase RGB 808080 <- 50",
-    "set rgb_uppercase RGB ffffff <- 100",
+    "set rgb_uppercase RGB ffffff <- 100 359",
     "set rgb_uppercase RGB 373737 <- 21.5",
-    "set rgb_uppercase RGB a1a1b <- -90",
-    "set rgb_uppercase RGB e6e610 <- 90",
-    "set rgb_uppercase RGB 969340 <- 359",
+    "set rgb_uppercase RGB e6e6e6 <- 90",
   ],
   "Hue": [
     "set rgb_uppercase RGB ff0400 <- true 1",
@@ -7296,19 +7564,17 @@ exports[`color/swap-rgb > is detected 1`] = `
 exports[`color/swap-rgb > sends commands 1`] = `
 {
   "Brightness": [
-    "set swap_rgb rgb 02f8fa <- true",
-    "set swap_rgb rgb 000000 <- false",
+    "set swap_rgb rgb 030000 <- true",
+    "set swap_rgb rgb 000000 <- false -90",
     "(nothing) <- 0",
     "set swap_rgb rgb 030303 <- 1",
     "set swap_rgb rgb 050505 <- 2",
     "set swap_rgb rgb 080808 <- 3",
     "set swap_rgb rgb 1a1a1a <- 10",
     "set swap_rgb rgb 808080 <- 50",
-    "set swap_rgb rgb ffffff <- 100",
+    "set swap_rgb rgb ffffff <- 100 359",
     "set swap_rgb rgb 373737 <- 21.5",
-    "set swap_rgb rgb a1a1b <- -90",
-    "set swap_rgb rgb e6e610 <- 90",
-    "set swap_rgb rgb 969340 <- 359",
+    "set swap_rgb rgb e6e6e6 <- 90",
   ],
   "Hue": [
     "set swap_rgb rgb ff0400 <- true 1",
@@ -8068,19 +8334,17 @@ exports[`color/wifilight-no-hsv-readings > is detected 1`] = `
 exports[`color/wifilight-no-hsv-readings > sends commands 1`] = `
 {
   "Brightness": [
-    "set wifilight_no_hsv_readings RGB 02f8fa <- true",
-    "set wifilight_no_hsv_readings RGB 000000 <- false",
+    "set wifilight_no_hsv_readings RGB 030000 <- true",
+    "set wifilight_no_hsv_readings RGB 000000 <- false -90",
     "(nothing) <- 0",
     "set wifilight_no_hsv_readings RGB 030303 <- 1",
     "set wifilight_no_hsv_readings RGB 050505 <- 2",
     "set wifilight_no_hsv_readings RGB 080808 <- 3",
     "set wifilight_no_hsv_readings RGB 1a1a1a <- 10",
     "set wifilight_no_hsv_readings RGB 808080 <- 50",
-    "set wifilight_no_hsv_readings RGB ffffff <- 100",
+    "set wifilight_no_hsv_readings RGB ffffff <- 100 359",
     "set wifilight_no_hsv_readings RGB 373737 <- 21.5",
-    "set wifilight_no_hsv_readings RGB a1a1b <- -90",
-    "set wifilight_no_hsv_readings RGB e6e610 <- 90",
-    "set wifilight_no_hsv_readings RGB 969340 <- 359",
+    "set wifilight_no_hsv_readings RGB e6e6e6 <- 90",
   ],
   "Hue": [
     "set wifilight_no_hsv_readings RGB ff0400 <- true 1",
@@ -8886,13 +9150,13 @@ exports[`dimmer/fs20-dimmer > is detected 1`] = `
 exports[`dimmer/fs20-dimmer > sends commands 1`] = `
 {
   "Brightness": [
-    "set fs20_dimmer   dim06% <- true false 0 1 2 3",
-    "set fs20_dimmer   dim18% <- 10",
-    "set fs20_dimmer   dim56% <- 50",
+    "set fs20_dimmer   dim06% <- true 1 2 3",
+    "set fs20_dimmer   off <- false 0 -90",
+    "set fs20_dimmer   dim12% <- 10",
+    "set fs20_dimmer   dim50% <- 50",
     "set fs20_dimmer   dim100% <- 100 359",
-    "set fs20_dimmer   dim25% <- 21.5",
-    "(nothing) <- -90",
-    "set fs20_dimmer   dim93% <- 90",
+    "set fs20_dimmer   dim18% <- 21.5",
+    "set fs20_dimmer   dim87% <- 90",
   ],
   "On": [
     "set fs20_dimmer on <- true 1",
@@ -10853,7 +11117,6 @@ exports[`lock/generic-lock > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "generic_lock-": 1,
     "generic_lock-state": 2,
   },
 }
@@ -10872,7 +11135,6 @@ exports[`lock/generic-lock > is detected 1`] = `
     "log   TargetDoorState []",
     "log   LockCurrentState [state]",
     "log   LockTargetState [state]",
-    "info     caching: TargetDoorState: 1 (as number; means CLOSED; from 'mapping.default')",
     "info     caching: LockCurrentState: 0 (as number; means UNSECURED; from 'unlocked')",
     "info     caching: LockTargetState: 0 (as number; means UNSECURED; from 'unlocked')",
   ],
@@ -10949,7 +11211,6 @@ exports[`lock/generic-lock > is detected 1`] = `
       ],
     },
     "TargetDoorState": {
-      "cached": 1,
       "characteristic": "class TargetDoorState",
       "characteristic_type": "TargetDoorState",
       "cmds": [
@@ -10964,7 +11225,6 @@ exports[`lock/generic-lock > is detected 1`] = `
       "homekit2name": {
         "1": "CLOSED",
       },
-      "informId": "generic_lock-",
       "reading": "",
       "timeout": 500,
     },
@@ -11022,10 +11282,6 @@ exports[`lock/generic-lock > sends commands 1`] = `
 
 exports[`lock/generic-lock > updates characteristics 1`] = `
 {
-  "generic_lock-": [
-    "Target Door State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "Target Door State=0 <- "0"",
-  ],
   "generic_lock-state": [
     "Lock Current State=0 Lock Target State=0 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
@@ -11256,7 +11512,6 @@ exports[`lock/hm-sec-key > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hm_sec_key-": 1,
     "hm_sec_key-battery": 1,
     "hm_sec_key-lock": 2,
   },
@@ -11278,7 +11533,6 @@ exports[`lock/hm-sec-key > is detected 1`] = `
     "log   LockCurrentState [lock]",
     "log   LockTargetState [lock]",
     "info     caching: StatusLowBattery: 0 (as number; means BATTERY_LEVEL_NORMAL; from 'ok')",
-    "info     caching: TargetDoorState: 1 (as number; means CLOSED; from 'mapping.default')",
     "info     caching: LockCurrentState: 1 (as number; means SECURED; from 'locked')",
     "info     caching: LockTargetState: 1 (as number; means SECURED; from 'locked')",
   ],
@@ -11381,7 +11635,6 @@ exports[`lock/hm-sec-key > is detected 1`] = `
       ],
     },
     "TargetDoorState": {
-      "cached": 1,
       "characteristic": "class TargetDoorState",
       "characteristic_type": "TargetDoorState",
       "cmds": [
@@ -11396,7 +11649,6 @@ exports[`lock/hm-sec-key > is detected 1`] = `
       "homekit2name": {
         "1": "CLOSED",
       },
-      "informId": "hm_sec_key-",
       "reading": "",
       "timeout": 500,
     },
@@ -11457,10 +11709,6 @@ exports[`lock/hm-sec-key > sends commands 1`] = `
 
 exports[`lock/hm-sec-key > updates characteristics 1`] = `
 {
-  "hm_sec_key-": [
-    "Target Door State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "Target Door State=0 <- "0"",
-  ],
   "hm_sec_key-battery": [
     "Status Low Battery=1 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
@@ -11669,7 +11917,6 @@ exports[`lock/hm-sec-key-uncertain > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hm_sec_key_uncertain-": 1,
     "hm_sec_key_uncertain-lock": 2,
   },
 }
@@ -11688,7 +11935,6 @@ exports[`lock/hm-sec-key-uncertain > is detected 1`] = `
     "log   TargetDoorState []",
     "log   LockCurrentState [lock]",
     "log   LockTargetState [lock]",
-    "info     caching: TargetDoorState: 1 (as number; means CLOSED; from 'mapping.default')",
     "info     caching: LockCurrentState: 3 (as number; means UNKNOWN; from 'unlocked (uncertain)')",
     "info     caching: LockTargetState: 0 (as number; means UNSECURED; from 'unlocked (uncertain)')",
   ],
@@ -11765,7 +12011,6 @@ exports[`lock/hm-sec-key-uncertain > is detected 1`] = `
       ],
     },
     "TargetDoorState": {
-      "cached": 1,
       "characteristic": "class TargetDoorState",
       "characteristic_type": "TargetDoorState",
       "cmds": [
@@ -11780,7 +12025,6 @@ exports[`lock/hm-sec-key-uncertain > is detected 1`] = `
       "homekit2name": {
         "1": "CLOSED",
       },
-      "informId": "hm_sec_key_uncertain-",
       "reading": "",
       "timeout": 500,
     },
@@ -11838,10 +12082,6 @@ exports[`lock/hm-sec-key-uncertain > sends commands 1`] = `
 
 exports[`lock/hm-sec-key-uncertain > updates characteristics 1`] = `
 {
-  "hm_sec_key_uncertain-": [
-    "Target Door State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "Target Door State=0 <- "0"",
-  ],
   "hm_sec_key_uncertain-lock": [
     "Lock Current State=0 Lock Target State=0 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
@@ -13997,7 +14237,6 @@ exports[`mapping/default-only > gets its services 1`] = `
   ],
   "subscriptions": {
     "default_only-state": 1,
-    "default_only-undefined": 1,
   },
 }
 `;
@@ -14014,9 +14253,8 @@ exports[`mapping/default-only > is detected 1`] = `
     "log default_only is switch",
     "log default_only has",
     "log   On [state;on,off]",
-    "log   StatusActive [undefined]",
+    "log   StatusActive [default 1]",
     "info     caching: On: true (as boolean; from 'on')",
-    "info     caching: StatusActive: 1 (as number; from 'mapping.default')",
   ],
   "mappings": {
     "On": {
@@ -14032,12 +14270,10 @@ exports[`mapping/default-only > is detected 1`] = `
       "valueOff": "/off|A0|000000/",
     },
     "StatusActive": {
-      "cached": 1,
       "characteristic": "class StatusActive",
       "characteristic_type": "StatusActive",
       "default": 1,
       "device": "default_only",
-      "informId": "default_only-undefined",
     },
   },
   "model": "<unknown>",
@@ -14079,10 +14315,6 @@ exports[`mapping/default-only > updates characteristics 1`] = `
   "default_only-state": [
     "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=false <- "off"",
-  ],
-  "default_only-undefined": [
-    "Status Active=false <- "on" "off" "0" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "Status Active=true <- "1"",
   ],
 }
 `;
@@ -15051,9 +15283,6 @@ exports[`mapping/information-and-category > gets its services 1`] = `
     "log     name (siriName) characteristic for information-and-category",
     "log   Switch service for information-and-category",
     "log     On characteristic for information_and_category:state",
-    "log     SerialNumber characteristic for information_and_category:state",
-    "log     Manufacturer characteristic for information_and_category:state",
-    "log     FirmwareRevision characteristic for information_and_category:fw",
   ],
   "services": [
     {
@@ -15078,7 +15307,7 @@ exports[`mapping/information-and-category > gets its services 1`] = `
             ],
           },
           "uuid": "00000020-0000-1000-8000-0026BB765291",
-          "value": "Default-Manufacturer",
+          "value": "ACME",
         },
         {
           "name": "Model",
@@ -15111,7 +15340,7 @@ exports[`mapping/information-and-category > gets its services 1`] = `
             ],
           },
           "uuid": "00000030-0000-1000-8000-0026BB765291",
-          "value": "Default-SerialNumber",
+          "value": "ABC123",
         },
         {
           "name": "Firmware Revision",
@@ -15156,39 +15385,6 @@ exports[`mapping/information-and-category > gets its services 1`] = `
           "uuid": "00000025-0000-1000-8000-0026BB765291",
           "value": true,
         },
-        {
-          "name": "Serial Number",
-          "props": {
-            "format": "string",
-            "perms": [
-              "pr",
-            ],
-          },
-          "uuid": "00000030-0000-1000-8000-0026BB765291",
-          "value": "on",
-        },
-        {
-          "name": "Manufacturer",
-          "props": {
-            "format": "string",
-            "perms": [
-              "pr",
-            ],
-          },
-          "uuid": "00000020-0000-1000-8000-0026BB765291",
-          "value": "on",
-        },
-        {
-          "name": "Firmware Revision",
-          "props": {
-            "format": "string",
-            "perms": [
-              "pr",
-            ],
-          },
-          "uuid": "00000052-0000-1000-8000-0026BB765291",
-          "value": "1.2.3",
-        },
       ],
       "linked": [],
       "name": "information_and_category",
@@ -15197,8 +15393,8 @@ exports[`mapping/information-and-category > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "information_and_category-fw": 2,
-    "information_and_category-state": 3,
+    "information_and_category-fw": 1,
+    "information_and_category-state": 1,
   },
 }
 `;
@@ -15206,7 +15402,7 @@ exports[`mapping/information-and-category > gets its services 1`] = `
 exports[`mapping/information-and-category > is detected 1`] = `
 {
   "alias": "information_and_category",
-  "category": undefined,
+  "category": 3,
   "device": "information_and_category",
   "fuuid": "745fdb07-f33f-f014-2390-e1e57009bcad",
   "homekit_uuid": "62fc005b-97f3-4bd4-b141-641be1bf4dc6",
@@ -15216,7 +15412,7 @@ AccessoryCategory=NOPE
 SerialNumber=serial=ABC123
 Manufacturer=value=ACME
 FirmwareRevision=fw",
-    "error unknown category: FAN",
+    "info using category: 3 (FAN)",
     "error unknown category: NOPE",
     "log information_and_category is switch",
     "log information_and_category has",
@@ -15315,30 +15511,21 @@ exports[`mapping/information-and-category > sends commands 1`] = `
 exports[`mapping/information-and-category > updates characteristics 1`] = `
 {
   "information_and_category-fw": [
-    "Firmware Revision="on" Firmware Revision="on" <- "on"",
-    "Firmware Revision="off" Firmware Revision="off" <- "off"",
-    "Firmware Revision="0" Firmware Revision="0" <- "0"",
-    "Firmware Revision="1" Firmware Revision="1" <- "1"",
-    "Firmware Revision="50" Firmware Revision="50" <- "50"",
-    "Firmware Revision="100" Firmware Revision="100" <- "100"",
-    "Firmware Revision="21.5" Firmware Revision="21.5" <- "21.5"",
-    "Firmware Revision="closed" Firmware Revision="closed" <- "closed"",
-    "Firmware Revision="open" Firmware Revision="open" <- "open"",
-    "Firmware Revision="ff8000" Firmware Revision="ff8000" <- "ff8000"",
-    "Firmware Revision="" Firmware Revision="" <- """,
+    "Firmware Revision="on" <- "on"",
+    "Firmware Revision="off" <- "off"",
+    "Firmware Revision="0" <- "0"",
+    "Firmware Revision="1" <- "1"",
+    "Firmware Revision="50" <- "50"",
+    "Firmware Revision="100" <- "100"",
+    "Firmware Revision="21.5" <- "21.5"",
+    "Firmware Revision="closed" <- "closed"",
+    "Firmware Revision="open" <- "open"",
+    "Firmware Revision="ff8000" <- "ff8000"",
+    "Firmware Revision="" <- """,
   ],
   "information_and_category-state": [
-    "On=true Serial Number="on" Manufacturer="on" <- "on"",
-    "On=false Serial Number="off" Manufacturer="off" <- "off"",
-    "On=true Serial Number="off" Manufacturer="0" <- "0"",
-    "On=true Serial Number="off" Manufacturer="1" <- "1"",
-    "On=true Serial Number="50" Manufacturer="50" <- "50"",
-    "On=true Serial Number="100" Manufacturer="100" <- "100"",
-    "On=true Serial Number="21.5" Manufacturer="21.5" <- "21.5"",
-    "On=true Serial Number="closed" Manufacturer="closed" <- "closed"",
-    "On=true Serial Number="open" Manufacturer="open" <- "open"",
-    "On=true Serial Number="ff8000" Manufacturer="ff8000" <- "ff8000"",
-    "On=true Serial Number="ff8000" Manufacturer="" <- """,
+    "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=false <- "off"",
   ],
 }
 `;
@@ -15633,18 +15820,18 @@ exports[`mapping/invert-bare-word > converts readings 1`] = `
 {
   "CurrentPosition": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "0.35" "000000" "0.4573,0.41"",
-    "1 <- "1"",
-    "2 <- "2"",
-    "3 <- "3"",
-    "20 <- "20"",
+    "100 <- "0" "0.35" "000000" "0.4573,0.41"",
+    "99 <- "1"",
+    "98 <- "2"",
+    "97 <- "3"",
+    "80 <- "20"",
     "50 <- "50"",
-    "99 <- "99"",
-    "100 <- "100"",
-    "254 <- "254"",
-    "1500 <- "1500"",
-    "22 <- "21.5"",
-    "-4 <- "-5"",
+    "1 <- "99"",
+    "0 <- "100"",
+    "-154 <- "254"",
+    "-1400 <- "1500"",
+    "78 <- "21.5"",
+    "104 <- "-5"",
   ],
   "TargetPosition": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -15673,7 +15860,7 @@ exports[`mapping/invert-bare-word > gets its services 1`] = `
     "log     manufacturer, model and serial number characteristics for invert-bare-word",
     "log     name (siriName) characteristic for invert-bare-word",
     "log   WindowCovering service for invert-bare-word",
-    "log     CurrentPosition characteristic for invert_bare_word:invert",
+    "log     CurrentPosition characteristic for invert_bare_word:position",
     "log     TargetPosition characteristic for invert_bare_word:position",
   ],
   "services": [
@@ -15778,7 +15965,7 @@ exports[`mapping/invert-bare-word > gets its services 1`] = `
             "unit": "percentage",
           },
           "uuid": "0000006D-0000-1000-8000-0026BB765291",
-          "value": 0,
+          "value": 80,
         },
         {
           "name": "Position State",
@@ -15825,8 +16012,7 @@ exports[`mapping/invert-bare-word > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "invert_bare_word-invert": 1,
-    "invert_bare_word-position": 1,
+    "invert_bare_word-position": 2,
   },
 }
 `;
@@ -15842,17 +16028,21 @@ exports[`mapping/invert-bare-word > is detected 1`] = `
     "info homebridgeMapping: CurrentPosition=position,invert",
     "log invert_bare_word is blind",
     "log invert_bare_word has",
-    "log   CurrentPosition [invert]",
+    "log   CurrentPosition [position]",
     "log   TargetPosition [position]",
+    "info     caching: CurrentPosition: 80 (as number; from '20')",
     "info     caching: TargetPosition: 20 (as number; from '20')",
   ],
   "mappings": {
     "CurrentPosition": {
+      "cached": 80,
       "characteristic": "class CurrentPosition",
       "characteristic_type": "CurrentPosition",
       "device": "invert_bare_word",
-      "informId": "invert_bare_word-invert",
-      "reading": "invert",
+      "informId": "invert_bare_word-position",
+      "invert": true,
+      "last_update": 1786881600,
+      "reading": "position",
     },
     "TargetPosition": {
       "cached": 20,
@@ -15882,7 +16072,7 @@ exports[`mapping/invert-bare-word > is detected 1`] = `
 exports[`mapping/invert-bare-word > sends commands 1`] = `
 {
   "CurrentPosition": [
-    "set invert_bare_word undefined 1 <- 1",
+    "set invert_bare_word undefined 99 <- 1",
   ],
   "TargetPosition": [
     "set invert_bare_word position true <- true",
@@ -15904,20 +16094,13 @@ exports[`mapping/invert-bare-word > sends commands 1`] = `
 
 exports[`mapping/invert-bare-word > updates characteristics 1`] = `
 {
-  "invert_bare_word-invert": [
-    "Current Position=0 <- "on" "off" "0"",
-    "Current Position=1 <- "1"",
-    "Current Position=50 <- "50"",
-    "Current Position=100 <- "100"",
-    "Current Position=22 <- "21.5" "closed" "open" "ff8000" """,
-  ],
   "invert_bare_word-position": [
-    "Target Position=20 <- "on" "off"",
-    "Target Position=0 <- "0"",
-    "Target Position=1 <- "1"",
-    "Target Position=50 <- "50"",
-    "Target Position=100 <- "100"",
-    "Target Position=22 <- "21.5" "closed" "open" "ff8000" """,
+    "Current Position=80 Target Position=20 <- "on" "off"",
+    "Current Position=100 Target Position=0 <- "0"",
+    "Current Position=99 Target Position=1 <- "1"",
+    "Current Position=50 Target Position=50 <- "50"",
+    "Current Position=0 Target Position=100 <- "100"",
+    "Current Position=78 Target Position=22 <- "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -17051,7 +17234,6 @@ exports[`mapping/json-broken-functions > is detected 1`] = `
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "json_broken_functions",
-      "homekit2reading": "doesNotExist",
       "informId": "json_broken_functions-state",
       "last_update": 1786881600,
       "reading": "state",
@@ -17300,7 +17482,6 @@ exports[`mapping/json-broken-write-function > is detected 1`] = `
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "json_broken_write_function",
-      "homekit2reading": "{return (}",
       "informId": "json_broken_write_function-state",
       "last_update": 1786881600,
       "reading": "state",
@@ -17883,7 +18064,7 @@ exports[`mapping/linked-services > gets its services 1`] = `
     "log     InputSource(hdmi2)#Identifier characteristic for linked_services:undefined",
     "log     linked to Television",
     "log   InputSource service for linked-services",
-    "error linked-services: can't link InputSource service to itself",
+    "error linked-services: linkedTo needs another InputSource service without a subtype. give it a subtype of its own. the mapping is skipped.",
     "log   Speaker service for linked-services",
     "error linked-services: no Lightbulb service to link to",
   ],
@@ -18318,106 +18499,6 @@ exports[`mapping/linked-services > gets its services 1`] = `
           "value": "linked_services",
         },
         {
-          "name": "Configured Name",
-          "props": {
-            "format": "string",
-            "perms": [
-              "ev",
-              "pr",
-              "pw",
-            ],
-          },
-          "uuid": "000000E3-0000-1000-8000-0026BB765291",
-          "value": "",
-        },
-        {
-          "name": "Input Source Type",
-          "props": {
-            "format": "uint8",
-            "maxValue": 10,
-            "minStep": 1,
-            "minValue": 0,
-            "perms": [
-              "ev",
-              "pr",
-            ],
-            "validValues": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10,
-            ],
-          },
-          "uuid": "000000DB-0000-1000-8000-0026BB765291",
-          "value": 0,
-        },
-        {
-          "name": "Is Configured",
-          "props": {
-            "format": "uint8",
-            "maxValue": 1,
-            "minStep": 1,
-            "minValue": 0,
-            "perms": [
-              "ev",
-              "pr",
-              "pw",
-            ],
-            "validValues": [
-              0,
-              1,
-            ],
-          },
-          "uuid": "000000D6-0000-1000-8000-0026BB765291",
-          "value": 0,
-        },
-        {
-          "name": "Current Visibility State",
-          "props": {
-            "format": "uint8",
-            "maxValue": 1,
-            "minStep": 1,
-            "minValue": 0,
-            "perms": [
-              "ev",
-              "pr",
-            ],
-            "validValues": [
-              0,
-              1,
-            ],
-          },
-          "uuid": "00000135-0000-1000-8000-0026BB765291",
-          "value": 0,
-        },
-      ],
-      "linked": [],
-      "name": "linked_services",
-      "subtype": "",
-      "type": "InputSource",
-      "uuid": "000000D9-0000-1000-8000-0026BB765291",
-    },
-    {
-      "characteristics": [
-        {
-          "name": "Name",
-          "props": {
-            "format": "string",
-            "perms": [
-              "pr",
-            ],
-          },
-          "uuid": "00000023-0000-1000-8000-0026BB765291",
-          "value": "linked_services",
-        },
-        {
           "name": "Mute",
           "props": {
             "format": "bool",
@@ -18441,7 +18522,6 @@ exports[`mapping/linked-services > gets its services 1`] = `
   "subscriptions": {
     "linked_services-input": 1,
     "linked_services-power": 1,
-    "linked_services-undefined": 2,
   },
 }
 `;
@@ -18467,25 +18547,21 @@ Speaker#linkedTo=Lightbulb",
     "log linked_services has",
     "log   Television#Active [power]",
     "log   Television#ActiveIdentifier [input]",
-    "log   InputSource(hdmi1)#Identifier [undefined]",
+    "log   InputSource(hdmi1)#Identifier [default 1]",
     "log   InputSource(hdmi1)#linkedTo [Television]",
-    "log   InputSource(hdmi2)#Identifier [undefined]",
+    "log   InputSource(hdmi2)#Identifier [default 2]",
     "log   InputSource(hdmi2)#linkedTo [Television]",
     "log   InputSource(hdmi2)#linkedTo [InputSource]",
     "log   Speaker#linkedTo [Lightbulb]",
     "error linked_services-power not a number: on",
     "info     caching: Television#ActiveIdentifier: 2 (as number; from 'hdmi2')",
-    "info     caching: InputSource(hdmi1)#Identifier: 1 (as number; from 'mapping.default')",
-    "info     caching: InputSource(hdmi2)#Identifier: 2 (as number; from 'mapping.default')",
   ],
   "mappings": {
     "InputSource(hdmi1)#Identifier": {
-      "cached": 1,
       "characteristic": "class Identifier",
       "characteristic_type": "InputSource(hdmi1)#Identifier",
       "default": 1,
       "device": "linked_services",
-      "informId": "linked_services-undefined",
     },
     "InputSource(hdmi1)#linkedTo": {
       "characteristic": undefined,
@@ -18495,12 +18571,10 @@ Speaker#linkedTo=Lightbulb",
       "reading": "Television",
     },
     "InputSource(hdmi2)#Identifier": {
-      "cached": 2,
       "characteristic": "class Identifier",
       "characteristic_type": "InputSource(hdmi2)#Identifier",
       "default": 2,
       "device": "linked_services",
-      "informId": "linked_services-undefined",
     },
     "InputSource(hdmi2)#linkedTo": [
       {
@@ -18636,14 +18710,6 @@ exports[`mapping/linked-services > updates characteristics 1`] = `
   "linked_services-power": [
     "Active=0 <- "on" "off" "0"",
     "Active=1 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "linked_services-undefined": [
-    "Identifier=1 Identifier=2 <- "on" "off"",
-    "Identifier=0 Identifier=0 <- "0"",
-    "Identifier=1 Identifier=1 <- "1"",
-    "Identifier=50 Identifier=50 <- "50"",
-    "Identifier=100 Identifier=100 <- "100"",
-    "Identifier=21 Identifier=21 <- "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -20156,7 +20222,6 @@ exports[`mapping/serial-from-value > gets its services 1`] = `
     "log     name (siriName) characteristic for serial-from-value",
     "log   Switch service for serial-from-value",
     "log     On characteristic for serial_from_value:state",
-    "log     SerialNumber characteristic for serial_from_value:state",
   ],
   "services": [
     {
@@ -20214,7 +20279,7 @@ exports[`mapping/serial-from-value > gets its services 1`] = `
             ],
           },
           "uuid": "00000030-0000-1000-8000-0026BB765291",
-          "value": "Default-SerialNumber",
+          "value": "XYZ789",
         },
         {
           "name": "Firmware Revision",
@@ -20259,17 +20324,6 @@ exports[`mapping/serial-from-value > gets its services 1`] = `
           "uuid": "00000025-0000-1000-8000-0026BB765291",
           "value": true,
         },
-        {
-          "name": "Serial Number",
-          "props": {
-            "format": "string",
-            "perms": [
-              "pr",
-            ],
-          },
-          "uuid": "00000030-0000-1000-8000-0026BB765291",
-          "value": "on",
-        },
       ],
       "linked": [],
       "name": "serial_from_value",
@@ -20278,7 +20332,7 @@ exports[`mapping/serial-from-value > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "serial_from_value-state": 2,
+    "serial_from_value-state": 1,
   },
 }
 `;
@@ -20360,15 +20414,8 @@ exports[`mapping/serial-from-value > sends commands 1`] = `
 exports[`mapping/serial-from-value > updates characteristics 1`] = `
 {
   "serial_from_value-state": [
-    "On=true Serial Number="on" <- "on"",
-    "On=false Serial Number="off" <- "off"",
-    "On=true Serial Number="off" <- "0" "1"",
-    "On=true Serial Number="50" <- "50"",
-    "On=true Serial Number="100" <- "100"",
-    "On=true Serial Number="21.5" <- "21.5"",
-    "On=true Serial Number="closed" <- "closed"",
-    "On=true Serial Number="open" <- "open"",
-    "On=true Serial Number="ff8000" <- "ff8000" """,
+    "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=false <- "off"",
   ],
 }
 `;
@@ -21351,7 +21398,6 @@ exports[`mapping/thermostat-states > gets its services 1`] = `
     "thermostat_states-desired-temp": 1,
     "thermostat_states-measured-temp": 1,
     "thermostat_states-mode": 1,
-    "thermostat_states-undefined": 1,
   },
 }
 `;
@@ -21370,15 +21416,13 @@ exports[`mapping/thermostat-states > is detected 1`] = `
     "log   TargetTemperature [desired-temp]",
     "log   TargetHeatingCoolingState [mode]",
     "log   CurrentTemperature [measured-temp]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: TargetTemperature: 20 (as number; from '20')",
     "info     caching: TargetHeatingCoolingState: 1 (as number; means HEAT; from 'x')",
     "info     caching: CurrentTemperature: 19 (as number; from '19')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -21386,7 +21430,6 @@ exports[`mapping/thermostat-states > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "thermostat_states-undefined",
     },
     "CurrentTemperature": {
       "cached": 19,
@@ -21516,11 +21559,6 @@ exports[`mapping/thermostat-states > updates characteristics 1`] = `
   ],
   "thermostat_states-mode": [
     "Target Heating Cooling State=1 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "thermostat_states-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -22046,14 +22084,13 @@ exports[`mapping/valid-numbers > gets its services 1`] = `
               "pw",
             ],
             "validValues": [
+              0,
+              1,
               7,
-              "HEAT",
-              null,
-              "OFF",
             ],
           },
           "uuid": "00000033-0000-1000-8000-0026BB765291",
-          "value": 7,
+          "value": 0,
         },
         {
           "name": "Current Temperature",
@@ -22118,7 +22155,6 @@ exports[`mapping/valid-numbers > gets its services 1`] = `
   "subscriptions": {
     "valid_numbers-desired-temp": 1,
     "valid_numbers-mode": 1,
-    "valid_numbers-undefined": 1,
   },
 }
 `;
@@ -22136,14 +22172,13 @@ exports[`mapping/valid-numbers > is detected 1`] = `
     "log valid_numbers has",
     "log   TargetTemperature [desired-temp]",
     "log   TargetHeatingCoolingState [mode]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: TargetTemperature: 21 (as number; from '21')",
+    "error valid: x is neither a number nor the name of a value of TargetHeatingCoolingState",
     "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'auto')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -22151,7 +22186,6 @@ exports[`mapping/valid-numbers > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "valid_numbers-undefined",
     },
     "TargetHeatingCoolingState": {
       "cached": 3,
@@ -22180,10 +22214,9 @@ exports[`mapping/valid-numbers > is detected 1`] = `
       "last_update": 1786881600,
       "reading": "mode",
       "valid": [
+        0,
+        1,
         7,
-        "HEAT",
-        NaN,
-        "OFF",
       ],
       "value2homekit": {
         "auto": 3,
@@ -22268,12 +22301,7 @@ exports[`mapping/valid-numbers > updates characteristics 1`] = `
     "Target Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "valid_numbers-mode": [
-    "Target Heating Cooling State=7 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "valid_numbers-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Target Heating Cooling State=0 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -22490,11 +22518,11 @@ exports[`mapping/valid-values > gets its services 1`] = `
             "validValues": [
               0,
               1,
-              "AUTO",
+              3,
             ],
           },
           "uuid": "00000033-0000-1000-8000-0026BB765291",
-          "value": 0,
+          "value": 3,
         },
         {
           "name": "Current Temperature",
@@ -22559,7 +22587,6 @@ exports[`mapping/valid-values > gets its services 1`] = `
   "subscriptions": {
     "valid_values-desired-temp": 1,
     "valid_values-mode": 1,
-    "valid_values-undefined": 1,
   },
 }
 `;
@@ -22577,14 +22604,12 @@ exports[`mapping/valid-values > is detected 1`] = `
     "log valid_values has",
     "log   TargetTemperature [desired-temp]",
     "log   TargetHeatingCoolingState [mode]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: TargetTemperature: 21 (as number; from '21')",
     "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'auto')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -22592,7 +22617,6 @@ exports[`mapping/valid-values > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "valid_values-undefined",
     },
     "TargetHeatingCoolingState": {
       "cached": 3,
@@ -22621,7 +22645,7 @@ exports[`mapping/valid-values > is detected 1`] = `
       "valid": [
         0,
         1,
-        "AUTO",
+        3,
       ],
       "value2homekit": {
         "auto": 3,
@@ -22707,12 +22731,8 @@ exports[`mapping/valid-values > updates characteristics 1`] = `
     "Target Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "valid_values-mode": [
-    "Target Heating Cooling State=0 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "valid_values-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Target Heating Cooling State=3 <- "on"",
+    "Target Heating Cooling State=0 <- "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -23744,7 +23764,7 @@ TargetHeatingCoolingState=mode,values=auto:3;manual:1,cmds=3:mode+auto;1:mode+ma
       "default": 1,
       "device": "values_as_numbers",
       "homekit2name": {
-        "0": "captureRejections",
+        "0": "OFF",
         "1": "HEAT",
       },
       "informId": "values_as_numbers-valve",
@@ -26238,8 +26258,9 @@ exports[`presence/residents > converts readings 1`] = `
     "3 <- "home"",
   ],
   "SecuritySystemTargetState": [
-    "undefined <- "on" "off" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "undefined <- "on" "off" "ON" "0" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "TV" "short" "motion 7 T: 21.5" """,
     "0 <- "absent"",
+    "3 <- "home"",
   ],
 }
 `;
@@ -26480,6 +26501,7 @@ exports[`presence/residents > is detected 1`] = `
         "0": "STAY_ARM",
         "1": "AWAY_ARM",
         "2": "NIGHT_ARM",
+        "3": "DISARM",
       },
       "informId": "residents-state",
       "last_update": 1786881600,
@@ -26488,7 +26510,7 @@ exports[`presence/residents > is detected 1`] = `
       "value2homekit_re": [
         {
           "re": "^home",
-          "to": "DISARMED",
+          "to": 3,
         },
         {
           "re": "^gotosleep",
@@ -26504,7 +26526,7 @@ exports[`presence/residents > is detected 1`] = `
         },
       ],
       "values": [
-        "/^home/:DISARMED",
+        "/^home/:DISARM",
         "/^gotosleep/:NIGHT_ARM",
         "/^absent/:STAY_ARM",
         "/^gone/:AWAY_ARM",
@@ -33092,7 +33114,7 @@ exports[`switch/generic-display-type > gets its services 1`] = `
     "log   information service for generic-display-type",
     "log     manufacturer, model and serial number characteristics for generic-display-type",
     "log     name (siriName) characteristic for generic-display-type",
-    "log   Switch service for generic-display-type",
+    "log   Outlet service for generic-display-type",
     "log     On characteristic for generic_display_type:state",
   ],
   "services": [
@@ -33199,8 +33221,8 @@ exports[`switch/generic-display-type > gets its services 1`] = `
       ],
       "linked": [],
       "name": "generic_display_type",
-      "type": "Switch",
-      "uuid": "00000049-0000-1000-8000-0026BB765291",
+      "type": "Outlet",
+      "uuid": "00000047-0000-1000-8000-0026BB765291",
     },
   ],
   "subscriptions": {
@@ -33217,7 +33239,7 @@ exports[`switch/generic-display-type > is detected 1`] = `
   "fuuid": "c6cabd1e-f33f-1aae-061f-434562d60c94",
   "homekit_uuid": "6981fdc8-36bd-44c5-8d97-f232be70e34a",
   "log": [
-    "log generic_display_type is switch",
+    "log generic_display_type is outlet",
     "log generic_display_type has",
     "log   On [state;on,off]",
     "info     caching: On: false (as boolean; from 'off')",
@@ -33242,7 +33264,7 @@ exports[`switch/generic-display-type > is detected 1`] = `
   "room": undefined,
   "sent": [],
   "serial": "c6cabd1e-f33f-1aae-061f-434562d60c94",
-  "service_name": "switch",
+  "service_name": "outlet",
   "siriName": "generic_display_type",
   "type": "dummy",
   "uuid_base": "c6cabd1e-f33f-1aae-061f-434562d60c94",
@@ -34959,6 +34981,8 @@ exports[`switch/reachable > gets its services 1`] = `
     "log   information service for reachable",
     "log     manufacturer, model and serial number characteristics for reachable",
     "log     name (siriName) characteristic for reachable",
+    "info   reachable has reachability [reachable]",
+    "info     caching: Reachable: false (as boolean; from '0')",
     "log   Switch service for reachable",
     "log     On characteristic for reachable:state",
   ],
@@ -35071,6 +35095,7 @@ exports[`switch/reachable > gets its services 1`] = `
     },
   ],
   "subscriptions": {
+    "reachable-reachable": 1,
     "reachable-state": 1,
   },
 }
@@ -35148,6 +35173,9 @@ exports[`switch/reachable > sends commands 1`] = `
 
 exports[`switch/reachable > updates characteristics 1`] = `
 {
+  "reachable-reachable": [
+    "-=undefined <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  ],
   "reachable-state": [
     "On=true <- "on" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
     "On=false <- "off"",
@@ -36176,7 +36204,6 @@ exports[`thermostat/comet-dect > gets its services 1`] = `
   "subscriptions": {
     "comet_dect-battery": 2,
     "comet_dect-temperature": 2,
-    "comet_dect-undefined": 1,
   },
 }
 `;
@@ -36195,12 +36222,11 @@ exports[`thermostat/comet-dect > is detected 1`] = `
     "log   StatusLowBattery [battery]",
     "log   TargetTemperature [temperature]",
     "log   CurrentTemperature [temperature]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: BatteryLevel: 80 (as number; from '80')",
     "info     caching: StatusLowBattery: 0 (as number; means BATTERY_LEVEL_NORMAL; from '80')",
     "info     caching: TargetTemperature: 21.5 (as number; from '21.5')",
     "info     caching: CurrentTemperature: 21.5 (as number; from '21.5')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "BatteryLevel": {
@@ -36213,7 +36239,6 @@ exports[`thermostat/comet-dect > is detected 1`] = `
       "reading": "battery",
     },
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -36221,7 +36246,6 @@ exports[`thermostat/comet-dect > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "comet_dect-undefined",
     },
     "CurrentTemperature": {
       "cached": 21.5,
@@ -36336,61 +36360,14 @@ exports[`thermostat/comet-dect > updates characteristics 1`] = `
     "Target Temperature=28 Current Temperature=100 <- "100"",
     "Target Temperature=21.5 Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
-  "comet_dect-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
 }
 `;
 
 exports[`thermostat/cul_hm-rt > converts readings 1`] = `
 {
   "CurrentHeatingCoolingState": [
-    ""on" <- "on"",
-    ""off" <- "off"",
-    ""ON" <- "ON"",
-    ""0" <- "0"",
-    ""1" <- "1"",
-    ""2" <- "2"",
-    ""3" <- "3"",
-    ""20" <- "20"",
-    ""50" <- "50"",
-    ""99" <- "99"",
-    ""100" <- "100"",
-    ""254" <- "254"",
-    ""1500" <- "1500"",
-    ""21.5" <- "21.5"",
-    ""-5" <- "-5"",
-    ""0.35" <- "0.35"",
-    ""dim 50" <- "dim 50"",
-    ""dim50%" <- "dim50%"",
-    ""closed" <- "closed"",
-    ""open" <- "open"",
-    ""Closed" <- "Closed"",
-    ""present" <- "present"",
-    ""absent" <- "absent"",
-    ""locked" <- "locked"",
-    ""ok" <- "ok"",
-    ""low" <- "low"",
-    ""A0" <- "A0"",
-    ""000000" <- "000000"",
-    ""ff8000" <- "ff8000"",
-    ""0.4573,0.41" <- "0.4573,0.41"",
-    ""set-on" <- "set-on"",
-    ""set_off" <- "set_off"",
-    ""true" <- "true"",
-    ""false" <- "false"",
-    ""PLAYING" <- "PLAYING"",
-    ""opening" <- "opening"",
-    ""up:on" <- "up:on"",
-    ""auto" <- "auto"",
-    ""manual" <- "manual"",
-    ""home" <- "home"",
-    ""TV" <- "TV"",
-    ""short" <- "short"",
-    ""motion 7 T: 21.5" <- "motion 7 T: 21.5"",
-    """ <- """,
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "000000"",
   ],
   "CurrentTemperature": [
     "31 <- "on" "ON"",
@@ -36451,7 +36428,7 @@ exports[`thermostat/cul_hm-rt > gets its services 1`] = `
     "log     TargetTemperature characteristic for cul_hm_rt:desired-temp",
     "log     Custom Actuation characteristic for cul_hm_rt:actuator",
     "log     CurrentTemperature characteristic for cul_hm_rt:measured-temp",
-    "log     CurrentHeatingCoolingState characteristic for cul_hm_rt:undefined",
+    "log     CurrentHeatingCoolingState characteristic for cul_hm_rt:actuator",
   ],
   "services": [
     {
@@ -36679,11 +36656,10 @@ exports[`thermostat/cul_hm-rt > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "cul_hm_rt-actuator": 1,
+    "cul_hm_rt-actuator": 2,
     "cul_hm_rt-battery": 1,
     "cul_hm_rt-desired-temp": 1,
     "cul_hm_rt-measured-temp": 1,
-    "cul_hm_rt-undefined": 1,
   },
 }
 `;
@@ -36702,12 +36678,12 @@ exports[`thermostat/cul_hm-rt > is detected 1`] = `
     "log   TargetTemperature [desired-temp]",
     "log   Custom Actuation [actuator]",
     "log   CurrentTemperature [measured-temp]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [actuator]",
     "info     caching: StatusLowBattery: 0 (as number; means BATTERY_LEVEL_NORMAL; from 'ok')",
     "info     caching: TargetTemperature: 20 (as number; from '20.0')",
     "info     caching: Actuation: 15 (as number; from '15')",
     "info     caching: CurrentTemperature: 19 (as number; from '19.0')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
+    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from '15')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
@@ -36717,9 +36693,27 @@ exports[`thermostat/cul_hm-rt > is detected 1`] = `
       "default": 1,
       "device": "cul_hm_rt",
       "homekit2name": {
+        "0": "OFF",
         "1": "HEAT",
       },
-      "informId": "cul_hm_rt-undefined",
+      "informId": "cul_hm_rt-actuator",
+      "last_update": 1786881600,
+      "reading": "actuator",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^0+(\\.0+)?( |%|$)",
+          "to": 0,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^0+(\\.0+)?( |%|$)/:OFF",
+        "/.*/:HEAT",
+      ],
     },
     "CurrentTemperature": {
       "cached": 19,
@@ -36835,12 +36829,12 @@ exports[`thermostat/cul_hm-rt > sends commands 1`] = `
 exports[`thermostat/cul_hm-rt > updates characteristics 1`] = `
 {
   "cul_hm_rt-actuator": [
-    "Actuation=15 <- "on" "off"",
-    "Actuation=0 <- "0"",
-    "Actuation=1 <- "1"",
-    "Actuation=50 <- "50"",
-    "Actuation=100 <- "100"",
-    "Actuation=22 <- "21.5" "closed" "open" "ff8000" """,
+    "Actuation=15 Current Heating Cooling State=1 <- "on" "off"",
+    "Actuation=0 Current Heating Cooling State=0 <- "0"",
+    "Actuation=1 Current Heating Cooling State=1 <- "1"",
+    "Actuation=50 Current Heating Cooling State=1 <- "50"",
+    "Actuation=100 Current Heating Cooling State=1 <- "100"",
+    "Actuation=22 Current Heating Cooling State=1 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "cul_hm_rt-battery": [
     "Status Low Battery=1 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
@@ -36859,61 +36853,14 @@ exports[`thermostat/cul_hm-rt > updates characteristics 1`] = `
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
-  "cul_hm_rt-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
 }
 `;
 
 exports[`thermostat/cul_hm-rt-valve-closed > converts readings 1`] = `
 {
   "CurrentHeatingCoolingState": [
-    ""on" <- "on"",
-    ""off" <- "off"",
-    ""ON" <- "ON"",
-    ""0" <- "0"",
-    ""1" <- "1"",
-    ""2" <- "2"",
-    ""3" <- "3"",
-    ""20" <- "20"",
-    ""50" <- "50"",
-    ""99" <- "99"",
-    ""100" <- "100"",
-    ""254" <- "254"",
-    ""1500" <- "1500"",
-    ""21.5" <- "21.5"",
-    ""-5" <- "-5"",
-    ""0.35" <- "0.35"",
-    ""dim 50" <- "dim 50"",
-    ""dim50%" <- "dim50%"",
-    ""closed" <- "closed"",
-    ""open" <- "open"",
-    ""Closed" <- "Closed"",
-    ""present" <- "present"",
-    ""absent" <- "absent"",
-    ""locked" <- "locked"",
-    ""ok" <- "ok"",
-    ""low" <- "low"",
-    ""A0" <- "A0"",
-    ""000000" <- "000000"",
-    ""ff8000" <- "ff8000"",
-    ""0.4573,0.41" <- "0.4573,0.41"",
-    ""set-on" <- "set-on"",
-    ""set_off" <- "set_off"",
-    ""true" <- "true"",
-    ""false" <- "false"",
-    ""PLAYING" <- "PLAYING"",
-    ""opening" <- "opening"",
-    ""up:on" <- "up:on"",
-    ""auto" <- "auto"",
-    ""manual" <- "manual"",
-    ""home" <- "home"",
-    ""TV" <- "TV"",
-    ""short" <- "short"",
-    ""motion 7 T: 21.5" <- "motion 7 T: 21.5"",
-    """ <- """,
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "000000"",
   ],
   "CurrentTemperature": [
     "31 <- "on" "ON"",
@@ -36968,7 +36915,7 @@ exports[`thermostat/cul_hm-rt-valve-closed > gets its services 1`] = `
     "log     TargetTemperature characteristic for cul_hm_rt_valve_closed:desired-temp",
     "log     Custom Actuation characteristic for cul_hm_rt_valve_closed:actuator",
     "log     CurrentTemperature characteristic for cul_hm_rt_valve_closed:measured-temp",
-    "log     CurrentHeatingCoolingState characteristic for cul_hm_rt_valve_closed:undefined",
+    "log     CurrentHeatingCoolingState characteristic for cul_hm_rt_valve_closed:actuator",
   ],
   "services": [
     {
@@ -37076,7 +37023,7 @@ exports[`thermostat/cul_hm-rt-valve-closed > gets its services 1`] = `
             ],
           },
           "uuid": "0000000F-0000-1000-8000-0026BB765291",
-          "value": 1,
+          "value": 0,
         },
         {
           "name": "Target Heating Cooling State",
@@ -37177,10 +37124,9 @@ exports[`thermostat/cul_hm-rt-valve-closed > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "cul_hm_rt_valve_closed-actuator": 1,
+    "cul_hm_rt_valve_closed-actuator": 2,
     "cul_hm_rt_valve_closed-desired-temp": 1,
     "cul_hm_rt_valve_closed-measured-temp": 1,
-    "cul_hm_rt_valve_closed-undefined": 1,
   },
 }
 `;
@@ -37198,23 +37144,41 @@ exports[`thermostat/cul_hm-rt-valve-closed > is detected 1`] = `
     "log   TargetTemperature [desired-temp]",
     "log   Custom Actuation [actuator]",
     "log   CurrentTemperature [measured-temp]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [actuator]",
     "info     caching: TargetTemperature: 4.5 (as number; from 'off')",
     "info     caching: Actuation: 0 (as number; from '0')",
     "info     caching: CurrentTemperature: 22 (as number; from '22.0')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
+    "info     caching: CurrentHeatingCoolingState: 0 (as number; means OFF; from '0')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
+      "cached": 0,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
       "device": "cul_hm_rt_valve_closed",
       "homekit2name": {
+        "0": "OFF",
         "1": "HEAT",
       },
-      "informId": "cul_hm_rt_valve_closed-undefined",
+      "informId": "cul_hm_rt_valve_closed-actuator",
+      "last_update": 1786881600,
+      "reading": "actuator",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^0+(\\.0+)?( |%|$)",
+          "to": 0,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^0+(\\.0+)?( |%|$)/:OFF",
+        "/.*/:HEAT",
+      ],
     },
     "CurrentTemperature": {
       "cached": 22,
@@ -37301,11 +37265,12 @@ exports[`thermostat/cul_hm-rt-valve-closed > sends commands 1`] = `
 exports[`thermostat/cul_hm-rt-valve-closed > updates characteristics 1`] = `
 {
   "cul_hm_rt_valve_closed-actuator": [
-    "Actuation=0 <- "on" "off" "0"",
-    "Actuation=1 <- "1"",
-    "Actuation=50 <- "50"",
-    "Actuation=100 <- "100"",
-    "Actuation=22 <- "21.5" "closed" "open" "ff8000" """,
+    "Actuation=0 Current Heating Cooling State=1 <- "on" "off"",
+    "Actuation=0 Current Heating Cooling State=0 <- "0"",
+    "Actuation=1 Current Heating Cooling State=1 <- "1"",
+    "Actuation=50 Current Heating Cooling State=1 <- "50"",
+    "Actuation=100 Current Heating Cooling State=1 <- "100"",
+    "Actuation=22 Current Heating Cooling State=1 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "cul_hm_rt_valve_closed-desired-temp": [
     "Target Temperature=30.5 <- "on" "50" "100"",
@@ -37321,61 +37286,14 @@ exports[`thermostat/cul_hm-rt-valve-closed > updates characteristics 1`] = `
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
-  "cul_hm_rt_valve_closed-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
 }
 `;
 
 exports[`thermostat/cul_hm-tc > converts readings 1`] = `
 {
   "CurrentHeatingCoolingState": [
-    ""on" <- "on"",
-    ""off" <- "off"",
-    ""ON" <- "ON"",
-    ""0" <- "0"",
-    ""1" <- "1"",
-    ""2" <- "2"",
-    ""3" <- "3"",
-    ""20" <- "20"",
-    ""50" <- "50"",
-    ""99" <- "99"",
-    ""100" <- "100"",
-    ""254" <- "254"",
-    ""1500" <- "1500"",
-    ""21.5" <- "21.5"",
-    ""-5" <- "-5"",
-    ""0.35" <- "0.35"",
-    ""dim 50" <- "dim 50"",
-    ""dim50%" <- "dim50%"",
-    ""closed" <- "closed"",
-    ""open" <- "open"",
-    ""Closed" <- "Closed"",
-    ""present" <- "present"",
-    ""absent" <- "absent"",
-    ""locked" <- "locked"",
-    ""ok" <- "ok"",
-    ""low" <- "low"",
-    ""A0" <- "A0"",
-    ""000000" <- "000000"",
-    ""ff8000" <- "ff8000"",
-    ""0.4573,0.41" <- "0.4573,0.41"",
-    ""set-on" <- "set-on"",
-    ""set_off" <- "set_off"",
-    ""true" <- "true"",
-    ""false" <- "false"",
-    ""PLAYING" <- "PLAYING"",
-    ""opening" <- "opening"",
-    ""up:on" <- "up:on"",
-    ""auto" <- "auto"",
-    ""manual" <- "manual"",
-    ""home" <- "home"",
-    ""TV" <- "TV"",
-    ""short" <- "short"",
-    ""motion 7 T: 21.5" <- "motion 7 T: 21.5"",
-    """ <- """,
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "000000"",
   ],
   "CurrentRelativeHumidity": [
     "null <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -37458,7 +37376,7 @@ exports[`thermostat/cul_hm-tc > gets its services 1`] = `
     "log     TargetHeatingCoolingState characteristic for cul_hm_tc:mode",
     "log     CurrentTemperature characteristic for cul_hm_tc:measured-temp",
     "log     CurrentRelativeHumidity characteristic for cul_hm_tc:humidity",
-    "log     CurrentHeatingCoolingState characteristic for cul_hm_tc:undefined",
+    "log     CurrentHeatingCoolingState characteristic for cul_hm_tc:ValvePosition",
   ],
   "services": [
     {
@@ -37702,13 +37620,12 @@ exports[`thermostat/cul_hm-tc > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "cul_hm_tc-ValvePosition": 1,
+    "cul_hm_tc-ValvePosition": 2,
     "cul_hm_tc-battery": 1,
     "cul_hm_tc-desired-temp": 1,
     "cul_hm_tc-humidity": 1,
     "cul_hm_tc-measured-temp": 1,
     "cul_hm_tc-mode": 1,
-    "cul_hm_tc-undefined": 1,
   },
 }
 `;
@@ -37729,14 +37646,14 @@ exports[`thermostat/cul_hm-tc > is detected 1`] = `
     "log   TargetHeatingCoolingState [mode]",
     "log   CurrentTemperature [measured-temp]",
     "log   CurrentRelativeHumidity [humidity]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [ValvePosition]",
     "info     caching: StatusLowBattery: 1 (as number; means BATTERY_LEVEL_LOW; from 'low')",
     "info     caching: TargetTemperature: 21 (as number; from '21.0')",
     "info     caching: Actuation: 30 (as number; from '30')",
     "info     caching: TargetHeatingCoolingState: 3 (as number; means AUTO; from 'auto')",
     "info     caching: CurrentTemperature: 20.5 (as number; from '20.5')",
     "info     caching: CurrentRelativeHumidity: 45 (as number; from '45')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
+    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from '30')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
@@ -37746,9 +37663,27 @@ exports[`thermostat/cul_hm-tc > is detected 1`] = `
       "default": 1,
       "device": "cul_hm_tc",
       "homekit2name": {
+        "0": "OFF",
         "1": "HEAT",
       },
-      "informId": "cul_hm_tc-undefined",
+      "informId": "cul_hm_tc-ValvePosition",
+      "last_update": 1786881600,
+      "reading": "ValvePosition",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^0+(\\.0+)?( |%|$)",
+          "to": 0,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^0+(\\.0+)?( |%|$)/:OFF",
+        "/.*/:HEAT",
+      ],
     },
     "CurrentRelativeHumidity": {
       "cached": 45,
@@ -37937,12 +37872,12 @@ exports[`thermostat/cul_hm-tc > sends commands 1`] = `
 exports[`thermostat/cul_hm-tc > updates characteristics 1`] = `
 {
   "cul_hm_tc-ValvePosition": [
-    "Actuation=30 <- "on" "off"",
-    "Actuation=0 <- "0"",
-    "Actuation=1 <- "1"",
-    "Actuation=50 <- "50"",
-    "Actuation=100 <- "100"",
-    "Actuation=22 <- "21.5" "closed" "open" "ff8000" """,
+    "Actuation=30 Current Heating Cooling State=1 <- "on" "off"",
+    "Actuation=0 Current Heating Cooling State=0 <- "0"",
+    "Actuation=1 Current Heating Cooling State=1 <- "1"",
+    "Actuation=50 Current Heating Cooling State=1 <- "50"",
+    "Actuation=100 Current Heating Cooling State=1 <- "100"",
+    "Actuation=22 Current Heating Cooling State=1 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "cul_hm_tc-battery": [
     "Status Low Battery=1 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
@@ -37971,11 +37906,6 @@ exports[`thermostat/cul_hm-tc > updates characteristics 1`] = `
   ],
   "cul_hm_tc-mode": [
     "Target Heating Cooling State=1 <- "on" "off" "0" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
-  "cul_hm_tc-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -38254,7 +38184,6 @@ exports[`thermostat/generic-without-set > gets its services 1`] = `
   ],
   "subscriptions": {
     "generic_without_set-temperature": 1,
-    "generic_without_set-undefined": 1,
   },
 }
 `;
@@ -38271,13 +38200,11 @@ exports[`thermostat/generic-without-set > is detected 1`] = `
     "error generic_without_set is NOT a thermostat. set command for target temperature missing: ",
     "log generic_without_set has",
     "log   CurrentTemperature [temperature]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: CurrentTemperature: 20 (as number; from '20.0')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -38285,7 +38212,6 @@ exports[`thermostat/generic-without-set > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "generic_without_set-undefined",
     },
     "CurrentTemperature": {
       "cached": 20,
@@ -38333,61 +38259,14 @@ exports[`thermostat/generic-without-set > updates characteristics 1`] = `
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
-  "generic_without_set-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
 }
 `;
 
 exports[`thermostat/max-heating > converts readings 1`] = `
 {
   "CurrentHeatingCoolingState": [
-    ""on" <- "on"",
-    ""off" <- "off"",
-    ""ON" <- "ON"",
-    ""0" <- "0"",
-    ""1" <- "1"",
-    ""2" <- "2"",
-    ""3" <- "3"",
-    ""20" <- "20"",
-    ""50" <- "50"",
-    ""99" <- "99"",
-    ""100" <- "100"",
-    ""254" <- "254"",
-    ""1500" <- "1500"",
-    ""21.5" <- "21.5"",
-    ""-5" <- "-5"",
-    ""0.35" <- "0.35"",
-    ""dim 50" <- "dim 50"",
-    ""dim50%" <- "dim50%"",
-    ""closed" <- "closed"",
-    ""open" <- "open"",
-    ""Closed" <- "Closed"",
-    ""present" <- "present"",
-    ""absent" <- "absent"",
-    ""locked" <- "locked"",
-    ""ok" <- "ok"",
-    ""low" <- "low"",
-    ""A0" <- "A0"",
-    ""000000" <- "000000"",
-    ""ff8000" <- "ff8000"",
-    ""0.4573,0.41" <- "0.4573,0.41"",
-    ""set-on" <- "set-on"",
-    ""set_off" <- "set_off"",
-    ""true" <- "true"",
-    ""false" <- "false"",
-    ""PLAYING" <- "PLAYING"",
-    ""opening" <- "opening"",
-    ""up:on" <- "up:on"",
-    ""auto" <- "auto"",
-    ""manual" <- "manual"",
-    ""home" <- "home"",
-    ""TV" <- "TV"",
-    ""short" <- "short"",
-    ""motion 7 T: 21.5" <- "motion 7 T: 21.5"",
-    """ <- """,
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "000000"",
   ],
   "CurrentTemperature": [
     "31 <- "on" "ON"",
@@ -38448,7 +38327,7 @@ exports[`thermostat/max-heating > gets its services 1`] = `
     "log     TargetTemperature characteristic for max_heating:desiredTemperature",
     "log     Custom Actuation characteristic for max_heating:valveposition",
     "log     CurrentTemperature characteristic for max_heating:temperature",
-    "log     CurrentHeatingCoolingState characteristic for max_heating:undefined",
+    "log     CurrentHeatingCoolingState characteristic for max_heating:valveposition",
   ],
   "services": [
     {
@@ -38679,8 +38558,7 @@ exports[`thermostat/max-heating > gets its services 1`] = `
     "max_heating-battery": 1,
     "max_heating-desiredTemperature": 1,
     "max_heating-temperature": 1,
-    "max_heating-undefined": 1,
-    "max_heating-valveposition": 1,
+    "max_heating-valveposition": 2,
   },
 }
 `;
@@ -38699,12 +38577,12 @@ exports[`thermostat/max-heating > is detected 1`] = `
     "log   TargetTemperature [desiredTemperature]",
     "log   Custom Actuation [valveposition]",
     "log   CurrentTemperature [temperature]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [valveposition]",
     "info     caching: StatusLowBattery: 0 (as number; means BATTERY_LEVEL_NORMAL; from 'ok')",
     "info     caching: TargetTemperature: 21 (as number; from '21.0')",
     "info     caching: Actuation: 42 (as number; from '42')",
     "info     caching: CurrentTemperature: 20.3 (as number; from '20.3')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
+    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from '42')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
@@ -38714,9 +38592,27 @@ exports[`thermostat/max-heating > is detected 1`] = `
       "default": 1,
       "device": "max_heating",
       "homekit2name": {
+        "0": "OFF",
         "1": "HEAT",
       },
-      "informId": "max_heating-undefined",
+      "informId": "max_heating-valveposition",
+      "last_update": 1786881600,
+      "reading": "valveposition",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^0+(\\.0+)?( |%|$)",
+          "to": 0,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^0+(\\.0+)?( |%|$)/:OFF",
+        "/.*/:HEAT",
+      ],
     },
     "CurrentTemperature": {
       "cached": 20.3,
@@ -38848,18 +38744,13 @@ exports[`thermostat/max-heating > updates characteristics 1`] = `
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
-  "max_heating-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
-  ],
   "max_heating-valveposition": [
-    "Actuation=42 <- "on" "off"",
-    "Actuation=0 <- "0"",
-    "Actuation=1 <- "1"",
-    "Actuation=50 <- "50"",
-    "Actuation=100 <- "100"",
-    "Actuation=22 <- "21.5" "closed" "open" "ff8000" """,
+    "Actuation=42 Current Heating Cooling State=1 <- "on" "off"",
+    "Actuation=0 Current Heating Cooling State=0 <- "0"",
+    "Actuation=1 Current Heating Cooling State=1 <- "1"",
+    "Actuation=50 Current Heating Cooling State=1 <- "50"",
+    "Actuation=100 Current Heating Cooling State=1 <- "100"",
+    "Actuation=22 Current Heating Cooling State=1 <- "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -38867,50 +38758,8 @@ exports[`thermostat/max-heating > updates characteristics 1`] = `
 exports[`thermostat/pid20 > converts readings 1`] = `
 {
   "CurrentHeatingCoolingState": [
-    ""on" <- "on"",
-    ""off" <- "off"",
-    ""ON" <- "ON"",
-    ""0" <- "0"",
-    ""1" <- "1"",
-    ""2" <- "2"",
-    ""3" <- "3"",
-    ""20" <- "20"",
-    ""50" <- "50"",
-    ""99" <- "99"",
-    ""100" <- "100"",
-    ""254" <- "254"",
-    ""1500" <- "1500"",
-    ""21.5" <- "21.5"",
-    ""-5" <- "-5"",
-    ""0.35" <- "0.35"",
-    ""dim 50" <- "dim 50"",
-    ""dim50%" <- "dim50%"",
-    ""closed" <- "closed"",
-    ""open" <- "open"",
-    ""Closed" <- "Closed"",
-    ""present" <- "present"",
-    ""absent" <- "absent"",
-    ""locked" <- "locked"",
-    ""ok" <- "ok"",
-    ""low" <- "low"",
-    ""A0" <- "A0"",
-    ""000000" <- "000000"",
-    ""ff8000" <- "ff8000"",
-    ""0.4573,0.41" <- "0.4573,0.41"",
-    ""set-on" <- "set-on"",
-    ""set_off" <- "set_off"",
-    ""true" <- "true"",
-    ""false" <- "false"",
-    ""PLAYING" <- "PLAYING"",
-    ""opening" <- "opening"",
-    ""up:on" <- "up:on"",
-    ""auto" <- "auto"",
-    ""manual" <- "manual"",
-    ""home" <- "home"",
-    ""TV" <- "TV"",
-    ""short" <- "short"",
-    ""motion 7 T: 21.5" <- "motion 7 T: 21.5"",
-    """ <- """,
+    "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "0.4573,0.41" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "0 <- "0" "000000"",
   ],
   "CurrentTemperature": [
     "31 <- "on" "ON"",
@@ -38977,7 +38826,7 @@ exports[`thermostat/pid20 > gets its services 1`] = `
     "log     TargetTemperature characteristic for pid20:desired",
     "log     Custom Actuation characteristic for pid20:actuation",
     "log     CurrentTemperature characteristic for pid20:measured",
-    "log     CurrentHeatingCoolingState characteristic for pid20:undefined",
+    "log     CurrentHeatingCoolingState characteristic for pid20:actuation",
   ],
   "services": [
     {
@@ -39186,10 +39035,9 @@ exports[`thermostat/pid20 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "pid20-actuation": 1,
+    "pid20-actuation": 2,
     "pid20-desired": 1,
     "pid20-measured": 1,
-    "pid20-undefined": 1,
   },
 }
 `;
@@ -39207,11 +39055,11 @@ exports[`thermostat/pid20 > is detected 1`] = `
     "log   TargetTemperature [desired]",
     "log   Custom Actuation [actuation]",
     "log   CurrentTemperature [measured]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [actuation]",
     "info     caching: TargetTemperature: 21.5 (as number; from '21.5')",
     "info     caching: Actuation: 37 (as number; from '37')",
     "info     caching: CurrentTemperature: 20.9 (as number; from '20.9')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
+    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from '37')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
@@ -39221,9 +39069,27 @@ exports[`thermostat/pid20 > is detected 1`] = `
       "default": 1,
       "device": "pid20",
       "homekit2name": {
+        "0": "OFF",
         "1": "HEAT",
       },
-      "informId": "pid20-undefined",
+      "informId": "pid20-actuation",
+      "last_update": 1786881600,
+      "reading": "actuation",
+      "value2homekit": {},
+      "value2homekit_re": [
+        {
+          "re": "^0+(\\.0+)?( |%|$)",
+          "to": 0,
+        },
+        {
+          "re": ".*",
+          "to": 1,
+        },
+      ],
+      "values": [
+        "/^0+(\\.0+)?( |%|$)/:OFF",
+        "/.*/:HEAT",
+      ],
     },
     "CurrentTemperature": {
       "cached": 20.9,
@@ -39306,12 +39172,12 @@ exports[`thermostat/pid20 > sends commands 1`] = `
 exports[`thermostat/pid20 > updates characteristics 1`] = `
 {
   "pid20-actuation": [
-    "Actuation=37 <- "on" "off"",
-    "Actuation=0 <- "0"",
-    "Actuation=1 <- "1"",
-    "Actuation=50 <- "50"",
-    "Actuation=100 <- "100"",
-    "Actuation=22 <- "21.5" "closed" "open" "ff8000" """,
+    "Actuation=37 Current Heating Cooling State=1 <- "on" "off"",
+    "Actuation=0 Current Heating Cooling State=0 <- "0"",
+    "Actuation=1 Current Heating Cooling State=1 <- "1"",
+    "Actuation=50 Current Heating Cooling State=1 <- "50"",
+    "Actuation=100 Current Heating Cooling State=1 <- "100"",
+    "Actuation=22 Current Heating Cooling State=1 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "pid20-desired": [
     "Target Temperature=31 <- "on"",
@@ -39327,11 +39193,6 @@ exports[`thermostat/pid20 > updates characteristics 1`] = `
     "Current Temperature=50 <- "50"",
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
-  ],
-  "pid20-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;
@@ -39610,7 +39471,6 @@ exports[`thermostat/subtype-with-measured > gets its services 1`] = `
   ],
   "subscriptions": {
     "subtype_with_measured-measured-temp": 1,
-    "subtype_with_measured-undefined": 1,
   },
 }
 `;
@@ -39627,13 +39487,11 @@ exports[`thermostat/subtype-with-measured > is detected 1`] = `
     "error subtype_with_measured is NOT a thermostat. set command for target temperature missing: ",
     "log subtype_with_measured has",
     "log   CurrentTemperature [measured-temp]",
-    "log   CurrentHeatingCoolingState [undefined]",
+    "log   CurrentHeatingCoolingState [default HEAT]",
     "info     caching: CurrentTemperature: 18.2 (as number; from '18.2')",
-    "info     caching: CurrentHeatingCoolingState: 1 (as number; means HEAT; from 'mapping.default')",
   ],
   "mappings": {
     "CurrentHeatingCoolingState": {
-      "cached": 1,
       "characteristic": "class CurrentHeatingCoolingState",
       "characteristic_type": "CurrentHeatingCoolingState",
       "default": 1,
@@ -39641,7 +39499,6 @@ exports[`thermostat/subtype-with-measured > is detected 1`] = `
       "homekit2name": {
         "1": "HEAT",
       },
-      "informId": "subtype_with_measured-undefined",
     },
     "CurrentTemperature": {
       "cached": 18.2,
@@ -39688,11 +39545,6 @@ exports[`thermostat/subtype-with-measured > updates characteristics 1`] = `
     "Current Temperature=50 <- "50"",
     "Current Temperature=100 <- "100"",
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
-  ],
-  "subtype_with_measured-undefined": [
-    "Current Heating Cooling State=1 <- "on" "off" "1"",
-    "Current Heating Cooling State=0 <- "0"",
-    "Current Heating Cooling State=2 <- "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
 }
 `;

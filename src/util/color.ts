@@ -6,14 +6,23 @@ import { looselyEqual } from './loose.ts';
 
 export type Hsv = [h: number | undefined, s: number, v: number];
 
-/** six hex digits for three components from 0 to 255, given one by one or as a list */
-export function rgb2hex(r: number | number[], g?: number, b?: number): string {
-  if (g === undefined) {
-    const rgb = r as [number, number, number];
-    return (0x1000000 + rgb[0] * 0x10000 + rgb[1] * 0x100 + rgb[2]).toString(16).substring(1);
+/** a colour component as a whole number from 0 to 255. what is no number counts as 0. */
+function toByte(component: number): number {
+  const rounded = Math.round(component);
+  if (isNaN(rounded) || rounded < 0) {
+    return 0;
   }
+  return rounded > 255 ? 255 : rounded;
+}
 
-  return (0x1000000 + (r as number) * 0x10000 + g * 0x100 + (b as number)).toString(16).substring(1);
+/**
+ * Six hex digits for three components, given one by one or as a list. A component outside of
+ * 0 to 255 is taken for the nearest of the two.
+ */
+export function rgb2hex(r: number | number[], g?: number, b?: number): string {
+  const [red, green, blue] = g === undefined ? (r as [number, number, number]) : [r as number, g, b as number];
+
+  return (0x1000000 + toByte(red) * 0x10000 + toByte(green) * 0x100 + toByte(blue)).toString(16).substring(1);
 }
 
 export function hsv2rgb(h: number, s: number, v: number): string {
@@ -69,6 +78,10 @@ export function hsv2rgb(h: number, s: number, v: number): string {
  */
 export function ct2rgb(ct: number | string): string {
   let mired = Number(ct);
+  if (isNaN(mired)) {
+    // no colour temperature: white
+    return 'ffffff';
+  }
 
   // kelvin -> mired
   if (mired > 1000) {
@@ -89,15 +102,26 @@ export function ct2rgb(ct: number | string): string {
     r = 255;
   }
 
-  // green was calculated here and then always replaced by 255.
-  const g = 255;
-
-  // blue for temperatures below 5600 K was calculated with a function that does not exist, which
-  // ended the conversion with this error.
-  if (temp < 66) {
-    throw new ReferenceError('log is not defined');
+  let g = temp <= 66 ? 99.4708025861 * Math.log(temp) - 161.1195681661 : 288.1221695283 * Math.pow(temp - 60, -0.0755148492);
+  if (g < 0) {
+    g = 0;
   }
-  const b = 255;
+  if (g > 255) {
+    g = 255;
+  }
+
+  let b = 255;
+  if (temp <= 19) {
+    b = 0;
+  } else if (temp < 66) {
+    b = 138.5177312231 * Math.log(temp - 10) - 305.0447927307;
+  }
+  if (b < 0) {
+    b = 0;
+  }
+  if (b > 255) {
+    b = 255;
+  }
 
   return rgb2hex(Math.round(r), Math.round(g), Math.round(b));
 }

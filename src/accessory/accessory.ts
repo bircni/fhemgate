@@ -29,7 +29,12 @@ export interface AccessoryPlatform {
   connection?: unknown;
   /** the functions of the jsFunctions file */
   jsFunctions?: unknown;
+  /** false if mappings must not carry JavaScript */
+  allowInlineFunctions?: boolean;
 }
+
+/** milliseconds fhem has to answer a read of a characteristic, after which HomeKit is told that it failed */
+const QUERY_TIMEOUT = 10000;
 
 /** a service with the name it was created under, which the plugin keeps at the service */
 export type NamedService = Service & { service_name?: string };
@@ -49,6 +54,32 @@ const serviceNameOfGenericDeviceType: Record<string, string | null | undefined> 
   window: 'Window',
   lock: 'LockMechanism',
 };
+
+// the names HAP-NodeJS had for some services and characteristics before its version 2. existing
+// homebridgeMapping attributes use them, so they stay known.
+const renamedServices: Record<string, string | undefined> = {
+  BatteryService: 'Battery',
+  Slat: 'Slats',
+  Label: 'ServiceLabel',
+  Relay: 'CloudRelay',
+  TunneledBTLEAccessoryService: 'Tunnel',
+  CameraEventRecordingManagement: 'CameraRecordingManagement',
+};
+const renamedCharacteristics: Record<string, string | undefined> = {
+  LabelIndex: 'ServiceLabelIndex',
+  LabelNamespace: 'ServiceLabelNamespace',
+  PairingPairings: 'ListPairings',
+  SelectedStreamConfiguration: 'SelectedRTPStreamConfiguration',
+};
+
+/** the class HAP-NodeJS has under the name, or under the name it gave it since */
+function classOfName(classes: Record<string, unknown>, renamed: Record<string, string | undefined>, name: string): { name: string; found: unknown } {
+  const current = Object.hasOwn(renamed, name) ? renamed[name] : undefined;
+  if (classes[name] === undefined && current !== undefined) {
+    return { name: current, found: classes[current] };
+  }
+  return { name, found: classes[name] };
+}
 
 /**
  * One fhem device as a HomeKit accessory. homebridge asks it for its services once and from
@@ -147,6 +178,7 @@ export class FhemAccessory {
         state.update(informId, value);
       },
       reading2homekit: reading2homekit,
+      allowInlineFunctions: platform.allowInlineFunctions,
     });
   }
 
@@ -157,7 +189,10 @@ export class FhemAccessory {
       const mappings = (Array.isArray(entry) ? entry : [entry]) as Mapping[];
 
       for (const mapping of mappings) {
-        const reading = (mapping.device ? mapping.device + '.' : '') + mapping.reading;
+        let reading = (mapping.device ? mapping.device + '.' : '') + mapping.reading;
+        if (mapping.reading === undefined && mapping.default !== undefined) {
+          reading = 'default ' + mapping.default;
+        }
         if (characteristic_type === 'On') {
           this.log('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmdOn + ',' + mapping.cmdOff + ']');
         } else if (characteristic_type === 'Hue' || characteristic_type === 'Saturation') {
@@ -189,19 +224,22 @@ export class FhemAccessory {
         (characteristic as MappedCharacteristic).FHEM_mapping = mapping;
       }
 
-      this.#state.subscriptions.subscribe(this, mapping.informId as string, characteristic, mapping);
+      // a mapping with only a default has no reading to follow
+      if (mapping.informId !== undefined) {
+        this.#state.subscriptions.subscribe(this, mapping.informId, characteristic, mapping);
+      }
     } else {
       this.#state.subscriptions.subscribe(this, mapping as string, characteristic);
     }
   }
 
+  /**
+   * Ends what subscribe started for the mapping, or the id of a reading, and the characteristic.
+   * Without a mapping every subscription of the accessory ends.
+   */
   unsubscribe(mapping?: PreparedMapping | string, characteristic?: Characteristic): void {
     if (mapping === undefined) {
-      // only finds subscriptions of single mappings that were made with this characteristic.
-      for (const characteristic_type in this.mappings) {
-        const each = this.mappings[characteristic_type] as Mapping;
-        this.#state.subscriptions.unsubscribe(this, each.informId as string, characteristic);
-      }
+      this.#state.subscriptions.unsubscribeAll(this);
     } else if (typeof mapping === 'object') {
       mapping.characteristic = characteristic;
 
@@ -216,9 +254,10 @@ export class FhemAccessory {
   }
 
   fromHomebridgeMapping(homebridgeMapping: string | undefined): void {
-    const { Accessory } = this.#state.hap;
-    // HAP-NodeJS 2 has the categories elsewhere, so none is found here.
-    parseHomebridgeMapping(this, homebridgeMapping, (Accessory as unknown as { Categories?: Record<string, number | undefined> }).Categories);
+    // the types declare the categories as a const enum, which can not be handed on as a value.
+    // HAP-NodeJS does export the object.
+    const { Categories } = this.#state.hap as unknown as { Categories?: Record<string, number | string | undefined> };
+    parseHomebridgeMapping(this, homebridgeMapping, Categories);
   }
 
   /** sends the command for the value after the delay, unless another value for the mapping arrives before */
@@ -260,33 +299,47 @@ export class FhemAccessory {
   /**
    * The value of the characteristic of the mapping: from the cache of the mapping, or from fhem
    * for a mapping that is not cached. Answers the callback, and returns the value if it was cached.
+   *
+   * Given the name of a reading of the device instead of a mapping, fhem is asked for it and the
+   * callback gets the text of the reading.
    */
   query(target: PreparedMapping | string, callback?: QueryCallback): HomekitValue | undefined {
-    const mapping = target as PreparedMapping;
+    const mapping = typeof target === 'object' ? target : undefined;
     let device = this.device;
     let reading: string | undefined;
 
-    if (typeof target === 'object') {
-      if (target.device) {
-        device = target.device;
+    if (mapping) {
+      if (mapping.device) {
+        device = mapping.device;
       }
-      if (target.reading) {
-        reading = target.reading;
+      if (mapping.reading) {
+        reading = mapping.reading;
       }
     } else {
-      reading = target;
+      reading = target as string;
     }
 
-    if (reading === undefined && mapping.default === undefined) {
+    if (reading === undefined && mapping?.default === undefined) {
       if (callback !== undefined) {
         callback(1);
       }
       return undefined;
     }
 
-    this.log.info('query: ' + (mapping.name ? mapping.name : mapping.characteristic_type) + ' for ' + mapping.informId);
-    const cached = mapping.cached;
-    if (typeof target === 'object' && cached !== undefined && !('nocache' in target)) {
+    if (reading === undefined) {
+      // only a default: there is no reading to ask fhem for
+      const value = mapping?.cached ?? mapping?.default;
+      if (callback !== undefined) {
+        callback(undefined, value);
+      }
+      return value;
+    }
+
+    const informId = mapping ? (mapping.informId as string) : device + '-' + reading;
+
+    this.log.info('query: ' + (mapping ? (mapping.name ? mapping.name : mapping.characteristic_type) : reading) + ' for ' + informId);
+    const cached = mapping?.cached;
+    if (mapping && cached !== undefined && !('nocache' in mapping)) {
       let defined: string | undefined = undefined;
       if (mapping.homekit2name !== undefined) {
         defined = mapping.homekit2name[cached as unknown as string];
@@ -307,14 +360,26 @@ export class FhemAccessory {
 
     const cmd = '{ReadingsVal("' + device + '","' + reading + '","")}';
 
+    // HomeKit is not left without an answer when fhem gives none
+    let timedOut = false;
+    const timer =
+      callback &&
+      setTimeout(() => {
+        timedOut = true;
+        this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
+        callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
+      }, QUERY_TIMEOUT);
+
     this.execute(cmd, (result) => {
+      clearTimeout(timer);
       const value = result.replace(/[\r\n]/g, '');
       this.log.info('  value: ' + value);
 
-      this.#state.update(mapping.informId as string, value, true);
+      this.#state.update(informId, value, true);
 
-      if (callback !== undefined) {
-        const converted = reading2homekit(mapping, value);
+      if (callback !== undefined && !timedOut) {
+        // without a mapping there is nothing to convert the reading with
+        const converted = mapping ? reading2homekit(mapping, value) : value;
         if (converted === undefined) {
           callback(1);
         } else {
@@ -361,9 +426,8 @@ export class FhemAccessory {
       return true;
     }
 
-    if (typeof scopes === 'object') {
-      // a list has no grep, so this fails.
-      if ((scopes as { grep(scope: string): number }).grep(scope) !== -1) {
+    if (Array.isArray(scopes)) {
+      if (scopes.includes(scope)) {
         return true;
       }
     } else {
@@ -378,9 +442,10 @@ export class FhemAccessory {
   /** a new service for a genericDeviceType value or the name of a HomeKit service. undefined if there is no such service. */
   serviceOfName(service_name: string | undefined, subtype?: string): NamedService | undefined {
     const translated = serviceNameOfGenericDeviceType[service_name as string];
-    const serviceName = translated !== undefined ? translated : service_name;
+    const given = translated !== undefined ? translated : service_name;
 
-    const serviceClass = (this.#state.hap.Service as unknown as Record<string, unknown>)[serviceName as string];
+    const services = this.#state.hap.Service as unknown as Record<string, unknown>;
+    const { name: serviceName, found: serviceClass } = classOfName(services, renamedServices, given as string);
     if (typeof serviceClass === 'function') {
       let name = this.siriName;
       if (subtype) {
@@ -389,7 +454,7 @@ export class FhemAccessory {
 
       this.log('  ' + serviceName + ' service for ' + this.name + (subtype ? ' (' + subtype + ')' : ''));
       const service = new (serviceClass as new (name?: string, subtype?: string) => NamedService)(name, subtype ? subtype : '');
-      service.service_name = serviceName as string;
+      service.service_name = serviceName;
       return service;
     }
 
@@ -405,7 +470,8 @@ export class FhemAccessory {
     const parts = name.split('#');
     const characteristicName = parts[1] ? parts[1] : name;
 
-    const characteristic = (this.#state.hap.Characteristic as unknown as Record<string, unknown>)[characteristicName];
+    const characteristics = this.#state.hap.Characteristic as unknown as Record<string, unknown>;
+    const characteristic = classOfName(characteristics, renamedCharacteristics, characteristicName).found;
     if (typeof characteristic === 'function') {
       return characteristic as CharacteristicClass;
     }

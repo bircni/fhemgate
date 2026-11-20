@@ -61,6 +61,25 @@ export function reading2homekit(mapping: PreparedMapping, reading: unknown): Hom
   return value as HomekitValue;
 }
 
+// the values each mapping was already warned about, so that a reading that keeps reporting one
+// does not fill the log
+const unhandledValues = new WeakMap<PreparedMapping, Set<string>>();
+
+/** warns that the values of the mapping do not cover the value, the first time it is seen */
+function warnOnce(mapping: PreparedMapping, value: unknown): void {
+  let warned = unhandledValues.get(mapping);
+  if (!warned) {
+    warned = new Set();
+    unhandledValues.set(mapping, warned);
+  }
+
+  const text = String(value);
+  if (!warned.has(text)) {
+    warned.add(text);
+    mapping.log.warn(mapping.informId + ' value ' + text + ' not handled in values');
+  }
+}
+
 // the value changes its type on the way: text from fhem, then a number, a boolean or the name of a
 // HomeKit value, and parameters that were read from an attribute are text where numbers are
 // expected. the arithmetic below is written as it was in homebridge-fhem and relies on JavaScript
@@ -218,8 +237,7 @@ function convert(mapping: PreparedMapping, orig: unknown): unknown {
       }
 
       if (mapped === undefined) {
-        // logged for every event that carries such a value.
-        mapping.log.error(mapping.informId + ' value ' + value + ' not handled in values');
+        warnOnce(mapping, value);
         return undefined;
       }
 

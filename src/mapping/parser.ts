@@ -17,19 +17,25 @@ export interface MappingTarget {
  *
  *     [<service>[(<subtype>)]#]<characteristic>=<parameter>,<parameter>,...
  *
- * where a parameter is `<name>=<value>`, the name of another characteristic whose mapping is
- * copied, `clear`, or `[<cmd>:][<device>:]<reading>`.
+ * where a parameter is `<name>=<value>`, `invert`, the name of another characteristic whose
+ * mapping is copied, `clear`, or `[<cmd>:][<device>:]<reading>`.
  *
- * @param categories the accessory categories of HomeKit by name, for the AccessoryCategory entry
+ * @param categories the accessory categories of HomeKit by name, for the AccessoryCategory
+ *   entry. The enumeration of HAP-NodeJS also holds the names by number, which are no categories.
  */
-export function parseHomebridgeMapping(target: MappingTarget, homebridgeMapping: string | undefined, categories?: Record<string, number | undefined>): void {
+export function parseHomebridgeMapping(
+  target: MappingTarget,
+  homebridgeMapping: string | undefined,
+  categories?: Record<string, number | string | undefined>,
+): void {
   if (!homebridgeMapping) {
     return;
   }
 
   target.log.info('homebridgeMapping: ' + homebridgeMapping);
 
-  if (/^{.*}$/.test(homebridgeMapping)) {
+  // an object, on one line or on many
+  if (/^\s*\{[\s\S]*\}\s*$/.test(homebridgeMapping)) {
     try {
       target.mappings = JSON.parse(homebridgeMapping) as Mappings;
     } catch (err) {
@@ -94,10 +100,11 @@ export function parseHomebridgeMapping(target: MappingTarget, homebridgeMapping:
         continue;
       } else if (characteristic === 'AccessoryCategory') {
         delete target.mappings[characteristic];
-        if (categories?.[param] === undefined) {
+        const category = categories?.[param];
+        if (typeof category !== 'number') {
           target.log.error('unknown category: ' + param);
         } else {
-          target.category = categories[param];
+          target.category = category;
           target.log.info('using category: ' + String(target.category) + ' (' + param + ')');
         }
         continue;
@@ -121,8 +128,12 @@ export function parseHomebridgeMapping(target: MappingTarget, homebridgeMapping:
           mapping[name] = value.replace(/\+/g, ' ');
         }
       } else if (p.length === 1) {
-        // a bare `invert` was meant to be a parameter of its own but is taken for a reading
-        // like any other word.
+        if (param === 'invert') {
+          // the one parameter that needs no value
+          mapping.invert = true;
+          continue;
+        }
+
         let other = target.mappings[param];
         if (other === undefined) {
           other = target.mappings[String(service) + '#' + param];

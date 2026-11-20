@@ -2,6 +2,7 @@
 // characteristics to fhem
 import util from 'node:util';
 import type { Characteristic, CharacteristicSetCallback, CharacteristicValue, Service } from '@homebridge/hap-nodejs';
+import { reading2homekit } from '../mapping/toHomekit.ts';
 import type { CharacteristicClass, Mapping, PreparedMapping } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import { ct2rgb, rgb2hsv, xyY2rgb, type Hsv } from '../util/color.ts';
@@ -27,12 +28,26 @@ function meaning(mapping: Mapping, value: unknown): string {
   return '; means ' + (mapping.homekit2name[value as string] ?? '???');
 }
 
+/** the characteristics of the accessory information a mapping can fill */
+const informationCharacteristics = new Set(['Manufacturer', 'Model', 'SerialNumber', 'FirmwareRevision']);
+
+/**
+ * The text a mapping for the accessory information stands for: what the mapping itself says with
+ * `value`, `serial` or `default`, or else the reading it names. Nothing without any of them.
+ */
+function informationText(entry: Mapping | Mapping[] | undefined): string | undefined {
+  const mapping = Array.isArray(entry) ? entry[0] : entry;
+  const text = mapping?.value ?? mapping?.serial ?? mapping?.default ?? mapping?.cached;
+  return text === undefined || text === '' ? undefined : String(text);
+}
+
 /**
  * The services of the accessory: the accessory information, one service for the device, more
  * for mappings that name another service or a subtype, and the history if the device has one.
  *
- * Nothing keeps two services of the same type from getting the same subtype, which homebridge
- * refuses for the whole platform.
+ * HomeKit tells services of the same type apart by their subtype. A mapping that would need a
+ * second service of a type without a subtype of its own is skipped: homebridge refuses such an
+ * accessory, and with it every other accessory of the platform.
  */
 export function createServices(accessory: FhemAccessory, state: PluginState): Service[] {
   const { Service, Characteristic, Perms } = state.hap;
@@ -50,18 +65,11 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   const informationService = new Service.AccessoryInformation();
   services.push(informationService);
 
-  // a mapping for one of these three is handed to HomeKit as it is, which is no text.
   log('    manufacturer, model and serial number characteristics for ' + accessory.name);
   informationService
-    .setCharacteristic(Characteristic.Manufacturer, (accessory.mappings.Manufacturer ? accessory.mappings.Manufacturer : 'FHEM:' + accessory.type) as string)
-    .setCharacteristic(
-      Characteristic.Model,
-      (accessory.mappings.Model ? accessory.mappings.Model : 'FHEM:' + (accessory.model ? accessory.model : '<unknown>')) as string,
-    )
-    .setCharacteristic(
-      Characteristic.SerialNumber,
-      (accessory.mappings.SerialNumber ? accessory.mappings.SerialNumber : accessory.serial ? accessory.serial : '<unknown>') as string,
-    );
+    .setCharacteristic(Characteristic.Manufacturer, informationText(accessory.mappings.Manufacturer) ?? 'FHEM:' + accessory.type)
+    .setCharacteristic(Characteristic.Model, informationText(accessory.mappings.Model) ?? 'FHEM:' + (accessory.model ? accessory.model : '<unknown>'))
+    .setCharacteristic(Characteristic.SerialNumber, informationText(accessory.mappings.SerialNumber) ?? (accessory.serial ? accessory.serial : '<unknown>'));
 
   const firmwareRevision = single('FirmwareRevision');
   if (firmwareRevision) {
@@ -99,13 +107,13 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
       });
   }
 
-  // HAP-NodeJS 2 has no Reachable characteristic any more.
-  if ((Characteristic as unknown as { Reachable?: unknown }).Reachable) {
-    const reachable = single('Reachable');
-    if (reachable) {
-      log.info('  ' + accessory.device + ' has reachability [' + reachable.reading + ']');
-      accessory.subscribe(reachable);
-    }
+  // HomeKit has no characteristic for whether a device can be reached. the mapping is followed
+  // all the same: while it says no, reads of the other characteristics are answered with an error.
+  const reachable = single('Reachable');
+  if (reachable) {
+    log.info('  ' + accessory.device + ' has reachability [' + reachable.reading + ']');
+    accessory.subscribe(reachable);
+    reading2homekit(reachable, cached[reachable.informId as string]);
   }
 
   // a light that is in xy or colour temperature mode reports no hue and saturation. they are
@@ -140,11 +148,10 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   let controlService = accessory.createDeviceService(accessory.service_name);
   services.push(controlService);
 
-  // the service, the mapping and the characteristic type of the last mapping that was looked at
-  // stay for the mappings that follow and for the history characteristics after the loop:
-  // a mapping without a service of its own lands on the service of the mapping before it.
+  // the service and the characteristic type of the last mapping that was looked at stay for the
+  // mappings that follow: a mapping without a service of its own lands on the service of the
+  // mapping before it.
   let service_name = controlService.service_name as string;
-  let mapping: PreparedMapping | undefined = undefined;
 
   const seen: Record<string, boolean | undefined> = {};
   const services_hash: Record<string, NamedService | undefined> = {};
@@ -157,13 +164,18 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
       continue;
     }
 
+    // these are shown at the accessory information, which has them already. a mapping that
+    // names a service for one of them, as `<service>#Model`, is none of these.
+    if (informationCharacteristics.has(characteristic_type)) {
+      continue;
+    }
+
     if (service_name === 'ContactSensor' && characteristic_type === 'CurrentDoorState' && accessory.mappings.history && accessory.mappings.ContactSensorState) {
       log.error(accessory.name + ': skipping CurrentDoorState characteristic as ContactSensor is also given and history is enabled');
       continue;
     }
 
     for (const each of mappings) {
-      mapping = each;
       if (each._isInformation) {
         continue;
       }
@@ -209,7 +221,22 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
       if (known) {
         controlService = known;
       } else {
-        controlService = accessory.createDeviceService(service_name, each.subtype);
+        const created = accessory.createDeviceService(service_name, each.subtype);
+        if (services.some((existing) => existing.UUID === created.UUID && (!created.subtype || existing.subtype === created.subtype))) {
+          log.error(
+            accessory.name +
+              ': ' +
+              (each.characteristic_type ?? characteristic_type) +
+              ' needs another ' +
+              service_name +
+              ' service ' +
+              (created.subtype ? 'with the subtype ' + created.subtype + ', which another one has' : 'without a subtype') +
+              '. give it a subtype of its own. the mapping is skipped.',
+          );
+          continue;
+        }
+
+        controlService = created;
         services.push(controlService);
         services_hash[service_name + '#' + each.subtype] = controlService;
       }
@@ -332,8 +359,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
           callback();
         })
         .on('get', (callback) => {
-          const reachable = single('Reachable');
-          if (reachable?.cached === false) {
+          if (single('Reachable')?.cached === false) {
             (callback as QueryCallback)('unreachable');
           } else {
             accessory.query(each, callback as QueryCallback);
@@ -343,7 +369,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   }
 
   if (accessory.historyService != null) {
-    addEveCharacteristics(accessory, state, controlService, mapping as PreparedMapping, service_name, seen);
+    addEveCharacteristics(accessory, state, services, controlService, seen);
   }
 
   return services;

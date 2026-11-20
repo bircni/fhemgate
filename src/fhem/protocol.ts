@@ -11,18 +11,24 @@ export function longpollUrl(baseUrl: string, lastEventTime: number | undefined, 
 }
 
 /**
- * The url that runs a fhem command.
+ * The url that runs a fhem command. The command is encoded completely, so that a `;`, `&` or
+ * `#` in a value stays part of the command.
  *
- * The command is encoded with encodeURI, which leaves `;`, `&` and `#` as they are. A command
- * that contains them is cut short or carries more parameters.
+ * A `+` is the exception and is sent as it is. FHEMWEB reads it as a blank, and mappings rely on
+ * that: the activities of a harmony hub, and commands in a homebridgeMapping written as JSON.
  */
 export function commandUrl(baseUrl: string, cmd: string, csrfToken: string | undefined): string {
-  let query = cmd;
+  let query = encodeURIComponent(cmd).replaceAll('%2B', '+');
   if (csrfToken) {
-    query += '&fwcsrf=' + csrfToken;
+    query += '&fwcsrf=' + encodeURIComponent(csrfToken);
   }
   query += '&XHR=1';
-  return encodeURI(baseUrl + '?cmd=' + query);
+  return baseUrl + '?cmd=' + query;
+}
+
+/** the url as it may be logged: the csrf token lets whoever has it run commands in fhem, so it is left out */
+export function withoutToken(url: string): string {
+  return url.replace(/([?&]fwcsrf=)[^&#]*/, '$1***');
 }
 
 /** the url that lists the devices of a devspec with everything fhem knows about them. all devices without a filter. */

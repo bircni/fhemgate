@@ -3,7 +3,7 @@
 import type { Logging } from 'homebridge';
 import type { Mapping, Mappings } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
-import { doorState, garage, blind, hmSecWin, positionState } from './rules/blinds.ts';
+import { doorState, garage, blind, hmSecWin, positionState, window } from './rules/blinds.ts';
 import { colorMode, hue, milight, rgb, saturation, wifilight } from './rules/color.ts';
 import { fs20di, fs20Dimmer, homematicDimmer, hueBrightness, zwaveDimmer } from './rules/dimmers.ts';
 import { hmSecKey, lock } from './rules/locks.ts';
@@ -41,7 +41,7 @@ export interface DetectionTarget {
 
 export interface DetectionContext {
   s: Jsonlist2Device;
-  /** the genericDeviceType attribute of the device */
+  /** the genericDeviceType attribute of the device, or its genericDisplayType */
   genericType: string | undefined;
   target: DetectionTarget;
   state: PluginState;
@@ -89,7 +89,22 @@ const rules: Rule[] = [
   firmware,
   reachable,
 
-  firstOf(garage, blind, hmSecWin, hmSecKey, lock, thermostatByType, fhttk, maxShutterContact, threeStateSensor, presence, roommateOrGuest, residents, fs20di),
+  firstOf(
+    garage,
+    blind,
+    hmSecWin,
+    window,
+    hmSecKey,
+    lock,
+    thermostatByType,
+    fhttk,
+    maxShutterContact,
+    threeStateSensor,
+    presence,
+    roommateOrGuest,
+    residents,
+    fs20di,
+  ),
 
   firstOf(desiredTemp, maxDesiredTemperature, pid20Desired),
 
@@ -108,9 +123,10 @@ const rules: Rule[] = [
  * beyond a note.
  */
 export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, state: PluginState): boolean {
-  // the genericDisplayType attribute was meant to stand in for a missing genericDeviceType,
-  // but the check for that never holds.
-  const genericType = s.Attributes.genericDeviceType;
+  let genericType = s.Attributes.genericDeviceType;
+  if (genericType === undefined) {
+    genericType = s.Attributes.genericDisplayType;
+  }
 
   if (genericType === 'ignore') {
     target.log.info('ignoring ' + s.Internals.NAME);
