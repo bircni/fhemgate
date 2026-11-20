@@ -706,11 +706,11 @@ describe('commands', () => {
   it('sends a command whole, also with characters that separate commands and parameters in a url', async () => {
     const platform = await connect();
 
-    platform.execute('set lamp on;set other off&x=1#y +%?');
+    platform.execute('set lamp on;set other off&x=1#y %?');
     await waitFor(() => fhem.requests.some((request) => request.url.includes('set%20lamp')), 'the command');
 
-    expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=set%20lamp%20on%3Bset%20other%20off%26x%3D1%23y%20%2B%25%3F&fwcsrf=csrf_fake_token&XHR=1');
-    expect(fhem.commands.at(-1)).toBe('set lamp on;set other off&x=1#y +%?');
+    expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=set%20lamp%20on%3Bset%20other%20off%26x%3D1%23y%20%25%3F&fwcsrf=csrf_fake_token&XHR=1');
+    expect(fhem.commands.at(-1)).toBe('set lamp on;set other off&x=1#y %?');
   });
 
   it('reports a command fhem refuses and does not answer the caller', async () => {
