@@ -4,6 +4,7 @@ import type { AccessoryPlugin, API, Logging, StaticPlatformPlugin } from 'homebr
 import { FhemAccessory } from './accessory/accessory.ts';
 import { baseUrl, isSwitchedOff, loadJsFunctions, optionalSwitch, type FhemPlatformConfig } from './config.ts';
 import { DEFAULT_DEBUG_PORT, FALLBACK_DEBUG_PORT, debugPortOf, handleDebugRequest, startDebugServer } from './debug/server.ts';
+import { IdentityStore } from './devices/identityStore.ts';
 import type { Jsonlist2Device } from './devices/types.ts';
 import { describeError, execute, fetchDevices, type FhemConnection } from './fhem/client.ts';
 import { startLongpoll } from './fhem/eventStream.ts';
@@ -15,6 +16,12 @@ const require = createRequire(import.meta.url);
 /** the version of this plugin */
 export const version = (require('../package.json') as { version: string }).version;
 
+/**
+ * How many accessories one HomeKit bridge can carry: 150 with the bridge itself. A bridge with
+ * more can not be added to HomeKit, and one that grows beyond it stops responding as a whole.
+ */
+export const MAX_BRIDGED_ACCESSORIES = 149;
+
 /** what all FHEM platforms of a homebridge share */
 export interface Plugin {
   state: PluginState;
@@ -22,6 +29,8 @@ export interface Plugin {
   storagePath(): string;
   /** the debug servers that were started, by the port the configuration asked for */
   debugServers: Map<number, Server>;
+  /** what each device was first published as */
+  identities?: IdentityStore;
 }
 
 /** sorts the list by the key, in place */
@@ -59,6 +68,11 @@ export class FhemPlatform implements StaticPlatformPlugin {
   declare siri_device?: string;
 
   readonly #plugin: Plugin;
+
+  /** what each device was first published as, kept in the storage directory of homebridge */
+  get identities(): IdentityStore {
+    return (this.#plugin.identities ??= new IdentityStore(this.#plugin.storagePath()));
+  }
 
   constructor(log: Logging, config: FhemPlatformConfig, api: API, plugin: Plugin) {
     this.#plugin = plugin;
@@ -258,10 +272,25 @@ export class FhemPlatform implements StaticPlatformPlugin {
       if (!err && response?.statusCode === 200 && json) {
         this.log.info('got: ' + json.totalResultsReturned + ' results');
         if (json.totalResultsReturned) {
-          for (const s of sortByKey<Jsonlist2Device>(json.Results, 'Name')) {
-            const accessory = new FhemAccessory(this, s, state, (log, target, cmd, answer) => {
-              execute(state, log, target as FhemConnection, cmd, answer);
-            });
+          // an entry that is no device, which no fhem should send, sorts first and is reported below
+          const results = json.Results.map((s) => s as Jsonlist2Device | null).sort((a, b) => {
+            const x = a?.Name ?? '';
+            const y = b?.Name ?? '';
+            return x < y ? -1 : x > y ? 1 : 0;
+          });
+          for (const s of results) {
+            // a device the plugin fails on is left out and the others are published: an error that
+            // gets out of here ends homebridge, and with it every accessory of every plugin
+            let accessory: FhemAccessory;
+            try {
+              accessory = new FhemAccessory(this, s as Jsonlist2Device, state, (log, target, cmd, answer) => {
+                execute(state, log, target as FhemConnection, cmd, answer);
+              });
+            } catch (error) {
+              this.log.error('no accessory created for ' + (s?.Name ?? 'a device without a name') + ': ' + String(error));
+              continue;
+            }
+
             if (accessory.service_name) {
               accessory.fhem = this;
 
@@ -270,11 +299,33 @@ export class FhemPlatform implements StaticPlatformPlugin {
                 continue;
               }
 
+              // the services are built here and not when homebridge asks for them, where an error could not be caught
+              try {
+                accessory.prepareServices();
+              } catch (error) {
+                this.log.error('no accessory created for ' + s?.Name + ': ' + String(error));
+                accessory.unsubscribe();
+                continue;
+              }
+
               foundAccessories.push(accessory);
             } else {
-              this.log.info('no accessory created for ' + s.Internals.NAME + ' (' + s.Internals.TYPE + ')');
+              this.log.info('no accessory created for ' + s?.Internals.NAME + ' (' + s?.Internals.TYPE + ')');
             }
           }
+        }
+
+        this.identities.save(this.log);
+
+        if (foundAccessories.length > MAX_BRIDGED_ACCESSORIES) {
+          this.log.warn(
+            (this.filter ? 'the filter ' + this.filter + ' selects ' : 'fhem lists ') +
+              foundAccessories.length +
+              ' devices that are published. a HomeKit bridge takes ' +
+              MAX_BRIDGED_ACCESSORIES +
+              ' accessories at most, and HomeKit refuses a bridge with more. ' +
+              'narrow the filter, or split the devices over several FHEM platforms with different filters and run each as a child bridge.',
+          );
         }
 
         done();

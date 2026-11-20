@@ -111,7 +111,7 @@ export function recordHistory(
     }
 
     if (entry !== undefined) {
-      mapping.log.info('      adding history entry ' + util.inspect(entry));
+      mapping.log.debug('      adding history entry ' + util.inspect(entry));
       historyService.addEntry(entry);
     }
   }
@@ -158,7 +158,7 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
     return;
   }
 
-  log('  FakeGatoHistory service with type ' + type + ' for ' + service_name);
+  log.debug('  FakeGatoHistory service with type ' + type + ' for ' + service_name);
   const historyService = new state.historyServiceClass(type, accessory, { size: mapping.size ? mapping.size : 1024, storage: 'fs' });
   accessory.historyService = historyService;
   services.push(historyService);
@@ -181,12 +181,12 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
         const extra_persist = historyService.getExtraPersistedData() as ExtraPersistedData | undefined;
         if (extra_persist !== undefined) {
           historyService.extra_persist = extra_persist;
-          log(accessory.name + ': FakeGatoHistory extra persisted data loaded');
+          log.debug(accessory.name + ': FakeGatoHistory extra persisted data loaded');
           if (historyService.extra_persist.TimesOpened !== undefined) {
             state.update(mapping.device + '-EVE-TimesOpened', historyService.extra_persist.TimesOpened);
           }
         } else {
-          log(accessory.name + ': FakeGatoHistory extra persisted data is empty');
+          log.debug(accessory.name + ': FakeGatoHistory extra persisted data is empty');
         }
       } else {
         setTimeout(checkIfLoaded, 10);
@@ -197,20 +197,18 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
   }
 
   if (service_name === 'ContactSensor') {
-    log('    FakeGatoHistory reset');
+    log.debug('    FakeGatoHistory reset');
     const characteristic = new (Characteristic as unknown as CustomCharacteristicClass)('Reset', EveUUIDs.Reset);
     historyService.addCharacteristic(characteristic);
     characteristic.setProps({ format: Formats.UINT32 });
     characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.PAIRED_WRITE] });
     log.debug('      props: ' + util.inspect(characteristic.props));
     characteristic
-      .on('set', (value, callback, context) => {
-        if (context !== 'fromFHEM') {
-          // eslint-disable-next-line @typescript-eslint/no-base-to-string -- logged as it comes
-          log('set reset: ' + String(value));
-          historyService.extra_persist.reset = value as number;
-          state.update(mapping.device + '-EVE-TimesOpened', 0);
-        }
+      .on('set', (value, callback) => {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string -- logged as it comes
+        log('set reset: ' + String(value));
+        historyService.extra_persist.reset = value as number;
+        state.update(mapping.device + '-EVE-TimesOpened', 0);
         callback();
       })
       .on('get', (callback) => {
@@ -218,7 +216,7 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
         if (value === undefined) {
           value = 0;
         }
-        log('get reset: ' + value);
+        log.debug('get reset: ' + value);
         callback(null, value);
       });
   }
@@ -258,13 +256,13 @@ export function addEveCharacteristics(
     (name: string) =>
     (callback: (error: null, value: CharacteristicValue) => void): void => {
       const value = 0;
-      log('query Custom ' + name + ' for ' + from + ': ' + value);
+      log.debug('query Custom ' + name + ' for ' + from + ': ' + value);
       callback(null, value);
     };
 
   let characteristic: Characteristic;
   if (accessory.mappings.ContactSensorState) {
-    log('    Custom TimesOpened characteristic ' + from);
+    log.debug('    Custom TimesOpened characteristic ' + from);
     characteristic = new Custom('TimesOpened', EveUUIDs.TimesOpened);
     const timesOpened = { name: 'Custom TimesOpened', characteristic: characteristic, informId: mapping.device + '-EVE-TimesOpened', log: mapping.log };
     accessory.mappings[EveUUIDs.TimesOpened] = timesOpened;
@@ -281,14 +279,14 @@ export function addEveCharacteristics(
       }
 
       const value = historyService.extra_persist.TimesOpened;
-      log('query Custom TimesOpened for ' + from + ': ' + value);
+      log.debug('query Custom TimesOpened for ' + from + ': ' + value);
       callback(null, value);
     });
   }
 
   if ((accessory.mappings.ContactSensorState || accessory.mappings.MotionDetected) && !seen[service_name + '#' + EveUUIDs.LastActivation]) {
     seen[service_name + '#' + EveUUIDs.LastActivation] = true;
-    log('    Custom LastActivation characteristic ' + from);
+    log.debug('    Custom LastActivation characteristic ' + from);
     characteristic = new Custom('LastActivation', EveUUIDs.LastActivation);
     accessory.mappings[EveUUIDs.LastActivation] = { characteristic: characteristic };
     controlService.addCharacteristic(characteristic);
@@ -311,7 +309,7 @@ export function addEveCharacteristics(
       // an empty history is started with the current state
       if (historyService.getInitialTime() === undefined) {
         const entry = { time: mapping.last_update, status: mapping.cached };
-        mapping.log.info('      adding history entry ' + util.inspect(entry));
+        mapping.log.debug('      adding history entry ' + util.inspect(entry));
         historyService.addEntry(entry);
       }
 
@@ -320,20 +318,20 @@ export function addEveCharacteristics(
       const initialTime = historyService.getInitialTime();
       const time = initialTime === undefined ? 0 : mapping.last_update - initialTime;
 
-      log('query Custom LastActivation for ' + from + ': ' + time);
+      log.debug('query Custom LastActivation for ' + from + ': ' + time);
       callback(null, time);
     });
   }
 
   if (accessory.mappings.ContactSensorState) {
-    log('    Custom OpenDuration characteristic ' + from);
+    log.debug('    Custom OpenDuration characteristic ' + from);
     characteristic = new Custom('OpenDuration', EveUUIDs.OpenDuration);
     controlService.addCharacteristic(characteristic);
     characteristic.setProps({ format: Formats.UINT32 });
     characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.PAIRED_WRITE, Perms.NOTIFY] });
     characteristic.on('get', answerZero('OpenDuration'));
 
-    log('    Custom ClosedDuration characteristic ' + from);
+    log.debug('    Custom ClosedDuration characteristic ' + from);
     characteristic = new Custom('ClosedDuration', EveUUIDs.ClosedDuration);
     controlService.addCharacteristic(characteristic);
     characteristic.setProps({ format: Formats.UINT32 });

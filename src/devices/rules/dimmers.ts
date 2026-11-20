@@ -11,7 +11,7 @@ export const zwaveDimmer: Rule = ({ s, target }) => {
   if (!target.service_name) {
     target.service_name = 'light';
   }
-  target.mappings.On = { reading: 'state', valueOff: '/^(dim )?0$/', cmdOn: 'on', cmdOff: 'off' };
+  target.mappings.On = { reading: 'state', valueOff: '/^(off|(dim )?0)$/', cmdOn: 'on', cmdOff: 'off' };
   const brightness: Mapping = { reading: 'state', cmd: 'dim', delay: true };
   target.mappings.Brightness = brightness;
 

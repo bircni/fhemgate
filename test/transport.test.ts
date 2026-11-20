@@ -10,7 +10,7 @@ import { startFakeFhem, waitFor, type FakeFhem, type FakeFhemOptions } from './s
 import { characteristicOf, serviceOf } from './support/homekit.ts';
 import { createWorld, hap, type World, type WorldOptions } from './support/subject.ts';
 import { selfSignedCertificate } from './support/tls.ts';
-import type { Accessory, Platform, PlatformConfig } from './support/types.ts';
+import type { Accessory, FhemDevice, Platform, PlatformConfig } from './support/types.ts';
 
 let fhem: FakeFhem;
 let world: World;
@@ -75,24 +75,17 @@ describe('connecting', () => {
     ]);
   });
 
-  it('keeps the csrf token out of the log', async () => {
+  it('keeps the csrf token out of the log, also out of what is logged for debugging', async () => {
     const platform = await connect({ csrfToken: 'csrf_42', answer: (cmd) => (cmd === 'boom' ? { status: 500, body: 'no' } : undefined) });
-    const logged = vi.mocked(console.log).mock.calls.length;
 
     platform.execute('boom');
     await waitFor(() => world.log.lines.includes('log   500: Internal Server Error'), 'the refusal');
     await accessoriesOf(platform);
 
+    const logged = [...world.log.lines, ...world.log.debugLines];
     expect(fhem.requests.every((request) => request.url.includes('inform=') || request.url.includes('fwcsrf=csrf_42'))).toBe(true);
-    expect(world.log.lines.filter((line) => line.includes('fwcsrf=')).length).toBeGreaterThan(4);
-    expect(world.log.lines.filter((line) => line.includes('csrf_42'))).toEqual([]);
-    expect(logged).toBeGreaterThan(0);
-    expect(
-      vi
-        .mocked(console.log)
-        .mock.calls.flat()
-        .filter((line) => String(line).includes('csrf_42')),
-    ).toEqual([]);
+    expect(logged.filter((line) => line.includes('fwcsrf=')).length).toBeGreaterThan(4);
+    expect(logged.filter((line) => line.includes('csrf_42'))).toEqual([]);
   });
 
   it('works with a FHEMWEB that has no csrf token', async () => {
@@ -109,11 +102,11 @@ describe('connecting', () => {
     await connect();
 
     expect(fhem.commands).toEqual(['{AttrVal("global","userattr","")}', 'jsonlist2 TYPE=siri']);
-    expect(world.log.lines.map(withoutPort)).toEqual([
-      'log Checking devices and attributes...',
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=%7BAttrVal(%22global%22%2C%22userattr%22%2C%22%22)%7D&fwcsrf=***&XHR=1',
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=jsonlist2%20TYPE%3Dsiri&fwcsrf=***&XHR=1',
-      'warn no siri device found. please define it.',
+    expect(world.log.lines.map(withoutPort)).toEqual(['log Checking devices and attributes...', 'warn no siri device found. please define it.']);
+    expect(world.log.debugLines.map(withoutPort)).toEqual([
+      'starting longpoll: http://127.0.0.1:PORT/fhem?XHR=1&inform=type=status;addglobal=1;filter=.*;since=null;fmt=JSON&timestamp=NOW',
+      '  executing: http://127.0.0.1:PORT/fhem?cmd=%7BAttrVal(%22global%22%2C%22userattr%22%2C%22%22)%7D&fwcsrf=***&XHR=1',
+      '  executing: http://127.0.0.1:PORT/fhem?cmd=jsonlist2%20TYPE%3Dsiri&fwcsrf=***&XHR=1',
     ]);
     expect(exit).not.toHaveBeenCalled();
   });
@@ -297,19 +290,104 @@ describe('devices', () => {
     expect(accessories[0]?.fhem).toBe(platform);
     expect(fhem.commands.at(-1)).toBe('jsonlist2 room=Wohnzimmer,Küche&x');
     expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=jsonlist2%20room%3DWohnzimmer%2CK%C3%BCche%26x&fwcsrf=csrf_fake_token&XHR=1');
-    expect(world.log.lines.filter((line) => !line.includes('caching')).map(withoutPort)).toEqual([
+    // one line for each device. what it is made of is logged for debugging.
+    expect(world.log.lines.map(withoutPort)).toEqual([
       'info Fetching FHEM devices...',
       'info fetching: http://127.0.0.1:PORT/fhem?cmd=jsonlist2%20room%3DWohnzimmer%2CK%C3%BCche%26x&fwcsrf=***&XHR=1',
       'info got: 3 results',
       'log lamp_a is switch',
-      'log lamp_a has',
-      'log   On [state;on,off]',
       'log lamp_b is switch',
-      'log lamp_b has',
-      'log   On [state;on,off]',
       'error timer: no service type detected',
       'info no accessory created for timer (at)',
     ]);
+    expect(world.log.debugLines).toEqual(
+      expect.arrayContaining([
+        'lamp_a has',
+        '  On [state;on,off]',
+        "    caching: On: false (as boolean; from 'off')",
+        'creating services for lamp-a',
+        '  Switch service for lamp-a',
+        '    On characteristic for lamp_a:state',
+      ]),
+    );
+  });
+
+  it('leaves out a device it can not make an accessory of, says which, and publishes the others', async () => {
+    const platform = await connect({
+      devices: [
+        { Name: 'lamp_a', ...device({ Internals: { NAME: 'lamp_a' }, Readings: { state: 'on' }, PossibleSets: 'on off' }) },
+        // what no fhem should report, and what must not stop the platform if one does
+        { Name: 'lamp_b', Readings: {}, Attributes: {} } as unknown as FhemDevice,
+        null as unknown as FhemDevice,
+        { Name: 'lamp_c', ...device({ Internals: { NAME: 'lamp_c' }, Readings: { state: 'on' }, PossibleSets: 'on off' }) },
+      ],
+    });
+    world.log.clear();
+
+    const accessories = await accessoriesOf(platform);
+
+    expect(accessories.map((accessory) => accessory.name)).toEqual(['lamp-a', 'lamp-c']);
+    expect(world.log.errors()).toEqual([
+      "error no accessory created for a device without a name: TypeError: Cannot read properties of null (reading 'Internals')",
+      "error no accessory created for lamp_b: TypeError: Cannot read properties of undefined (reading 'NAME')",
+    ]);
+  });
+
+  it('leaves out a device whose services can not be built, says which, and publishes the others', async () => {
+    const dimmer = (name: string, homebridgeMapping?: string) => ({
+      Name: name,
+      ...device({
+        Internals: { NAME: name },
+        Readings: { state: 'on', pct: '40' },
+        PossibleSets: 'on off pct:slider,0,1,100',
+        Attributes: homebridgeMapping ? { homebridgeMapping } : {},
+      }),
+    });
+    const platform = await connect({
+      // HAP-NodeJS refuses a range that ends before it starts
+      devices: [dimmer('dimmer_a'), dimmer('dimmer_b', 'Brightness=pct,cmd=pct,minValue=60,maxValue=40'), dimmer('dimmer_c')],
+    });
+    world.log.clear();
+
+    const accessories = await accessoriesOf(platform);
+
+    expect(accessories.map((accessory) => accessory.name)).toEqual(['dimmer-a', 'dimmer-c']);
+    expect(world.log.errors()).toEqual([
+      "error no accessory created for dimmer_b: Error: Error setting CharacteristicsProps for 'Brightness': 'minValue' cannot be greater or equal the 'maxValue'!",
+    ]);
+    // the device that was left out listens to nothing, and can be published once its mapping is corrected
+    expect(Object.keys(world.subscriptions).filter((informId) => informId.startsWith('dimmer_b-'))).toEqual([]);
+    // homebridge is handed the services that were built, and no second set
+    const [first] = accessories;
+    expect(first?.getServices()).toBe(first?.getServices());
+    expect(first?.getServices().map((service) => service.constructor.name)).toEqual(['AccessoryInformation', 'Lightbulb']);
+  });
+
+  const lamps = (count: number) =>
+    Array.from({ length: count }, (_, index) => {
+      const name = `lamp_${String(index).padStart(3, '0')}`;
+      return { Name: name, ...device({ Internals: { NAME: name, FUUID: `fuuid-${index}` }, Readings: { state: 'on' }, PossibleSets: 'on off' }) };
+    });
+
+  it('warns when it publishes more accessories than a HomeKit bridge takes, and says what to do', async () => {
+    const platform = await connect({ devices: lamps(150) }, { filter: 'room=HomeKit' });
+    world.log.clear();
+
+    expect(await accessoriesOf(platform)).toHaveLength(150);
+
+    expect(world.log.lines.filter((line) => line.startsWith('warn '))).toEqual([
+      'warn the filter room=HomeKit selects 150 devices that are published. a HomeKit bridge takes 149 accessories at most, and HomeKit refuses a bridge with more. ' +
+        'narrow the filter, or split the devices over several FHEM platforms with different filters and run each as a child bridge.',
+    ]);
+  });
+
+  it('does not warn about as many accessories as a HomeKit bridge takes', async () => {
+    const platform = await connect({ devices: lamps(149) });
+    world.log.clear();
+
+    expect(await accessoriesOf(platform)).toHaveLength(149);
+
+    expect(world.log.lines.filter((line) => line.startsWith('warn '))).toEqual([]);
   });
 
   it('asks for all devices without a filter', async () => {
@@ -557,9 +635,9 @@ describe('events', () => {
       'error   error in longpoll connection: TypeError: value.match is not a function',
       'error   error in longpoll connection: TypeError: value.match is not a function',
     ]);
-    expect(world.log.lines.filter((line) => line.includes('caching: On'))).toEqual([
-      "info     caching: On: false (as boolean; from 'off')",
-      "info     caching: On: true (as boolean; from 'on')",
+    expect(world.log.debugLines.filter((line) => line.includes('caching: On'))).toEqual([
+      "    caching: On: false (as boolean; from 'off')",
+      "    caching: On: true (as boolean; from 'on')",
     ]);
     expect(world.cached['lamp-state']).toBe('on');
   });
@@ -676,6 +754,99 @@ describe('reconnecting', () => {
   });
 });
 
+describe('a long poll nothing arrives on', () => {
+  const quarterHour = 15 * 60 * 1000;
+  const probes = () => fhem.commands.filter((cmd) => cmd === '{1}').length;
+
+  async function quietLamp(): Promise<void> {
+    const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }] });
+    (await firstAccessoryOf(platform)).getServices();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    // the wait for the next byte starts over with this event, on the faked timers
+    await event('standby');
+    world.log.clear();
+  }
+
+  /** an event arrives, which also starts the wait for the next byte over */
+  async function event(value: string): Promise<void> {
+    fhem.event('lamp-state', value);
+    await waitFor(() => world.cached['lamp-state'] === value, 'the event');
+  }
+
+  const logged = () => world.log.lines.filter((line) => line.includes('longpoll'));
+
+  it('is left alone while something arrives now and then', async () => {
+    await quietLamp();
+
+    for (const value of ['off', 'on', 'off']) {
+      vi.advanceTimersByTime(quarterHour - 1);
+      await event(value);
+    }
+
+    expect(probes()).toBe(0);
+    expect(fhem.streams).toHaveLength(1);
+    expect(logged()).toEqual([]);
+  });
+
+  it('is opened again after a quarter of an hour of silence when fhem answers, and events arrive on the new one', async () => {
+    await quietLamp();
+
+    vi.advanceTimersByTime(quarterHour - 1);
+    expect(probes()).toBe(0);
+    vi.advanceTimersByTime(1);
+    await waitFor(() => fhem.streams.length === 2, 'the second long poll');
+    await waitFor(() => fhem.openStreams() === 1, 'the silent long poll to be closed');
+
+    expect(probes()).toBe(1);
+    expect(logged()[0]).toBe('info longpoll: nothing arrived for 15 minutes while fhem answers. opening the long poll again.');
+    expect(world.log.errors()).toEqual([]);
+    expect(world.longpoll[baseUrl()]).toMatchObject({ connected: true, connects: 2, disconnects: 0 });
+
+    await event('off');
+    expect(world.cached['lamp-state']).toBe('off');
+  });
+
+  it('waits twice as long each time a fhem stays silent, and a quarter of an hour again once something arrived', async () => {
+    await quietLamp();
+
+    vi.advanceTimersByTime(quarterHour);
+    await waitFor(() => fhem.streams.length === 2, 'the second long poll');
+    await waitFor(() => fhem.commands.filter((cmd) => cmd === 'jsonlist2 TYPE=siri').length === 2, 'the checks after the second long poll');
+
+    vi.advanceTimersByTime(2 * quarterHour - 1);
+    expect(probes()).toBe(1);
+    vi.advanceTimersByTime(1);
+    await waitFor(() => fhem.streams.length === 3, 'the third long poll');
+    await waitFor(() => fhem.commands.filter((cmd) => cmd === 'jsonlist2 TYPE=siri').length === 3, 'the checks after the third long poll');
+    expect(probes()).toBe(2);
+
+    await event('off');
+    vi.advanceTimersByTime(quarterHour);
+    await waitFor(() => fhem.streams.length === 4, 'the fourth long poll');
+    expect(probes()).toBe(3);
+  });
+
+  it('is taken for failed when fhem does not answer within ten seconds, and tried again like after any failure', async () => {
+    await quietLamp();
+    fhem.options.hangs = true;
+
+    vi.advanceTimersByTime(quarterHour);
+    await waitFor(() => probes() === 1, 'fhem to be asked');
+    expect(fhem.streams).toHaveLength(1);
+
+    vi.advanceTimersByTime(10_000);
+    await waitFor(() => world.log.errors().length === 1, 'the failure to be reported');
+    expect(world.log.errors()[0]).toBe(
+      'error longpoll error: Error: nothing arrived for 15 minutes and fhem does not answer (Error: no answer within 10 seconds), retry in: 3000msec',
+    );
+    await waitFor(() => fhem.openStreams() === 0, 'the silent long poll to be closed');
+    expect(world.longpoll[baseUrl()]).toMatchObject({ connected: false, disconnects: 1 });
+
+    vi.advanceTimersByTime(3000);
+    await waitFor(() => fhem.streams.length === 2, 'the second long poll');
+  });
+});
+
 describe('commands', () => {
   it('sends the command of a characteristic to fhem', async () => {
     const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }] });
@@ -687,10 +858,8 @@ describe('commands', () => {
     await waitFor(() => fhem.commands.at(-1) === 'set lamp off', 'the command');
 
     expect(fhem.requests.at(-1)?.url).toBe('/fhem?cmd=set%20lamp%20off&fwcsrf=csrf_fake_token&XHR=1');
-    expect(world.log.lines.map(withoutPort)).toEqual([
-      'info lamp: executing set cmd for On with value 0',
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=set%20lamp%20off&fwcsrf=***&XHR=1',
-    ]);
+    expect(world.log.lines.map(withoutPort)).toEqual(['info lamp: executing set cmd for On with value 0']);
+    expect(world.log.debugLines.map(withoutPort)).toEqual(['  executing: http://127.0.0.1:PORT/fhem?cmd=set%20lamp%20off&fwcsrf=***&XHR=1']);
   });
 
   it('hands the answer to the caller without line breaks', async () => {
@@ -719,10 +888,9 @@ describe('commands', () => {
     world.log.clear();
 
     platform.execute('boom', answered);
-    await waitFor(() => world.log.lines.length === 3, 'the report');
+    await waitFor(() => world.log.lines.length === 2, 'the report');
 
     expect(world.log.lines.map(withoutPort)).toEqual([
-      'info   executing: http://127.0.0.1:PORT/fhem?cmd=boom&fwcsrf=***&XHR=1',
       'log There was a problem connecting to FHEM (http://127.0.0.1:PORT/fhem?cmd=boom&fwcsrf=***&XHR=1).',
       'log   500: Internal Server Error',
     ]);
@@ -749,7 +917,8 @@ describe('commands', () => {
     await waitFor(() => world.cached['aussen-temperature'] === '7.5', 'the reading');
 
     expect(fhem.commands.at(-1)).toBe('{ReadingsVal("aussen","temperature","")}');
-    expect((accessory.mappings.CurrentTemperature as { cached?: unknown }).cached).toBeUndefined();
+    // the services exist by then, so the answer reaches the mapping
+    expect((accessory.mappings.CurrentTemperature as { cached?: unknown }).cached).toBe(7.5);
   });
 });
 

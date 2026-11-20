@@ -3,10 +3,11 @@
 import util from 'node:util';
 import type { Characteristic, CharacteristicSetCallback, CharacteristicValue, Service } from '@homebridge/hap-nodejs';
 import { reading2homekit } from '../mapping/toHomekit.ts';
-import type { CharacteristicClass, Mapping, PreparedMapping } from '../mapping/types.ts';
+import type { CharacteristicClass, HomekitValue, Mapping, PreparedMapping } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import { ct2rgb, rgb2hsv, xyY2rgb, type Hsv } from '../util/color.ts';
 import type { FhemAccessory, NamedService, QueryCallback } from './accessory.ts';
+import { acceptableValue } from './acceptable.ts';
 import { CustomUUIDs } from './customCharacteristics.ts';
 import { addEveCharacteristics, addHistoryService } from './history.ts';
 
@@ -19,6 +20,8 @@ export type CustomCharacteristicClass = new (name: string, uuid: string) => Char
 const setQuietly = (characteristic: Characteristic, value: unknown): void => {
   characteristic.value = value as CharacteristicValue;
 };
+
+const numericFormats = new Set(['int', 'float', 'uint8', 'uint16', 'uint32', 'uint64']);
 
 /** `; means <name>` for a value that stands for a named HomeKit value, for the log */
 function meaning(mapping: Mapping, value: unknown): string {
@@ -59,21 +62,26 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
 
   const services: Service[] = [];
 
-  log('creating services for ' + accessory.name);
+  log.debug('creating services for ' + accessory.name);
 
-  log('  information service for ' + accessory.name);
+  log.debug('  information service for ' + accessory.name);
   const informationService = new Service.AccessoryInformation();
   services.push(informationService);
 
-  log('    manufacturer, model and serial number characteristics for ' + accessory.name);
+  log.debug('    manufacturer, model and serial number characteristics for ' + accessory.name);
   informationService
     .setCharacteristic(Characteristic.Manufacturer, informationText(accessory.mappings.Manufacturer) ?? 'FHEM:' + accessory.type)
     .setCharacteristic(Characteristic.Model, informationText(accessory.mappings.Model) ?? 'FHEM:' + (accessory.model ? accessory.model : '<unknown>'))
     .setCharacteristic(Characteristic.SerialNumber, informationText(accessory.mappings.SerialNumber) ?? (accessory.serial ? accessory.serial : '<unknown>'));
 
   const firmwareRevision = single('FirmwareRevision');
-  if (firmwareRevision) {
-    log('    firmware revision characteristic for ' + accessory.name);
+  if (firmwareRevision && firmwareRevision.cached === undefined) {
+    // the characteristic keeps the 0.0.0 it starts with
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- readings are text
+    const reading = String(cached[firmwareRevision.informId as string] ?? '');
+    log.warn(accessory.name + ': the firmware reading "' + reading + '" holds no version number. HomeKit is not told a firmware revision.');
+  } else if (firmwareRevision) {
+    log.debug('    firmware revision characteristic for ' + accessory.name);
 
     // getCharacteristic only adds what the service knows as optional. the types say it always answers.
     /* eslint-disable @typescript-eslint/no-unnecessary-condition */
@@ -83,20 +91,18 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
 
     accessory.subscribe(firmwareRevision, characteristic);
 
-    setQuietly(characteristic, cached[firmwareRevision.informId as string]);
+    // the version that was taken out of the reading when the mappings were prepared
+    setQuietly(characteristic, firmwareRevision.cached);
 
     characteristic.on('get', (callback) => {
-      const mapping = single('FirmwareRevision');
-      if (mapping) {
-        accessory.query(mapping, callback as QueryCallback);
-      }
+      accessory.query(firmwareRevision, callback as QueryCallback);
     });
   }
 
   const nameCharacteristic = informationService.getCharacteristic(Characteristic.Name);
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- as it was
   if (nameCharacteristic) {
-    log('    name (siriName) characteristic for ' + accessory.name);
+    log.debug('    name (siriName) characteristic for ' + accessory.name);
     nameCharacteristic
       .on('set', (_value, callback) => {
         // a new name from HomeKit is accepted and not written back to fhem
@@ -111,7 +117,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   // all the same: while it says no, reads of the other characteristics are answered with an error.
   const reachable = single('Reachable');
   if (reachable) {
-    log.info('  ' + accessory.device + ' has reachability [' + reachable.reading + ']');
+    log.debug('  ' + accessory.device + ' has reachability [' + reachable.reading + ']');
     accessory.subscribe(reachable);
     reading2homekit(reachable, cached[reachable.informId as string]);
   }
@@ -256,7 +262,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
           log.error(accessory.name + ": can't link " + each.reading + ' service to itself');
         } else {
           service.addLinkedService(controlService);
-          log('    linked to ' + service.service_name);
+          log.debug('    linked to ' + service.service_name);
         }
 
         continue;
@@ -293,7 +299,7 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
 
       seen[service_name + '#' + characteristic_type] = true;
 
-      log('    ' + (each.name ? each.name : each.characteristic_type) + ' characteristic for ' + each.device + ':' + each.reading);
+      log.debug('    ' + (each.name ? each.name : each.characteristic_type) + ' characteristic for ' + each.device + ':' + each.reading);
 
       accessory.subscribe(each, characteristic);
 
@@ -316,45 +322,59 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
         const unit = units[each.unit];
         characteristic.setProps({ unit: unit ? unit : each.unit });
       }
-      if (each.minValue !== undefined) {
-        characteristic.setProps({ minValue: each.minValue });
+      // only a number has a range, steps and a list of valid values. the conversion gives an
+      // inverted on/off value the limits 0 and 1, which are no properties of a boolean.
+      if (numericFormats.has(characteristic.props.format)) {
+        if (each.minValue !== undefined) {
+          characteristic.setProps({ minValue: each.minValue });
+        }
+        if (each.maxValue !== undefined) {
+          characteristic.setProps({ maxValue: each.maxValue });
+        }
+        if (each.minStep !== undefined) {
+          characteristic.setProps({ minStep: each.minStep });
+        }
+        if (each.valid !== undefined) {
+          characteristic.setProps({ validValues: each.valid as number[] });
+        }
       }
-      if (each.maxValue !== undefined) {
-        characteristic.setProps({ maxValue: each.maxValue });
-      }
-      if (each.minStep !== undefined) {
-        characteristic.setProps({ minStep: each.minStep });
-      }
-      if (each.valid !== undefined) {
-        characteristic.setProps({ validValues: each.valid as number[] });
+
+      // the value the characteristic starts with has to fit what was just said about it
+      const initial = acceptableValue(characteristic, characteristic.value);
+      if (initial !== undefined && initial !== characteristic.value) {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string -- logged as it comes
+        log.debug('      initial value ' + String(characteristic.value) + ' is not accepted by HomeKit, using ' + String(initial));
+        setQuietly(characteristic, initial);
       }
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- a characteristic created from a uuid has no properties yet
       if (characteristic_type.match(uuidFormat) || !characteristic.props?.perms?.length) {
-        if (each.cmd === undefined) {
-          characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.NOTIFY] });
-        } else {
+        // HomeKit may write what the mapping has a command for, in any of the ways to give one
+        const writable = !each.readOnly && (each.cmd !== undefined || each.cmdOn !== undefined || each.cmdOff !== undefined || each.cmds !== undefined);
+        if (writable) {
           characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.PAIRED_WRITE, Perms.NOTIFY] });
+        } else {
+          characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.NOTIFY] });
         }
       }
 
       log.debug('      props: ' + util.inspect(characteristic.props));
 
       characteristic
-        .on('set', (value: CharacteristicValue, callback: CharacteristicSetCallback, context: unknown) => {
-          // a value the plugin itself took over from fhem is not sent back
-          if (context !== 'fromFHEM') {
-            if (each.delay) {
-              accessory.delayed(each, value, each.delay);
-            } else {
-              accessory.command(each, value);
-            }
+        // only HomeKit writes through this handler: values from fhem are published with updateValue
+        .on('set', (value: CharacteristicValue, callback: CharacteristicSetCallback) => {
+          if (each.delay) {
+            accessory.delayed(each, value, each.delay);
+          } else {
+            accessory.command(each, value);
+          }
 
-            if (each.timeout && each.default !== undefined) {
-              setTimeout(() => {
-                (each.characteristic as unknown as FromFhem).setValue(each.default, undefined, 'fromFHEM');
-              }, each.timeout);
-            }
+          const fallback = each.default;
+          if (each.timeout && fallback !== undefined) {
+            // a push button: HomeKit is shown the default again, and fhem is not told
+            setTimeout(() => {
+              characteristic.updateValue(fallback);
+            }, each.timeout);
           }
           callback();
         })
@@ -362,7 +382,14 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
           if (single('Reachable')?.cached === false) {
             (callback as QueryCallback)('unreachable');
           } else {
-            accessory.query(each, callback as QueryCallback);
+            accessory.query(each, (error, value) => {
+              if (error !== undefined) {
+                (callback as QueryCallback)(error);
+              } else {
+                // a value HomeKit would reject is answered with the one the characteristic has
+                (callback as QueryCallback)(undefined, acceptableValue(characteristic, value) ?? (characteristic.value as HomekitValue));
+              }
+            });
           }
         });
     }
@@ -373,9 +400,4 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
   }
 
   return services;
-}
-
-/** setValue as it is called here, with the callback left out */
-interface FromFhem {
-  setValue(value: unknown, callback: undefined, context: string): void;
 }

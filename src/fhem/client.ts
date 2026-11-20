@@ -32,6 +32,8 @@ export interface ConnectionStatus {
   /** bytes received on the current connection, and since homebridge started */
   received?: number;
   received_total: number;
+  /** how often in a row the long poll was opened again because nothing arrived on it while fhem answered */
+  reopened_silent?: number;
   /** when the last event for a subscribed reading arrived, in milliseconds since the epoch */
   last_event_time?: number;
 }
@@ -68,7 +70,7 @@ export function requestOptions(connection: FhemConnection): GetOptions {
 export function execute(state: PluginState, log: Logging, connection: FhemConnection, cmd: string, callback?: (result: string) => void): void {
   const url = commandUrl(connection.base_url, cmd, state.csrfToken[connection.base_url]);
   const shown = withoutToken(url);
-  log.info('  executing: ' + shown);
+  log.debug('  executing: ' + shown);
 
   getText(url, { ...requestOptions(connection), gzip: true }, (err, response, result) => {
     if (!err && response?.statusCode === 200) {

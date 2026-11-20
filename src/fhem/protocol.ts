@@ -61,15 +61,16 @@ export interface FhemEvent {
  * by `<<`. Answers undefined for lines that are no change of a reading: timestamps, events for
  * the web frontend, and the echo of a set command.
  *
+ * A line that starts like JSON and is none is reported to the log, if one is given, and skipped.
  * Fails for a JSON line whose id or value is not text.
  */
-export function parseEventLine(line: string): FhemEvent | undefined {
+export function parseEventLine(line: string, log?: { warn(message: string): void }): FhemEvent | undefined {
   let d: string[];
   if (line.startsWith('[')) {
     try {
       d = JSON.parse(line) as string[];
     } catch (err) {
-      console.log('  longpoll JSON.parse: ' + String(err));
+      log?.warn('longpoll JSON.parse: ' + String(err));
       return undefined;
     }
   } else {

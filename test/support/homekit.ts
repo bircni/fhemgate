@@ -47,8 +47,8 @@ export function read(characteristic: Characteristic): ReadResult {
   return result;
 }
 
-/** homekit, or the plugin itself with the context 'fromFHEM', sets the value of a characteristic */
-export function write(characteristic: Characteristic, value: CharacteristicValue, context?: string): { answered: boolean } {
+/** homekit sets the value of a characteristic */
+export function write(characteristic: Characteristic, value: CharacteristicValue): { answered: boolean } {
   const result = { answered: false };
   characteristic.emit(
     'set',
@@ -56,7 +56,7 @@ export function write(characteristic: Characteristic, value: CharacteristicValue
     () => {
       result.answered = true;
     },
-    context,
+    undefined,
   );
   return result;
 }

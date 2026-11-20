@@ -4,7 +4,7 @@ import type { Logging } from 'homebridge';
 import type { Mapping, Mappings } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import { doorState, garage, blind, hmSecWin, positionState, window } from './rules/blinds.ts';
-import { colorMode, hue, milight, rgb, saturation, wifilight } from './rules/color.ts';
+import { colorMode, colorTemperature, hue, milight, rgb, saturation, wifilight } from './rules/color.ts';
 import { fs20di, fs20Dimmer, homematicDimmer, hueBrightness, zwaveDimmer } from './rules/dimmers.ts';
 import { hmSecKey, lock } from './rules/locks.ts';
 import { harmony, sonos, volume } from './rules/media.ts';
@@ -24,7 +24,7 @@ import {
   threeStateSensor,
 } from './rules/sensors.ts';
 import { onOff, setList } from './rules/switches.ts';
-import { desiredTemp, heatingStateDefault, maxDesiredTemperature, pid20Desired, thermostatByType } from './rules/thermostats.ts';
+import { desiredTemp, heatingStateDefault, maxDesiredTemperature, offerSupportedModes, pid20Desired, thermostatByType } from './rules/thermostats.ts';
 import type { Jsonlist2Device } from './types.ts';
 
 /** the part of an accessory the detection fills in */
@@ -74,6 +74,7 @@ const rules: Rule[] = [
   saturation,
   firstOf(milight, wifilight),
   rgb,
+  colorTemperature,
   colorMode,
 
   volume,
@@ -178,5 +179,9 @@ export function reviseMappings(target: DetectionTarget, s: Jsonlist2Device): voi
       target.log.error(s.Internals.NAME + ' is NOT a thermostat. set command for target temperature missing: ' + (targetCmd ? targetCmd : ''));
       delete target.mappings.TargetTemperature;
     }
+  }
+
+  if (target.service_name === 'thermostat' || target.service_name === 'Thermostat') {
+    offerSupportedModes(target);
   }
 }

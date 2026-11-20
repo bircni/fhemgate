@@ -3,6 +3,7 @@ import type { Characteristic, Service } from '@homebridge/hap-nodejs';
 import type { Logging } from 'homebridge';
 import { detectMappings, reviseMappings } from '../devices/detect.ts';
 import { deviceIdentity } from '../devices/identity.ts';
+import { identityKey, type IdentityStore } from '../devices/identityStore.ts';
 import type { Jsonlist2Device } from '../devices/types.ts';
 import { prepareMappings } from '../mapping/compile.ts';
 import { parseHomebridgeMapping } from '../mapping/parser.ts';
@@ -31,10 +32,19 @@ export interface AccessoryPlatform {
   jsFunctions?: unknown;
   /** false if mappings must not carry JavaScript */
   allowInlineFunctions?: boolean;
+  /** what each device was first published as. without it a device is what is worked out for it now. */
+  identities?: IdentityStore;
 }
 
-/** milliseconds fhem has to answer a read of a characteristic, after which HomeKit is told that it failed */
-const QUERY_TIMEOUT = 10000;
+/**
+ * Milliseconds fhem has to answer a read of a characteristic before HomeKit is answered without
+ * it. homebridge calls a plugin slow that takes three seconds, and HomeKit shows the whole
+ * accessory as not responding soon after.
+ */
+export const QUERY_TIMEOUT = 2000;
+
+/** milliseconds in which fhem is asked at most once for a reading that HomeKit reads from the cache */
+export const READ_REFRESH_INTERVAL = 60 * 1000;
 
 /** a service with the name it was created under, which the plugin keeps at the service */
 export type NamedService = Service & { service_name?: string };
@@ -119,13 +129,16 @@ export class FhemAccessory {
   /** the platform the accessory belongs to, set by the platform */
   declare fhem?: { scope?: unknown };
   declare historyService?: HistoryService;
-  /** the commands that wait to be sent, by the reading id of their mapping */
+  /** the commands that wait to be sent, by the reading id and the characteristic of their mapping */
   declare delayed_timers?: Record<string, ReturnType<typeof setTimeout>>;
   /** set once the history was saved for the shutdown of homebridge */
   declare shutdown?: boolean;
 
   readonly #state: PluginState;
   readonly #execute: Execute;
+  #services?: Service[];
+  /** when fhem was last asked for a reading that is cached, by the id of the reading */
+  readonly #refreshed = new Map<string, number>();
 
   constructor(platform: AccessoryPlatform, s: Jsonlist2Device, state: PluginState, execute: Execute) {
     this.#state = state;
@@ -163,13 +176,23 @@ export class FhemAccessory {
     this.fromHomebridgeMapping(s.Attributes.homebridgeMapping);
     this.log.debug('mappings for ' + s.Internals.NAME + ': ' + util.inspect(this.mappings));
 
+    // the one line every device gets at the usual log level. the rest is there with debug logging.
     this.log(s.Internals.NAME + ' is ' + this.service_name);
 
     reviseMappings(this, s);
 
     this.#logMappings(s);
 
-    Object.assign(this, deviceIdentity(s, this.mappings));
+    const identities = platform.identities;
+    const baseUrl = (platform.connection as { base_url?: string } | undefined)?.base_url;
+    Object.assign(
+      this,
+      deviceIdentity(
+        s,
+        this.mappings,
+        identities && ((computed) => identities.resolve(identityKey(baseUrl, s.Internals.NAME, s.Internals.FUUID), computed, this.log)),
+      ),
+    );
 
     prepareMappings(this, s, {
       characteristics: state.hap.Characteristic as unknown as Record<string, unknown>,
@@ -183,7 +206,7 @@ export class FhemAccessory {
   }
 
   #logMappings(s: Jsonlist2Device): void {
-    this.log(s.Internals.NAME + ' has');
+    this.log.debug(s.Internals.NAME + ' has');
     for (const characteristic_type in this.mappings) {
       const entry = this.mappings[characteristic_type];
       const mappings = (Array.isArray(entry) ? entry : [entry]) as Mapping[];
@@ -194,19 +217,19 @@ export class FhemAccessory {
           reading = 'default ' + mapping.default;
         }
         if (characteristic_type === 'On') {
-          this.log('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmdOn + ',' + mapping.cmdOff + ']');
+          this.log.debug('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmdOn + ',' + mapping.cmdOff + ']');
         } else if (characteristic_type === 'Hue' || characteristic_type === 'Saturation') {
-          this.log('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmd + ';0-' + mapping.max + ']');
+          this.log.debug('  ' + characteristic_type + ' [' + reading + ';' + mapping.cmd + ';0-' + mapping.max + ']');
         } else if (characteristic_type === 'history') {
-          this.log('  ' + characteristic_type + ' [' + (mapping.type ? mapping.type : 'thermo') + ';' + (mapping.size ? mapping.size : 1024) + ']');
+          this.log.debug('  ' + characteristic_type + ' [' + (mapping.type ? mapping.type : 'thermo') + ';' + (mapping.size ? mapping.size : 1024) + ']');
         } else if (mapping.name) {
           if (characteristic_type === CustomUUIDs.Volume) {
-            this.log('  Custom ' + mapping.name + ' [' + reading + ';' + (mapping.nocache ? 'not cached' : 'cached') + ']');
+            this.log.debug('  Custom ' + mapping.name + ' [' + reading + ';' + (mapping.nocache ? 'not cached' : 'cached') + ']');
           } else {
-            this.log('  Custom ' + mapping.name + ' [' + reading + ']');
+            this.log.debug('  Custom ' + mapping.name + ' [' + reading + ']');
           }
         } else {
-          this.log('  ' + characteristic_type + ' [' + reading + ']');
+          this.log.debug('  ' + characteristic_type + ' [' + reading + ']');
         }
       }
     }
@@ -260,7 +283,7 @@ export class FhemAccessory {
     parseHomebridgeMapping(this, homebridgeMapping, Categories);
   }
 
-  /** sends the command for the value after the delay, unless another value for the mapping arrives before */
+  /** sends the command for the value after the delay, unless another value for the characteristic arrives before */
   delayed(mapping: PreparedMapping, value: unknown, delay?: number | boolean): void {
     this.delayed_timers ??= {};
 
@@ -269,15 +292,17 @@ export class FhemAccessory {
       milliseconds = 500;
     }
 
-    const informId = mapping.informId as string;
-    const timer = this.delayed_timers[informId];
+    // two characteristics can follow the same reading, like the position and the tilt of a
+    // blind. each has its own command waiting, so the reading alone does not tell them apart.
+    const pending = mapping.informId + ' ' + mapping.characteristic_type + (mapping.subtype ? '(' + mapping.subtype + ')' : '');
+    const timer = this.delayed_timers[pending];
     if (timer) {
       clearTimeout(timer);
     }
 
     this.log.info(this.name + ' delaying command ' + mapping.characteristic_type + ' with value ' + String(value));
-    this.delayed_timers[informId] = setTimeout(() => {
-      delete this.delayed_timers?.[informId];
+    this.delayed_timers[pending] = setTimeout(() => {
+      delete this.delayed_timers?.[pending];
       this.command(mapping, value);
     }, milliseconds);
   }
@@ -337,8 +362,10 @@ export class FhemAccessory {
 
     const informId = mapping ? (mapping.informId as string) : device + '-' + reading;
 
-    this.log.info('query: ' + (mapping ? (mapping.name ? mapping.name : mapping.characteristic_type) : reading) + ' for ' + informId);
+    this.log.debug('query: ' + (mapping ? (mapping.name ? mapping.name : mapping.characteristic_type) : reading) + ' for ' + informId);
     const cached = mapping?.cached;
+    const cmd = '{ReadingsVal("' + device + '","' + reading + '","")}';
+
     if (mapping && cached !== undefined && !('nocache' in mapping)) {
       let defined: string | undefined = undefined;
       if (mapping.homekit2name !== undefined) {
@@ -348,34 +375,41 @@ export class FhemAccessory {
         }
       }
 
-      mapping.log.info('  cached: ' + cached + ' (as ' + typeof cached + (defined ? '; means ' + defined : '') + ')');
+      mapping.log.debug('  cached: ' + cached + ' (as ' + typeof cached + (defined ? '; means ' + defined : '') + ')');
 
       if (callback !== undefined) {
         callback(undefined, cached);
+        this.#refresh(informId, cmd);
       }
       return cached;
     } else {
-      this.log.info('  not cached');
+      this.log.debug('  not cached');
     }
 
-    const cmd = '{ReadingsVal("' + device + '","' + reading + '","")}';
-
-    // HomeKit is not left without an answer when fhem gives none
+    // HomeKit is not left waiting when fhem takes its time: it gets the value last seen, or an
+    // error if there never was one, and the answer of fhem is published when it comes
     let timedOut = false;
     const timer =
       callback &&
       setTimeout(() => {
         timedOut = true;
-        this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
-        callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
+        if (cached !== undefined) {
+          this.log.debug('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds, answering with the last value');
+          callback(undefined, cached);
+        } else {
+          this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
+          callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
+        }
       }, QUERY_TIMEOUT);
 
     this.execute(cmd, (result) => {
       clearTimeout(timer);
       const value = result.replace(/[\r\n]/g, '');
-      this.log.info('  value: ' + value);
+      this.log.debug('  value: ' + value);
 
-      this.#state.update(informId, value, true);
+      // the read that waited gets the value as its answer. one that was answered meanwhile is
+      // told with an update like any change in fhem.
+      this.#state.update(informId, value, !timedOut);
 
       if (callback !== undefined && !timedOut) {
         // without a mapping there is nothing to convert the reading with
@@ -388,6 +422,31 @@ export class FhemAccessory {
       }
     });
     return undefined;
+  }
+
+  /**
+   * Asks fhem for a reading whose cached value was just handed to HomeKit, and takes over what
+   * it answers if that differs. The events of the long poll keep the cache current, so this
+   * only matters when one was missed, and a reading is asked for at most once in
+   * READ_REFRESH_INTERVAL however often HomeKit reads it.
+   */
+  #refresh(informId: string, cmd: string): void {
+    const now = Date.now();
+    const last = this.#refreshed.get(informId);
+    if (last !== undefined && now - last < READ_REFRESH_INTERVAL) {
+      return;
+    }
+    this.#refreshed.set(informId, now);
+
+    const before = this.#state.cache.get(informId);
+    this.execute(cmd, (result) => {
+      const value = result.replace(/[\r\n]/g, '');
+      // fhem answers with nothing for a reading it does not have. and an event that arrived while
+      // fhem was asked is newer than the answer.
+      if (value !== '' && this.#state.cache.get(informId) === before) {
+        this.#state.update(informId, value);
+      }
+    });
   }
 
   isInRoom(room: string | undefined): boolean {
@@ -452,7 +511,7 @@ export class FhemAccessory {
         name = subtype + ' - ' + this.siriName;
       }
 
-      this.log('  ' + serviceName + ' service for ' + this.name + (subtype ? ' (' + subtype + ')' : ''));
+      this.log.debug('  ' + serviceName + ' service for ' + this.name + (subtype ? ' (' + subtype + ')' : ''));
       const service = new (serviceClass as new (name?: string, subtype?: string) => NamedService)(name, subtype ? subtype : '');
       service.service_name = serviceName;
       return service;
@@ -491,7 +550,7 @@ export class FhemAccessory {
       return service;
     }
 
-    this.log('  switch service (default) for ' + this.name + ' (' + subtype + ')');
+    this.log.debug('  switch service (default) for ' + this.name + ' (' + subtype + ')');
     return new this.#state.hap.Service.Switch(name, subtype);
   }
 
@@ -504,7 +563,13 @@ export class FhemAccessory {
     callback();
   }
 
+  /** builds the services before homebridge asks for them, so that whoever calls can deal with a device they can not be built for */
+  prepareServices(): void {
+    this.#services = createServices(this, this.#state);
+  }
+
+  /** the services homebridge publishes for the accessory: the prepared ones, or a new set */
   getServices(): Service[] {
-    return createServices(this, this.#state);
+    return this.#services ?? createServices(this, this.#state);
   }
 }

@@ -16,7 +16,7 @@ function accessoryWith(mappings: Record<string, Mapping | Mapping[]> = {}): { wo
 function parse(homebridgeMapping: string, mappings: Record<string, Mapping | Mapping[]> = {}) {
   const { world, accessory } = accessoryWith(mappings);
   accessory.fromHomebridgeMapping(homebridgeMapping);
-  return { mappings: accessory.mappings, log: world.log.lines.slice(1), accessory };
+  return { mappings: accessory.mappings, log: world.log.lines, accessory };
 }
 
 describe('entries', () => {
@@ -41,12 +41,13 @@ describe('entries', () => {
     expect(world.log.lines).toEqual([]);
   });
 
-  it('logs the attribute before it is parsed', () => {
+  it('logs the attribute before it is parsed, for debugging', () => {
     const { world, accessory } = accessoryWith();
 
     accessory.fromHomebridgeMapping('On=state');
 
-    expect(world.log.lines).toEqual(['info homebridgeMapping: On=state']);
+    expect(world.log.lines).toEqual([]);
+    expect(world.log.debugLines).toEqual(['homebridgeMapping: On=state']);
   });
 
   it('changes a mapping that already exists', () => {
