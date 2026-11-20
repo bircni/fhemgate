@@ -25,6 +25,7 @@ end-to-end tests.
 | `bun run pack-smoke` | packs, installs and loads the plugin |
 | `bun run test:e2e` | builds, then runs a real homebridge with the plugin against the stand-in fhem |
 | `bun run coverage:e2e` | the same, and reports which lines of `src` the homebridge processes ran |
+| `bun run release` | prepares a release, see [Releasing](#releasing) |
 
 ## Layout
 
@@ -37,7 +38,7 @@ end-to-end tests.
 | `src/state` | the readings the plugin has seen and who is subscribed to them |
 | `src/debug` | the debug page |
 | `test` | the suites that run whole devices through the plugin, their fixtures and a stand-in FHEMWEB |
-| `scripts` | what `bun run` needs besides the tools: the pack check and the coverage of the end-to-end tests |
+| `scripts` | what `bun run` needs besides the tools: the pack check, the coverage of the end-to-end tests and the release |
 | `docs` | the documentation for users, which the README links to |
 
 Unit tests sit next to the module they test, as `*.test.ts`.
@@ -102,3 +103,35 @@ itself belong into issues and pull requests.
 3. Save it as `test/fixtures/devices/<family>/<name>.json`.
 4. Run `bun run test`. The new fixture is picked up by the fixture suites, which record what the
    plugin makes of it. Check the recorded result before committing it.
+
+## Releasing
+
+A release is a commit on `main` that sets the version, with an annotated tag `vX.Y.Z` whose
+message holds the release notes. `bun run release` makes both, and nothing else: it does not push
+and does not publish.
+
+```sh
+bun run release minor --dry-run   # shows the version, the notes and what would be done
+bun run release minor
+```
+
+The argument is `patch`, `minor`, `major`, `prerelease` or a version like `1.0.0-rc.1`. They count
+the way `npm version` does: from `0.6.0-alpha.0`, `prerelease` gives `0.6.0-alpha.1`, and `patch`
+or `minor` give `0.6.0`.
+
+The script refuses to do anything unless the branch is `main`, the working tree is clean, local
+`main` is the commit `origin/main` is at, and the tag exists neither here nor on `origin`. It then
+runs `bun run verify` and stops if that fails. After that it
+
+1. sets the version in `package.json`,
+2. commits it as `chore(release): vX.Y.Z`,
+3. tags the commit. The notes are made from the subjects of the commits since the last `v*` tag,
+   grouped into breaking changes (a `!` before the colon, or a `BREAKING CHANGE:` line in the
+   body), features (`feat`), fixes (`fix`) and other changes. There is no changelog file: the
+   notes live in the tag, `git show vX.Y.Z` prints them.
+
+It ends by printing the two commands that push the commit and the tag. Look at the notes first:
+until it is pushed, a release is undone with `git tag -d vX.Y.Z` and `git reset --hard HEAD~1`.
+
+While `package.json` says `"private": true` the package can not be published to npm, and the script
+says so. Publishing a release needs that line removed.
