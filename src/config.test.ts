@@ -1,10 +1,11 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Logging } from 'homebridge';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLog } from '../test/support/log.ts';
-import { baseUrl, isSwitchedOff, loadJsFunctions, optionalSwitch } from './config.ts';
+import { baseUrl, isSwitchedOff, loadJsFunctions, optionalSwitch, type FhemPlatformConfig } from './config.ts';
+import { PLATFORM_NAME } from './settings.ts';
 
 const logging = () => {
   const log = createLog();
@@ -90,5 +91,68 @@ describe('loadJsFunctions', () => {
 
     expect(loadJsFunctions('missing.cjs', '/nonexistent', target)).toBeUndefined();
     expect(log.lines[0]).toMatch(/^error {3}jsFunctions: Error: Cannot find module/);
+  });
+});
+
+// the settings form of the homebridge UI is built from config.schema.json. on saving, the UI
+// keeps of a platform only what the form has a field for.
+describe('config.schema.json', () => {
+  interface SchemaProperty {
+    type: string;
+    title?: string;
+    default?: unknown;
+    properties?: Record<string, SchemaProperty>;
+  }
+
+  const schema = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'config.schema.json'), 'utf8')) as {
+    pluginAlias: string;
+    pluginType: string;
+    schema: SchemaProperty & { properties: Record<string, SchemaProperty> };
+  };
+
+  /** the options the interface names, without what it inherits for any key */
+  type Named<T> = { [K in keyof T as string extends K ? never : K]: T[K] };
+
+  // an option that is added to the configuration has to be added here, or this does not compile
+  const options: Record<Exclude<keyof Named<FhemPlatformConfig>, 'platform' | '_bridge'>, true> = {
+    name: true,
+    server: true,
+    port: true,
+    filter: true,
+    ssl: true,
+    webname: true,
+    auth: true,
+    rejectUnauthorized: true,
+    jsFunctions: true,
+    scope: true,
+    neverTimeout: true,
+    allowInlineFunctions: true,
+    debugPort: true,
+    debugHost: true,
+  };
+
+  const all = (properties: Record<string, SchemaProperty>): SchemaProperty[] =>
+    Object.values(properties).flatMap((property) => [property, ...all(property.properties ?? {})]);
+
+  it('is for the platform the plugin registers', () => {
+    expect(schema.pluginAlias).toBe(PLATFORM_NAME);
+    expect(schema.pluginType).toBe('platform');
+  });
+
+  it('has a field for every option of the platform, so that the UI drops none on saving', () => {
+    expect(Object.keys(schema.schema.properties).sort()).toEqual(Object.keys(options).sort());
+  });
+
+  it('gives every default in the type of its option', () => {
+    const typeOf = (value: unknown) => (Number.isInteger(value) ? 'integer' : typeof value);
+    const defaults = all(schema.schema.properties).filter((property) => property.default !== undefined);
+
+    expect(defaults.map((property) => [property.title, typeOf(property.default)])).toEqual(defaults.map((property) => [property.title, property.type]));
+  });
+
+  it('labels no two fields alike', () => {
+    const titles = all(schema.schema.properties).flatMap((property) => property.title ?? []);
+
+    expect(titles).toEqual([...new Set(titles)]);
   });
 });
