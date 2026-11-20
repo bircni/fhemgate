@@ -143,6 +143,10 @@ export class FhemAccessory {
   declare shutdown?: boolean;
 
   readonly #state: PluginState;
+  /** the url of the FHEMWEB of the connection, none for an accessory of no fhem the plugin talks to */
+  get #baseUrl(): string | undefined {
+    return (this.connection as { base_url?: string } | undefined)?.base_url;
+  }
   readonly #execute: Execute;
   #services?: Service[];
   /** when fhem was last asked for a reading that is cached, by the id of the reading */
@@ -197,7 +201,7 @@ export class FhemAccessory {
     this.#logMappings(s);
 
     const identities = platform.identities;
-    const baseUrl = (platform.connection as { base_url?: string } | undefined)?.base_url;
+    const baseUrl = this.#baseUrl;
     Object.assign(
       this,
       deviceIdentity(
@@ -332,6 +336,16 @@ export class FhemAccessory {
 
   execute(cmd: string, callback?: (result: string) => void): void {
     this.#execute(this.log, this.connection, cmd, callback);
+  }
+
+  /**
+   * Whether the fhem of the accessory answers. HomeKit is told that the device does not respond
+   * while it does not: a value from before could be wrong by now, and a command would be lost.
+   * An accessory of no fhem the plugin talks to is taken for reachable.
+   */
+  isReachable(): boolean {
+    const url = this.#baseUrl;
+    return url === undefined || this.#state.longpoll[url]?.reachable === true;
   }
 
   /**

@@ -158,6 +158,7 @@ describe('config.schema.json', () => {
     debugPort: true,
     debugHost: true,
     connections: true,
+    migrateFrom: true,
   };
 
   const all = (properties: Record<string, SchemaProperty>): SchemaProperty[] =>

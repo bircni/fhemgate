@@ -46,9 +46,16 @@ export interface ConnectionConfig {
 export interface FhemPlatformConfig extends PlatformConfig, ConnectionConfig {
   /**
    * More fhem to publish the devices of, each configured like the entry itself. A device that
-   * two of them list is published by the one that comes first, the entry itself before these.
+   * two of them list is published by one of them only, so device names have to differ between them.
    */
   connections?: ConnectionConfig[];
+  /**
+   * For an installation that comes from homebridge-fhem: the platform name it was configured
+   * with, `FHEM` or `homebridge-fhem.FHEM`. The accessories keep the identities HomeKit knows
+   * them by, and on the first start their devices are fetched before homebridge publishes the
+   * bridge. See docs/migration.md.
+   */
+  migrateFrom?: string;
   /**
    * The port of a web page that shows what the plugin has cached and who is subscribed to what.
    * 8282 if not given, or 8283 when that is taken. There is no such page with false or 0.

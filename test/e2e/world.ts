@@ -67,7 +67,11 @@ export interface World {
   characteristic(device: string, service: string, type: string, name?: string): HapCharacteristic;
   /** the same, with service and characteristic given by their names in HomeKit or Eve */
   named(device: string, service: TypeName, type: TypeName, name?: string): HapCharacteristic;
-  /** the types of the characteristics of the service, without its name, in the order they are published in */
+  /**
+   * The types of the characteristics of the service, without its name, in the order of their
+   * ids. HomeKit knows them by the ids. HAP-NodeJS lists them in another order for a moment
+   * after an accessory was added to a bridge that is published already.
+   */
   characteristicsOf(device: string, service: string, name?: string): string[];
   /** resolves once a read of the characteristic answers the value */
   becomes(target: HapCharacteristic, value: number | string): Promise<void>;
@@ -117,7 +121,9 @@ export function worldOf(fhem: FhemUnderTest, homebridge: Homebridge, accessories
     characteristicsOf: (device, service, name) =>
       world
         .service(device, service, name)
-        .characteristics.map((characteristic) => characteristic.type)
+        .characteristics.slice()
+        .sort((a, b) => a.iid - b.iid)
+        .map((characteristic) => characteristic.type)
         .filter((type) => type !== hapType.Name),
 
     async becomes(target, value) {

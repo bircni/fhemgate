@@ -71,40 +71,32 @@ describe('findOldPlugin', () => {
 });
 
 describe('installationWarnings', () => {
-  it('has nothing to say when homebridge-fhem is not installed', () => {
-    expect(installationWarnings(pluginRoot, configPath)).toEqual([]);
-  });
-
-  it('says where homebridge-fhem is, what homebridge does about it and what to do', () => {
-    const old = install('homebridge-fhem');
+  it('says how to change an entry of homebridge-fhem, which no plugin serves any more', () => {
+    configure({ platforms: [{ platform: 'FHEM', server: 'fhem' }, { platform: 'homebridge-fhem.FHEM' }, { platform: 'homebridge-fhemgate.FHEM' }] });
 
     const warnings = installationWarnings(pluginRoot, configPath);
 
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0]).toContain(`homebridge-fhem is installed as well, in ${old}.`);
-    expect(warnings[0]).toContain('"platform": "FHEM"');
-    expect(warnings[0]).toContain('HomeKit forgets them');
-    expect(warnings[0]).toContain('uninstall homebridge-fhem');
+    expect(warnings).toHaveLength(3);
+    expect(warnings[0]).toBe(
+      'config.json has a platform "FHEM", which no plugin serves: homebridge-fhemgate answers to "platform": "fhemgate". ' +
+        'change the entry to "platform": "fhemgate", "migrateFrom": "FHEM", so that HomeKit keeps its accessories, see docs/migration.md. ' +
+        'homebridge runs one fhemgate platform per bridge: merge the entries of one bridge into one, with the others as its connections.',
+    );
+    expect(warnings[1]).toContain('"migrateFrom": "homebridge-fhem.FHEM"');
+    expect(warnings[1]).toContain('merge the entries of one bridge into one, with the others as its connections.');
   });
 
-  it('has nothing to say when homebridge-fhem is disabled, as homebridge then loads the platform from this plugin', () => {
-    install('homebridge-fhem');
-    configure({ disabledPlugins: ['homebridge-fhem'], platforms: [{ platform: 'FHEM' }] });
+  it('does not ask to merge a single entry', () => {
+    configure({ platforms: [{ platform: 'FHEM' }] });
 
+    expect(installationWarnings(pluginRoot, configPath)[0]).not.toContain('merge');
+  });
+
+  it('has nothing to say without such an entry', () => {
+    configure({ platforms: [{ platform: 'fhemgate', server: 'fhem' }, null, { name: 'no platform' }] });
     expect(installationWarnings(pluginRoot, configPath)).toEqual([]);
-  });
 
-  it('has nothing to say when every FHEM platform names its plugin', () => {
-    install('homebridge-fhem');
-    configure({ platforms: [{ platform: 'homebridge-fhem.FHEM' }, { platform: 'homebridge-fhemgate.FHEM' }, null, { name: 'no platform' }] });
-
-    expect(installationWarnings(pluginRoot, configPath)).toEqual([]);
-  });
-
-  it('has nothing to say when no FHEM platform is configured', () => {
-    install('homebridge-fhem');
     configure({ bridge: {} });
-
     expect(installationWarnings(pluginRoot, configPath)).toEqual([]);
   });
 
@@ -112,24 +104,47 @@ describe('installationWarnings', () => {
     ['is missing', undefined],
     ['is damaged', '{"platforms": ['],
     ['holds something else', 'null'],
-  ])('warns when the config.json %s, as it can not tell', (_what, content) => {
-    install('homebridge-fhem');
+  ])('has nothing to say when the config.json %s', (_what, content) => {
     if (content === undefined) {
       rmSync(configPath);
     } else {
       configure(content);
     }
 
-    expect(installationWarnings(pluginRoot, configPath)).toHaveLength(1);
+    expect(installationWarnings(pluginRoot, configPath)).toEqual([]);
   });
 
-  it('warns when the list of disabled plugins is no list or names other plugins', () => {
+  it('leaves an entry of homebridge-fhem to it while it is installed', () => {
     install('homebridge-fhem');
 
-    configure({ disabledPlugins: 'homebridge-fhem', platforms: [{ platform: 'FHEM' }] });
-    expect(installationWarnings(pluginRoot, configPath)).toHaveLength(1);
+    expect(installationWarnings(pluginRoot, configPath)).toEqual([]);
+  });
 
-    configure({ disabledPlugins: ['homebridge-hue'], platforms: [{ platform: 'FHEM' }] });
+  it('warns about an entry that names this plugin also while homebridge-fhem is installed', () => {
+    install('homebridge-fhem');
+    configure({ platforms: [{ platform: 'FHEM' }, { platform: 'homebridge-fhemgate.FHEM' }] });
+
+    const warnings = installationWarnings(pluginRoot, configPath);
+
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain('"migrateFrom": "homebridge-fhemgate.FHEM"');
+  });
+
+  it('warns when homebridge-fhem is installed as well and both have a platform', () => {
+    const old = install('homebridge-fhem');
+    configure({ platforms: [{ platform: 'FHEM' }, { platform: 'fhemgate' }] });
+
+    const warnings = installationWarnings(pluginRoot, configPath);
+
+    expect(warnings).toHaveLength(1);
+    expect(warnings[0]).toContain(`homebridge-fhem is installed as well, in ${old}, and both have a platform in config.json.`);
+    expect(warnings[0]).toContain('uninstall homebridge-fhem');
+  });
+
+  it('takes a disabled homebridge-fhem for one that is not there, as homebridge does', () => {
+    install('homebridge-fhem');
+    configure({ disabledPlugins: ['homebridge-fhem'], platforms: [{ platform: 'FHEM' }] });
+
     expect(installationWarnings(pluginRoot, configPath)).toHaveLength(1);
   });
 });
@@ -176,19 +191,17 @@ describe('connectionFindings', () => {
   });
 });
 
-describe('platformFindings for a platform that names its plugin', () => {
-  it('notes that an entry that names homebridge-fhem has to stay as it is', () => {
-    const found = platformFindings('homebridge-fhem.FHEM');
-
-    expect(found).toHaveLength(1);
-    expect(found[0]?.level).toBe('info');
-    expect(found[0]?.text).toContain('"platform": "homebridge-fhem.FHEM"');
-    expect(found[0]?.text).toContain('leave it as it is');
+describe('platformFindings', () => {
+  it.each(['FHEM', 'homebridge-fhem.FHEM', 'homebridge-fhemgate.FHEM', undefined])('has nothing to say about migrateFrom %j', (migrateFrom) => {
+    expect(platformFindings({ migrateFrom })).toEqual([]);
   });
 
-  it('has nothing to say about an entry that names this plugin or no plugin', () => {
-    expect(platformFindings('homebridge-fhemgate.FHEM')).toEqual([]);
-    expect(platformFindings('FHEM')).toEqual([]);
+  it.each(['fhemgate', '', 7])('warns about migrateFrom %j, which homebridge-fhem was never configured as', (migrateFrom) => {
+    const found = platformFindings({ migrateFrom });
+
+    expect(found).toHaveLength(1);
+    expect(found[0]?.level).toBe('warn');
+    expect(found[0]?.text).toContain(`config: migrateFrom is ${JSON.stringify(migrateFrom)}, which is no platform name of homebridge-fhem.`);
   });
 });
 
@@ -202,7 +215,7 @@ describe('a platform', () => {
     // no server, so that it does not connect
     const platform = new FhemPlatform(
       log as unknown as Logging,
-      { platform: 'FHEM', debugPort: false, auth: { user: 'homebridge', pass: 'secret', sendImmediately: false, bearer: 'token' } as never },
+      { platform: 'fhemgate', debugPort: false, auth: { user: 'homebridge', pass: 'secret', sendImmediately: false, bearer: 'token' } as never },
       api(),
       plugin(),
     );
@@ -220,7 +233,7 @@ describe('a platform', () => {
 
     const platform = new FhemPlatform(
       log as unknown as Logging,
-      { platform: 'FHEM', debugPort: false, auth: { user: 'homebridge', pass: 'secret' } },
+      { platform: 'fhemgate', debugPort: false, auth: { user: 'homebridge', pass: 'secret' } },
       api(),
       plugin(),
     );

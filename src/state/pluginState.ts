@@ -1,7 +1,7 @@
 import type { Characteristic } from '@homebridge/hap-nodejs';
 import type { HAP } from 'homebridge';
 import { acceptableValue } from '../accessory/acceptable.ts';
-import { recordHistory, type HistoryServiceClass } from '../accessory/history.ts';
+import { recordHistory, type HistoryService, type HistoryServiceClass } from '../accessory/history.ts';
 import type { ConnectionStatus } from '../fhem/client.ts';
 import { reading2homekit } from '../mapping/toHomekit.ts';
 import { toInt } from '../util/loose.ts';
@@ -27,6 +27,13 @@ export class PluginState {
 
   /** the history service of the fakegato-history package for this homebridge, if the package is installed */
   historyServiceClass?: HistoryServiceClass;
+
+  /**
+   * The histories of each device, by its FUUID and their type. An accessory that is built again for a device takes
+   * the history it had, also after it was removed and comes back: fakegato-history keeps one writer per file and
+   * has no way to stop one.
+   */
+  readonly histories = new Map<string, Map<string, HistoryService>>();
 
   constructor(readonly hap: HAP) {}
 

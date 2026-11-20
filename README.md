@@ -8,9 +8,13 @@ A [Homebridge](https://homebridge.io) platform plugin that publishes the devices
 HomeKit shows a change as soon as FHEM reports it.
 
 This project is based on [homebridge-fhem](https://github.com/justme-1968/homebridge-fhem) by
-justme1968 and its contributors, and retains its configuration: the platform is still called
-`FHEM`, and the `homebridgeMapping` and `genericDeviceType` attributes work as before. See
+justme1968 and its contributors. The `homebridgeMapping` and `genericDeviceType` attributes work as
+before, and so does the configuration, under the platform name `fhemgate`. HomeKit keeps the
+accessories of homebridge-fhem with their rooms and automations: see
 [moving from homebridge-fhem](docs/migration.md).
+
+Homebridge keeps the accessories from one start to the next. It starts without waiting for FHEM,
+and while FHEM is away the accessories stay and show as not responding.
 
 ## Requirements
 
@@ -35,13 +39,13 @@ If you use homebridge-fhem today, follow [moving from homebridge-fhem](docs/migr
 
 ## Configure
 
-Add a `FHEM` platform to the `config.json` of Homebridge:
+Add a `fhemgate` platform to the `config.json` of Homebridge:
 
 ```json
 {
   "platforms": [
     {
-      "platform": "FHEM",
+      "platform": "fhemgate",
       "name": "FHEM",
       "server": "127.0.0.1",
       "port": 8083,
@@ -77,7 +81,7 @@ see [docs/devices.md](docs/devices.md) for what is recognised by itself.
 
 | Page | Holds |
 | --- | --- |
-| [Configuration](docs/configuration.md) | every option of the platform, password and https, several platforms, the debug page |
+| [Configuration](docs/configuration.md) | every option of the platform, password and https, several FHEM servers, the debug page |
 | [Devices](docs/devices.md) | which FHEM devices become which HomeKit accessories, `genericDeviceType`, how to check what was detected |
 | [Mapping](docs/mapping.md) | the `homebridgeMapping` attribute: syntax, every parameter, examples and recipes |
 | [History](docs/history.md) | the history the Eve app shows |

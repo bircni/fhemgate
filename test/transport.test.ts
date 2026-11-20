@@ -199,8 +199,7 @@ describe('connecting', () => {
 
     world.platform({ server: 'fhem.invalid' }, { on });
 
-    expect(on).toHaveBeenCalledOnce();
-    expect(on.mock.calls[0]?.[0]).toBe('shutdown');
+    expect(on.mock.calls.map(([event]) => event as unknown)).toEqual(['shutdown', 'didFinishLaunching']);
   });
 });
 
@@ -218,7 +217,7 @@ describe('authentication', () => {
     fhem = await startFakeFhem({ auth: { user: 'fhem', pass: 'secret' } });
     world = createWorld();
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
-    const platform = world.platform({ server: '127.0.0.1', port: fhem.port });
+    world.platform({ server: '127.0.0.1', port: fhem.port });
     const refusal = (pause: number) =>
       `error longpoll refused by fhem with 401 Unauthorized: authentication failed. check user and password (auth) of the platform. retry in: ${pause}msec`;
 
@@ -239,7 +238,6 @@ describe('authentication', () => {
     expect(world.log.errors().at(-1)).toBe(refusal(18000));
     expect(fhem.requests.every((request) => request.url.includes('inform='))).toBe(true);
     expect(world.csrfToken[baseUrl()]).toBeUndefined();
-    expect(platform.servers[0]?.connection?.dead).toBeUndefined();
     expect(world.longpoll[baseUrl()]).toMatchObject({ connected: false, connects: 6, disconnects: 6 });
   });
 
@@ -410,33 +408,6 @@ describe('devices', () => {
     const [first] = accessories;
     expect(first?.getServices()).toBe(first?.getServices());
     expect(first?.getServices().map((service) => service.constructor.name)).toEqual(['AccessoryInformation', 'Lightbulb']);
-  });
-
-  const lamps = (count: number) =>
-    Array.from({ length: count }, (_, index) => {
-      const name = `lamp_${String(index).padStart(3, '0')}`;
-      return { Name: name, ...device({ Internals: { NAME: name, FUUID: `fuuid-${index}` }, Readings: { state: 'on' }, PossibleSets: 'on off' }) };
-    });
-
-  it('warns when it publishes more accessories than a HomeKit bridge takes, and says what to do', async () => {
-    const platform = await connect({ devices: lamps(150) }, { filter: 'room=HomeKit' });
-    world.log.clear();
-
-    expect(await accessoriesOf(platform)).toHaveLength(150);
-
-    expect(world.log.lines.filter((line) => line.startsWith('warn '))).toEqual([
-      'warn the filter room=HomeKit selects 150 devices that are published. a HomeKit bridge takes 149 accessories at most, and HomeKit refuses a bridge with more. ' +
-        'narrow the filter, or split the devices over several FHEM platforms with different filters and run each as a child bridge.',
-    ]);
-  });
-
-  it('does not warn about as many accessories as a HomeKit bridge takes', async () => {
-    const platform = await connect({ devices: lamps(149) });
-    world.log.clear();
-
-    expect(await accessoriesOf(platform)).toHaveLength(149);
-
-    expect(world.log.lines.filter((line) => line.startsWith('warn '))).toEqual([]);
   });
 
   it('asks for all devices without a filter', async () => {
@@ -733,14 +704,14 @@ describe('reconnecting', () => {
     expect(fhem.commands.filter((cmd) => cmd.startsWith('{$defs{siri}'))).toHaveLength(1);
   });
 
-  it('gives up after four failed attempts when it never reached fhem', async () => {
+  it('keeps trying to reach a fhem it never reached', async () => {
     fhem = await startFakeFhem();
     const port = fhem.port;
     await fhem.close();
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     world = createWorld();
 
-    const platform = world.platform({ server: '127.0.0.1', port });
+    world.platform({ server: '127.0.0.1', port });
     for (const attempt of [1, 2, 3]) {
       await waitFor(() => world.log.errors().length === attempt, `attempt ${attempt}`);
       vi.runOnlyPendingTimers();
@@ -751,10 +722,8 @@ describe('reconnecting', () => {
       'error longpoll error: (error), retry in: 3000msec',
       'error longpoll error: (error), retry in: 6000msec',
       'error longpoll error: (error), retry in: 9000msec',
-      'error longpoll error: (error), retrys exhausted',
+      'error longpoll error: (error), retry in: 12000msec',
     ]);
-    expect(platform.servers[0]?.connection?.dead).toBe(true);
-    expect(await accessoriesOf(platform)).toEqual([]);
   });
 
   it('does not give up on a fhem whose certificate it does not trust, and says what to do', async () => {
@@ -769,7 +738,7 @@ describe('reconnecting', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     world = createWorld();
 
-    const platform = world.platform({ server: '127.0.0.1', port: (server.address() as AddressInfo).port, ssl: true, rejectUnauthorized: true });
+    world.platform({ server: '127.0.0.1', port: (server.address() as AddressInfo).port, ssl: true, rejectUnauthorized: true });
     for (const attempt of [1, 2, 3, 4, 5]) {
       await waitFor(() => world.log.errors().length === attempt, `attempt ${attempt}`);
       vi.runOnlyPendingTimers();
@@ -782,24 +751,22 @@ describe('reconnecting', () => {
           `or set rejectUnauthorized to false for the platform), retry in: ${pause}msec`,
       ),
     );
-    expect(platform.servers[0]?.connection?.dead).toBeUndefined();
   });
 
-  it('keeps trying with neverTimeout', async () => {
+  it('waits half a minute at most between two attempts', async () => {
     fhem = await startFakeFhem();
     const port = fhem.port;
     await fhem.close();
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     world = createWorld();
 
-    const platform = world.platform({ server: '127.0.0.1', port, neverTimeout: true });
+    world.platform({ server: '127.0.0.1', port });
     for (const attempt of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
       await waitFor(() => world.log.errors().length === attempt, `attempt ${attempt}`);
       vi.runOnlyPendingTimers();
     }
 
     expect(world.log.errors().at(-1)).toMatch(/retry in: 30000msec$/);
-    expect(platform.servers[0]?.connection?.dead).toBeUndefined();
   });
 });
 

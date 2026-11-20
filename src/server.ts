@@ -1,14 +1,42 @@
 // one fhem a platform publishes the devices of
 import type { Logging } from 'homebridge';
-import { FhemAccessory } from './accessory/accessory.ts';
+import { FhemAccessory, type Skipped } from './accessory/accessory.ts';
 import { baseUrl, isSwitchedOff, loadJsFunctions, optionalSwitch, type ConnectionConfig } from './config.ts';
 import { IdentityStore } from './devices/identityStore.ts';
 import type { Jsonlist2Device } from './devices/types.ts';
 import { describeError, execute, fetchDevices, type FhemConnection } from './fhem/client.ts';
 import { startLongpoll } from './fhem/eventStream.ts';
+import type { DevicesRequest } from './fhem/fetchNow.ts';
 import { retryDelayAfterError } from './fhem/protocol.ts';
 import type { Plugin } from './platform.ts';
 import { version } from './settings.ts';
+import type { PluginState } from './state/pluginState.ts';
+
+/** what became of a device fhem listed: an accessory, or why not */
+export type Outcome = 'published' | Skipped | 'outOfScope' | 'failed';
+
+/** the devices fhem listed, and the accessories made of them */
+export interface Listing {
+  accessories: FhemAccessory[];
+  /** what became of each device, by its name in fhem */
+  devices: Map<string, Outcome>;
+}
+
+// the fhem that looks at the attributes of each FHEMWEB, by its url
+const checkers = new WeakMap<PluginState, Map<string, FhemServer>>();
+
+/** whether the fhem is the one that looks at the attributes of the FHEMWEB, which the first to ask is */
+function checkedBy(state: PluginState, url: string, server: FhemServer): boolean {
+  let byUrl = checkers.get(state);
+  if (byUrl === undefined) {
+    byUrl = new Map();
+    checkers.set(state, byUrl);
+  }
+  if (!byUrl.has(url)) {
+    byUrl.set(url, server);
+  }
+  return byUrl.get(url) === server;
+}
 
 /**
  * One fhem: the connection to its FHEMWEB, the long poll that keeps the readings current, and
@@ -32,6 +60,12 @@ export class FhemServer {
   declare siri_device?: string;
 
   readonly #plugin: Plugin;
+  /** the accessories of the last listing */
+  #published: FhemAccessory[] = [];
+  /** set while fhem is asked for its devices */
+  #listing = false;
+  /** the wait before fhem is asked again for its devices, after it did not list them */
+  #retry?: ReturnType<typeof setTimeout>;
 
   /** what each device was first published as, kept in the storage directory of homebridge */
   get identities(): IdentityStore {
@@ -65,18 +99,43 @@ export class FhemServer {
       base_url: baseUrl(config, log),
       auth: config.auth,
       log: log,
-      neverTimeout: config.neverTimeout,
       rejectUnauthorized: optionalSwitch(config.rejectUnauthorized),
     };
   }
 
-  /** opens the long poll to fhem, which is kept open for as long as homebridge runs */
-  start(): void {
-    if (this.connection) {
-      startLongpoll(this.#plugin.state, this.connection, () => {
-        this.checkAndSetGenericDeviceType();
+  /**
+   * Opens the long poll to fhem, which is kept open for as long as homebridge runs.
+   *
+   * @param onConnected called every time FHEMWEB has answered the long poll
+   */
+  start(onConnected?: () => void): void {
+    const connection = this.connection;
+    if (connection) {
+      startLongpoll(this.#plugin.state, connection, () => {
+        // two connections to one fhem share its long poll, and fhem is looked at once for both
+        if (checkedBy(this.#plugin.state, connection.base_url, this)) {
+          this.checkAndSetGenericDeviceType();
+        }
+        onConnected?.();
       });
     }
+  }
+
+  /** how fetchDevicesNow asks this fhem for its devices. none for a fhem without a server. */
+  request(): DevicesRequest | undefined {
+    return (
+      this.connection && {
+        base_url: this.connection.base_url,
+        auth: this.connection.auth,
+        rejectUnauthorized: this.connection.rejectUnauthorized,
+        filter: this.filter,
+      }
+    );
+  }
+
+  /** whether FHEMWEB answers the long poll */
+  get reachable(): boolean {
+    return this.connection !== undefined && this.#plugin.state.longpoll[this.connection.base_url]?.reachable === true;
   }
 
   /** runs a command in fhem. see execute in fhem/client.ts. */
@@ -128,19 +187,67 @@ export class FhemServer {
   }
 
   /**
-   * The accessories for the devices of the filter, sorted by name.
+   * Asks fhem for the devices of the filter and builds the accessories for them, sorted by name.
+   * The accessories of the listing before are given up.
    *
-   * Waits for the long poll to have reached fhem first. When fhem then does not list the
-   * devices it is asked again, after a pause that grows like the one of the long poll. No
-   * empty list is answered instead: HomeKit would take every accessory for removed and forget
-   * its room and its automations.
+   * When fhem does not list the devices it is asked again, after a pause that grows like the
+   * one of the long poll. No empty list is answered instead. A call while fhem is asked already
+   * is left to the one under way, and one while it waits to ask again asks at once.
    */
-  accessories(callback: (accessories: FhemAccessory[]) => void): void {
-    this.#fetchAccessories(callback, 0);
+  list(callback: (listing: Listing) => void): void {
+    if (this.#retry !== undefined) {
+      clearTimeout(this.#retry);
+      this.#retry = undefined;
+      this.#listing = false;
+    }
+    if (this.#listing) {
+      return;
+    }
+    this.#listing = true;
+    this.#fetch((devices) => {
+      this.#listing = false;
+      callback(this.build(devices));
+    }, 0);
+  }
+
+  /** gives up an accessory of the last listing that the platform does not publish */
+  reject(accessory: FhemAccessory): void {
+    accessory.unsubscribe();
+    this.#published = this.#published.filter((each) => each !== accessory);
+  }
+
+  /** the accessories for devices fhem listed. the accessories of the listing before are given up. */
+  build(devices: (Jsonlist2Device | null)[]): Listing {
+    for (const accessory of this.#published) {
+      accessory.unsubscribe();
+    }
+
+    const listing: Listing = { accessories: [], devices: new Map() };
+    // an entry that is no device, which no fhem should send, sorts first and is reported below
+    const sorted = [...devices].sort((a, b) => {
+      const x = a?.Name ?? '';
+      const y = b?.Name ?? '';
+      return x < y ? -1 : x > y ? 1 : 0;
+    });
+    for (const s of sorted) {
+      const { accessory, outcome } = this.#accessoryFor(s);
+      // what fhem should not send, a device without internals, is reported by #accessoryFor
+      const name = (s as { Internals?: { NAME?: string } } | null)?.Internals?.NAME;
+      if (name !== undefined) {
+        listing.devices.set(name, outcome);
+      }
+      if (accessory) {
+        listing.accessories.push(accessory);
+      }
+    }
+
+    this.#published = listing.accessories;
+    this.identities.save(this.log);
+    return listing;
   }
 
   /** @param failures how often fhem did not list the devices so far */
-  #fetchAccessories(callback: (accessories: FhemAccessory[]) => void, failures: number): void {
+  #fetch(callback: (devices: (Jsonlist2Device | null)[]) => void, failures: number): void {
     const state = this.#plugin.state;
 
     const connection = this.connection;
@@ -149,47 +256,12 @@ export class FhemServer {
       return;
     }
 
-    if (state.csrfToken[connection.base_url] === undefined) {
-      if (connection.dead) {
-        callback([]);
-        return;
-      }
-
-      let timeout = 500;
-      const disconnects = state.longpoll[connection.base_url]?.disconnects;
-      if (disconnects) {
-        timeout = disconnects * 1000;
-      }
-      this.log.debug('FHEM csrfToken missing, retry in: ' + timeout + 'msec');
-      setTimeout(() => {
-        this.#fetchAccessories(callback, failures);
-      }, timeout);
-      return;
-    }
-
     this.log.info('Fetching FHEM devices...');
 
     fetchDevices(state, this.log, connection, this.filter, (err, response, json) => {
       if (!err && response?.statusCode === 200 && json) {
-        const foundAccessories: FhemAccessory[] = [];
         this.log.info('got: ' + json.totalResultsReturned + ' results');
-        if (json.totalResultsReturned) {
-          // an entry that is no device, which no fhem should send, sorts first and is reported below
-          const results = json.Results.map((s) => s as Jsonlist2Device | null).sort((a, b) => {
-            const x = a?.Name ?? '';
-            const y = b?.Name ?? '';
-            return x < y ? -1 : x > y ? 1 : 0;
-          });
-          for (const s of results) {
-            const accessory = this.#accessoryFor(s);
-            if (accessory) {
-              foundAccessories.push(accessory);
-            }
-          }
-        }
-
-        this.identities.save(this.log);
-        callback(foundAccessories);
+        callback(json.totalResultsReturned ? json.Results : []);
       } else {
         this.log.error('There was a problem connecting to FHEM');
         if (err) {
@@ -203,19 +275,20 @@ export class FhemServer {
         const attempt = failures + 1;
         const pause = retryDelayAfterError(attempt);
         this.log.error('fetching the devices failed for the ' + attempt + '. time, trying again in: ' + pause + 'msec');
-        setTimeout(() => {
-          this.#fetchAccessories(callback, attempt);
+        this.#retry = setTimeout(() => {
+          this.#retry = undefined;
+          this.#fetch(callback, attempt);
         }, pause);
       }
     });
   }
 
   /**
-   * The accessory for a device fhem listed, with its services built. Undefined for a device
-   * that is not to be published, and for one the plugin fails on: an error that gets out of here
-   * ends homebridge, and with it every accessory of every plugin.
+   * The accessory for a device fhem listed, with its services built, or what kept it from being
+   * one. A device the plugin fails on is no accessory: an error that gets out of here ends
+   * homebridge, and with it every accessory of every plugin.
    */
-  #accessoryFor(s: Jsonlist2Device | null): FhemAccessory | undefined {
+  #accessoryFor(s: Jsonlist2Device | null): { accessory?: FhemAccessory; outcome: Outcome } {
     const state = this.#plugin.state;
 
     let accessory: FhemAccessory;
@@ -225,19 +298,20 @@ export class FhemServer {
       });
     } catch (error) {
       this.log.error('no accessory created for ' + (s?.Name ?? 'a device without a name') + ': ' + String(error));
-      return undefined;
+      return { outcome: 'failed' };
     }
 
     if (accessory.skipped !== undefined) {
       this.log.info('no accessory created for ' + s?.Internals.NAME + ' (' + s?.Internals.TYPE + ')');
-      return undefined;
+      return { outcome: accessory.skipped };
     }
 
     accessory.fhem = this;
 
     if (!accessory.isInScope('siri')) {
       this.log.info('ignoring ' + accessory.name + ' for siri');
-      return undefined;
+      accessory.unsubscribe();
+      return { outcome: 'outOfScope' };
     }
 
     // the services are built here and not when homebridge asks for them, where an error could not be caught
@@ -246,9 +320,9 @@ export class FhemServer {
     } catch (error) {
       this.log.error('no accessory created for ' + s?.Name + ': ' + String(error));
       accessory.unsubscribe();
-      return undefined;
+      return { outcome: 'failed' };
     }
 
-    return accessory;
+    return { accessory, outcome: 'published' };
   }
 }

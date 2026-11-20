@@ -147,7 +147,30 @@ export function createWorld(options: WorldOptions = {}): World {
       FhemAccessory.prototype.execute = realExecute;
       // the tests also hand in what a config.json could wrongly contain
       // without a word in the config the debug page would take its default port on this machine
-      return new FhemPlatform(logging, { platform: 'FHEM', debugPort: false, ...config } as FhemPlatformConfig, api(extra), plugin) as unknown as Platform;
+      // the tests start a platform after another, as homebridge does with one on each start
+      plugin.platformCreated = false;
+      const platform = new FhemPlatform(logging, { platform: 'fhemgate', debugPort: false, ...config } as FhemPlatformConfig, api(extra), plugin);
+      // homebridge would start the platform once it restored its accessories, and the platform
+      // would publish what each fhem lists. the tests open the long polls and ask for the lists.
+      for (const server of platform.servers) {
+        server.start();
+      }
+      return Object.assign(platform, {
+        accessories(callback: (accessories: Accessory[]) => void): void {
+          void (async () => {
+            const found: unknown[] = [];
+            for (const server of platform.servers) {
+              // the platform asks for the devices once the long poll was answered
+              const url = server.connection?.base_url ?? '';
+              while (server.connection && state.csrfToken[url] === undefined) {
+                await new Promise((resolve) => setImmediate(resolve));
+              }
+              found.push(...(await new Promise<unknown[]>((resolve) => server.list((listing) => resolve(listing.accessories)))));
+            }
+            callback(found as Accessory[]);
+          })();
+        },
+      }) as unknown as Platform;
     },
 
     update: (informId, value, noUpdate) => {
@@ -163,7 +186,8 @@ export function createWorld(options: WorldOptions = {}): World {
 
     shutdown() {
       // any platform does: they all save the histories of the one state
-      new FhemPlatform(createLog() as unknown as Logging, { platform: 'FHEM', debugPort: false }, api({}), plugin).shutdown();
+      plugin.platformCreated = false;
+      new FhemPlatform(createLog() as unknown as Logging, { platform: 'fhemgate', debugPort: false }, api({}), plugin).shutdown();
     },
 
     debugPage(url) {

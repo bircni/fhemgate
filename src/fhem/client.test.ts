@@ -12,20 +12,20 @@ const log = createLog() as unknown as Logging;
 
 describe('requestOptions', () => {
   it('checks the certificate of the server when the connection says so, with and without user and password', () => {
-    expect(requestOptions({ base_url: 'https://fhem', log, rejectUnauthorized: true })).toEqual({});
-    expect(requestOptions({ base_url: 'https://fhem', log, auth: { user: 'u', pass: 'p' }, rejectUnauthorized: true })).toEqual({
+    expect(requestOptions({ rejectUnauthorized: true })).toEqual({});
+    expect(requestOptions({ auth: { user: 'u', pass: 'p' }, rejectUnauthorized: true })).toEqual({
       auth: { user: 'u', pass: 'p' },
     });
   });
 
   it('checks it without user and password, and not with them, when the connection says nothing', () => {
-    expect(requestOptions({ base_url: 'https://fhem', log })).toEqual({});
-    expect(requestOptions({ base_url: 'https://fhem', log, auth: { user: 'u', pass: 'p' } })).toEqual({ auth: { user: 'u', pass: 'p' }, insecure: true });
+    expect(requestOptions({})).toEqual({});
+    expect(requestOptions({ auth: { user: 'u', pass: 'p' } })).toEqual({ auth: { user: 'u', pass: 'p' }, insecure: true });
   });
 
   it('does not check it when the connection says not to', () => {
-    expect(requestOptions({ base_url: 'https://fhem', log, rejectUnauthorized: false })).toEqual({ insecure: true });
-    expect(requestOptions({ base_url: 'https://fhem', log, auth: { user: 'u' }, rejectUnauthorized: false })).toEqual({ auth: { user: 'u' }, insecure: true });
+    expect(requestOptions({ rejectUnauthorized: false })).toEqual({ insecure: true });
+    expect(requestOptions({ auth: { user: 'u' }, rejectUnauthorized: false })).toEqual({ auth: { user: 'u' }, insecure: true });
   });
 });
 

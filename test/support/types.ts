@@ -98,7 +98,7 @@ export interface PlatformConfig {
 
 /** one fhem of a platform */
 export interface Server {
-  connection?: { base_url: string; dead?: boolean; rejectUnauthorized?: boolean };
+  connection?: { base_url: string; rejectUnauthorized?: boolean };
   filter?: string;
   scope?: unknown;
   jsFunctions?: unknown;

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import type { API, Logging } from 'homebridge';
 import type { HistoryServiceClass } from './accessory/history.ts';
 import type { FhemPlatformConfig } from './config.ts';
-import { installationWarnings, OLD_PLUGIN_NAME } from './migration.ts';
+import { installationWarnings } from './migration.ts';
 import { FhemPlatform, version, type Plugin } from './platform.ts';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.ts';
 import { PluginState } from './state/pluginState.ts';
@@ -55,10 +55,5 @@ export default function (homebridge: API): void {
 
   const plugin = createPlugin(homebridge);
 
-  // Registered under the name of homebridge-fhem. homebridge takes a plugin that names another
-  // plugin here for one that got its own name wrong and notes that the name stands for it, so a
-  // config entry that says "platform": "homebridge-fhem.FHEM" is loaded from this plugin. Such an
-  // entry can not be renamed: homebridge makes the uuid of every accessory from what it says.
-  // "FHEM" and "homebridge-fhemgate.FHEM" are found as they are without it.
-  homebridge.registerPlatform(OLD_PLUGIN_NAME, PLATFORM_NAME, plugin.Platform);
+  homebridge.registerPlatform(PLATFORM_NAME, plugin.Platform);
 }

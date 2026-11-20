@@ -363,6 +363,11 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
       characteristic
         // only HomeKit writes through this handler: values from fhem are published with updateValue
         .on('set', (value: CharacteristicValue, callback: CharacteristicSetCallback) => {
+          if (!accessory.isReachable()) {
+            callback(state.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+            return;
+          }
+
           if (each.delay) {
             accessory.delayed(each, value, each.delay);
           } else {
@@ -379,7 +384,9 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
           callback();
         })
         .on('get', (callback) => {
-          if (single('Reachable')?.cached === false) {
+          if (!accessory.isReachable()) {
+            (callback as QueryCallback)(state.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+          } else if (single('Reachable')?.cached === false) {
             (callback as QueryCallback)('unreachable');
           } else {
             accessory.query(each, (error, value) => {

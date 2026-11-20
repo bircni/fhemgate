@@ -35,7 +35,7 @@ Homebridge.
    | `ignoring <device>` | it has `genericDeviceType ignore`, or is a `structure`, `SVG` or `THRESHOLD` without `genericDeviceType` |
    | `<device>: no service type detected` | the plugin does not know what it is. Set [`genericDeviceType`](devices.md#saying-what-a-device-is-genericdevicetype). |
    | `no accessory created for <device>` | as above, or with an error behind it: the mapping of the device can not be used |
-   | `<device> is already published` | another FHEM platform, or another connection of this entry, has published it |
+   | `<device> is already published` | another FHEM server of this entry has published a device of this name |
    | `ignoring <device> for siri` | the platform has a [`scope`](configuration.md#scope) without `siri` |
 
 A device with a mapping the plugin can not use does not stop the others: it is left out and named
@@ -77,16 +77,15 @@ address of the host. FHEMWEB also has to accept connections from the address Hom
 | `the certificate of fhem is not trusted` | with `ssl` and without `auth` the certificate of FHEM is checked. One that FHEM made itself needs `"rejectUnauthorized": false`, see [https](configuration.md#https). |
 | `There was a problem connecting to FHEM` | a single command or read failed. The address is in the line. |
 
-## Homebridge starts before FHEM
+## Homebridge starts before FHEM, or FHEM is away
 
-When FHEM can not be reached while Homebridge starts, the plugin tries again with a growing pause
-and gives up after the fourth failed attempt, with `retrys exhausted` in the log. Homebridge then
-goes on without the devices of FHEM. `"neverTimeout": true` makes it keep trying. Homebridge waits
-for the plugin in both cases, so on a machine that starts both, start FHEM first.
+Homebridge keeps the accessories from one start to the next and publishes them without waiting for
+FHEM. While FHEM can not be reached, HomeKit shows them as not responding, and a command from
+HomeKit is answered with an error instead of being lost. The plugin tries again with a growing
+pause, for as long as Homebridge runs, and builds the accessories from what FHEM lists once it is
+back. Nothing is removed while FHEM is away.
 
-Once FHEM was reached the plugin does not give up: after a restart of FHEM it connects again by
-itself. The exception is a FHEMWEB whose csrf token is switched off (`attr WEB csrfToken none`):
-there the plugin also gives up when FHEM stays away later, so set `"neverTimeout": true`.
+On the very first start there are no accessories yet: they appear once FHEM answers.
 
 ## Blinds
 
@@ -140,15 +139,19 @@ To give a device a fixed identity yourself use `SerialNumber=serial=<text>` in i
 
 ## Homebridge can not be added to HomeKit, or everything shows "no response"
 
-A HomeKit bridge takes 149 accessories. The plugin warns in the log when a platform publishes more.
-Use `filter` to publish fewer devices, or define several FHEM platforms with different filters and
-run each as a child bridge. See [several platforms](configuration.md#several-platforms).
+A HomeKit bridge takes 149 accessories. The plugin publishes no more, and says in the log which
+devices it left out. Use `filter` to publish fewer devices, or define several fhemgate entries with
+different filters and run each as a child bridge. See
+[more than 149 accessories](configuration.md#more-than-149-accessories).
 
 ## Messages in the log
 
 | Log line | Meaning |
 | --- | --- |
-| `Plugin 'homebridge-fhemgate' tried to register with an incorrect plugin identifier: 'homebridge-fhem'. Please report this to the developer!` | Expected, no need to report it. The plugin registers its platform under the name of homebridge-fhem on purpose, so that a config entry with `"platform": "homebridge-fhem.FHEM"` keeps working. Homebridge notes this at every start. |
+| `config.json has a platform "FHEM", which no plugin serves` | An entry of homebridge-fhem. Change it as the line says, see [moving from homebridge-fhem](migration.md). |
+| `<name> is no longer published by fhem. its accessory is removed if that is still so in 10 minutes.` | FHEM no longer lists the device, or lists it left out on purpose. Its accessory goes in ten minutes, unless the device is back by then. |
+| `removing <name>, which fhem no longer publishes` | The accessory of the device was removed. |
+| `<name> has the identity of an accessory that is published already, and is left out` | Two devices have the same serial number. Give one of them its own with `SerialNumber=serial=<text>` in its `homebridgeMapping`. |
 | `no siri device found. please define it.` | The plugin looks for a device of the FHEM module `siri` and notes its version there. Nothing else depends on it. `define siri siri` in FHEM ends the message. |
 | `genericDeviceType attribute was not known to fhem and was created. restart homebridge after giving it to devices.` | First start against this FHEM. Set the attribute where needed and restart Homebridge. |
 | `homebridgeMapping attribute created.` | First start against this FHEM. Nothing to do. |

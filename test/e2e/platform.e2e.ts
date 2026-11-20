@@ -21,13 +21,10 @@ const logged = (homebridge: Homebridge, pattern: RegExp) =>
     .split('\n')
     .filter((line) => pattern.test(line));
 
-/** what a homebridge is configured with for several fhem: a platform for each, or one platform with all of them as connections */
-const layouts: [string, (platforms: Record<string, unknown>[]) => Record<string, unknown>[]][] = [
-  ['several FHEM platforms in one homebridge', (platforms) => platforms],
-  ['one FHEM platform with several connections', ([first, ...others]) => [{ ...first, connections: others }]],
-];
+/** one platform with all of the fhem as connections. homebridge takes a dynamic platform once. */
+const layout = ([first, ...others]: Record<string, unknown>[]): Record<string, unknown>[] => [{ ...first, connections: others }];
 
-describe.skipIf(realFhemUrl !== undefined).each(layouts)('%s', (_title, layout) => {
+describe.skipIf(realFhemUrl !== undefined)('one fhemgate platform with several connections', () => {
   const basic = `Basic ${Buffer.from('homebridge:secret').toString('base64')}`;
 
   /** asks for user and password, hands out a csrf token and has a siri device */
@@ -270,8 +267,8 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
 
     await says(homebridge, /fetching the devices failed for the 1\. time, trying again in: 3000msec/);
     expect(logged(homebridge, / {2}500: Internal Server Error/)).toHaveLength(1);
-    // homebridge still waits for the platform
-    await expect(homebridge.accessories()).rejects.toThrow('fetch failed');
+    // the bridge is published without the accessory, which homebridge did not have yet
+    expect(names(await homebridge.accessories())).toEqual([]);
 
     await says(homebridge, /fetching the devices failed for the 2\. time, trying again in: 6000msec/);
     expect(logged(homebridge, / {2}the answer is no list of devices/)).toHaveLength(1);
@@ -306,12 +303,9 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     await says(homebridge, /failed to parse <html>busy<\/html>/);
   });
 
-  it('opens one long poll for two platforms of the same fhem, and publishes the devices of both', async () => {
+  it('opens one long poll for two connections to the same fhem, and publishes the devices of both', async () => {
     const fhem = await startStandIn([lamp('e2e_p_upstairs', 'a'), lamp('e2e_p_downstairs', 'b')]);
-    const homebridge = await startHomebridge([
-      { ...fhem.platformConfig, filter: 'room=a' },
-      { ...fhem.platformConfig, filter: 'room=b' },
-    ]);
+    const homebridge = await startHomebridge({ ...fhem.platformConfig, filter: 'room=a', connections: [{ ...fhem.platformConfig, filter: 'room=b' }] });
     started.push({ stop: () => homebridge.stop() }, { stop: () => fhem.close() });
 
     const accessories = await published(homebridge, 2);
@@ -325,23 +319,20 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     await world.notifies(world.characteristic('e2e_p_downstairs', hapType.Switch, hapType.On), 1, () => fhem.change('e2e_p_downstairs', 'state', 'on'));
   });
 
-  it('warns when the devices are more than a HomeKit bridge takes, and says what to do about it, before homebridge ends over them', async () => {
-    const lamps = Array.from({ length: 150 }, (_, index) => lamp(`e2e_p_many_${index}`, 'a'));
+  it('publishes no more devices than a HomeKit bridge takes, and says what to do about the others', async () => {
+    const lamps = Array.from({ length: 150 }, (_, index) => lamp(`e2e_p_many_${String(index).padStart(3, '0')}`, 'a'));
     const { homebridge } = await start(lamps, {}, { filter: 'room=a' });
 
     await says(
       homebridge,
       new RegExp(
-        'the filter room=a selects 150 devices that are published\\. a HomeKit bridge takes 149 accessories at most, and HomeKit refuses a bridge with more\\. ' +
-          'narrow the filter, or split the devices over several FHEM platforms with different filters and run each as a child bridge\\.',
+        '1 devices are not published: a HomeKit bridge takes 149 accessories at most, and HomeKit refuses a bridge with more\\. ' +
+          'narrow the filter, or split the devices over several fhemgate platforms with different filters and run each as a child bridge\\.',
       ),
     );
-
-    // homebridge is handed all of them all the same. HAP-NodeJS refuses the 150th, which ends homebridge.
-    await says(homebridge, /Error: Cannot Bridge more than 149 Accessories/);
-    await says(homebridge, /Got SIGTERM, shutting down Homebridge/);
-    const output = homebridge.output();
-    expect(output.indexOf('a HomeKit bridge takes 149 accessories at most')).toBeLessThan(output.indexOf('Cannot Bridge more than 149 Accessories'));
+    expect(logged(homebridge, /e2e-p-many-149 is not published/)).toHaveLength(1);
+    expect(await published(homebridge, 149)).toHaveLength(149);
+    expect(homebridge.output()).not.toContain('Cannot Bridge more than 149 Accessories');
   });
 
   it('takes a scope that is a list', async () => {
@@ -465,13 +456,25 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     );
     const page = async (path: string) => (await fetch(`http://127.0.0.1:${debugPort}${path}`)).text();
 
-    expect(names(await published(homebridge, 3))).toEqual(['e2e_p_lamp', 'e2e_p_quality', 'e2e_p_unseen']);
+    const accessories = await published(homebridge, 3);
+    expect(names(accessories)).toEqual(['e2e_p_lamp', 'e2e_p_quality', 'e2e_p_unseen']);
+    // a read asks fhem for the reading, which it answers with nothing
+    await homebridge.answer(
+      worldOf(fhem, homebridge, accessories, (device) => device).characteristic('e2e_p_unseen', hapType.TemperatureSensor, hapType.CurrentTemperature),
+    );
     expect(logged(homebridge, /no accessory created for e2e_p_twice: Error: Cannot add a Characteristic with the same UUID/)).toHaveLength(1);
     await says(homebridge, new RegExp(`debug server listening on http://<ip>:${debugPort}`));
 
     expect(await page('/')).toBe('<a href="/cached">cached</a><br><a href="/subscriptions">subscriptions</a>');
 
-    let cached = await page('/cached');
+    let cached = await eventually(
+      'fhem to answer the read',
+      async () => {
+        const shown = await page('/cached');
+        return shown.includes('e2e_p_unseen-later: <br><br>') ? shown : undefined;
+      },
+      homebridge,
+    );
     expect(cached).toContain(`http://127.0.0.1:${fhem.fake.port}/fhem<br>&nbsp;&nbsp;connected: true; connects: 1<br>`);
     expect(cached).not.toContain('last event: ');
     expect(cached).toContain('e2e_p_lamp-state: off<br>&nbsp;&nbsp;On: false (boolean)<br>');
@@ -529,28 +532,20 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     }
   });
 
-  it('starts no debug server for a debugPort that is no port, and says so unless it is 0 or false', async () => {
-    const debugPort = await freePort();
-    const fhem = await startStandIn([lamp('e2e_p_lamp', 'a')]);
-    // only the first one has a fhem. the others are looked at for their debugPort all the same.
-    const homebridge = await startHomebridge([
-      { ...fhem.platformConfig, debugPort: 'abc' },
-      { debugPort: 70000 },
-      { debugPort: 1.5 },
-      { debugPort: 0 },
-      { debugPort: '0' },
-      { debugPort: 'false' },
-      // a port as text is taken
-      { debugPort: String(debugPort), debugHost: '127.0.0.1' },
-    ]);
-    started.push({ stop: () => homebridge.stop() }, { stop: () => fhem.close() });
+  it('starts no debug server for a debugPort that is no port, says so, and goes on', async () => {
+    const { homebridge } = await start([lamp('e2e_p_lamp', 'a')], {}, { debugPort: 'abc' });
 
     expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
-    const refused = logged(homebridge, /config: value for debugPort has to be a port number or false\. the debug server is not started\./);
-    expect(refused.map((line) => /\[(FHEM[^\]]*)\]/.exec(line)?.[1])).toEqual(['FHEM', 'FHEM 2', 'FHEM 3']);
-    expect(logged(homebridge, /debug server listening on /).map((line) => line.replace(/^.*debug server /, ''))).toEqual([
-      `listening on http://127.0.0.1:${debugPort}`,
-    ]);
+    expect(logged(homebridge, /config: value for debugPort has to be a port number or false\. the debug server is not started\./)).toHaveLength(1);
+    expect(logged(homebridge, /debug server listening on /)).toEqual([]);
+  });
+
+  it('takes a debugPort that is a number as text', async () => {
+    const debugPort = await freePort();
+    const { homebridge } = await start([lamp('e2e_p_lamp', 'a')], {}, { debugPort: String(debugPort), debugHost: '127.0.0.1' });
+
+    expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
+    await says(homebridge, new RegExp(`debug server listening on http://127\\.0\\.0\\.1:${debugPort}`));
   });
 
   it('starts the file of the identities it remembers anew when it can not read it, and says so', async () => {

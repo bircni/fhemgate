@@ -317,7 +317,7 @@ export async function startHomebridge(
       // several bridges run at the same time, each needs a name and an id of its own
       bridge: { name: `fhemgate e2e ${port}`, username: options.username ?? `0E:2E:2E:2E:${hex(port >> 8)}:${hex(port)}`, port, pin },
       platforms: (Array.isArray(platforms) ? platforms : [platforms]).map((platform, index) => ({
-        platform: 'FHEM',
+        platform: 'fhemgate',
         name: index ? `FHEM ${index + 1}` : 'FHEM',
         // the debug page of the plugin would take a fixed port of this machine
         debugPort: false,

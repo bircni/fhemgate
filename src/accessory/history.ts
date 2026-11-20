@@ -158,8 +158,22 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
     return;
   }
 
+  // the file of the history is named after the FUUID, see services.ts. devices without one share
+  // a file, and get a history service each.
+  const ofDevice = accessory.fuuid === undefined ? undefined : state.histories.get(accessory.fuuid);
+  const kept = ofDevice?.get(type);
+  if (kept) {
+    log.debug('  FakeGatoHistory service for ' + service_name + ' as it was');
+    accessory.historyService = kept;
+    services.push(kept);
+    return;
+  }
+
   log.debug('  FakeGatoHistory service with type ' + type + ' for ' + service_name);
   const historyService = new state.historyServiceClass(type, accessory, { size: mapping.size ? mapping.size : 1024, storage: 'fs' });
+  if (accessory.fuuid !== undefined) {
+    state.histories.set(accessory.fuuid, (ofDevice ?? new Map<string, HistoryService>()).set(type, historyService));
+  }
   accessory.historyService = historyService;
   services.push(historyService);
 

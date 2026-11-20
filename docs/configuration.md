@@ -1,13 +1,14 @@
 # Configuration
 
-Every FHEM installation is one platform entry in the `config.json` of Homebridge. The platform is
-called `FHEM`.
+The plugin is one platform entry in the `config.json` of Homebridge. The platform is called
+`fhemgate`. Coming from homebridge-fhem, whose platform was called `FHEM`, read
+[moving from homebridge-fhem](migration.md) first.
 
 ```json
 {
   "platforms": [
     {
-      "platform": "FHEM",
+      "platform": "fhemgate",
       "name": "FHEM",
       "server": "127.0.0.1",
       "port": 8083,
@@ -17,14 +18,21 @@ called `FHEM`.
 }
 ```
 
-The plugin reads the devices and their attributes once, when Homebridge starts. After a change to
+Homebridge keeps the accessories from one start to the next and publishes them as soon as it
+starts, before FHEM answers. The plugin reads the devices and their attributes every time it
+reaches FHEM: when Homebridge starts, and when FHEM comes back after it was away. After a change to
 the configuration, to the filter result or to an attribute of a device, restart Homebridge.
+
+While FHEM can not be reached, the accessories stay, and HomeKit shows them as not responding. An
+accessory is removed when FHEM no longer lists its device, or lists it left out on purpose (with
+`genericDeviceType ignore`, outside the filter or the `scope`), and still does ten minutes later.
+A device FHEM lists but the plugin can not make an accessory of keeps its accessory.
 
 ## Options
 
 | Option | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `platform` | text | | Has to be `FHEM`. |
+| `platform` | text | | Has to be `fhemgate`. |
 | `name` | text | | The name of the platform in the log of Homebridge. |
 | `server` | text | | Host name or address of FHEM. Required unless the entry has `connections`: without it the entry logs `incomplete configuration` and publishes nothing of its own. |
 | `port` | number | `8083` | The port of FHEMWEB. |
@@ -36,7 +44,8 @@ the configuration, to the filter result or to an attribute of a device, restart 
 | `scope` | text or list | none | See [scope](#scope). |
 | `jsFunctions` | text | none | A file with functions for mappings. See [jsFunctions](#jsfunctions). |
 | `allowInlineFunctions` | boolean | `true` | `false` to refuse JavaScript in mappings. See [who is trusted](#who-is-trusted). |
-| `neverTimeout` | boolean | `false` | `true` to keep trying for ever when FHEM can not be reached while Homebridge starts. |
+| `migrateFrom` | text | none | Only for an entry that was a platform of homebridge-fhem: what it said for `platform`. See [moving from homebridge-fhem](migration.md). |
+| `neverTimeout` | boolean | | Not needed any more: FHEM is tried for as long as Homebridge runs. |
 | `debugPort` | number or `false` | `8282` | The port of the [debug page](#debug-page). `false` or `0` switches it off. |
 | `debugHost` | text | all addresses | The address the debug page listens on. |
 | `connections` | list | none | More FHEM servers for this entry, see [several FHEM servers](#several-fhem-servers). |
@@ -74,7 +83,7 @@ For a FHEMWEB that is protected with an `allowed` device and `basicAuth`:
 
 ```json
 {
-  "platform": "FHEM",
+  "platform": "fhemgate",
   "name": "FHEM",
   "server": "fhem.example.org",
   "port": 8083,
@@ -90,7 +99,7 @@ For a FHEMWEB with `attr WEB HTTPS 1`:
 
 ```json
 {
-  "platform": "FHEM",
+  "platform": "fhemgate",
   "name": "FHEM",
   "server": "fhem.example.org",
   "port": 8083,
@@ -119,13 +128,12 @@ plugin keeps trying.
 
 One entry can publish the devices of several FHEM servers. `connections` lists the others, each
 with the options of the table above that are about one FHEM: `server`, `port`, `webname`, `ssl`,
-`rejectUnauthorized`, `auth`, `filter`, `scope`, `jsFunctions`, `allowInlineFunctions` and
-`neverTimeout`. A connection takes none of them from the entry, not even `allowInlineFunctions`: give each
+`rejectUnauthorized`, `auth`, `filter`, `scope`, `jsFunctions` and `allowInlineFunctions`. A connection takes none of them from the entry, not even `allowInlineFunctions`: give each
 connection `"allowInlineFunctions": false` that is to refuse JavaScript.
 
 ```json
 {
-  "platform": "FHEM",
+  "platform": "fhemgate",
   "server": "127.0.0.1",
   "filter": "room=HomeKit",
   "connections": [{ "server": "192.168.1.20", "port": 8088, "webname": "garden" }]
@@ -134,27 +142,18 @@ connection `"allowInlineFunctions": false` that is to refuse JavaScript.
 
 An entry without `server` publishes only the devices of its connections. Device names have to
 differ between them: a device whose name another FHEM of the entry already published is left out,
-with `<name> is already published` in the log. The entry itself is asked before its connections.
+with `<name> is already published` in the log.
 
-## Several platforms
+Homebridge runs the platform once per bridge, so all FHEM servers of one bridge are one entry
+with `connections`. Two connections can talk to the same FHEM with different filters; they share
+one long poll.
 
-Each FHEM installation, or each part of one, can also be an entry of its own:
+## More than 149 accessories
 
-```json
-{
-  "platforms": [
-    { "platform": "FHEM", "name": "FHEM ground floor", "server": "127.0.0.1", "filter": "room=HomeKitGround" },
-    { "platform": "FHEM", "name": "FHEM upstairs", "server": "127.0.0.1", "filter": "room=HomeKitUp" },
-    { "platform": "FHEM", "name": "FHEM garden", "server": "192.168.1.20", "port": 8088, "webname": "garden" }
-  ]
-}
-```
-
-- A device that two platforms select is published once, by the first platform that lists it.
-- A HomeKit bridge takes 149 accessories. The plugin warns in the log when a platform publishes
-  more. Split the devices over several platforms with different filters and run each as a child
-  bridge of Homebridge.
-- All platforms share one debug page, unless they name different ports.
+A HomeKit bridge takes 149 accessories. The plugin publishes no more and says in the log which
+devices it left out. Split the devices over several entries with different filters and run each
+as a child bridge of Homebridge, with `_bridge` in the entry. All entries share one debug page,
+unless they name different ports.
 
 ## Scope
 

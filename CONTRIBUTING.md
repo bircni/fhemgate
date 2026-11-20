@@ -65,9 +65,9 @@ and write its accessories the way a HomeKit controller does, and are notified by
 | `mappings.e2e.ts` | what the `homebridgeMapping` attribute can say, one device per feature |
 | `history.e2e.ts` | the Eve history with the real fakegato-history |
 | `hardware.e2e.ts` | device types of other fhem modules, and the `eventMap` attribute |
-| `platform.e2e.ts` | the options of the platform, several platforms, what ends homebridge |
+| `platform.e2e.ts` | the options of the platform, several fhem in one entry, the 149 accessories of a bridge |
 | `connection.e2e.ts` | a fhem that is not there, restarts, or sends events in pieces |
-| `migration.e2e.ts` | a storage directory as homebridge-fhem left it: the accessories keep their ids, a `homebridge-fhem.FHEM` entry, both plugins installed |
+| `migration.e2e.ts` | a storage directory as homebridge-fhem left it, on a bridge with an accessory of another plugin: with `migrateFrom` the accessories keep their ids, also on the next start while fhem is away, and without it they do not; an old entry, both plugins installed |
 | `reads.e2e.ts` | a fhem that takes its time to answer what HomeKit reads |
 | `refresh.e2e.ts` | the reading fhem is asked for in the background, once a minute at most. takes that minute. |
 | `fixtures.e2e.ts` | every device fixture: is what homebridge publishes what the plugin builds? |

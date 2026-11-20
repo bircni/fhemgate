@@ -12,20 +12,19 @@ export interface FhemConnection {
   log: Logging;
   /** user and password for FHEMWEB */
   auth?: HttpAuth;
-  /** keep trying to open the long poll for ever */
-  neverTimeout?: boolean;
   /**
    * Whether the certificate of the server has to be one Node trusts. Without a value it has to
    * unless user and password are configured.
    */
   rejectUnauthorized?: boolean;
-  /** set when the long poll was given up without ever reaching fhem */
-  dead?: boolean;
 }
 
 /** how the long poll to one fhem is doing */
 export interface ConnectionStatus {
+  /** a long poll is open or being opened */
   connected?: boolean;
+  /** FHEMWEB answered the long poll that is open. false while it is being opened, and after it ended or failed. */
+  reachable?: boolean;
   connects: number;
   /** how often in a row the long poll ended or failed */
   disconnects: number;
@@ -52,7 +51,7 @@ export interface DeviceList {
  * configured, and checked if they are not. That is how it was in homebridge-fhem: it sends the
  * password to whoever answers, so a connection with a password should ask for the check.
  */
-export function requestOptions(connection: FhemConnection): GetOptions {
+export function requestOptions(connection: Pick<FhemConnection, 'auth' | 'rejectUnauthorized'>): GetOptions {
   const options: GetOptions = {};
   if (connection.auth) {
     options.auth = connection.auth;
@@ -105,17 +104,24 @@ export function fetchDevices(
   log.info('fetching: ' + withoutToken(url));
 
   getText(url, { ...requestOptions(connection), gzip: true }, (err, response, body) => {
-    let devices: DeviceList | undefined;
-    try {
-      const answer = JSON.parse(body as string) as Partial<DeviceList> | null;
-      if (Array.isArray(answer?.Results)) {
-        devices = answer as DeviceList;
-      }
-    } catch {
-      // no JSON: an error page, or nothing at all
-    }
-    callback(err, response, devices);
+    callback(err, response, deviceList(body));
   });
+}
+
+/** what jsonlist2 answered, if it is a list of devices: no JSON may be an error page, or nothing at all */
+export function deviceList(body: string | undefined): DeviceList | undefined {
+  try {
+    const answer = JSON.parse(body as string) as Partial<DeviceList> | null;
+    return Array.isArray(answer?.Results) ? (answer as DeviceList) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** the csrf token FHEMWEB hands out with an answer: empty for a FHEMWEB that has none */
+export function csrfTokenOf(response: HttpResponse): string {
+  const token = response.headers['x-fhem-csrftoken'];
+  return token ? String(token) : '';
 }
 
 // the reasons Node gives for a certificate it does not accept
