@@ -57,8 +57,18 @@ export const garage: Rule = ({ s, target, genericType }) => {
   return true;
 };
 
+/** the modules whose devices with a position command are roller shutters */
+const shutterModules = new Set(['DUOFERN', 'SOMFY']);
+
+/** stops the blind when HomeKit sets the characteristic. HomeKit never sets it to false, and nothing is sent if it does. */
+function holdPosition2stop(_mapping: Mapping, hold: unknown): number | undefined {
+  return hold ? 1 : undefined;
+}
+
 export const blind: Rule = ({ s, target, genericType }) => {
-  if (genericType !== 'blind' && s.Internals.type !== 'blind' && s.Attributes.subType !== 'blind' && s.Attributes.subType !== 'blindActuator') {
+  // a DUOFERN or SOMFY device that is set to a position is a blind without being told so, unless the user says what else it is
+  const shutter = genericType === undefined && shutterModules.has(s.Internals.TYPE) && /(^| )position\b/.test(s.PossibleSets);
+  if (!shutter && genericType !== 'blind' && s.Internals.type !== 'blind' && s.Attributes.subType !== 'blind' && s.Attributes.subType !== 'blindActuator') {
     return false;
   }
 
@@ -95,6 +105,13 @@ export const blind: Rule = ({ s, target, genericType }) => {
   }
   target.mappings.CurrentPosition = currentPosition;
   target.mappings.TargetPosition = targetPosition;
+
+  // HomeKit sets HoldPosition to stop a blind where it is. it has no reading to follow.
+  if (s.PossibleSets.match(/(^| )stop\b/)) {
+    const holdPosition: Mapping = { cmdOn: 'stop', default: false };
+    holdPosition.homekit2reading = holdPosition2stop.bind(null, holdPosition);
+    target.mappings.HoldPosition = holdPosition;
+  }
   return true;
 };
 
