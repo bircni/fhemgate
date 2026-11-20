@@ -7,7 +7,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { fixtureDevices } from '../support/devices.ts';
 import { createWorld, hap } from '../support/subject.ts';
 import type { FhemDevice } from '../support/types.ts';
-import { realFhemUrl, startFakeFhemWith, type FhemUnderTest } from './fhem.ts';
+import { realFhemUrl, startStandIn, type FhemUnderTest } from './fhem.ts';
 import { hapType, shortType, startHomebridge, type Homebridge } from './homebridge.ts';
 
 // the functions the fixtures name in their mappings, as test/devices.test.ts defines them.
@@ -78,7 +78,7 @@ describe.skipIf(realFhemUrl !== undefined).each(groups.map((group, index) => ({ 
 
   it('are published by homebridge with the services and characteristics the plugin builds', async () => {
     const built = expected(group);
-    fhem = await startFakeFhemWith(group);
+    fhem = await startStandIn(group);
     homebridge = await startHomebridge({ ...fhem.platformConfig, jsFunctions: 'functions.cjs' }, { 'functions.cjs': jsFunctions });
 
     const deadline = Date.now() + 60_000;
@@ -135,7 +135,7 @@ describe.skipIf(realFhemUrl !== undefined)('a device whose mappings give two ser
 
   it('is published without the mapping that asks for it, like the other devices of the platform', async () => {
     const lamp = devices('switch/dummy-on-off');
-    fhem = await startFakeFhemWith([...devices(SKIPS_A_MAPPING), ...lamp]);
+    fhem = await startStandIn([...devices(SKIPS_A_MAPPING), ...lamp]);
     homebridge = await startHomebridge(fhem.platformConfig);
 
     const deadline = Date.now() + 60_000;

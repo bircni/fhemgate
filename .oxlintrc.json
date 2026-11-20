@@ -54,7 +54,24 @@
     "vitest/require-mock-type-parameters": "off",
     // the second argument is the message vitest shows when the expectation fails
     "vitest/valid-expect": ["error", { "maxArgs": 2 }],
-    "vitest/expect-expect": ["error", { "assertFunctionNames": ["expect", "check", "command", "waitFor", "eventually", "becomes", "fhem.wasSet"] }],
+    "vitest/expect-expect": [
+      "error",
+      {
+        "assertFunctionNames": [
+          "expect",
+          "check",
+          "command",
+          "waitFor",
+          "eventually",
+          "becomes",
+          "says",
+          "**.becomes",
+          "**.notifies",
+          "**.wasSet",
+          "**.wasTold"
+        ]
+      }
+    ],
     // String.match fails for a value that is not text where RegExp.exec would convert it.
     // readings are matched with the former, and which of the two happens is behaviour.
     "typescript/prefer-regexp-exec": "off"
