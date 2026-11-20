@@ -24,6 +24,8 @@ export interface FakeFhemOptions {
   forbidden?: boolean;
   /** takes commands and never answers them, as a fhem that hangs. the event streams stay as they are. */
   hangs?: boolean;
+  /** the commands whose answer is held back until `release` is called, as a fhem that is busy. the event streams stay as they are. */
+  holds?: (cmd: string) => boolean;
   /** answers a command before any of the built in answers are tried */
   answer?: (cmd: string) => { status?: number; body: string } | undefined;
 }
@@ -45,12 +47,17 @@ export interface FakeFhem {
   endStreams(): void;
   /** number of event streams that are open */
   openStreams(): number;
+  /** number of commands whose answer is held back */
+  held(): number;
+  /** answers the commands that were held back, with what fhem answers now */
+  release(): void;
   close(): Promise<void>;
 }
 
 export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<FakeFhem> {
   const sockets = new Set<Socket>();
   const open = new Set<ServerResponse>();
+  const held: (() => void)[] = [];
 
   const fhem: FakeFhem = {
     port: 0,
@@ -73,6 +80,12 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
       open.clear();
     },
     openStreams: () => open.size,
+    held: () => held.length,
+    release() {
+      for (const respond of held.splice(0)) {
+        respond();
+      }
+    },
     close() {
       for (const socket of sockets) {
         socket.destroy();
@@ -149,8 +162,15 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
       return;
     }
 
-    const { status = 200, body } = answer(cmd);
-    response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' }).end(body);
+    const respond = (): void => {
+      const { status = 200, body } = answer(cmd);
+      response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' }).end(body);
+    };
+    if (fhem.options.holds?.(cmd)) {
+      held.push(respond);
+      return;
+    }
+    respond();
   }
 
   const server: Server | TlsServer = options.tls ? createTlsServer(options.tls, handle) : createServer(handle);

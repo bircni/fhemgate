@@ -91,6 +91,7 @@ export const hapType = {
   CarbonDioxideLevel: '93',
   ChargingState: '8F',
   ColorTemperature: 'CE',
+  ConfiguredName: 'E3',
   ContactSensorState: '6A',
   CurrentAmbientLightLevel: '6B',
   CurrentDoorState: 'E',
@@ -177,6 +178,8 @@ export interface Homebridge {
   accessories(): Promise<HapAccessory[]>;
   /** the value homebridge answers a controller that reads the characteristic. undefined if the read is answered with an error. */
   read(characteristic: HapCharacteristic): Promise<unknown>;
+  /** what homebridge answers a controller that reads the characteristic: the value, or the HAP status of the error */
+  answer(characteristic: HapCharacteristic): Promise<{ value?: unknown; status?: number }>;
   write(characteristic: HapCharacteristic, value: unknown): Promise<void>;
   /** asks to be told about changes of the characteristics, on a connection that stays open as the one of a controller does */
   subscribe(characteristics: HapCharacteristic[]): Promise<HapSubscription>;
@@ -315,6 +318,12 @@ export async function startHomebridge(
   const notifications: HapNotification[] = [];
   const listeners: Socket[] = [];
 
+  const answer: Homebridge['answer'] = async ({ aid, iid }) => {
+    const response = await fetch(`${hap}/characteristics?id=${aid}.${iid}`);
+    const { characteristics } = (await response.json()) as { characteristics: { value?: unknown; status?: number }[] };
+    return { value: characteristics[0]?.value, status: characteristics[0]?.status };
+  };
+
   return {
     storage,
     output,
@@ -342,11 +351,9 @@ export async function startHomebridge(
         });
     },
 
-    async read({ aid, iid }) {
-      const response = await fetch(`${hap}/characteristics?id=${aid}.${iid}`);
-      const { characteristics } = (await response.json()) as { characteristics: { value: unknown }[] };
-      return characteristics[0]?.value;
-    },
+    read: async (characteristic) => (await answer(characteristic)).value,
+
+    answer,
 
     async write({ aid, iid }, value) {
       const response = await fetch(`${hap}/characteristics`, {

@@ -193,6 +193,16 @@ describe('a reading that changes in fhem', () => {
 
     await eventually('the plugin to add the entry', () => (logged(entry).length ? true : undefined), world.homebridge);
   });
+
+  it('is not handed to the history when it is a concentration that is no number', async () => {
+    const entries = () => logged(/adding history entry \{ time: \d+, ppm: /).length;
+    const before = entries();
+
+    // HomeKit is told that the quality of the air is not known
+    await world.notifies(world.named('e2e_h_air', 'AirQualitySensor', 'AirQuality'), 0, () => world.fhem.change('e2e_h_air', 'co2', 'n/a'));
+
+    expect(entries()).toBe(before);
+  });
 });
 
 describe('homebridge starting again', () => {
@@ -205,6 +215,8 @@ describe('homebridge starting again', () => {
     world = worldOf(fhem, again, await published(again, devices.length), (device) => device);
     await again.subscribe([door('TimesOpened')]);
 
+    // the history is read from disk in the background
+    await eventually('the history to be loaded', () => (logged(/e2e-h-door: FakeGatoHistory extra persisted data loaded/).length ? true : undefined), again);
     expect(logged(/e2e-h-door: FakeGatoHistory extra persisted data loaded/)).toHaveLength(1);
     expect(await again.read(door('TimesOpened'))).toBe(2);
     const { history } = await persistedWith({ status: 0 }, ofDoor);

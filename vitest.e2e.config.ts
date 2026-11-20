@@ -9,7 +9,7 @@ export default defineConfig({
     testTimeout: 90_000,
     hookTimeout: 90_000,
     // every file has a fhem and a homebridge of its own, on ports of their own, so the files
-    // run side by side
-    maxWorkers: 4,
+    // run side by side. one of them does little but wait for a minute to pass.
+    maxWorkers: 5,
   },
 });

@@ -51,7 +51,8 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that can not be reached when 
     const homebridge = await startHomebridge({ server: '127.0.0.1', port });
     stops.push(() => homebridge.stop());
 
-    await says(homebridge, new RegExp(`longpoll error: Error: connect ECONNREFUSED 127\\.0\\.0\\.1:${port}, retry in: 3000msec`));
+    // the first attempt can meet whoever had the port a moment ago, so the wait is not part of what is looked for
+    await says(homebridge, new RegExp(`longpoll error: Error: connect ECONNREFUSED 127\\.0\\.0\\.1:${port}, retry in: \\d+msec`));
     await expect(homebridge.accessories()).rejects.toThrow('fetch failed');
 
     const fhem = await startStandIn([lamp('e2e_c_late')], { port });
@@ -60,6 +61,34 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that can not be reached when 
 
     expect(accessories.map((accessory) => accessory.name)).toEqual(['e2e_c_late']);
     expect(fhem.fake.streams).toHaveLength(1);
+  });
+
+  it('is tried again as well when its address is none', async () => {
+    const homebridge = await startHomebridge({ server: '127.0.0.1', port: 'none' });
+    stops.push(() => homebridge.stop());
+
+    await says(homebridge, /longpoll error: TypeError.*Invalid URL, retry in: 3000msec/);
+    await says(homebridge, /longpoll error: TypeError.*Invalid URL, retry in: 6000msec/);
+  });
+
+  it('that goes away while it is asked for its devices is asked again once it is back', async () => {
+    const port = await freePort();
+    // takes the question for its devices and does not answer it
+    const busy = await startStandIn([lamp('e2e_c_back')], { port, holds: (cmd) => cmd === 'jsonlist2' });
+    const homebridge = await startHomebridge(busy.platformConfig);
+    stops.push(() => homebridge.stop());
+
+    await eventually('fhem to be asked for its devices', () => (busy.fake.held() ? true : undefined), homebridge);
+    await busy.close();
+
+    await says(homebridge, /fetching the devices failed for the 1\. time, trying again in: 3000msec/);
+    expect(logged(homebridge, /There was a problem connecting to FHEM$/)).toHaveLength(1);
+    expect(logged(homebridge, / {2}Error: socket hang up/)).toHaveLength(1);
+
+    const back = await startStandIn([lamp('e2e_c_back')], { port });
+    stops.push(() => back.close());
+
+    expect((await published(homebridge)).map((accessory) => accessory.name)).toEqual(['e2e_c_back']);
   });
 
   it('is given up after the fourth failed attempt, unless the platform is told never to', async () => {
@@ -94,26 +123,31 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that homebridge is connected 
   const pause = () => new Promise((resolve) => setTimeout(resolve, 100));
 
   beforeAll(async () => {
-    world = await startStandInWorld([
-      lamp('e2e_c_lamp'),
-      lamp('e2e_c_other'),
-      // the JSON form of the mapping takes any character in a command
-      asJsonlist2({
-        name: 'e2e_c_chars',
-        setList: 'on off',
-        readings: { state: 'off' },
-        attributes: {
-          genericDeviceType: 'switch',
-          homebridgeMapping: JSON.stringify({ On: { reading: 'state', cmdOn: 'on;set e2e_c_other on', cmdOff: 'text a&b#c' } }),
-        },
-      }),
-      asJsonlist2({
-        name: 'e2e_c_words',
-        setList: 'on off',
-        readings: { state: 'off' },
-        attributes: { homebridgeMapping: 'On=cmdOn=farbe+grün+50%,cmdOff=aus' },
-      }),
-    ]);
+    world = await startStandInWorld(
+      [
+        lamp('e2e_c_lamp'),
+        lamp('e2e_c_other'),
+        lamp('e2e_c_refused'),
+        // the JSON form of the mapping takes any character in a command
+        asJsonlist2({
+          name: 'e2e_c_chars',
+          setList: 'on off',
+          readings: { state: 'off' },
+          attributes: {
+            genericDeviceType: 'switch',
+            homebridgeMapping: JSON.stringify({ On: { reading: 'state', cmdOn: 'on;set e2e_c_other on', cmdOff: 'text a&b#c' } }),
+          },
+        }),
+        asJsonlist2({
+          name: 'e2e_c_words',
+          setList: 'on off',
+          readings: { state: 'off' },
+          attributes: { homebridgeMapping: 'On=cmdOn=farbe+grün+50%,cmdOff=aus' },
+        }),
+      ],
+      // one command is refused
+      { fhem: { answer: (cmd) => (cmd === 'set e2e_c_refused on' ? { status: 500, body: 'no' } : undefined) } },
+    );
   });
 
   afterAll(async () => {
@@ -141,6 +175,19 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that homebridge is connected 
       await world.fhem.wasSet('e2e_c_chars', 'text a&b#c', 'state', 'text a&b#c');
       expect(world.fhem.fake.requests.map((request) => request.url)).toContain('/fhem?cmd=set%20e2e_c_chars%20text%20a%26b%23c&fwcsrf=csrf_fake_token&XHR=1');
       expect(logged(world.homebridge, /400: Bad Request/)).toEqual([]);
+    });
+  });
+
+  describe('a command fhem refuses', () => {
+    it('is reported with what fhem answered, and without the csrf token', async () => {
+      await world.homebridge.write(on('e2e_c_refused'), true);
+
+      await says(
+        world.homebridge,
+        /There was a problem connecting to FHEM \(http:\/\/127\.0\.0\.1:\d+\/fhem\?cmd=set%20e2e_c_refused%20on&fwcsrf=\*\*\*&XHR=1\)\.$/,
+      );
+      await says(world.homebridge, / {2}500: Internal Server Error$/);
+      expect(world.homebridge.output()).not.toContain('csrf_fake_token');
     });
   });
 
@@ -199,6 +246,35 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that homebridge is connected 
 
       expect(logged(world.homebridge, /longpoll JSON\.parse: /)).toHaveLength(1);
       expect(await world.homebridge.read(on('e2e_c_other'))).toBe(0);
+    });
+
+    it('is skipped when it is no list of three or names no reading of a device, and reported when its parts are no text', async () => {
+      await world.notifies(on('e2e_c_lamp'), 0, () => {
+        world.fhem.fake.send(
+          // two parts, a name without a reading, and numbers where the name and the value are expected
+          `${JSON.stringify(['e2e_c_other-state', 'on'])}\n${JSON.stringify(['e2e_c_other', 'on', 'on'])}\n[1,2,3]\n${event('e2e_c_lamp-state', 'off')}`,
+        );
+        return Promise.resolve();
+      });
+
+      expect(logged(world.homebridge, / {2}error in longpoll connection: TypeError: /)).toHaveLength(1);
+      expect(await world.homebridge.read(on('e2e_c_other'))).toBe(0);
+
+      await world.notifies(on('e2e_c_lamp'), 1, () => world.fhem.change('e2e_c_lamp', 'state', 'on'));
+    });
+  });
+
+  describe('when fhem is away', () => {
+    it('reports a command that could not be sent, without the csrf token', async () => {
+      await world.fhem.close();
+
+      await world.homebridge.write(on('e2e_c_other'), true);
+
+      await says(
+        world.homebridge,
+        /There was a problem connecting to FHEM \(http:\/\/127\.0\.0\.1:\d+\/fhem\?cmd=set%20e2e_c_other%20on&fwcsrf=\*\*\*&XHR=1\):Error: connect ECONNREFUSED/,
+      );
+      expect(world.homebridge.output()).not.toContain('csrf_fake_token');
     });
   });
 

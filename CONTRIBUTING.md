@@ -51,6 +51,8 @@ and write its accessories the way a HomeKit controller does, and are notified by
 | `hardware.e2e.ts` | device types of other fhem modules, and the `eventMap` attribute |
 | `platform.e2e.ts` | the options of the platform, several platforms, what ends homebridge |
 | `connection.e2e.ts` | a fhem that is not there, restarts, or sends events in pieces |
+| `reads.e2e.ts` | a fhem that takes its time to answer what HomeKit reads |
+| `refresh.e2e.ts` | the reading fhem is asked for in the background, once a minute at most. takes that minute. |
 | `fixtures.e2e.ts` | every device fixture: is what homebridge publishes what the plugin builds? |
 
 The devices of the first four are dummy devices. With `E2E_FHEM_URL` set to the url of a FHEMWEB,
@@ -61,6 +63,8 @@ into one of the other files, or checks for `fhem.fake`.
 
 The files run side by side, each with a fhem and a homebridge of its own. A homebridge takes up
 to five seconds to end, which the tests do not wait for: the run ends once the last one is gone.
+A test that has to wait long goes into a file of its own, like the one in `refresh.e2e.ts`, so
+that the run takes no longer than that wait.
 
 ## Behaviour is pinned by tests
 

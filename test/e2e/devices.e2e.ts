@@ -77,6 +77,12 @@ const devices: DummyDevice[] = [
     readings: { state: 'on', hue: '32768', sat: '127' },
   },
   { name: 'e2e_rgb', setList: 'on off rgb:colorpicker,RGB', readingList: 'rgb', readings: { state: 'on', rgb: 'FF0000' } },
+  // one to go round the colour wheel with
+  { name: 'e2e_rgb_wheel', setList: 'on off rgb:colorpicker,RGB', readingList: 'rgb', readings: { state: 'on', rgb: 'FF0000' } },
+  // one that has not reported a colour yet
+  { name: 'e2e_rgb_new', setList: 'on off rgb:colorpicker,RGB', readingList: 'rgb', readings: { state: 'on' } },
+  // a saturation and no hue
+  { name: 'e2e_sat', setList: 'sat:slider,0,1,254', readingList: 'sat', readings: { state: 'ok', sat: '127' } },
   // white tones, set and reported in mired
   { name: 'e2e_ct', setList: 'on off ct:colorpicker,CT,153,1,500', readingList: 'ct', readings: { state: 'on', ct: '366' } },
 
@@ -109,6 +115,14 @@ const devices: DummyDevice[] = [
       homebridgeMapping: 'OccupancyDetected=state,values=present:OCCUPANCY_DETECTED;absent:OCCUPANCY_NOT_DETECTED',
     },
   },
+
+  // ---- switches. `set on` and `set off` are in scenarios.e2e.ts.
+  // two commands of its own, and no state yet
+  { name: 'e2e_two', setList: 'an aus', readings: {} },
+  // a state that only says that a command is on its way
+  { name: 'e2e_busy', setList: 'on off', readings: { state: 'set-on' } },
+  // a firmware reading without a version in it
+  { name: 'e2e_nofw', setList: 'on off', readings: { state: 'on', firmware: 'unknown' } },
 
   // ---- media
   { name: 'e2e_avr', setList: 'on off volume:slider,0,1,100', readingList: 'volume', readings: { state: 'on', volume: '25' } },
@@ -152,6 +166,9 @@ describe('what homebridge publishes', () => {
       e2e_bri: 'Lightbulb',
       e2e_color: 'Lightbulb',
       e2e_rgb: 'Lightbulb',
+      e2e_rgb_wheel: 'Lightbulb',
+      e2e_rgb_new: 'Lightbulb',
+      e2e_sat: 'Lightbulb',
       e2e_ct: 'Lightbulb',
       e2e_shutter: 'WindowCovering',
       e2e_lux: 'LightSensor',
@@ -161,6 +178,9 @@ describe('what homebridge publishes', () => {
       e2e_humidity: 'HumiditySensor',
       e2e_plug: 'Outlet',
       e2e_presence: 'OccupancySensor',
+      e2e_two: 'Switch',
+      e2e_busy: 'Switch',
+      e2e_nofw: 'Switch',
       e2e_avr: 'Switch',
     };
 
@@ -190,6 +210,7 @@ describe('what homebridge publishes', () => {
     ['e2e_bri', 'Lightbulb', ['On', 'Brightness']],
     ['e2e_color', 'Lightbulb', ['On', 'Hue', 'Saturation']],
     ['e2e_rgb', 'Lightbulb', ['On', 'Hue', 'Saturation', 'Brightness']],
+    ['e2e_sat', 'Lightbulb', ['On', 'Saturation']],
     ['e2e_ct', 'Lightbulb', ['On', 'ColorTemperature']],
     // HoldPosition, as it has a stop command
     ['e2e_shutter', 'WindowCovering', ['HoldPosition', 'CurrentPosition', 'PositionState', 'TargetPosition']],
@@ -200,9 +221,15 @@ describe('what homebridge publishes', () => {
     ['e2e_humidity', 'HumiditySensor', ['CurrentRelativeHumidity']],
     ['e2e_plug', 'Outlet', ['On', 'Voltage', 'Current', 'Power', 'Energy']],
     ['e2e_presence', 'OccupancySensor', ['OccupancyDetected']],
+    ['e2e_two', 'Switch', ['On']],
     ['e2e_avr', 'Switch', ['On', 'Volume']],
   ])('gives %s a %s with these characteristics: %s', (device, service, characteristics) => {
     expect(world.characteristicsOf(device, uuids[service])).toEqual(types(characteristics));
+  });
+
+  // a real fhem and the stand-in do not agree on the order of these, the other colour lights have theirs held above
+  it('gives e2e_rgb_new, which has not reported a colour yet, the characteristics of a colour light', () => {
+    expect(new Set(world.characteristicsOf('e2e_rgb_new', uuids.Lightbulb))).toEqual(new Set(types(['On', 'Hue', 'Saturation', 'Brightness'])));
   });
 
   it.each<[string, TypeName, TypeName, number]>([
@@ -240,6 +267,8 @@ describe('what homebridge publishes', () => {
     ['e2e_rgb', 'Lightbulb', 'Hue', 0],
     ['e2e_rgb', 'Lightbulb', 'Saturation', 100],
     ['e2e_rgb', 'Lightbulb', 'Brightness', 100],
+    // sat 127 of 254
+    ['e2e_sat', 'Lightbulb', 'Saturation', 50],
     ['e2e_ct', 'Lightbulb', 'ColorTemperature', 366],
     ['e2e_shutter', 'WindowCovering', 'CurrentPosition', 20],
     ['e2e_shutter', 'WindowCovering', 'TargetPosition', 20],
@@ -261,6 +290,9 @@ describe('what homebridge publishes', () => {
     // 1500 Wh, shown as kWh
     ['e2e_plug', 'Outlet', 'Energy', 1.5],
     ['e2e_presence', 'OccupancySensor', 'OccupancyDetected', 1],
+    // off, as long as nothing says otherwise
+    ['e2e_two', 'Switch', 'On', 0],
+    ['e2e_busy', 'Switch', 'On', 0],
     ['e2e_avr', 'Switch', 'Volume', 25],
   ])('shows the reading of %s in %s/%s as %d', (device, service, type, value) => {
     expect(Number(world.named(device, service, type).value)).toBe(value);
@@ -268,6 +300,11 @@ describe('what homebridge publishes', () => {
 
   it('shows the firmware reading as the firmware revision of the accessory', () => {
     expect(world.named('e2e_door', 'AccessoryInformation', 'FirmwareRevision').value).toBe('1.2.3');
+  });
+
+  it('tells HomeKit no firmware revision for a firmware reading without a version in it, and says so', () => {
+    expect(world.named('e2e_nofw', 'AccessoryInformation', 'FirmwareRevision').value).toBe('0.0.0');
+    expect(logged(/e2e-nofw: the firmware reading "unknown" holds no version number\. HomeKit is not told a firmware revision\./)).toHaveLength(1);
   });
 
   it('takes the range of the colour temperature from the widget of the set command', () => {
@@ -319,6 +356,8 @@ describe('a value HomeKit writes', () => {
     // sent as the nearest of the sixteen steps, without a command word
     ['e2e_fs20', 'Lightbulb', 'Brightness', 50, '  dim50%', 'state', 'dim50%'],
     ['e2e_fs20', 'Lightbulb', 'Brightness', 10, '  dim12%', 'state', 'dim12%'],
+    // no brightness is off
+    ['e2e_fs20', 'Lightbulb', 'Brightness', 0, '  off', 'state', 'off'],
     ['e2e_fs20', 'Lightbulb', 'On', false, 'off', 'state', 'off'],
     // brightness is read from bri and set with pct
     ['e2e_bri', 'Lightbulb', 'Brightness', 80, 'pct 80', 'pct', '80'],
@@ -329,16 +368,44 @@ describe('a value HomeKit writes', () => {
     ['e2e_rgb', 'Lightbulb', 'Hue', 120, 'rgb 00ff00', 'rgb', '00ff00'],
     ['e2e_rgb', 'Lightbulb', 'Saturation', 50, 'rgb 80ff80', 'rgb', '80ff80'],
     ['e2e_rgb', 'Lightbulb', 'Brightness', 50, 'rgb 408040', 'rgb', '408040'],
+    // a light that has not reported a colour is taken to be at full saturation and brightness
+    ['e2e_rgb_new', 'Lightbulb', 'Hue', 120, 'rgb 00ff00', 'rgb', '00ff00'],
     ['e2e_ct', 'Lightbulb', 'ColorTemperature', 250, 'ct 250', 'ct', '250'],
     ['e2e_shutter', 'WindowCovering', 'TargetPosition', 70, 'position 70', 'position', '70'],
     // stops the blind where it is
     ['e2e_shutter', 'WindowCovering', 'HoldPosition', true, 'stop', 'state', 'stop'],
     ['e2e_plug', 'Outlet', 'On', false, 'off', 'state', 'off'],
+    // the first of its two commands switches it on
+    ['e2e_two', 'Switch', 'On', true, 'an', 'state', 'an'],
     ['e2e_avr', 'Switch', 'Volume', 30, 'volume 30', 'volume', '30'],
   ])('to %s %s/%s as %s reaches fhem as: set %s', async (device, service, type, value, command, reading, expected) => {
     await world.homebridge.write(world.named(device, service, type), value);
 
     await world.fhem.wasSet(device, command, reading, expected);
+  });
+
+  // one hue in each sixth of the colour wheel, at full saturation and brightness
+  it.each([
+    [30, 'ff8000'],
+    [90, '80ff00'],
+    [150, '00ff80'],
+    [210, '0080ff'],
+    [270, '8000ff'],
+    [330, 'ff0080'],
+  ])('of a hue of %d reaches a light that is set with rgb as %s', async (hue, rgb) => {
+    await world.homebridge.write(world.named('e2e_rgb_wheel', 'Lightbulb', 'Hue'), hue);
+
+    await world.fhem.wasSet('e2e_rgb_wheel', `rgb ${rgb}`, 'rgb', rgb);
+  });
+
+  it('of no saturation reaches a light that is set with rgb as white', async () => {
+    const saturation = world.named('e2e_rgb_wheel', 'Lightbulb', 'Saturation');
+
+    await world.homebridge.write(saturation, 0);
+
+    await world.fhem.wasSet('e2e_rgb_wheel', 'rgb ffffff', 'rgb', 'ffffff');
+    // the white the light then reports has no saturation either
+    await world.becomes(saturation, 0);
   });
 
   it('is not sent when it leaves the light at the colour it has', async () => {
@@ -382,6 +449,8 @@ describe('a reading that changes in fhem', () => {
     ['e2e_zwave', 'state', 'dim 0', 'Lightbulb', 'On', 0],
     ['e2e_fs20', 'state', 'dim25%', 'Lightbulb', 'Brightness', 25],
     ['e2e_fs20', 'state', 'off', 'Lightbulb', 'On', 0],
+    // on without a step is all the way on
+    ['e2e_fs20', 'state', 'on', 'Lightbulb', 'Brightness', 100],
     ['e2e_bri', 'bri', '254', 'Lightbulb', 'Brightness', 100],
     ['e2e_bri', 'onoff', '0', 'Lightbulb', 'On', 0],
     ['e2e_color', 'hue', '0', 'Lightbulb', 'Hue', 0],
@@ -389,6 +458,7 @@ describe('a reading that changes in fhem', () => {
     // two thirds of the 359 the hue is scaled to
     ['e2e_rgb', 'rgb', '0000FF', 'Lightbulb', 'Hue', 239],
     ['e2e_rgb', 'rgb', '0000CC', 'Lightbulb', 'Brightness', 80],
+    ['e2e_rgb_wheel', 'rgb', '000000', 'Lightbulb', 'Brightness', 0],
     ['e2e_ct', 'ct', '200', 'Lightbulb', 'ColorTemperature', 200],
     ['e2e_shutter', 'position', '55', 'WindowCovering', 'CurrentPosition', 55],
     ['e2e_shutter', 'motor', 'up', 'WindowCovering', 'PositionState', 1],
@@ -397,6 +467,10 @@ describe('a reading that changes in fhem', () => {
     // 1600 ppm is POOR
     ['e2e_air', 'co2', '1600', 'AirQualitySensor', 'AirQuality', 5],
     ['e2e_air', 'co2', '500', 'AirQualitySensor', 'CarbonDioxideLevel', 500],
+    // 700 ppm is GOOD
+    ['e2e_air', 'co2', '700', 'AirQualitySensor', 'AirQuality', 2],
+    // no number: the quality of the air is not known
+    ['e2e_air', 'co2', 'n/a', 'AirQualitySensor', 'AirQuality', 0],
     ['e2e_weather', 'temperature', '-4', 'TemperatureSensor', 'CurrentTemperature', -4],
     ['e2e_weather', 'humidity', '93', 'TemperatureSensor', 'CurrentRelativeHumidity', 93],
     ['e2e_weather', 'pressure', '990', 'TemperatureSensor', 'AirPressure', 990],
@@ -409,12 +483,36 @@ describe('a reading that changes in fhem', () => {
     ['e2e_plug', 'current', '0.5', 'Outlet', 'Current', 0.5],
     ['e2e_plug', 'energy', '2500 Wh', 'Outlet', 'Energy', 2.5],
     ['e2e_presence', 'state', 'absent', 'OccupancySensor', 'OccupancyDetected', 0],
+    // the second of its two commands, as its state
+    ['e2e_two', 'state', 'aus', 'Switch', 'On', 0],
+    ['e2e_two', 'state', 'an', 'Switch', 'On', 1],
     ['e2e_avr', 'volume', '60', 'Switch', 'Volume', 60],
   ])('%s %s = %s is told to HomeKit as %s/%s = %d', async (device, reading, value, service, type, expected) => {
     const target = world.named(device, service, type);
 
     await world.notifies(target, expected, () => world.fhem.change(device, reading, value));
     await world.becomes(target, expected);
+  });
+
+  it('is left alone while it only says that a command is on its way', async () => {
+    const on = world.named('e2e_busy', 'Switch', 'On');
+
+    await world.fhem.change('e2e_busy', 'state', 'set_on');
+    await world.notifies(on, 1, () => world.fhem.change('e2e_busy', 'state', 'on'));
+    await world.fhem.change('e2e_busy', 'state', 'set_off');
+    await world.notifies(on, 0, () => world.fhem.change('e2e_busy', 'state', 'off'));
+
+    const told = world.homebridge.notifications().filter((notification) => notification.aid === on.aid && notification.iid === on.iid);
+    expect(told.map((notification) => Number(notification.value))).toEqual([1, 0]);
+  });
+
+  it('is reported when it is no colour for a light that is set with rgb, which keeps the colour it has', async () => {
+    await world.fhem.change('e2e_rgb_new', 'rgb', 'none');
+    await eventually('the plugin to report the reading', () => (logged(/e2e_rgb_new-rgb not a number: none/).length ? true : undefined), world.homebridge);
+
+    // still the green it was set to, now with half of its saturation
+    await world.homebridge.write(world.named('e2e_rgb_new', 'Lightbulb', 'Saturation'), 50);
+    await world.fhem.wasSet('e2e_rgb_new', 'rgb 80ff80', 'rgb', '80ff80');
   });
 
   it('is shown as firmware revision by the version in it, and the last version stays when a reading holds none', async () => {
