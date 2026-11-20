@@ -1,14 +1,19 @@
 {
   "name": "homebridge-fhem2hb",
   "displayName": "FHEM",
-  "version": "0.6.0-alpha.0",
-  "private": true,
+  "version": "0.0.0",
   "description": "a fhem platform plugin for homebridge, maintained successor of homebridge-fhem",
   "keywords": [
     "fhem",
     "homebridge",
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "homekit",
+    "supports-hap"
   ],
+  "homepage": "https://github.com/bircni/fhem2hb#readme",
+  "bugs": {
+    "url": "https://github.com/bircni/fhem2hb/issues"
+  },
   "license": "ISC",
   "author": {
     "name": "bircni"
@@ -20,10 +25,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/bircni/fhem2hb.git"
+    "url": "git+https://github.com/bircni/fhem2hb.git"
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
+    "!dist/**/*.d.ts",
     "config.schema.json",
     "docs",
     "LICENSE",
@@ -31,6 +38,9 @@
   ],
   "type": "module",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
     "format": "oxfmt",
