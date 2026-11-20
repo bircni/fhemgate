@@ -1175,3 +1175,45 @@ describe('a zwave dimmer', () => {
     expect(characteristicOf(light, Characteristic.On).value).toBe(false);
   });
 });
+
+describe('delayed commands of one accessory', () => {
+  const venetian = () =>
+    device({
+      Internals: { NAME: 'blind' },
+      Readings: { state: '50', pct: '50' },
+      PossibleSets: 'pct:slider,0,1,100 slats:slider,0,1,100',
+      Attributes: {
+        genericDeviceType: 'blind',
+        homebridgeMapping: 'TargetPosition=pct,cmd=pct,delay=true TargetHorizontalTiltAngle=pct,cmd=slats,delay=true,minValue=0,maxValue=90',
+      },
+    });
+
+  it('are both sent when two characteristics that follow the same reading are written, position and tilt of a blind', () => {
+    vi.useFakeTimers();
+    const world = createWorld();
+    const covering = serviceOf(world.accessory(venetian()).getServices(), 'WindowCovering');
+
+    write(characteristicOf(covering, Characteristic.TargetPosition), 80);
+    write(characteristicOf(covering, Characteristic.TargetHorizontalTiltAngle), 45);
+    expect(world.sent).toEqual([]);
+
+    vi.advanceTimersByTime(1000);
+    expect(world.sent).toEqual(['set blind pct 80', 'set blind slats 45']);
+  });
+
+  it('still only send the last value of each characteristic', () => {
+    vi.useFakeTimers();
+    const world = createWorld();
+    const accessory = world.accessory(venetian());
+    const covering = serviceOf(accessory.getServices(), 'WindowCovering');
+
+    write(characteristicOf(covering, Characteristic.TargetPosition), 80);
+    write(characteristicOf(covering, Characteristic.TargetHorizontalTiltAngle), 45);
+    write(characteristicOf(covering, Characteristic.TargetPosition), 20);
+    write(characteristicOf(covering, Characteristic.TargetHorizontalTiltAngle), 10);
+
+    vi.advanceTimersByTime(1000);
+    expect(world.sent).toEqual(['set blind pct 20', 'set blind slats 10']);
+    expect(accessory.delayed_timers).toEqual({});
+  });
+});

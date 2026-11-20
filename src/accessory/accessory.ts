@@ -129,7 +129,7 @@ export class FhemAccessory {
   /** the platform the accessory belongs to, set by the platform */
   declare fhem?: { scope?: unknown };
   declare historyService?: HistoryService;
-  /** the commands that wait to be sent, by the reading id of their mapping */
+  /** the commands that wait to be sent, by the reading id and the characteristic of their mapping */
   declare delayed_timers?: Record<string, ReturnType<typeof setTimeout>>;
   /** set once the history was saved for the shutdown of homebridge */
   declare shutdown?: boolean;
@@ -283,7 +283,7 @@ export class FhemAccessory {
     parseHomebridgeMapping(this, homebridgeMapping, Categories);
   }
 
-  /** sends the command for the value after the delay, unless another value for the mapping arrives before */
+  /** sends the command for the value after the delay, unless another value for the characteristic arrives before */
   delayed(mapping: PreparedMapping, value: unknown, delay?: number | boolean): void {
     this.delayed_timers ??= {};
 
@@ -292,15 +292,17 @@ export class FhemAccessory {
       milliseconds = 500;
     }
 
-    const informId = mapping.informId as string;
-    const timer = this.delayed_timers[informId];
+    // two characteristics can follow the same reading, like the position and the tilt of a
+    // blind. each has its own command waiting, so the reading alone does not tell them apart.
+    const pending = mapping.informId + ' ' + mapping.characteristic_type + (mapping.subtype ? '(' + mapping.subtype + ')' : '');
+    const timer = this.delayed_timers[pending];
     if (timer) {
       clearTimeout(timer);
     }
 
     this.log.info(this.name + ' delaying command ' + mapping.characteristic_type + ' with value ' + String(value));
-    this.delayed_timers[informId] = setTimeout(() => {
-      delete this.delayed_timers?.[informId];
+    this.delayed_timers[pending] = setTimeout(() => {
+      delete this.delayed_timers?.[pending];
       this.command(mapping, value);
     }, milliseconds);
   }
