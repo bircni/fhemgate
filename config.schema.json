@@ -31,7 +31,7 @@
         "type": "integer",
         "title": "FHEM port",
         "required": true,
-        "default": "8083",
+        "default": 8083,
         "description": "fhemweb port"
       },
 
@@ -46,6 +46,7 @@
 
       "ssl": {
         "type": "boolean",
+        "title": "Use https",
         "required": false,
         "default": false,
         "description": "use ssl/https when connecting to fhem"
@@ -58,21 +59,30 @@
         "description": "with ssl: on to only talk to a fhem whose certificate is trusted, off to accept any certificate. if not set, the certificate is not checked when user and password are configured, and checked when they are not."
       },
 
+      "webname": {
+        "type": "string",
+        "title": "Webname",
+        "required": false,
+        "placeholder": "fhem",
+        "description": "the webname of the FHEMWEB instance. fhem if not given."
+      },
+
       "auth": {
         "type": "object",
+        "title": "Login",
         "required": false,
         "#description": "user & password for this FHEM connection",
         "properties": {
           "user": {
             "type": "string",
-            "title": "Name",
+            "title": "User",
             "required": false,
             "#placeholder": "<user>",
             "description": "user for this FHEM connection."
           },
           "pass": {
             "type": "string",
-            "title": "Server",
+            "title": "Password",
             "required": false,
             "#placeholder": "<password>",
             "description": "password for this FHEM connection."
@@ -80,8 +90,25 @@
         }
       },
 
+      "jsFunctions": {
+        "type": "string",
+        "title": "Functions file",
+        "required": false,
+        "placeholder": "e.g. functions.js",
+        "description": "a file with functions that mappings can name as reading2homekit and homekit2reading. absolute, or relative to the storage directory of homebridge. it is loaded as code."
+      },
+
+      "scope": {
+        "type": "string",
+        "title": "Scope",
+        "required": false,
+        "placeholder": "e.g. siri",
+        "description": "the scopes this platform serves, separated by commas. the devices are published unless scopes are given and siri is not one of them."
+      },
+
       "neverTimeout": {
         "type": "boolean",
+        "title": "Never give up",
         "required": false,
         "default": false,
         "description": "never timeout if trying to reconnect"

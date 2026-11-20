@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, inject, it } from 'vitest';
 import { selfSignedCertificate } from '../support/tls.ts';
 import { asJsonlist2, realFhemUrl, startStandIn, type StandIn } from './fhem.ts';
-import { freePort, hapType, startHomebridge, type HapAccessory, type HapCharacteristic, type Homebridge } from './homebridge.ts';
+import { freePort, hapType, homebridgeVersion, startHomebridge, type HapAccessory, type HapCharacteristic, type Homebridge } from './homebridge.ts';
 import { eventually, notifying, published, servicesByName, worldOf, type World } from './world.ts';
 
 const lamp = (name: string, room: string) => asJsonlist2({ name, setList: 'on off', readings: { state: 'off' } }, room);
@@ -90,6 +90,12 @@ describe.skipIf(realFhemUrl !== undefined)('several FHEM platforms in one homebr
     expect(accessories.map((accessory) => accessory.name).sort()).toEqual(['e2e_p_both', 'e2e_p_first', 'e2e_p_level', 'e2e_p_second']);
     expect(logged(homebridge, /e2e_p_both is already published/)).toHaveLength(1);
     expect(logged(homebridge, /no accessory created for e2e_p_both \(dummy\)/)).toHaveLength(1);
+  });
+
+  it('runs in the homebridge the tests are to start, which loads the plugin', () => {
+    // E2E_HOMEBRIDGE can name another homebridge than the one the plugin is built with
+    expect(homebridge.output()).toContain(`Homebridge v${homebridgeVersion} `);
+    expect(homebridge.output()).toContain(`Loaded plugin: homebridge-fhem2hb@${version}`);
   });
 
   it('starts although one platform has no server', () => {

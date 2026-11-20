@@ -8,7 +8,19 @@ import { inject } from 'vitest';
 
 const root = join(import.meta.dirname, '..', '..');
 const pin = '031-45-154';
-const homebridgeBin = join(root, 'node_modules', 'homebridge', 'bin', 'homebridge.js');
+
+/**
+ * The homebridge the tests start: the one this repository installs, or the one in the directory
+ * `E2E_HOMEBRIDGE` names, e.g. `/tmp/old/node_modules/homebridge`. That is how the tests run
+ * against another version than the one the plugin is built with.
+ */
+const homebridgePackage = process.env.E2E_HOMEBRIDGE || join(root, 'node_modules', 'homebridge');
+const homebridgeManifest = JSON.parse(readFileSync(join(homebridgePackage, 'package.json'), 'utf8')) as { version: string; bin: { homebridge: string } };
+// homebridge 1 names the file it is started with differently than homebridge 2 does
+const homebridgeBin = join(homebridgePackage, homebridgeManifest.bin.homebridge);
+
+/** the version of the homebridge the tests start */
+export const homebridgeVersion = homebridgeManifest.version;
 
 export interface HapCharacteristic {
   aid: number;
