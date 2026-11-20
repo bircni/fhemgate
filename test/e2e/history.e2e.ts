@@ -145,20 +145,24 @@ describe('a device with a history mapping', () => {
 
 describe('a reading that changes in fhem', () => {
   it('is written to the history of a door, which counts how often it was opened', async () => {
+    // the history counts in seconds. the door is opened in a later one than the history started in.
+    await new Promise((resolve) => setTimeout(resolve, 1100));
     await world.notifies(door('TimesOpened'), 1, () => world.fhem.change('e2e_h_door', 'state', 'open'));
     await world.notifies(door('ContactSensorState'), 0, () => world.fhem.change('e2e_h_door', 'state', 'closed'));
     await world.notifies(door('TimesOpened'), 2, () => world.fhem.change('e2e_h_door', 'state', 'open'));
 
     const { history, extra } = await persistedWith({ status: 0 }, (file) => file.extra?.TimesOpened === 2);
-    // the state the history started with, without a value, and then open, closed and open
-    expect(history.slice(2).map((entry) => (typeof entry === 'object' ? entry.status : entry))).toEqual([undefined, 1, 0, 1]);
+    // closed, as the door was when the history started, and then open, closed and open
+    expect(history.slice(2).map((entry) => (typeof entry === 'object' ? entry.status : entry))).toEqual([0, 1, 0, 1]);
     expect(extra?.TimesOpened).toBe(2);
     expect(await world.homebridge.read(door('TimesOpened'))).toBe(2);
   });
 
-  // read from the history mapping instead of the contact.
-  it('does not move the last activation of the door', async () => {
-    expect(await world.homebridge.read(door('LastActivation'))).toBe(0);
+  it('moves the last activation of the door to the second of its last change, counted from the start of the history', async () => {
+    const seconds = Number(await world.homebridge.read(door('LastActivation')));
+
+    expect(seconds).toBeGreaterThanOrEqual(1);
+    expect(seconds).toBeLessThan(60);
   });
 
   it('is written to the history of a thermostat with what it is set to and how far its valve is open', async () => {
@@ -181,8 +185,8 @@ describe('a reading that changes in fhem', () => {
     ['e2e_h_climate', 'temperature', '20', /adding history entry \{ time: \d+, temp: 20 \}/],
     ['e2e_h_climate', 'humidity', '60', /adding history entry \{ time: \d+, humidity: 60 \}/],
     ['e2e_h_climate', 'pressure', '990', /adding history entry \{ time: \d+, pressure: 990 \}/],
-    // the level POOR instead of the concentration.
-    ['e2e_h_air', 'co2', '1600', /adding history entry \{ time: \d+, ppm: 5 \}/],
+    // the concentration, not the level of the air quality that is shown for it
+    ['e2e_h_air', 'co2', '1600', /adding history entry \{ time: \d+, ppm: 1600 \}/],
     ['e2e_h_plug', 'power', '100', /adding history entry \{ time: \d+, power: 100 \}/],
   ])('%s %s = %s is handed to the history', async (device, reading, value, entry) => {
     await world.fhem.change(device, reading, value);

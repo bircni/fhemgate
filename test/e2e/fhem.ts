@@ -177,7 +177,7 @@ async function realFhem(address: string, dummies: DummyDevice[], room: string): 
     }
   };
 
-  // the plugin ends homebridge after it had to create the genericDeviceType attribute itself
+  // the devices are given a genericDeviceType, which fhem only takes once it knows the attribute
   await done(`attr global userattr ${userattr}`);
   for (const dummy of dummies) {
     const { Attributes, Readings } = asJsonlist2(dummy, room);

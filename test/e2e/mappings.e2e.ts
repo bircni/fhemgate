@@ -376,20 +376,21 @@ describe('what homebridge publishes', () => {
     expect(world.named('e2e_m_info', 'AccessoryInformation', 'FirmwareRevision').value).toBe('2.0.1');
   });
 
-  it('shows placeholders of HomeKit for a manufacturer and a serial number mapping', () => {
-    expect(world.named('e2e_m_info', 'AccessoryInformation', 'Manufacturer').value).toBe('Default-Manufacturer');
-    expect(world.named('e2e_m_info', 'AccessoryInformation', 'SerialNumber').value).toBe('Default-SerialNumber');
+  it('shows the text of a manufacturer and a serial number mapping at the accessory information', () => {
+    expect(world.named('e2e_m_info', 'AccessoryInformation', 'Manufacturer').value).toBe('ACME');
+    expect(world.named('e2e_m_info', 'AccessoryInformation', 'SerialNumber').value).toBe('ABC123');
   });
 
-  it('also puts the mappings for the accessory information onto the switch, where two of them show the state', () => {
-    expect(world.characteristicsOf('e2e_m_info', hapType.Switch)).toEqual([hapType.On, hapType.SerialNumber, hapType.Manufacturer, hapType.FirmwareRevision]);
-    expect(world.named('e2e_m_info', 'Switch', 'SerialNumber').value).toBe('on');
-    expect(world.named('e2e_m_info', 'Switch', 'Manufacturer').value).toBe('on');
-    expect(logged(/threw an error from the characteristic 'Firmware Revision'/).length).toBeGreaterThan(0);
+  it('keeps the mappings for the accessory information off the switch, and answers a read of the firmware revision once', async () => {
+    expect(world.characteristicsOf('e2e_m_info', hapType.Switch)).toEqual([hapType.On]);
+
+    expect(await world.homebridge.read(world.named('e2e_m_info', 'AccessoryInformation', 'FirmwareRevision'))).toBe('2.0.1');
+    expect(logged(/This callback function has already been called|threw an error from the characteristic/)).toEqual([]);
   });
 
-  it('does not know any accessory category', () => {
-    expect(logged(/unknown category: FAN/)).toHaveLength(1);
+  it('takes the accessory category a mapping names', () => {
+    expect(logged(/using category: 3 \(FAN\)/)).toHaveLength(1);
+    expect(logged(/unknown category/)).toEqual([]);
   });
 
   it('reports the entries of a mapping it can not read and goes on with the others', () => {
@@ -508,7 +509,7 @@ describe('a value HomeKit writes', () => {
 
     await eventually(
       'the plugin to log that it sends nothing',
-      () => (logged(/e2e-m-readonly NOT sending command undefined with value (true|1)for readOnly characteristic/).length ? true : undefined),
+      () => (logged(/e2e-m-readonly NOT sending command \S+ with value (true|1) for readOnly characteristic/).length ? true : undefined),
       world.homebridge,
     );
     expect(logged(/executing: .*set%20e2e_m_readonly/)).toEqual([]);
@@ -561,14 +562,18 @@ describe('a reading that changes in fhem', () => {
     await world.becomes(target, expected);
   });
 
-  it('is reported as an error when the values of the mapping do not cover it, and changes nothing', async () => {
-    await world.fhem.change('e2e_m_light', 'level', 'broken');
+  it('is reported once when the values of the mapping do not cover it, and changes nothing', async () => {
+    const brightness = world.named('e2e_m_light', 'Lightbulb', 'Brightness');
+    const reported = () => logged(/e2e_m_light-level value broken not handled in values/).length;
 
-    await eventually(
-      'the plugin to report the value',
-      () => (logged(/e2e_m_light-level value broken not handled in values/).length ? true : undefined),
-      world.homebridge,
-    );
-    expect(await world.homebridge.read(world.named('e2e_m_light', 'Lightbulb', 'Brightness'))).toBe(7);
+    await world.fhem.change('e2e_m_light', 'level', 'broken');
+    await eventually('the plugin to report the value', () => (reported() ? true : undefined), world.homebridge);
+    expect(await world.homebridge.read(brightness)).toBe(7);
+
+    // the same value arrives again after another one
+    await world.notifies(brightness, 8, () => world.fhem.change('e2e_m_light', 'level', '8'));
+    await world.fhem.change('e2e_m_light', 'level', 'broken');
+    await world.notifies(brightness, 9, () => world.fhem.change('e2e_m_light', 'level', '9'));
+    expect(reported()).toBe(1);
   });
 });

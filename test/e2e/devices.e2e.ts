@@ -46,7 +46,7 @@ const devices: DummyDevice[] = [
     setList: 'pct:slider,0,1,100',
     readingList: 'pct',
     readings: { state: 'ok', pct: '10' },
-    attributes: { genericDeviceType: 'window', homebridgeMapping: 'CurrentPosition=pct TargetPosition=pct::pct,delay=true' },
+    attributes: { genericDeviceType: 'window' },
   },
   // the name of a HomeKit service instead of one of the values above
   { name: 'e2e_fan', setList: 'on off', readings: { state: 'on' }, attributes: { genericDeviceType: 'Fan' } },
@@ -177,8 +177,8 @@ describe('what homebridge publishes', () => {
     ],
     ['e2e_window_contact', 'ContactSensor', ['ContactSensorState', 'CurrentDoorState']],
     ['e2e_garage', 'GarageDoorOpener', ['ObstructionDetected', 'CurrentDoorState', 'TargetDoorState']],
-    // the brightness is left over from the dimmer rule.
-    ['e2e_skylight', 'Window', ['PositionState', 'CurrentPosition', 'TargetPosition', 'Brightness']],
+    // it is set with pct like a dimmer, and has a position and no brightness
+    ['e2e_skylight', 'Window', ['PositionState', 'CurrentPosition', 'TargetPosition']],
     ['e2e_fan', 'Fan', ['On']],
     ['e2e_door', 'GarageDoorOpener', ['TargetDoorState', 'ObstructionDetected', 'CurrentDoorState']],
     ['e2e_window_drive', 'Window', ['PositionState', 'CurrentPosition', 'TargetPosition']],
@@ -210,7 +210,7 @@ describe('what homebridge publishes', () => {
     ['e2e_heating', 'Thermostat', 'CurrentTemperature', 19],
     ['e2e_heating', 'Thermostat', 'Actuation', 35],
     ['e2e_heating', 'Thermostat', 'TargetHeatingCoolingState', 3],
-    // always heating.
+    // heating, as the valve is open
     ['e2e_heating', 'Thermostat', 'CurrentHeatingCoolingState', 1],
     ['e2e_window_contact', 'ContactSensor', 'ContactSensorState', 0],
     ['e2e_window_contact', 'ContactSensor', 'CurrentDoorState', 1],
@@ -302,8 +302,9 @@ describe('a value HomeKit writes', () => {
     ['e2e_window_drive', 'Window', 'TargetPosition', 0, '  lock', 'state', 'lock'],
     ['e2e_zwave', 'Lightbulb', 'On', false, 'off', 'state', 'off'],
     ['e2e_zwave', 'Lightbulb', 'Brightness', 60, 'dim 60', 'state', 'dim 60'],
-    // sent as one of the sixteen steps, without a command word. it is the step above the one asked for.
-    ['e2e_fs20', 'Lightbulb', 'Brightness', 50, '  dim56%', 'state', 'dim56%'],
+    // sent as the nearest of the sixteen steps, without a command word
+    ['e2e_fs20', 'Lightbulb', 'Brightness', 50, '  dim50%', 'state', 'dim50%'],
+    ['e2e_fs20', 'Lightbulb', 'Brightness', 10, '  dim12%', 'state', 'dim12%'],
     ['e2e_fs20', 'Lightbulb', 'On', false, 'off', 'state', 'off'],
     // brightness is read from bri and set with pct
     ['e2e_bri', 'Lightbulb', 'Brightness', 80, 'pct 80', 'pct', '80'],
@@ -345,6 +346,9 @@ describe('a reading that changes in fhem', () => {
     ['e2e_heating', 'temperature', '21.5', 'Thermostat', 'CurrentTemperature', 21.5],
     ['e2e_heating', 'desired-temp', '18', 'Thermostat', 'TargetTemperature', 18],
     ['e2e_heating', 'actuator', '80', 'Thermostat', 'Actuation', 80],
+    // the valve is closed, so it does not heat
+    ['e2e_heating', 'actuator', '0', 'Thermostat', 'CurrentHeatingCoolingState', 0],
+    ['e2e_heating', 'actuator', '15', 'Thermostat', 'CurrentHeatingCoolingState', 1],
     ['e2e_heating', 'mode', 'auto', 'Thermostat', 'TargetHeatingCoolingState', 3],
     ['e2e_window_contact', 'contact', 'open (to VCCU)', 'ContactSensor', 'ContactSensorState', 1],
     ['e2e_window_contact', 'contact', 'closed (to VCCU)', 'ContactSensor', 'CurrentDoorState', 1],

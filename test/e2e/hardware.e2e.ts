@@ -192,11 +192,10 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       await world.fhem.wasTold(`set ${device} ${command}`);
     });
 
-    // the blank after the device is missing.
-    it('to identify a HUEDevice sends a command fhem can not make sense of', async () => {
+    it('to identify a HUEDevice makes the lamp blink', async () => {
       await world.homebridge.write(world.named('hue_color_xy', 'AccessoryInformation', 'Identify'), true);
 
-      await world.fhem.wasTold('set hue_color_xyalert select');
+      await world.fhem.wasTold('set hue_color_xy alert select');
     });
   });
 
@@ -265,14 +264,13 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       expect(told.slice(-2).map((notification) => Number(notification.value))).toEqual([0, 1]);
     });
 
-    // the mapping names a value the target state does not have.
-    it('leaves the security system of the residents armed in its target state when they come home', async () => {
-      const current = world.named('residents', 'SecuritySystem', 'SecuritySystemCurrentState');
+    it('disarms the security system of the residents in both of its states when they come home', async () => {
+      const target = world.named('residents', 'SecuritySystem', 'SecuritySystemTargetState');
 
-      await world.notifies(current, 3, () => world.fhem.change('residents', 'state', 'home'));
+      await world.notifies(target, 3, () => world.fhem.change('residents', 'state', 'home'));
 
-      expect(logged(/residents-state not a number: home/)).toHaveLength(1);
-      expect(await world.homebridge.read(world.named('residents', 'SecuritySystem', 'SecuritySystemTargetState'))).toBe(0);
+      await world.becomes(world.named('residents', 'SecuritySystem', 'SecuritySystemCurrentState'), 3);
+      expect(logged(/residents-state not a number/)).toEqual([]);
     });
   });
 
@@ -297,15 +295,16 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       expect(logged(/error in longpoll connection/)).toEqual([]);
     });
 
-    it('fails for a lower colour temperature, and holds back the events that came with it until the next one', async () => {
-      const on = world.named('presence', 'OccupancySensor', 'OccupancyDetected');
+    it('has them worked out for a lower colour temperature as well, and hands on the events that came with it', async () => {
+      const present = world.named('presence', 'OccupancySensor', 'OccupancyDetected');
       const event = (informId: string, value: string) => `${JSON.stringify([informId, value, value])}\n`;
 
-      world.fhem.fake.send(event('hue_color_xy-ct', '366') + event('presence-state', 'present'));
-      await eventually('the plugin to report the failure', () => (logged(/error in longpoll connection: /).length ? true : undefined), world.homebridge);
-      expect(await world.homebridge.read(on)).toBe(0);
+      await world.notifies(present, 1, () => {
+        world.fhem.fake.send(event('hue_color_xy-ct', '366') + event('presence-state', 'present'));
+        return Promise.resolve();
+      });
 
-      await world.notifies(on, 1, () => world.fhem.change('roommate', 'presence', 'present'));
+      expect(logged(/error in longpoll connection/)).toEqual([]);
     });
   });
 });
