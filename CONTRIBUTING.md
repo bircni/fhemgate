@@ -59,6 +59,15 @@ tests define dummy devices named `e2e_*` there and overwrite the `userattr` attr
 so only point it at a fhem that is there to be tested with. A test that needs the stand-in goes
 into one of the other files, or checks for `fhem.fake`.
 
+The homebridge the tests start is the one `bun install` puts into `node_modules`, the version the
+plugin is built with. With `E2E_HOMEBRIDGE` set to the directory of another installed homebridge
+they start that one, which is how CI runs them against the oldest homebridge the plugin supports:
+
+```sh
+npm install --prefix /tmp/homebridge-1.8.0 homebridge@1.8.0
+E2E_HOMEBRIDGE=/tmp/homebridge-1.8.0/node_modules/homebridge bun run test:e2e
+```
+
 The files run side by side, each with a fhem and a homebridge of its own. A homebridge takes up
 to five seconds to end, which the tests do not wait for: the run ends once the last one is gone.
 
