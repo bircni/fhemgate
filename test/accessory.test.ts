@@ -1262,3 +1262,68 @@ describe('a characteristic that is given by its uuid', () => {
     expect(custom(parameters).characteristic.props.perms).toEqual(['pr', 'ev']);
   });
 });
+
+describe('the modes a thermostat offers', () => {
+  const { OFF, HEAT, COOL, AUTO } = Characteristic.TargetHeatingCoolingState;
+
+  const thermostat = (homebridgeMapping?: string, sets = 'desired-temp:slider,5,0.5,30') =>
+    device({
+      Internals: { NAME: 'heating' },
+      Readings: { state: 'ok', 'desired-temp': '21', temperature: '19.5', mode: 'manual', heatingState: 'HEAT' },
+      PossibleSets: sets,
+      Attributes: homebridgeMapping ? { homebridgeMapping } : {},
+    });
+  const targetState = (homebridgeMapping?: string, sets?: string) => {
+    const world = createWorld();
+    const service = serviceOf(world.accessory(thermostat(homebridgeMapping, sets)).getServices(), 'Thermostat');
+    return { world, target: characteristicOf(service, Characteristic.TargetHeatingCoolingState) };
+  };
+
+  it('are only heating for a thermostat that can not be switched to anything else, and a write sends nothing', () => {
+    const { world, target } = targetState();
+
+    expect(target.props.validValues).toEqual([HEAT]);
+    expect(target.value).toBe(HEAT);
+
+    write(target, HEAT);
+    expect(world.sent).toEqual([]);
+  });
+
+  it('are off, heating and automatic for a thermostat with a mode command, without cooling', () => {
+    const { world, target } = targetState(undefined, 'desired-temp:slider,5,0.5,30 mode');
+
+    expect(target.props.validValues).toEqual([OFF, HEAT, AUTO]);
+    expect(target.value).toBe(HEAT);
+
+    write(target, AUTO);
+    write(target, OFF);
+    expect(world.sent).toEqual(['set heating mode auto', 'set heating mode holiday_short']);
+  });
+
+  it('are the ones a mapping has commands for', () => {
+    const { target } = targetState('TargetHeatingCoolingState=mode,values=manual:HEAT;off:OFF,cmds=OFF:mode+off;HEAT:mode+manual');
+
+    expect(target.props.validValues).toEqual([OFF, HEAT]);
+  });
+
+  it('are the ones the values of a mapping can report when it has no commands', () => {
+    const { target } = targetState('TargetHeatingCoolingState=heatingState,values=OFF:0;HEAT:1,default=1');
+
+    expect(target.props.validValues).toEqual([OFF, HEAT]);
+    expect(target.value).toBe(HEAT);
+  });
+
+  it('are the ones a mapping says with valid, whatever commands it has', () => {
+    const { target } = targetState(
+      'TargetHeatingCoolingState=mode,values=manual:HEAT;cool:COOL,cmds=OFF:mode+off;HEAT:mode+manual;COOL:mode+cool,valid=HEAT;COOL',
+    );
+
+    expect(target.props.validValues).toEqual([HEAT, COOL]);
+  });
+
+  it('are all four when the commands of a mapping do not name them', () => {
+    const { target } = targetState('TargetHeatingCoolingState=mode,cmds=/[0-3]/:mode+set');
+
+    expect(target.props.validValues).toEqual([OFF, HEAT, COOL, AUTO]);
+  });
+});

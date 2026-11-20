@@ -1,6 +1,6 @@
 // thermostats, recognised by the command the desired temperature is set with
 import { CustomUUIDs } from '../../accessory/customCharacteristics.ts';
-import { numberAsText, type Mapping } from '../../mapping/types.ts';
+import { numberAsText, type Mapping, type Mappings } from '../../mapping/types.ts';
 import type { Rule } from '../detect.ts';
 
 /** the opening of the valve in percent, shown with the characteristic Eve knows */
@@ -68,6 +68,8 @@ export const desiredTemp: Rule = ({ s, target }) => {
       reading: 'mode',
       values: ['/^auto/:AUTO', '/^holiday_short/:OFF', '/.*/:HEAT'],
       cmds: ['OFF:mode holiday_short', 'HEAT:mode manual', 'COOL:mode manual', 'AUTO:mode auto'],
+      // these thermostats heat. cooling is not offered, and still understood if it is asked for.
+      valid: ['OFF', 'HEAT', 'AUTO'],
     };
   }
   return true;
@@ -141,3 +143,52 @@ export const heatingStateDefault: Rule = ({ target }) => {
   }
   return true;
 };
+
+/** the left or the right side of the `from:to` pairs of a mapping, or undefined if one of them does not name a single value */
+function namedValues(pairs: string[], side: 'from' | 'to'): string[] | undefined {
+  const values: string[] = [];
+  for (const pair of pairs) {
+    const separator = pair.indexOf(':');
+    const from = separator < 0 ? pair : pair.slice(0, separator);
+    const value = side === 'from' || separator < 0 ? from : pair.slice(separator + 1);
+    // a pattern on the left of a command stands for any number of values, and `#` on the right for the reading itself
+    if (value === '' || value === '#' || (side === 'from' && /^\/.*\/$/.test(value))) {
+      return undefined;
+    }
+    values.push(value);
+  }
+  return values;
+}
+
+/**
+ * HomeKit offers Off, Heat, Cool and Auto for every thermostat unless it is told which of them
+ * there are. Run once the homebridgeMapping attribute was applied: a mapping that says with
+ * `valid` what to offer is left alone. Otherwise the target state offers the modes the mapping
+ * has a command for, or without commands the modes its `values` can report. A thermostat without
+ * a mapping for the target state can not be switched to anything, and is shown as heating.
+ */
+export function offerSupportedModes(target: { mappings: Mappings }): void {
+  const entry = target.mappings.TargetHeatingCoolingState;
+  if (entry === undefined) {
+    target.mappings.TargetHeatingCoolingState = { default: 'HEAT', valid: ['HEAT'], readOnly: true };
+    return;
+  }
+
+  if (Array.isArray(entry) || entry.valid !== undefined) {
+    return;
+  }
+
+  let modes: string[] | undefined;
+  if (Array.isArray(entry.cmds) && entry.cmds.length) {
+    modes = namedValues(entry.cmds, 'from');
+  } else if (Array.isArray(entry.values) && entry.values.length) {
+    modes = namedValues(entry.values, 'to');
+    if (modes && entry.default !== undefined) {
+      modes.push(String(entry.default));
+    }
+  }
+
+  if (modes?.length) {
+    entry.valid = [...new Set(modes)];
+  }
+}

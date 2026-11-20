@@ -24,7 +24,7 @@ import {
   threeStateSensor,
 } from './rules/sensors.ts';
 import { onOff, setList } from './rules/switches.ts';
-import { desiredTemp, heatingStateDefault, maxDesiredTemperature, pid20Desired, thermostatByType } from './rules/thermostats.ts';
+import { desiredTemp, heatingStateDefault, maxDesiredTemperature, offerSupportedModes, pid20Desired, thermostatByType } from './rules/thermostats.ts';
 import type { Jsonlist2Device } from './types.ts';
 
 /** the part of an accessory the detection fills in */
@@ -178,5 +178,9 @@ export function reviseMappings(target: DetectionTarget, s: Jsonlist2Device): voi
       target.log.error(s.Internals.NAME + ' is NOT a thermostat. set command for target temperature missing: ' + (targetCmd ? targetCmd : ''));
       delete target.mappings.TargetTemperature;
     }
+  }
+
+  if (target.service_name === 'thermostat' || target.service_name === 'Thermostat') {
+    offerSupportedModes(target);
   }
 }
