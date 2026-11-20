@@ -1217,3 +1217,48 @@ describe('delayed commands of one accessory', () => {
     expect(accessory.delayed_timers).toEqual({});
   });
 });
+
+describe('a characteristic that is given by its uuid', () => {
+  const uuid = '1844F825-6843-42B4-8B33-2B09FB047BD9';
+  const fan = (parameters: string) =>
+    device({
+      Internals: { NAME: 'fan' },
+      Readings: { state: 'on', buzzer: 'off' },
+      PossibleSets: 'on off buzzer:on,off',
+      Attributes: { homebridgeMapping: `${uuid}=buzzer,name=Klingelton,format=bool,${parameters}` },
+    });
+  const custom = (parameters: string) => {
+    const world = createWorld();
+    const characteristic = characteristicOf(serviceOf(world.accessory(fan(parameters)).getServices(), 'Switch'), 'Klingelton');
+    return { world, characteristic };
+  };
+
+  it.each([
+    ['cmd', 'cmd=buzzer', true, 'set fan buzzer true'],
+    ['cmdOn and cmdOff', 'cmdOn=buzzer+on,cmdOff=buzzer+off,valueOn=on,valueOff=off', true, 'set fan buzzer on'],
+    ['cmdOff alone', 'cmdOff=buzzer+off', false, 'set fan buzzer off'],
+    ['cmds', 'cmds=1:buzzer+on;0:buzzer+off', 1, 'set fan buzzer on'],
+  ])('can be written when its mapping has %s', (_what, parameters, value, command) => {
+    const { world, characteristic } = custom(parameters);
+
+    expect(characteristic.props.perms).toEqual(['pr', 'pw', 'ev']);
+    write(characteristic, value);
+    expect(world.sent).toEqual([command]);
+  });
+
+  it('can be written when its mapping converts the value with homekit2reading', () => {
+    const world = createWorld({ jsFunctions: { loud: (_mapping: unknown, value: unknown) => (value ? 'on' : 'off') } });
+    const characteristic = characteristicOf(serviceOf(world.accessory(fan('cmd=buzzer,homekit2reading=loud')).getServices(), 'Switch'), 'Klingelton');
+
+    expect(characteristic.props.perms).toEqual(['pr', 'pw', 'ev']);
+    write(characteristic, true);
+    expect(world.sent).toEqual(['set fan buzzer on']);
+  });
+
+  it.each([
+    ['has no command', 'valueOn=on'],
+    ['is readOnly', 'cmdOn=buzzer+on,cmdOff=buzzer+off,readOnly=1'],
+  ])('can only be read when its mapping %s', (_what, parameters) => {
+    expect(custom(parameters).characteristic.props.perms).toEqual(['pr', 'ev']);
+  });
+});

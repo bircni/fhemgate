@@ -349,10 +349,12 @@ export function createServices(accessory: FhemAccessory, state: PluginState): Se
 
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- a characteristic created from a uuid has no properties yet
       if (characteristic_type.match(uuidFormat) || !characteristic.props?.perms?.length) {
-        if (each.cmd === undefined) {
-          characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.NOTIFY] });
-        } else {
+        // HomeKit may write what the mapping has a command for, in any of the ways to give one
+        const writable = !each.readOnly && (each.cmd !== undefined || each.cmdOn !== undefined || each.cmdOff !== undefined || each.cmds !== undefined);
+        if (writable) {
           characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.PAIRED_WRITE, Perms.NOTIFY] });
+        } else {
+          characteristic.setProps({ perms: [Perms.PAIRED_READ, Perms.NOTIFY] });
         }
       }
 
