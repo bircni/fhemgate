@@ -1,5 +1,5 @@
 {
-  "name": "homebridge-fhem2hb",
+  "name": "homebridge-fhemgate",
   "displayName": "FHEM",
   "version": "0.0.0",
   "description": "a fhem platform plugin for homebridge, maintained successor of homebridge-fhem",
@@ -10,9 +10,9 @@
     "homekit",
     "supports-hap"
   ],
-  "homepage": "https://github.com/bircni/fhem2hb#readme",
+  "homepage": "https://github.com/bircni/fhemgate#readme",
   "bugs": {
-    "url": "https://github.com/bircni/fhem2hb/issues"
+    "url": "https://github.com/bircni/fhemgate/issues"
   },
   "license": "ISC",
   "author": {
@@ -25,7 +25,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bircni/fhem2hb.git"
+    "url": "git+https://github.com/bircni/fhemgate.git"
   },
   "files": [
     "dist",

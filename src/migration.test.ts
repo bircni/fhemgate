@@ -27,8 +27,8 @@ const configure = (config: unknown) => {
 };
 
 beforeEach(() => {
-  directory = mkdtempSync(join(tmpdir(), 'fhem2hb-migration-'));
-  pluginRoot = install('homebridge-fhem2hb');
+  directory = mkdtempSync(join(tmpdir(), 'fhemgate-migration-'));
+  pluginRoot = install('homebridge-fhemgate');
   configPath = join(directory, 'config.json');
   configure({ bridge: {}, platforms: [{ platform: 'config' }, { platform: 'FHEM', server: 'fhem' }] });
 });
@@ -62,7 +62,7 @@ describe('findOldPlugin', () => {
   });
 
   it('does not look next to a checkout of this plugin, which is in no node_modules directory', () => {
-    const checkout = join(directory, 'fhem2hb');
+    const checkout = join(directory, 'fhemgate');
     mkdirSync(join(directory, 'homebridge-fhem'), { recursive: true });
     writeFileSync(join(directory, 'homebridge-fhem', 'package.json'), JSON.stringify({ name: 'homebridge-fhem' }));
 
@@ -96,7 +96,7 @@ describe('installationWarnings', () => {
 
   it('has nothing to say when every FHEM platform names its plugin', () => {
     install('homebridge-fhem');
-    configure({ platforms: [{ platform: 'homebridge-fhem.FHEM' }, { platform: 'homebridge-fhem2hb.FHEM' }, null, { name: 'no platform' }] });
+    configure({ platforms: [{ platform: 'homebridge-fhem.FHEM' }, { platform: 'homebridge-fhemgate.FHEM' }, null, { name: 'no platform' }] });
 
     expect(installationWarnings(pluginRoot, configPath)).toEqual([]);
   });
@@ -187,7 +187,7 @@ describe('configFindings for a platform that names its plugin', () => {
   });
 
   it('has nothing to say about an entry that names this plugin or no plugin', () => {
-    expect(configFindings({ platform: 'homebridge-fhem2hb.FHEM' })).toEqual([]);
+    expect(configFindings({ platform: 'homebridge-fhemgate.FHEM' })).toEqual([]);
     expect(configFindings({ platform: 'FHEM' })).toEqual([]);
   });
 });

@@ -18,14 +18,14 @@ describe('resolveConverter', () => {
   });
 
   it('refuses source between braces when it is not allowed, and does not run it', () => {
-    const mapping: Mapping = { reading: 'state', reading2homekit: '{globalThis.fhem2hbTestRan = true; return 1}' };
+    const mapping: Mapping = { reading: 'state', reading2homekit: '{globalThis.fhemgateTestRan = true; return 1}' };
 
     expect(resolve(mapping, 'reading2homekit', undefined, false)).toEqual([
       'error   reading2homekit: JavaScript in a mapping is refused, as allowInlineFunctions is false for this platform',
       'error   reading2homekit disabled.',
     ]);
     expect(mapping).toEqual({ reading: 'state' });
-    expect(globalThis).not.toHaveProperty('fhem2hbTestRan');
+    expect(globalThis).not.toHaveProperty('fhemgateTestRan');
   });
 
   it('still takes a function of the jsFunctions file by name when source between braces is not allowed', () => {

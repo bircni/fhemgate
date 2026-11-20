@@ -75,7 +75,7 @@ describe('optionalSwitch', () => {
 
 describe('loadJsFunctions', () => {
   it('loads a file relative to the storage directory, or by its full path', () => {
-    const storage = mkdtempSync(join(tmpdir(), 'fhem2hb-'));
+    const storage = mkdtempSync(join(tmpdir(), 'fhemgate-'));
     try {
       writeFileSync(join(storage, 'f.cjs'), 'module.exports = { one: () => 1 };');
 

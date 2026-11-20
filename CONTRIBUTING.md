@@ -36,7 +36,7 @@ looks for its plugins. The machine homebridge runs on needs npm, not bun.
 bun install --frozen-lockfile
 bun run build
 bun pm pack
-npm install -g ./homebridge-fhem2hb-<version>.tgz
+npm install -g ./homebridge-fhemgate-<version>.tgz
 ```
 
 ## Layout
@@ -154,8 +154,8 @@ published by hand, and every later one by the workflow.
 
 5. Push the tag: `git push origin v0.1.0`. The workflow verifies the commit, finds `0.1.0` on npm
    already and leaves it, and creates the GitHub release.
-6. Shortly before the second release, open the settings of `homebridge-fhem2hb` on npmjs.com and
-   add a trusted publisher for GitHub Actions: the user `bircni`, the repository `fhem2hb`, the
+6. Shortly before the second release, open the settings of `homebridge-fhemgate` on npmjs.com and
+   add a trusted publisher for GitHub Actions: the user `bircni`, the repository `fhemgate`, the
    workflow file `release.yml`, no environment, allowed to `npm publish`. A new trusted publisher
    has to publish within two days, or it expires and has to be made again.
 7. Once the second release is published by the workflow, choose, in the same settings under
@@ -191,7 +191,7 @@ fails. After that it
    them.
 
 The release before is the highest `v*` tag below the new version whose commit has a
-`package.json` with the name `homebridge-fhem2hb`. The repository also holds the `v0.5.x` tags of
+`package.json` with the name `homebridge-fhemgate`. The repository also holds the `v0.5.x` tags of
 homebridge-fhem, which name another package and do not count. Without a release before, the notes
 start at the commit that gave the package its name, the rewrite. `--notes-from <ref>` starts them
 after another commit or tag instead.
@@ -207,13 +207,13 @@ On a pushed tag `v*`, `release.yml`
    (`scripts/release-tag.ts`),
 2. runs `bun run verify` on the tagged commit, with the end-to-end tests against the stand-in fhem,
 3. publishes with `npm publish` through trusted publishing: no token, npm signs the provenance by
-   itself. A prerelease goes to the dist-tag `next`, so that `npm install homebridge-fhem2hb`
+   itself. A prerelease goes to the dist-tag `next`, so that `npm install homebridge-fhemgate`
    never installs one, and a release to `latest`. A version that is on npm already is left as it
    is,
 4. creates the GitHub release of the tag, with the message of the tag as its notes, marked as a
    prerelease for a prerelease.
 
-To check a release: the run under Actions, `npm view homebridge-fhem2hb dist-tags`, the
+To check a release: the run under Actions, `npm view homebridge-fhemgate dist-tags`, the
 provenance on the npm page of the version, and the release on GitHub. If a step after the publish
 failed, rerun the failed jobs of the run. A version npm has once published can not be published
 again, not even after it was unpublished.
@@ -223,9 +223,9 @@ again, not even after it was unpublished.
 Do not unpublish it. Deprecate it with a reason, and release the fix as the next version:
 
 ```sh
-npm deprecate homebridge-fhem2hb@0.2.0 "breaks thermostats, use 0.2.1"
+npm deprecate homebridge-fhemgate@0.2.0 "breaks thermostats, use 0.2.1"
 ```
 
 If it is the `latest` one and the fix takes longer, point `latest` back to the version before:
-`npm dist-tag add homebridge-fhem2hb@0.1.0 latest`. Both need an `npm login` with two-factor
+`npm dist-tag add homebridge-fhemgate@0.1.0 latest`. Both need an `npm login` with two-factor
 authentication, as the trusted publisher may only publish.

@@ -1,7 +1,7 @@
-# fhem2hb
+# fhemgate
 
-[![npm](https://img.shields.io/npm/v/homebridge-fhem2hb)](https://www.npmjs.com/package/homebridge-fhem2hb)
-[![CI](https://github.com/bircni/fhem2hb/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bircni/fhem2hb/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/homebridge-fhemgate)](https://www.npmjs.com/package/homebridge-fhemgate)
+[![CI](https://github.com/bircni/fhemgate/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/bircni/fhemgate/actions/workflows/ci.yml)
 
 A [Homebridge](https://homebridge.io) platform plugin that publishes the devices of a
 [FHEM](https://fhem.de) installation to HomeKit. It follows the events of FHEM over a long poll, so
@@ -25,11 +25,11 @@ justme1968 and its contributors, and retains its configuration: the platform is 
 Install the plugin from npm:
 
 ```sh
-npm install -g homebridge-fhem2hb
+npm install -g homebridge-fhemgate
 ```
 
 With the [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x), search for
-`homebridge-fhem2hb` on its Plugins page and install it there.
+`homebridge-fhemgate` on its Plugins page and install it there.
 
 If you use homebridge-fhem today, follow [moving from homebridge-fhem](docs/migration.md) instead.
 

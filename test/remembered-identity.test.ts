@@ -12,7 +12,7 @@ import type { Accessory, FhemDevice } from './support/types.ts';
 
 const fuuid = '5f0d1e7a-f33f-1a2b-3c4d-0000000000aa';
 const uniqueid = '00:17:88:01:02:03:04:05-0b';
-const file = 'fhem2hb-identities.json';
+const file = 'fhemgate-identities.json';
 
 let storage: string;
 let fhem: FakeFhem | undefined;
@@ -45,7 +45,7 @@ const identityOf = ([accessory]: Accessory[]) => ({ uuid_base: accessory?.uuid_b
 const stored = () => JSON.parse(readFileSync(join(storage, file), 'utf8')) as unknown;
 
 beforeEach(() => {
-  storage = mkdtempSync(join(tmpdir(), 'fhem2hb-identity-'));
+  storage = mkdtempSync(join(tmpdir(), 'fhemgate-identity-'));
 });
 
 afterEach(async () => {

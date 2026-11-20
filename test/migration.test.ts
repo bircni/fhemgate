@@ -43,7 +43,7 @@ describe.each(fixtures.filter((fixture) => isPublished(createWorld().accessory(f
   });
 
   it('is remembered as that on the first start after homebridge-fhem, and stays it', () => {
-    storage = mkdtempSync(join(tmpdir(), 'fhem2hb-migration-'));
+    storage = mkdtempSync(join(tmpdir(), 'fhemgate-migration-'));
     const platform = () => ({ connection: { base_url: 'http://fhem:8083/fhem' }, identities: new IdentityStore(storage as string) });
     const world = createWorld();
 
@@ -96,7 +96,7 @@ describe('the device fixtures', () => {
   });
 
   it('are remembered by what homebridge-fhem made the uuid from', () => {
-    storage = mkdtempSync(join(tmpdir(), 'fhem2hb-migration-'));
+    storage = mkdtempSync(join(tmpdir(), 'fhemgate-migration-'));
     const world = createWorld();
     const identities = new IdentityStore(storage);
     const fixture = fixtures.find((candidate) => candidate.load().Internals.TYPE === 'FS20');

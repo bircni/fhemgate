@@ -133,7 +133,7 @@ attr <device> homebridgeMapping BatteryLevel=clear StatusLowBattery=clear Status
 ## A device is new in HomeKit after a restart and has lost its room
 
 HomeKit recognises an accessory by a serial number the plugin works out from the device. The one a
-device was first published with is kept in `fhem2hb-identities.json` in the storage directory of
+device was first published with is kept in `fhemgate-identities.json` in the storage directory of
 Homebridge and used from then on. Deleting that file makes the plugin work the identities out anew.
 To give a device a fixed identity yourself use `SerialNumber=serial=<text>` in its
 `homebridgeMapping`.
@@ -148,7 +148,7 @@ run each as a child bridge. See [several platforms](configuration.md#several-pla
 
 | Log line | Meaning |
 | --- | --- |
-| `Plugin 'homebridge-fhem2hb' tried to register with an incorrect plugin identifier: 'homebridge-fhem'. Please report this to the developer!` | Expected, no need to report it. The plugin registers its platform under the name of homebridge-fhem on purpose, so that a config entry with `"platform": "homebridge-fhem.FHEM"` keeps working. Homebridge notes this at every start. |
+| `Plugin 'homebridge-fhemgate' tried to register with an incorrect plugin identifier: 'homebridge-fhem'. Please report this to the developer!` | Expected, no need to report it. The plugin registers its platform under the name of homebridge-fhem on purpose, so that a config entry with `"platform": "homebridge-fhem.FHEM"` keeps working. Homebridge notes this at every start. |
 | `no siri device found. please define it.` | The plugin looks for a device of the FHEM module `siri` and notes its version there. Nothing else depends on it. `define siri siri` in FHEM ends the message. |
 | `genericDeviceType attribute was not known to fhem and was created. restart homebridge after giving it to devices.` | First start against this FHEM. Set the attribute where needed and restart Homebridge. |
 | `homebridgeMapping attribute created.` | First start against this FHEM. Nothing to do. |

@@ -213,7 +213,7 @@ At the usual log level every such device gets a line like
 | serial number | what identifies the hardware where FHEM knows it (HomeMatic, ZWave, HUE, MAX, SONOS and others), else the `FUUID` of the device |
 
 HomeKit recognises an accessory by its serial number. The one a device was first published with is
-kept in `fhem2hb-identities.json` in the storage directory of Homebridge, so that the accessory
+kept in `fhemgate-identities.json` in the storage directory of Homebridge, so that the accessory
 keeps its room and its automations. Manufacturer, model, serial number and firmware revision can be
 set with a mapping, see [accessory information](mapping.md#accessory-information).
 

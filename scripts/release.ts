@@ -430,10 +430,26 @@ function releaseTags(): ReleaseTag[] {
     });
 }
 
-/** the first commit in which package.json has this name: where the history of the package starts. undefined if it can not be told. */
-function firstCommitOf(name: string): string | undefined {
-  const found = gitOrNothing('log', '--reverse', '--format=%H', '-S"name": ' + JSON.stringify(name), 'HEAD', '--', 'package.json');
-  return found?.split('\n')[0] || undefined;
+/** the package this one started from. its history is in the repository as well. */
+const UPSTREAM_PACKAGE = 'homebridge-fhem';
+
+/**
+ * Where the history of this package starts: the last commit that changed package.json away from
+ * the name of homebridge-fhem. The package may have been renamed since, so its own name can not
+ * be looked for. undefined if it can not be told.
+ */
+function firstCommitOfPackage(): string | undefined {
+  const found = gitOrNothing('log', '--format=%H', '-S"name": ' + JSON.stringify(UPSTREAM_PACKAGE), 'HEAD', '--', 'package.json');
+  const commit = found?.split('\n')[0] || undefined;
+  if (commit === undefined) {
+    return undefined;
+  }
+  try {
+    const name = (JSON.parse(git('show', commit + ':package.json')) as { name?: unknown }).name;
+    return name === UPSTREAM_PACKAGE ? undefined : commit;
+  } catch {
+    return undefined;
+  }
 }
 
 /** where the notes of a release start */
@@ -447,7 +463,8 @@ interface NotesStart {
 /**
  * The commits the notes of this release are made from: those after the ref that was asked for,
  * else those after the release before, else, for the first release of the package, everything
- * from the commit on that gave package.json its name. Throws if the ref that was asked for is none.
+ * from the commit on that took package.json away from homebridge-fhem. Throws if the ref that was
+ * asked for is none.
  */
 function notesStart(name: string, version: string, notesFrom: string | undefined): NotesStart {
   if (notesFrom !== undefined) {
@@ -463,7 +480,7 @@ function notesStart(name: string, version: string, notesFrom: string | undefined
     return { range: previous + '..HEAD', described: 'the commits since ' + previous };
   }
 
-  const first = firstCommitOf(name);
+  const first = firstCommitOfPackage();
   const parent = first === undefined ? undefined : gitOrNothing('rev-parse', '--verify', '--quiet', first + '^');
   if (first === undefined || parent === undefined) {
     return { range: 'HEAD', described: 'all commits, as there is no release of ' + name + ' before this one' };

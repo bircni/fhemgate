@@ -280,7 +280,7 @@ describe.skipIf(realFhemUrl !== undefined)('a homebridge that ran homebridge-fhe
   });
 
   it('remembers every device as what it was published as, in a file of its own', () => {
-    const [file] = storedFiles(homebridge, 'fhem2hb-identities.json');
+    const [file] = storedFiles(homebridge, 'fhemgate-identities.json');
 
     expect(JSON.parse(readFileSync(file as string, 'utf8'))).toEqual({
       version: 1,
@@ -352,7 +352,7 @@ describe.skipIf(realFhemUrl !== undefined)('a config entry that names homebridge
       [
         { ...fhem.platformConfig, platform, filter: 'room=HomeKit' },
         // a second entry, which names this plugin
-        { ...fhem.platformConfig, platform: 'homebridge-fhem2hb.FHEM', filter: 'room=Keller' },
+        { ...fhem.platformConfig, platform: 'homebridge-fhemgate.FHEM', filter: 'room=Keller' },
       ],
       {},
       storageAfterHomebridgeFhem(username, platform),
@@ -386,7 +386,7 @@ describe.skipIf(realFhemUrl !== undefined)('a config entry that names homebridge
 
     // the next id homebridge had to give
     expect(cellar?.aid).toBe(60);
-    expect(accessoryIds(homebridge.storage, username)).toMatchObject({ [homebridgeUuid(upstreamIdentity(elsewhere), 'homebridge-fhem2hb.FHEM')]: 60 });
+    expect(accessoryIds(homebridge.storage, username)).toMatchObject({ [homebridgeUuid(upstreamIdentity(elsewhere), 'homebridge-fhemgate.FHEM')]: 60 });
   });
 
   it('says that the entry has to stay as it is', () => {
@@ -402,7 +402,7 @@ describe.skipIf(realFhemUrl !== undefined)('a homebridge that still has homebrid
   beforeAll(async () => {
     // both plugins in one node_modules directory, as npm installs them
     plugins = join(realpathSync(mkdtempSync(join(inject('e2eDirectory'), 'plugins-'))), 'node_modules');
-    const mine = join(plugins, 'homebridge-fhem2hb');
+    const mine = join(plugins, 'homebridge-fhemgate');
     mkdirSync(mine, { recursive: true });
     cpSync(join(root, 'dist'), join(mine, 'dist'), { recursive: true });
     cpSync(join(root, 'package.json'), join(mine, 'package.json'));
@@ -436,7 +436,7 @@ describe.skipIf(realFhemUrl !== undefined)('a homebridge that still has homebrid
   });
 
   it('is told by the plugin where homebridge-fhem is, what follows and what to do', () => {
-    const lines = logged(homebridge, /^homebridge-fhem2hb: /);
+    const lines = logged(homebridge, /^homebridge-fhemgate: /);
 
     expect(lines).toHaveLength(1);
     expect(lines[0]).toContain(`homebridge-fhem is installed as well, in ${join(plugins, 'homebridge-fhem')}.`);

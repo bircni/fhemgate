@@ -103,28 +103,28 @@ describe('the npm dist-tag', () => {
 });
 
 describe('the release before', () => {
-  const ours = (tag: string): ReleaseTag => ({ tag, packageName: 'homebridge-fhem2hb' });
+  const ours = (tag: string): ReleaseTag => ({ tag, packageName: 'homebridge-fhemgate' });
   // the tags homebridge-fhem left in the repository
   const upstream = (tag: string): ReleaseTag => ({ tag, packageName: 'homebridge-fhem' });
 
   it('is none for the first release, also with the higher tags of homebridge-fhem in the repository', () => {
-    expect(previousRelease([upstream('v0.5.54'), upstream('v0.5.27')], 'homebridge-fhem2hb', '0.1.0')).toBeUndefined();
-    expect(previousRelease([upstream('v0.5.54')], 'homebridge-fhem2hb', '0.6.0')).toBeUndefined();
-    expect(previousRelease([], 'homebridge-fhem2hb', '0.1.0')).toBeUndefined();
+    expect(previousRelease([upstream('v0.5.54'), upstream('v0.5.27')], 'homebridge-fhemgate', '0.1.0')).toBeUndefined();
+    expect(previousRelease([upstream('v0.5.54')], 'homebridge-fhemgate', '0.6.0')).toBeUndefined();
+    expect(previousRelease([], 'homebridge-fhemgate', '0.1.0')).toBeUndefined();
   });
 
   it('is the highest release of this package below the new version', () => {
     const tags = [upstream('v0.5.54'), ours('v0.1.0'), ours('v0.2.0-rc.1'), ours('v0.1.1'), ours('v0.3.0')];
-    expect(previousRelease(tags, 'homebridge-fhem2hb', '0.2.0')).toBe('v0.2.0-rc.1');
-    expect(previousRelease(tags, 'homebridge-fhem2hb', '0.2.0-rc.2')).toBe('v0.2.0-rc.1');
-    expect(previousRelease(tags, 'homebridge-fhem2hb', '0.2.0-rc.1')).toBe('v0.1.1');
-    expect(previousRelease(tags, 'homebridge-fhem2hb', '1.0.0')).toBe('v0.3.0');
+    expect(previousRelease(tags, 'homebridge-fhemgate', '0.2.0')).toBe('v0.2.0-rc.1');
+    expect(previousRelease(tags, 'homebridge-fhemgate', '0.2.0-rc.2')).toBe('v0.2.0-rc.1');
+    expect(previousRelease(tags, 'homebridge-fhemgate', '0.2.0-rc.1')).toBe('v0.1.1');
+    expect(previousRelease(tags, 'homebridge-fhemgate', '1.0.0')).toBe('v0.3.0');
   });
 
   it('ignores tags that are no versions, and commits without a package.json', () => {
     const tags = [ours('v-next'), { tag: 'v0.4.0', packageName: undefined }, ours('v0.1.0')];
-    expect(previousRelease(tags, 'homebridge-fhem2hb', '0.5.0')).toBe('v0.1.0');
-    expect(previousRelease(tags, 'homebridge-fhem2hb', 'latest')).toBeUndefined();
+    expect(previousRelease(tags, 'homebridge-fhemgate', '0.5.0')).toBe('v0.1.0');
+    expect(previousRelease(tags, 'homebridge-fhemgate', 'latest')).toBeUndefined();
   });
 });
 
@@ -197,8 +197,8 @@ describe('the release notes', () => {
   });
 
   it('are plain text with a section for every group that has entries', () => {
-    const notes = formatNotes('homebridge-fhem2hb', '0.6.0', { breaking: ['- b'], features: ['- f1', '- f2'], fixes: [], other: ['- o'], internal: 0 });
-    expect(notes).toBe('homebridge-fhem2hb v0.6.0\n\nBreaking changes:\n- b\n\nFeatures:\n- f1\n- f2\n\nOther changes:\n- o\n');
+    const notes = formatNotes('homebridge-fhemgate', '0.6.0', { breaking: ['- b'], features: ['- f1', '- f2'], fixes: [], other: ['- o'], internal: 0 });
+    expect(notes).toBe('homebridge-fhemgate v0.6.0\n\nBreaking changes:\n- b\n\nFeatures:\n- f1\n- f2\n\nOther changes:\n- o\n');
     expect(notes).not.toMatch(/^#/m);
   });
 
@@ -244,7 +244,7 @@ describe('the command line', () => {
 });
 
 describe('a pushed tag', () => {
-  const pkg = { name: 'homebridge-fhem2hb', version: '0.1.0' };
+  const pkg = { name: 'homebridge-fhemgate', version: '0.1.0' };
 
   it('publishes a release under latest and a prerelease under next', () => {
     expect(releaseOfTag('v0.1.0', pkg)).toEqual({ distTag: 'latest', prerelease: false });

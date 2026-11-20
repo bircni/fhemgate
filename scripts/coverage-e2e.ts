@@ -159,7 +159,7 @@ if (!existsSync(dist)) {
   process.exit(1);
 }
 
-const directory = mkdtempSync(join(tmpdir(), 'fhem2hb-e2e-coverage-'));
+const directory = mkdtempSync(join(tmpdir(), 'fhemgate-e2e-coverage-'));
 let status: number;
 let coverage: FileCoverage[];
 try {
