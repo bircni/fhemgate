@@ -257,13 +257,15 @@ function listen(port: number, characteristics: HapCharacteristic[], notified: (n
  * @param storage the storage directory of a homebridge that has ended, to start it again with what it kept there
  * @param options `debug: false` starts homebridge the way a user does. otherwise it also logs what
  *   plugins log for debugging: the plugin logs there what it asks fhem and what it reads, which
- *   is how the tests see it also with a real fhem.
+ *   is how the tests see it also with a real fhem. `username` is the id of the bridge, for a
+ *   storage directory that holds what a bridge of that id kept. `plugins` is the directory
+ *   homebridge looks for plugins in, instead of loading the plugin from where it was built.
  */
 export async function startHomebridge(
   platforms: Record<string, unknown> | Record<string, unknown>[],
   files: Record<string, string> = {},
   storage = mkdtempSync(join(inject('e2eDirectory'), 'homebridge-')),
-  options: { debug?: boolean } = {},
+  options: { debug?: boolean; username?: string; plugins?: string } = {},
 ): Promise<Homebridge> {
   rmSync(join(storage, 'stopping'), { force: true });
   for (const [name, content] of Object.entries(files)) {
@@ -275,7 +277,7 @@ export async function startHomebridge(
     join(storage, 'config.json'),
     JSON.stringify({
       // several bridges run at the same time, each needs a name and an id of its own
-      bridge: { name: `fhem2hb e2e ${port}`, username: `0E:2E:2E:2E:${hex(port >> 8)}:${hex(port)}`, port, pin },
+      bridge: { name: `fhem2hb e2e ${port}`, username: options.username ?? `0E:2E:2E:2E:${hex(port >> 8)}:${hex(port)}`, port, pin },
       platforms: (Array.isArray(platforms) ? platforms : [platforms]).map((platform, index) => ({
         platform: 'FHEM',
         name: index ? `FHEM ${index + 1}` : 'FHEM',
@@ -295,7 +297,7 @@ export async function startHomebridge(
     env.NODE_V8_COVERAGE = process.env.E2E_V8_COVERAGE;
   }
   const flags = options.debug === false ? [] : ['-D'];
-  const child = spawn(process.execPath, [homebridgeBin, '-I', '-Q', ...flags, '-U', storage, '-P', root, '--strict-plugin-resolution'], {
+  const child = spawn(process.execPath, [homebridgeBin, '-I', '-Q', ...flags, '-U', storage, '-P', options.plugins ?? root, '--strict-plugin-resolution'], {
     env,
     stdio: ['ignore', log, log],
   });
