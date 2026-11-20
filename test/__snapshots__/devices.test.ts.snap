@@ -8724,8 +8724,8 @@ exports[`dimmer/zwave-dimmer > converts readings 1`] = `
     "50 <- "dim 50"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -8899,7 +8899,7 @@ exports[`dimmer/zwave-dimmer > is detected 1`] = `
       "informId": "zwave_dimmer-state",
       "last_update": 1786881600,
       "reading": "state",
-      "valueOff": "/^(dim )?0$/",
+      "valueOff": "/^(off|(dim )?0)$/",
     },
   },
   "model": "FIBARO System FGD212 Dimmer 2",
@@ -8951,8 +8951,8 @@ exports[`dimmer/zwave-dimmer > sends commands 1`] = `
 exports[`dimmer/zwave-dimmer > updates characteristics 1`] = `
 {
   "zwave_dimmer-state": [
-    "On=true Brightness=0 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "On=false Brightness=0 <- "0"",
+    "On=true Brightness=0 <- "on" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
   ],
 }
 `;
@@ -8964,8 +8964,8 @@ exports[`dimmer/zwave-dimmer-off > converts readings 1`] = `
     "50 <- "dim 50"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -9074,7 +9074,7 @@ exports[`dimmer/zwave-dimmer-off > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -9130,7 +9130,7 @@ exports[`dimmer/zwave-dimmer-off > is detected 1`] = `
       "reading2homekit": "[function]",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
@@ -9139,7 +9139,7 @@ exports[`dimmer/zwave-dimmer-off > is detected 1`] = `
       "informId": "zwave_dimmer_off-state",
       "last_update": 1786881600,
       "reading": "state",
-      "valueOff": "/^(dim )?0$/",
+      "valueOff": "/^(off|(dim )?0)$/",
     },
   },
   "model": "<unknown>",
@@ -9191,8 +9191,8 @@ exports[`dimmer/zwave-dimmer-off > sends commands 1`] = `
 exports[`dimmer/zwave-dimmer-off > updates characteristics 1`] = `
 {
   "zwave_dimmer_off-state": [
-    "On=true Brightness=0 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "On=false Brightness=0 <- "0"",
+    "On=true Brightness=0 <- "on" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
   ],
 }
 `;

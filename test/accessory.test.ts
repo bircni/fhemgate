@@ -1147,3 +1147,31 @@ describe('names of services and characteristics', () => {
     }).not.toThrow();
   });
 });
+
+describe('a zwave dimmer', () => {
+  const dimmer = (state: string) =>
+    device({ Internals: { NAME: 'dimmer', TYPE: 'ZWave', DEF: 'c1 2' }, Readings: { state }, PossibleSets: 'on off dim:slider,0,1,99' });
+
+  it.each([
+    ['off', false, 0],
+    ['dim 0', false, 0],
+    ['0', false, 0],
+    ['on', true, 0],
+    ['dim 40', true, 40],
+    ['dim 99', true, 99],
+  ])('with the state %j is on: %j, at %d percent', (state, on, brightness) => {
+    const light = serviceOf(createWorld().accessory(dimmer(state)).getServices(), 'Lightbulb');
+
+    expect(characteristicOf(light, Characteristic.On).value).toBe(on);
+    expect(characteristicOf(light, Characteristic.Brightness).value).toBe(brightness);
+  });
+
+  it('goes off in HomeKit when fhem reports off after it was switched off', () => {
+    const world = createWorld();
+    const light = serviceOf(world.accessory(dimmer('dim 60')).getServices(), 'Lightbulb');
+
+    world.update('dimmer-state', 'off');
+
+    expect(characteristicOf(light, Characteristic.On).value).toBe(false);
+  });
+});
