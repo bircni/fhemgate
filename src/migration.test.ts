@@ -176,6 +176,22 @@ describe('configFindings', () => {
   });
 });
 
+describe('configFindings for a platform that names its plugin', () => {
+  it('notes that an entry that names homebridge-fhem has to stay as it is', () => {
+    const found = configFindings({ platform: 'homebridge-fhem.FHEM', server: 'fhem' });
+
+    expect(found).toHaveLength(1);
+    expect(found[0]?.level).toBe('info');
+    expect(found[0]?.text).toContain('"platform": "homebridge-fhem.FHEM"');
+    expect(found[0]?.text).toContain('leave it as it is');
+  });
+
+  it('has nothing to say about an entry that names this plugin or no plugin', () => {
+    expect(configFindings({ platform: 'homebridge-fhem2hb.FHEM' })).toEqual([]);
+    expect(configFindings({ platform: 'FHEM' })).toEqual([]);
+  });
+});
+
 describe('a platform', () => {
   const api = () => ({ hap, on: vi.fn() }) as unknown as API;
   const plugin = (): Plugin => ({ state: new PluginState(hap), storagePath: () => directory, debugServers: new Map() });

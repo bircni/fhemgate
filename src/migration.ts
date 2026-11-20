@@ -82,7 +82,8 @@ export interface ConfigFinding {
 
 /**
  * What the configuration of a platform holds that homebridge-fhem acted on and this plugin does
- * not. Each finding names the key and says what to do.
+ * not, or that only somebody who comes from there has. Each finding names the key and says what
+ * to do.
  *
  * homebridge-fhem handed `auth` to its http library as it was. That library waited for FHEMWEB
  * to ask before it sent user and password, unless `sendImmediately` was true, and answered a
@@ -114,6 +115,16 @@ export function configFindings(config: FhemPlatformConfig): ConfigFinding[] {
         text: 'config: auth.bearer is not supported. only auth.user and auth.pass are sent, as basic authentication. remove auth.bearer.',
       });
     }
+  }
+
+  // the plugin registers its platform under the name of homebridge-fhem as well, see index.ts
+  if (typeof config.platform === 'string' && config.platform.startsWith(OLD_PLUGIN_NAME + '.')) {
+    findings.push({
+      level: 'info',
+      text:
+        `config: this platform is configured as "platform": "${config.platform}", which names ${OLD_PLUGIN_NAME}. ${PLUGIN_NAME} answers to that name. ` +
+        'leave it as it is: homebridge makes the identity of every accessory from it, and with another name HomeKit takes them all for new ones.',
+    });
   }
 
   return findings;
