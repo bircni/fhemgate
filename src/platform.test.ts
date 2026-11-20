@@ -119,12 +119,12 @@ describe('the plugin', () => {
     expect(plugin.state.subscriptions.byInformId['lamp-state']?.[0]?.accessory.shutdown).toBe(true);
   });
 
-  it('registers its platform under the name FHEM', () => {
+  it('registers its platform under the name FHEM, as the plugin homebridge-fhem did', () => {
     const homebridge = api();
 
     createPluginFor(homebridge);
 
-    expect(homebridge.registerPlatform).toHaveBeenCalledWith('FHEM', expect.any(Function));
+    expect(homebridge.registerPlatform).toHaveBeenCalledWith('homebridge-fhem', 'FHEM', expect.any(Function));
   });
 });
 

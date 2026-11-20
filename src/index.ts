@@ -1,7 +1,9 @@
 import { createRequire } from 'node:module';
+import { join } from 'node:path';
 import type { API, Logging } from 'homebridge';
 import type { HistoryServiceClass } from './accessory/history.ts';
 import type { FhemPlatformConfig } from './config.ts';
+import { installationWarnings, OLD_PLUGIN_NAME } from './migration.ts';
 import { FhemPlatform, version, type Plugin } from './platform.ts';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.ts';
 import { PluginState } from './state/pluginState.ts';
@@ -42,7 +44,21 @@ export default function (homebridge: API): void {
   console.log('homebridge API version: ' + homebridge.version);
   console.info('this is ' + PLUGIN_NAME + ' ' + version);
 
+  // homebridge hands a plugin no logger at this point, and it may never create a platform of it
+  try {
+    for (const warning of installationWarnings(join(import.meta.dirname, '..'), homebridge.user.configPath())) {
+      console.warn(PLUGIN_NAME + ': ' + warning);
+    }
+  } catch {
+    // the look around is a courtesy. it must not keep the plugin from loading.
+  }
+
   const plugin = createPlugin(homebridge);
 
-  homebridge.registerPlatform(PLATFORM_NAME, plugin.Platform);
+  // Registered under the name of homebridge-fhem. homebridge takes a plugin that names another
+  // plugin here for one that got its own name wrong and notes that the name stands for it, so a
+  // config entry that says "platform": "homebridge-fhem.FHEM" is loaded from this plugin. Such an
+  // entry can not be renamed: homebridge makes the uuid of every accessory from what it says.
+  // "FHEM" and "homebridge-fhem2hb.FHEM" are found as they are without it.
+  homebridge.registerPlatform(OLD_PLUGIN_NAME, PLATFORM_NAME, plugin.Platform);
 }
