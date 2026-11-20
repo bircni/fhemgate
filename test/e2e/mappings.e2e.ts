@@ -610,7 +610,9 @@ describe('what homebridge publishes', () => {
   });
 
   it('tells HomeKit no firmware revision when the function of the mapping answers no text', () => {
-    expect(world.named('e2e_m_typed', 'AccessoryInformation', 'FirmwareRevision').value).toBe('0.0.0');
+    // what homebridge gives an accessory that names none, which is not the same in every version of homebridge
+    const none = world.named('e2e_m_light', 'AccessoryInformation', 'FirmwareRevision').value;
+    expect(world.named('e2e_m_typed', 'AccessoryInformation', 'FirmwareRevision').value).toBe(none);
     expect(logged(/e2e-m-typed: the firmware reading "1\.2\.3" holds no version number\. HomeKit is not told a firmware revision\./)).toHaveLength(1);
   });
 

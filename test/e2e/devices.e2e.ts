@@ -303,7 +303,9 @@ describe('what homebridge publishes', () => {
   });
 
   it('tells HomeKit no firmware revision for a firmware reading without a version in it, and says so', () => {
-    expect(world.named('e2e_nofw', 'AccessoryInformation', 'FirmwareRevision').value).toBe('0.0.0');
+    // what homebridge gives an accessory that names none, which is not the same in every version of homebridge
+    const none = world.named('e2e_switch', 'AccessoryInformation', 'FirmwareRevision').value;
+    expect(world.named('e2e_nofw', 'AccessoryInformation', 'FirmwareRevision').value).toBe(none);
     expect(logged(/e2e-nofw: the firmware reading "unknown" holds no version number\. HomeKit is not told a firmware revision\./)).toHaveLength(1);
   });
 
