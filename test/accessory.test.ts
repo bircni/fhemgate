@@ -1384,3 +1384,87 @@ describe('the colour temperature of a light', () => {
     expect(light.characteristics.map((characteristic) => characteristic.displayName)).not.toContain('Color Temperature');
   });
 });
+
+describe('a roller shutter', () => {
+  const shutter = (type: string, sets: string, attributes: Record<string, string> = {}) =>
+    device({
+      Internals: { NAME: 'shutter', TYPE: type, DEF: '401234' },
+      Readings: { state: '30', position: '30' },
+      PossibleSets: sets,
+      Attributes: attributes,
+    });
+  const servicesOf = (type: string, sets: string, attributes?: Record<string, string>) => {
+    const world = createWorld();
+    const services = world.accessory(shutter(type, sets, attributes)).getServices();
+    return { world, services, kinds: services.map((service) => service.constructor.name).slice(1) };
+  };
+
+  it.each([
+    ['DUOFERN', 'position:slider,0,1,100 up:noArg down:noArg stop:noArg', 'set shutter position 20'],
+    ['SOMFY', 'position:slider,0,10,100 pos:slider,0,10,100 on off stop go-my', 'set shutter pos 20'],
+  ])('of %s is a blind without a genericDeviceType, with the position the other way round', (type, sets, command) => {
+    vi.useFakeTimers();
+    const { world, services, kinds } = servicesOf(type, sets);
+    expect(kinds).toEqual(['WindowCovering']);
+    const covering = serviceOf(services, 'WindowCovering');
+
+    // fhem counts how far it is closed, HomeKit how far it is open
+    expect(characteristicOf(covering, Characteristic.CurrentPosition).value).toBe(70);
+
+    write(characteristicOf(covering, Characteristic.TargetPosition), 80);
+    vi.advanceTimersByTime(1000);
+    expect(world.sent).toEqual([command]);
+  });
+
+  it('of SOMFY with positionInverse keeps the position as fhem reports it', () => {
+    const { services } = servicesOf('SOMFY', 'position:slider,0,10,100 pos:slider,0,10,100 on off stop', { positionInverse: '1' });
+
+    expect(characteristicOf(serviceOf(services, 'WindowCovering'), Characteristic.CurrentPosition).value).toBe(30);
+  });
+
+  it.each([
+    ['switch', 'Switch'],
+    ['light', 'Lightbulb'],
+  ])('is what its genericDeviceType %s says when it has one', (genericDeviceType, kind) => {
+    const { kinds } = servicesOf('DUOFERN', 'position:slider,0,1,100 on off stop:noArg', { genericDeviceType });
+
+    expect(kinds).toEqual([kind]);
+  });
+
+  it('is no blind without a position command, and neither is a device of another module with one', () => {
+    expect(servicesOf('DUOFERN', 'on off level:slider,0,1,100').kinds).toEqual(['Switch']);
+    expect(servicesOf('dummy', 'on off position:slider,0,1,100').kinds).toEqual(['Switch']);
+  });
+
+  it('is stopped where it is when HomeKit sets HoldPosition', () => {
+    const { world, services } = servicesOf('DUOFERN', 'position:slider,0,1,100 up:noArg down:noArg stop:noArg');
+    const hold = characteristicOf(serviceOf(services, 'WindowCovering'), Characteristic.HoldPosition);
+
+    write(hold, true);
+    expect(world.sent).toEqual(['set shutter stop']);
+
+    write(hold, false);
+    expect(world.sent).toEqual(['set shutter stop']);
+    expect(Object.keys(world.subscriptions)).toEqual(['shutter-position']);
+  });
+
+  it('has no HoldPosition without a stop command', () => {
+    const { services } = servicesOf('DUOFERN', 'position:slider,0,1,100 up:noArg down:noArg');
+
+    expect(serviceOf(services, 'WindowCovering').characteristics.map((characteristic) => characteristic.displayName)).not.toContain('Hold Position');
+  });
+
+  it('gets HoldPosition as any blind with a stop command does', () => {
+    const world = createWorld();
+    const blind = device({
+      Internals: { NAME: 'blind' },
+      Readings: { state: '30', pct: '30' },
+      PossibleSets: 'pct:slider,0,1,100 stop',
+      Attributes: { genericDeviceType: 'blind' },
+    });
+    const hold = characteristicOf(serviceOf(world.accessory(blind).getServices(), 'WindowCovering'), Characteristic.HoldPosition);
+
+    write(hold, true);
+    expect(world.sent).toEqual(['set blind stop']);
+  });
+});
