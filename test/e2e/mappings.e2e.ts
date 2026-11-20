@@ -369,7 +369,7 @@ describe('what homebridge publishes', () => {
   });
 
   it('asks fhem for the reading of another device when it starts', () => {
-    expect(logged(/executing: .*ReadingsVal\(%22e2e_m_other%22,%22temperature%22/).length).toBeGreaterThan(0);
+    expect(logged(/executing: .*ReadingsVal\(%22e2e_m_other%22%2C%22temperature%22/).length).toBeGreaterThan(0);
   });
 
   it('shows a firmware revision mapping at the accessory information', () => {
@@ -401,9 +401,16 @@ describe('what homebridge publishes', () => {
 describe('a read of a characteristic', () => {
   const asked = (device: string) => logged(new RegExp(`executing: .*ReadingsVal\\(%22${device}%22`)).length;
 
-  it('is answered from what the plugin has seen, without asking fhem', async () => {
-    expect(await world.homebridge.read(world.named('e2e_m_parts', 'TemperatureSensor', 'CurrentTemperature'))).toBe(21.5);
-    expect(asked('e2e_m_parts')).toBe(0);
+  it('is answered from what the plugin has seen, and fhem is asked in the background once a minute at most', async () => {
+    const temperature = world.named('e2e_m_parts', 'TemperatureSensor', 'CurrentTemperature');
+    // homebridge read every characteristic when it listed the accessories, which was the first read of this minute
+    const before = asked('e2e_m_parts');
+    expect(before).toBeGreaterThan(0);
+
+    expect(await world.homebridge.read(temperature)).toBe(21.5);
+    expect(await world.homebridge.read(temperature)).toBe(21.5);
+    // one more if the minute happened to be over
+    expect(asked('e2e_m_parts')).toBeLessThanOrEqual(before + 1);
   });
 
   it('is answered with an error when the function that converts the reading fails', async () => {

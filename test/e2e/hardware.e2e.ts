@@ -54,6 +54,13 @@ const devices: FhemDevice[] = [
       homebridgeMapping: 'ContactSensorState=state,values=on:CONTACT_NOT_DETECTED;off:CONTACT_DETECTED',
     },
   }),
+  // a light that is set with rgb and also reports its colour as xy
+  asJsonlist2({
+    name: 'e2e_hw_xy',
+    setList: 'on off rgb:colorpicker,RGB',
+    readingList: 'rgb',
+    readings: { state: 'on', rgb: 'FF0000', colormode: 'hs', xy: '0.6,0.3' },
+  }),
   asJsonlist2({
     name: 'e2e_hw_on',
     readings: { state: 'A0' },
@@ -270,16 +277,16 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
   });
 
   describe('a light that reports its colour as xy or as colour temperature', () => {
-    const cached = (suffix: string) => logged(new RegExp(`caching: hue_color_xy-${suffix}: `)).length;
+    // the plugin keeps what it worked out to itself. it shows in the next rgb colour it sends:
+    // the brightness HomeKit sets is combined with the hue and saturation the light has.
+    it('has hue and saturation worked out for an xy colour', async () => {
+      await world.fhem.change('e2e_hw_xy', 'xy', '0.3,0.3');
+      await eventually('the plugin to take the xy colour', () => (logged(/caching: e2e_hw_xy-xy: 0\.3,0\.3/).length ? true : undefined), world.homebridge);
 
-    it('has hue, saturation and brightness worked out for an xy colour', async () => {
-      const before = cached('h');
+      await world.homebridge.write(world.named('e2e_hw_xy', 'Lightbulb', 'Brightness'), 50);
 
-      await world.fhem.change('hue_color_xy', 'xy', '0.3,0.3');
-
-      await eventually('the plugin to work out the hue', () => (cached('h') > before ? true : undefined), world.homebridge);
-      expect(cached('s')).toBeGreaterThan(0);
-      expect(cached('v')).toBeGreaterThan(0);
+      // the red the light started with would give 800000
+      await world.fhem.wasTold('set e2e_hw_xy rgb 5c6280');
     });
 
     it('has them worked out for a colour temperature from 5600 kelvin on', async () => {

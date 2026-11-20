@@ -246,11 +246,15 @@ function listen(port: number, characteristics: HapCharacteristic[], notified: (n
  * @param platforms the configuration of the FHEM platform, or of several
  * @param files files to put into the storage directory of homebridge, by name
  * @param storage the storage directory of a homebridge that has ended, to start it again with what it kept there
+ * @param options `debug: false` starts homebridge the way a user does. otherwise it also logs what
+ *   plugins log for debugging: the plugin logs there what it asks fhem and what it reads, which
+ *   is how the tests see it also with a real fhem.
  */
 export async function startHomebridge(
   platforms: Record<string, unknown> | Record<string, unknown>[],
   files: Record<string, string> = {},
   storage = mkdtempSync(join(inject('e2eDirectory'), 'homebridge-')),
+  options: { debug?: boolean } = {},
 ): Promise<Homebridge> {
   rmSync(join(storage, 'stopping'), { force: true });
   for (const [name, content] of Object.entries(files)) {
@@ -281,7 +285,8 @@ export async function startHomebridge(
     // node writes what the process ran into this directory when the process ends
     env.NODE_V8_COVERAGE = process.env.E2E_V8_COVERAGE;
   }
-  const child = spawn(process.execPath, [homebridgeBin, '-I', '-Q', '-U', storage, '-P', root, '--strict-plugin-resolution'], {
+  const flags = options.debug === false ? [] : ['-D'];
+  const child = spawn(process.execPath, [homebridgeBin, '-I', '-Q', ...flags, '-U', storage, '-P', root, '--strict-plugin-resolution'], {
     env,
     stdio: ['ignore', log, log],
   });
