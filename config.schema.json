@@ -1,7 +1,7 @@
 {
   "pluginAlias": "FHEM",
   "pluginType": "platform",
-  "headerDisplay": "HomeKit support for the FHEM home automation system. See the [homebridge-fhem](https://github.com/justme-1968/homebridge-fhem) developer page for documentation.",
+  "headerDisplay": "HomeKit support for the FHEM home automation system. See the [documentation](https://github.com/bircni/fhem2hb#documentation) for all options, device types and the homebridgeMapping attribute.",
   "footerDisplay": "Find out more about FHEM on its [project page](https://fhem.de).",
   "singular": false,
 

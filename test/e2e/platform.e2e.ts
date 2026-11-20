@@ -342,7 +342,7 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
   });
 
-  it('knows the battery service by the name it had before HAP-NodeJS 2, which the README uses', async () => {
+  it('knows the battery service by the name it had before HAP-NodeJS 2, which attributes written for homebridge-fhem use', async () => {
     const { homebridge } = await start([
       lamp('e2e_p_lamp', 'a'),
       asJsonlist2({

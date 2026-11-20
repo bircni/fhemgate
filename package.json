@@ -25,6 +25,7 @@
   "files": [
     "dist",
     "config.schema.json",
+    "docs",
     "LICENSE",
     "README.md"
   ],

@@ -35,7 +35,10 @@ end-to-end tests.
 | `src/accessory` | the accessory homebridge sees, its services and the Eve history |
 | `src/fhem` | the connection to FHEMWEB: the long poll for events and the commands |
 | `src/state` | the readings the plugin has seen and who is subscribed to them |
+| `src/debug` | the debug page |
 | `test` | the suites that run whole devices through the plugin, their fixtures and a stand-in FHEMWEB |
+| `scripts` | what `bun run` needs besides the tools: the pack check and the coverage of the end-to-end tests |
+| `docs` | the documentation for users, which the README links to |
 
 Unit tests sit next to the module they test, as `*.test.ts`.
 
@@ -83,6 +86,14 @@ alters a recorded result has to say why, in the pull request.
 
 Behaviour that is recorded but wrong is tracked as an issue of this repository. Fix
 one of those in a pull request of its own, together with the changed test.
+
+## Documentation
+
+`README.md` is the short introduction, and `docs/` holds one page per subject: the options of the
+platform, the detection, the `homebridgeMapping` attribute, the history and the troubleshooting. A
+change to an option, to what is detected or to what a mapping can say changes the page that
+describes it in the same pull request. `docs/` is for users of the plugin only; notes on the work
+itself belong into issues and pull requests.
 
 ## Adding a device
 
