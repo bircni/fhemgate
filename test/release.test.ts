@@ -2,14 +2,17 @@
 import { describe, expect, it } from 'vitest';
 import {
   compareVersions,
+  distTag,
   formatNotes,
   formatVersion,
   groupCommits,
   nextVersion,
   parseArguments,
   parseVersion,
+  previousRelease,
   withVersion,
   type Commit,
+  type ReleaseTag,
 } from '../scripts/release.ts';
 
 const commit = (subject: string, body = '', hash = 'abcdef0123456789'): Commit => ({ hash, subject, body });
@@ -78,10 +81,49 @@ describe('the next version', () => {
     expect(() => nextVersion('next', 'patch')).toThrow('the current version "next" is no version');
   });
 
+  it('starts from 0.0.0 with the first release asked for by its number', () => {
+    expect(nextVersion('0.0.0', '0.1.0')).toBe('0.1.0');
+    expect(nextVersion('0.0.0', 'minor')).toBe('0.1.0');
+  });
+
   it('replaces the version in package.json and nothing else', () => {
     const before = '{\n  "name": "x",\n  "version": "0.6.0-alpha.0",\n  "dependencies": { "y": "0.6.0-alpha.0" }\n}\n';
     expect(withVersion(before, '0.6.0')).toBe('{\n  "name": "x",\n  "version": "0.6.0",\n  "dependencies": { "y": "0.6.0-alpha.0" }\n}\n');
     expect(() => withVersion('{ "name": "x" }', '0.6.0')).toThrow('no "version"');
+  });
+});
+
+describe('the npm dist-tag', () => {
+  it('is next for a prerelease, so that an install without a tag never gets one, and latest otherwise', () => {
+    expect(distTag(parseVersion('0.1.0') as never)).toBe('latest');
+    expect(distTag(parseVersion('1.0.0-rc.1') as never)).toBe('next');
+    expect(distTag(parseVersion('0.6.0-alpha.0') as never)).toBe('next');
+  });
+});
+
+describe('the release before', () => {
+  const ours = (tag: string): ReleaseTag => ({ tag, packageName: 'homebridge-fhem2hb' });
+  // the tags homebridge-fhem left in the repository
+  const upstream = (tag: string): ReleaseTag => ({ tag, packageName: 'homebridge-fhem' });
+
+  it('is none for the first release, also with the higher tags of homebridge-fhem in the repository', () => {
+    expect(previousRelease([upstream('v0.5.54'), upstream('v0.5.27')], 'homebridge-fhem2hb', '0.1.0')).toBeUndefined();
+    expect(previousRelease([upstream('v0.5.54')], 'homebridge-fhem2hb', '0.6.0')).toBeUndefined();
+    expect(previousRelease([], 'homebridge-fhem2hb', '0.1.0')).toBeUndefined();
+  });
+
+  it('is the highest release of this package below the new version', () => {
+    const tags = [upstream('v0.5.54'), ours('v0.1.0'), ours('v0.2.0-rc.1'), ours('v0.1.1'), ours('v0.3.0')];
+    expect(previousRelease(tags, 'homebridge-fhem2hb', '0.2.0')).toBe('v0.2.0-rc.1');
+    expect(previousRelease(tags, 'homebridge-fhem2hb', '0.2.0-rc.2')).toBe('v0.2.0-rc.1');
+    expect(previousRelease(tags, 'homebridge-fhem2hb', '0.2.0-rc.1')).toBe('v0.1.1');
+    expect(previousRelease(tags, 'homebridge-fhem2hb', '1.0.0')).toBe('v0.3.0');
+  });
+
+  it('ignores tags that are no versions, and commits without a package.json', () => {
+    const tags = [ours('v-next'), { tag: 'v0.4.0', packageName: undefined }, ours('v0.1.0')];
+    expect(previousRelease(tags, 'homebridge-fhem2hb', '0.5.0')).toBe('v0.1.0');
+    expect(previousRelease(tags, 'homebridge-fhem2hb', 'latest')).toBeUndefined();
   });
 });
 
@@ -99,7 +141,8 @@ describe('the release notes', () => {
       breaking: [],
       features: ['- support HomeMatic IP devices via HMCCU (1111111)', '- history: keep a history for plugs (4444444)'],
       fixes: ['- parser: read a mapping on several lines (2222222)'],
-      other: ['- docs: describe the options (3333333)', '- Merge the old way of doing it (5555555)'],
+      other: ['- Merge the old way of doing it (5555555)'],
+      internal: 1,
     });
   });
 
@@ -117,21 +160,59 @@ describe('the release notes', () => {
       '- refactor: read the configuration in one place (3333333)\n  the option ssl has to be a boolean',
       '- fix: a fix (4444444)\n  with a dash',
     ]);
-    expect([notes.features, notes.fixes, notes.other]).toEqual([[], [], []]);
+    expect([notes.features, notes.fixes, notes.other, notes.internal]).toEqual([[], [], [], 0]);
+  });
+
+  it('count the commits that change nothing for users instead of listing them, unless they are breaking', () => {
+    const notes = groupCommits([
+      commit('build: prepare the package for publishing'),
+      commit('ci: publish a tagged release'),
+      commit('chore: update the lockfile'),
+      commit('docs(readme): install from npm'),
+      commit('refactor: one place for the options'),
+      commit('style: format'),
+      commit('test(e2e): cover the migration'),
+      commit('build!: drop node 20', '', '1111111aaaa'),
+      commit('perf: read the readings once', '', '2222222aaaa'),
+    ]);
+
+    expect(notes).toEqual({
+      breaking: ['- build!: drop node 20 (1111111)'],
+      features: [],
+      fixes: [],
+      other: ['- perf: read the readings once (2222222)'],
+      internal: 7,
+    });
   });
 
   it('leave out the commits of earlier releases', () => {
-    expect(groupCommits([commit('chore(release): v0.5.0'), commit('chore: update the lockfile')]).other).toEqual(['- chore: update the lockfile (abcdef0)']);
+    expect(groupCommits([commit('chore(release): v0.5.0'), commit('Update the lockfile')])).toEqual({
+      breaking: [],
+      features: [],
+      fixes: [],
+      other: ['- Update the lockfile (abcdef0)'],
+      internal: 0,
+    });
   });
 
   it('are plain text with a section for every group that has entries', () => {
-    const notes = formatNotes('homebridge-fhem2hb', '0.6.0', { breaking: ['- b'], features: ['- f1', '- f2'], fixes: [], other: ['- o'] });
+    const notes = formatNotes('homebridge-fhem2hb', '0.6.0', { breaking: ['- b'], features: ['- f1', '- f2'], fixes: [], other: ['- o'], internal: 0 });
     expect(notes).toBe('homebridge-fhem2hb v0.6.0\n\nBreaking changes:\n- b\n\nFeatures:\n- f1\n- f2\n\nOther changes:\n- o\n');
     expect(notes).not.toMatch(/^#/m);
   });
 
-  it('say so when nothing changed', () => {
-    expect(formatNotes('x', '1.0.0', { breaking: [], features: [], fixes: [], other: [] })).toBe('x v1.0.0\n\nNo changes.\n');
+  it('end with the number of internal changes', () => {
+    expect(formatNotes('x', '1.0.0', { breaking: [], features: [], fixes: ['- f'], other: [], internal: 3 })).toBe(
+      'x v1.0.0\n\nFixes:\n- f\n\nand 3 internal changes (tests, build, documentation).\n',
+    );
+    expect(formatNotes('x', '1.0.0', { breaking: [], features: [], fixes: ['- f'], other: [], internal: 1 })).toContain('and 1 internal change (tests');
+  });
+
+  it('say so when nothing changed, or nothing for users', () => {
+    expect(formatNotes('x', '1.0.0', { breaking: [], features: [], fixes: [], other: [], internal: 0 })).toBe('x v1.0.0\n\nNo changes.\n');
+    expect(formatNotes('x', '1.0.0', { breaking: [], features: [], fixes: [], other: [], internal: 2 })).toBe(
+      'x v1.0.0\n\nNothing changes for users: 2 internal changes (tests, build, documentation).\n',
+    );
   });
 });
 
@@ -147,5 +228,16 @@ describe('the command line', () => {
     expect(() => parseArguments(['--dry-run'])).toThrow('exactly one of');
     expect(() => parseArguments(['patch', 'minor'])).toThrow('exactly one of');
     expect(() => parseArguments(['patch', '--push'])).toThrow('unknown option --push');
+  });
+
+  it('takes the ref the notes start after, as the next argument or after an equals sign', () => {
+    expect(parseArguments(['0.1.0', '--notes-from', 'bcfc357^', '--dry-run'])).toEqual({ release: '0.1.0', dryRun: true, notesFrom: 'bcfc357^' });
+    expect(parseArguments(['--notes-from=v0.1.0', 'patch'])).toEqual({ release: 'patch', dryRun: false, notesFrom: 'v0.1.0' });
+  });
+
+  it('is refused for --notes-from without a ref', () => {
+    expect(() => parseArguments(['patch', '--notes-from'])).toThrow('--notes-from needs a ref');
+    expect(() => parseArguments(['patch', '--notes-from='])).toThrow('--notes-from needs a ref');
+    expect(() => parseArguments(['patch', '--notes-from', '--dry-run'])).toThrow('--notes-from needs a ref');
   });
 });

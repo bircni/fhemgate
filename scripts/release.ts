@@ -1,12 +1,14 @@
 // prepares a release: checks that the checkout is the main branch as it is on origin, runs
 // `bun run verify`, sets the new version in package.json, commits that as
 // `chore(release): vX.Y.Z` and tags the commit with the release notes as the message of the tag.
-// the notes are made from the conventional commits since the tag before.
+// the notes are made from the conventional commits since the release before, or since the ref
+// that --notes-from names.
 //
 // nothing leaves the machine: the script neither pushes nor publishes, and ends by printing the
-// commands that do. with --dry-run it changes nothing at all and prints what it would do.
+// commands that push. pushing the tag is what starts .github/workflows/release.yml, which
+// publishes to npm. with --dry-run it changes nothing at all and prints what it would do.
 //
-//   bun run release <patch|minor|major|prerelease|x.y.z> [--dry-run]
+//   bun run release <patch|minor|major|prerelease|x.y.z> [--notes-from <ref>] [--dry-run]
 import { execFileSync } from 'node:child_process';
 import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -149,6 +151,43 @@ export function nextVersion(current: string, release: string): string {
   return formatVersion(to);
 }
 
+/** the npm dist-tag a version is published under: `next` for a prerelease, so that `npm install` without a tag never gives one, and `latest` otherwise */
+export function distTag(version: Version): 'latest' | 'next' {
+  return version.prerelease.length ? 'next' : 'latest';
+}
+
+/** a release tag of the repository, with the name the package.json of its commit has */
+export interface ReleaseTag {
+  tag: string;
+  /** undefined if the commit has no package.json that can be read */
+  packageName: string | undefined;
+}
+
+/**
+ * The tag of the release before the given version: the highest version below it among the tags
+ * whose commit has a package.json with this name. The repository also holds the `v0.5.x` tags
+ * of homebridge-fhem, the package this one started from. Those name another package, so they
+ * are no releases of this one, whatever their number. undefined if there is none.
+ */
+export function previousRelease(tags: ReleaseTag[], name: string, version: string): string | undefined {
+  const next = parseVersion(version);
+  if (!next) {
+    return undefined;
+  }
+
+  let best: { tag: string; version: Version } | undefined;
+  for (const { tag, packageName } of tags) {
+    const candidate = parseVersion(tag);
+    if (!candidate || packageName !== name || compareVersions(candidate, next) >= 0) {
+      continue;
+    }
+    if (!best || compareVersions(candidate, best.version) > 0) {
+      best = { tag, version: candidate };
+    }
+  }
+  return best?.tag;
+}
+
 /** the text of a package.json with its version replaced, everything else as it was */
 export function withVersion(packageJson: string, version: string): string {
   const line = /^(\s*"version"\s*:\s*")[^"]*(")/m;
@@ -173,7 +212,12 @@ export interface ReleaseNotes {
   features: string[];
   fixes: string[];
   other: string[];
+  /** how many commits are left out because they change nothing for someone who uses the package */
+  internal: number;
 }
+
+/** the types of commits that change nothing for someone who uses the package. they are counted, not listed. */
+const INTERNAL = new Set(['build', 'chore', 'ci', 'docs', 'refactor', 'style', 'test']);
 
 /** what the body of a commit says behind `BREAKING CHANGE:`, up to the next empty line, as one line. undefined without such a line. */
 function breakingChange(body: string): string | undefined {
@@ -193,12 +237,14 @@ function breakingChange(body: string): string | undefined {
  * Sorts the commits into the groups of the release notes, each as one line, in the order given.
  *
  * A commit is breaking with a `!` before the colon of its subject, or with a `BREAKING CHANGE:`
- * line in its body, whose text is put below the subject. `feat` commits are features, `fix`
- * commits fixes, and everything else is listed with its subject as it is, also commits that do
- * not follow the convention. The commits of earlier releases, `chore(release): ...`, are left out.
+ * line in its body, whose text is put below the subject. `feat` commits are features and `fix`
+ * commits fixes. Commits of the types that only matter to who works on the package (tests, ci,
+ * build, chores, documentation, refactoring, style) are counted and not listed, unless they are
+ * breaking. Everything else is listed with its subject as it is, also commits that do not follow
+ * the convention. The commits of earlier releases, `chore(release): ...`, are left out entirely.
  */
 export function groupCommits(commits: Commit[]): ReleaseNotes {
-  const notes: ReleaseNotes = { breaking: [], features: [], fixes: [], other: [] };
+  const notes: ReleaseNotes = { breaking: [], features: [], fixes: [], other: [], internal: 0 };
 
   for (const commit of commits) {
     const subject = commit.subject.trim();
@@ -219,6 +265,8 @@ export function groupCommits(commits: Commit[]): ReleaseNotes {
       notes.features.push('- ' + (scope ? scope + ': ' : '') + description + hash);
     } else if (type === 'fix') {
       notes.fixes.push('- ' + (scope ? scope + ': ' : '') + description + hash);
+    } else if (type !== undefined && INTERNAL.has(type)) {
+      notes.internal++;
     } else {
       notes.other.push('- ' + subject + hash);
     }
@@ -242,8 +290,12 @@ export function formatNotes(name: string, version: string, notes: ReleaseNotes):
       text += '\n' + title + ':\n' + lines.join('\n') + '\n';
     }
   }
-  if (sections.every(([, lines]) => !lines.length)) {
-    text += '\nNo changes.\n';
+  const listed = sections.some(([, lines]) => lines.length);
+  const internal = notes.internal + ' internal change' + (notes.internal === 1 ? '' : 's') + ' (tests, build, documentation)';
+  if (!listed) {
+    text += notes.internal ? '\nNothing changes for users: ' + internal + '.\n' : '\nNo changes.\n';
+  } else if (notes.internal) {
+    text += '\nand ' + internal + '.\n';
   }
   return text;
 }
@@ -254,23 +306,41 @@ export interface Arguments {
   /** patch, minor, major, prerelease or a version */
   release: string;
   dryRun: boolean;
+  /** the ref the notes start after, instead of the release before. undefined if not given. */
+  notesFrom?: string;
 }
 
-export const USAGE = 'usage: bun run release <patch|minor|major|prerelease|x.y.z> [--dry-run]';
+export const USAGE = 'usage: bun run release <patch|minor|major|prerelease|x.y.z> [--notes-from <ref>] [--dry-run]';
 
-/** what the command line asks for. throws an error for anything but one release and the option. */
+/** what the command line asks for. throws an error for anything but one release and the options. */
 export function parseArguments(argv: string[]): Arguments {
-  const options = argv.filter((argument) => argument.startsWith('--'));
-  const others = argv.filter((argument) => !argument.startsWith('--'));
-  const unknown = options.find((option) => option !== '--dry-run');
-  if (unknown !== undefined) {
-    throw new Error('unknown option ' + unknown);
+  const others: string[] = [];
+  let dryRun = false;
+  let notesFrom: string | undefined;
+
+  for (let i = 0; i < argv.length; i++) {
+    const argument = argv[i] as string;
+    if (argument === '--dry-run') {
+      dryRun = true;
+    } else if (argument === '--notes-from' || argument.startsWith('--notes-from=')) {
+      // the ref is the next argument, or follows the equals sign
+      const ref = argument === '--notes-from' ? argv[++i] : argument.slice('--notes-from='.length);
+      if (ref === undefined || ref === '' || ref.startsWith('-')) {
+        throw new Error('--notes-from needs a ref: a commit, a tag or a branch');
+      }
+      notesFrom = ref;
+    } else if (argument.startsWith('--')) {
+      throw new Error('unknown option ' + argument);
+    } else {
+      others.push(argument);
+    }
   }
+
   const [release, ...rest] = others;
   if (release === undefined || rest.length) {
     throw new Error('exactly one of patch, minor, major, prerelease or a version is needed');
   }
-  return { release, dryRun: options.includes('--dry-run') };
+  return notesFrom === undefined ? { release, dryRun } : { release, dryRun, notesFrom };
 }
 
 // ---- what touches the repository
@@ -278,6 +348,7 @@ export function parseArguments(argv: string[]): Arguments {
 const root = join(import.meta.dirname, '..');
 const MAIN = 'main';
 const REMOTE = 'origin';
+const WORKFLOW = '.github/workflows/release.yml';
 
 /** the output of a git command, without the line break at its end */
 function git(...args: string[]): string {
@@ -294,8 +365,12 @@ function gitOrNothing(...args: string[]): string | undefined {
 }
 
 /** why the release can not be made from this checkout. empty if it can. reads only, also from origin. */
-function obstacles(tag: string): string[] {
+function obstacles(tag: string, isPrivate: boolean): string[] {
   const problems: string[] = [];
+
+  if (isPrivate) {
+    problems.push('package.json says "private": true, so npm would refuse to publish the release');
+  }
 
   const branch = gitOrNothing('rev-parse', '--abbrev-ref', 'HEAD');
   if (branch !== MAIN) {
@@ -338,17 +413,72 @@ function obstacles(tag: string): string[] {
   return problems;
 }
 
-/** the last release tag that leads to this commit, undefined if there is none */
-function previousTag(): string | undefined {
-  return gitOrNothing('describe', '--tags', '--abbrev=0', '--match', 'v[0-9]*');
+/** the release tags that lead to this commit, each with the name of the package at its commit */
+function releaseTags(): ReleaseTag[] {
+  return git('tag', '--list', 'v[0-9]*', '--merged', 'HEAD')
+    .split('\n')
+    .filter((tag) => tag !== '')
+    .map((tag) => {
+      let packageName: string | undefined;
+      try {
+        const name = (JSON.parse(git('show', tag + ':package.json')) as { name?: unknown }).name;
+        packageName = typeof name === 'string' ? name : undefined;
+      } catch {
+        // a commit without a package.json that can be read is no release of this package
+      }
+      return { tag, packageName };
+    });
 }
 
-/** the commits since the tag, or all of them, oldest first, without merges */
-function commitsSince(tag: string | undefined): Commit[] {
+/** the first commit in which package.json has this name: where the history of the package starts. undefined if it can not be told. */
+function firstCommitOf(name: string): string | undefined {
+  const found = gitOrNothing('log', '--reverse', '--format=%H', '-S"name": ' + JSON.stringify(name), 'HEAD', '--', 'package.json');
+  return found?.split('\n')[0] || undefined;
+}
+
+/** where the notes of a release start */
+interface NotesStart {
+  /** the commits in the notes, as a range for git log */
+  range: string;
+  /** the same for a reader */
+  described: string;
+}
+
+/**
+ * The commits the notes of this release are made from: those after the ref that was asked for,
+ * else those after the release before, else, for the first release of the package, everything
+ * from the commit on that gave package.json its name. Throws if the ref that was asked for is none.
+ */
+function notesStart(name: string, version: string, notesFrom: string | undefined): NotesStart {
+  if (notesFrom !== undefined) {
+    const commit = gitOrNothing('rev-parse', '--verify', '--quiet', notesFrom + '^{commit}');
+    if (commit === undefined) {
+      throw new Error('--notes-from: ' + JSON.stringify(notesFrom) + ' is no commit, tag or branch of this repository');
+    }
+    return { range: commit + '..HEAD', described: 'the commits after ' + notesFrom + ' (' + commit.slice(0, 7) + ')' };
+  }
+
+  const previous = previousRelease(releaseTags(), name, version);
+  if (previous !== undefined) {
+    return { range: previous + '..HEAD', described: 'the commits since ' + previous };
+  }
+
+  const first = firstCommitOf(name);
+  const parent = first === undefined ? undefined : gitOrNothing('rev-parse', '--verify', '--quiet', first + '^');
+  if (first === undefined || parent === undefined) {
+    return { range: 'HEAD', described: 'all commits, as there is no release of ' + name + ' before this one' };
+  }
+  return {
+    range: parent + '..HEAD',
+    described: 'the first commit of ' + name + ' (' + first.slice(0, 7) + ') and all after it, as there is no release of ' + name + ' before this one',
+  };
+}
+
+/** the commits of the range, oldest first, without merges */
+function commitsIn(range: string): Commit[] {
   // git writes the separators for %x1f and %x1e: no subject or body holds them
   const fields = '\u001f';
   const records = '\u001e';
-  const range = tag === undefined ? 'HEAD' : tag + '..HEAD';
   const log = git('log', '--no-merges', '--reverse', '--format=%H%x1f%s%x1f%b%x1e', range);
   return log
     .split(records)
@@ -383,18 +513,34 @@ function main(argv: string[]): number {
   const tag = 'v' + version;
   const message = 'chore(release): ' + tag;
 
-  const problems = obstacles(tag);
-  const since = previousTag();
-  const notes = formatNotes(pkg.name, version, groupCommits(commitsSince(since)));
+  let start: NotesStart;
+  try {
+    start = notesStart(pkg.name, version, wanted.notesFrom);
+  } catch (error) {
+    console.error((error as Error).message + '\n' + USAGE);
+    return 2;
+  }
+
+  const problems = obstacles(tag, pkg.private === true);
+  const notes = formatNotes(pkg.name, version, groupCommits(commitsIn(start.range)));
+  const npmTag = distTag(parseVersion(version) as Version);
   const pushCommands = ['git push ' + REMOTE + ' ' + MAIN, 'git push ' + REMOTE + ' ' + tag];
-  const aboutPublishing = pkg.private
-    ? 'package.json says "private": true, so npm refuses to publish this package. Publishing a release needs that line removed first.'
-    : 'To publish the release after pushing: npm publish' + (parseVersion(version)?.prerelease.length ? ' --tag next' : '');
+  const aboutPublishing =
+    'Pushing the tag starts ' +
+    WORKFLOW +
+    ', which checks the tagged commit again, publishes ' +
+    pkg.name +
+    '@' +
+    version +
+    ' to npm under the dist-tag ' +
+    npmTag +
+    ' and creates the GitHub release with the notes of the tag. Nothing is published before that push.';
 
   if (wanted.dryRun) {
     console.log('dry run: nothing is changed.\n');
     console.log('version: ' + pkg.version + ' -> ' + version);
-    console.log('notes from: ' + (since === undefined ? 'the first commit' : 'the commits since ' + since) + '\n');
+    console.log('npm dist-tag: ' + npmTag + (npmTag === 'next' ? ' (a prerelease)' : ''));
+    console.log('notes from: ' + start.described + '\n');
     console.log('would');
     console.log('  1. run: bun run verify');
     console.log('  2. set "version" in package.json to ' + version);
@@ -416,7 +562,7 @@ function main(argv: string[]): number {
     return 1;
   }
 
-  console.log('releasing ' + pkg.name + ' ' + pkg.version + ' -> ' + version + '\n');
+  console.log('releasing ' + pkg.name + ' ' + pkg.version + ' -> ' + version + ', for the npm dist-tag ' + npmTag + '\n');
   try {
     execFileSync('bun', ['run', 'verify'], { cwd: root, stdio: 'inherit' });
   } catch {
