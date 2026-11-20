@@ -19,7 +19,11 @@ try {
   }
 
   writeFileSync(join(work, 'package.json'), JSON.stringify({ name: 'pack-smoke', private: true }));
-  execFileSync('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error', join(work, tarball)], { cwd: work, stdio: 'inherit' });
+  // run by npm, as in prepublishOnly, the settings of that npm reach this one as npm_config_*
+  // variables, as if they were given on its command line. the install is to be one of a user, so
+  // they are left out.
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.toLowerCase().startsWith('npm_config_')));
+  execFileSync('npm', ['install', '--no-audit', '--no-fund', '--loglevel=error', join(work, tarball)], { cwd: work, stdio: 'inherit', env });
 
   // the plugin has to export the function homebridge calls to register it
   const check = `
