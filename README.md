@@ -1,13 +1,12 @@
-# homebridge-fhem2hb
+# fhem2hb
 
 A [Homebridge](https://homebridge.io) platform plugin that publishes the devices of a
 [FHEM](https://fhem.de) installation to HomeKit. It follows the events of FHEM over a long poll, so
 HomeKit shows a change as soon as FHEM reports it.
 
-This is the maintained successor of [homebridge-fhem](https://github.com/justme-1968/homebridge-fhem)
-by justme1968 and its contributors. It is built on that code and keeps its configuration: the
-platform is still called `FHEM`, and the `homebridgeMapping` and `genericDeviceType` attributes work
-as before. It replaces homebridge-fhem and can not be installed next to it. See
+This project is based on [homebridge-fhem](https://github.com/justme-1968/homebridge-fhem) by
+justme1968 and its contributors, and retains its configuration: the platform is still called
+`FHEM`, and the `homebridgeMapping` and `genericDeviceType` attributes work as before. See
 [moving from homebridge-fhem](docs/migration.md).
 
 ## Requirements
@@ -20,23 +19,11 @@ as before. It replaces homebridge-fhem and can not be installed next to it. See
 
 ## Install
 
-The plugin is **not published to npm yet**. The current version is `0.6.0-alpha.0`, and until a
-release is published it has to be built from this repository. That needs [bun](https://bun.sh):
-
-```sh
-git clone https://github.com/bircni/fhem2hb.git
-cd fhem2hb
-bun install
-bun run build
-bun pm pack
-```
-
-This writes `homebridge-fhem2hb-<version>.tgz`. Remove homebridge-fhem if it is installed, then
-install the file where your Homebridge keeps its plugins, for a global installation:
+If you have homebridge-fhem installed, remove it first. Then install this plugin from npm:
 
 ```sh
 npm uninstall -g homebridge-fhem
-npm install -g ./homebridge-fhem2hb-0.6.0-alpha.0.tgz
+npm install -g homebridge-fhem2hb
 ```
 
 ## Configure
