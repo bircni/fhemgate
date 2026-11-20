@@ -13,9 +13,12 @@ export function longpollUrl(baseUrl: string, lastEventTime: number | undefined, 
 /**
  * The url that runs a fhem command. The command is encoded completely, so that a `;`, `&` or
  * `#` in a value stays part of the command.
+ *
+ * A `+` is the exception and is sent as it is. FHEMWEB reads it as a blank, and mappings rely on
+ * that: the activities of a harmony hub, and commands in a homebridgeMapping written as JSON.
  */
 export function commandUrl(baseUrl: string, cmd: string, csrfToken: string | undefined): string {
-  let query = encodeURIComponent(cmd);
+  let query = encodeURIComponent(cmd).replaceAll('%2B', '+');
   if (csrfToken) {
     query += '&fwcsrf=' + encodeURIComponent(csrfToken);
   }

@@ -21,6 +21,10 @@ describe('urls', () => {
     expect(commandUrl(fhem, 'x', 'a&b')).toBe(fhem + '?cmd=x&fwcsrf=a%26b&XHR=1');
   });
 
+  it('leave a plus sign in a command for fhem to read as a blank', () => {
+    expect(commandUrl(fhem, 'set hub activity+Musik hören', undefined)).toBe(fhem + '?cmd=set%20hub%20activity+Musik%20h%C3%B6ren&XHR=1');
+  });
+
   it('are logged without the csrf token', () => {
     expect(withoutToken(commandUrl(fhem, 'set lamp on', 'csrf_1'))).toBe(fhem + '?cmd=set%20lamp%20on&fwcsrf=***&XHR=1');
     expect(withoutToken(devicesUrl(fhem, 'a=b', 'csrf_1'))).toBe(fhem + '?cmd=jsonlist2%20a%3Db&fwcsrf=***&XHR=1');
