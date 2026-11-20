@@ -89,6 +89,9 @@ jobs:
     services:
       fhem:
         image: ghcr.io/fhem/fhem-minimal-docker:5-bookworm
+        # fhem tells the time of a reading without a time zone, so it has to be in the one homebridge runs in
+        env:
+          TZ: UTC
         ports:
           - 8083:8083
     steps:
@@ -111,8 +114,14 @@ jobs:
           done
           echo "fhem did not come up" >&2
           exit 1
-      # the device scenarios, with dummy devices the test defines in this fhem
-      - run: bunx vitest run --config vitest.e2e.config.ts test/e2e/scenarios.e2e.ts
+      # the files whose devices are dummy devices, which the tests define in this fhem. the other
+      # files need the stand-in and skip themselves when a fhem is named.
+      - run: >-
+          bunx vitest run --config vitest.e2e.config.ts
+          test/e2e/scenarios.e2e.ts
+          test/e2e/devices.e2e.ts
+          test/e2e/mappings.e2e.ts
+          test/e2e/history.e2e.ts
         env:
           E2E_FHEM_URL: http://127.0.0.1:8083/fhem
 

@@ -1,10 +1,13 @@
 // a stand-in for FHEMWEB, the web server of fhem the plugin talks to. it speaks just enough
 // of the protocol: the long poll stream of events, and commands sent as ?cmd=.
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import { createServer as createTlsServer, type Server as TlsServer } from 'node:https';
 import type { AddressInfo, Socket } from 'node:net';
 import type { FhemDevice } from './types.ts';
 
 export interface FakeFhemOptions {
+  /** the port to listen on. any free one if not given. */
+  port?: number;
   /** the token FHEMWEB hands out and wants back with every command. undefined for a FHEMWEB without one. */
   csrfToken?: string;
   /** what `jsonlist2` answers, whatever the filter */
@@ -15,6 +18,8 @@ export interface FakeFhemOptions {
   readings?: Record<string, string>;
   /** user and password, if FHEMWEB asks for them */
   auth?: { user: string; pass: string };
+  /** key and certificate, as PEM, for a FHEMWEB that is reached with https */
+  tls?: { key: string; cert: string };
   /** refuses every request, as FHEMWEB does for an address it does not allow */
   forbidden?: boolean;
   /** takes commands and never answers them, as a fhem that hangs. the event streams stay as they are. */
@@ -130,7 +135,8 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
 
     // the plugin builds the query by hand, so it is taken apart by hand as well
     const parameters = query.split('&');
-    const cmd = decodeURIComponent((parameters.find((parameter) => parameter.startsWith('cmd=')) ?? 'cmd=').slice(4));
+    // FHEMWEB takes a + for a blank, as in a form
+    const cmd = decodeURIComponent((parameters.find((parameter) => parameter.startsWith('cmd=')) ?? 'cmd=').slice(4).replaceAll('+', ' '));
     fhem.commands.push(cmd);
 
     const token = parameters.find((parameter) => parameter.startsWith('fwcsrf='))?.slice(7);
@@ -147,13 +153,13 @@ export async function startFakeFhem(options: FakeFhemOptions = {}): Promise<Fake
     response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8' }).end(body);
   }
 
-  const server: Server = createServer(handle);
+  const server: Server | TlsServer = options.tls ? createTlsServer(options.tls, handle) : createServer(handle);
   server.on('connection', (socket) => {
     sockets.add(socket);
     socket.on('close', () => sockets.delete(socket));
   });
 
-  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  await new Promise<void>((resolve) => server.listen(options.port ?? 0, '127.0.0.1', resolve));
   fhem.port = (server.address() as AddressInfo).port;
   return fhem;
 }
