@@ -1,14 +1,19 @@
 {
-  "name": "homebridge-fhem2hb",
+  "name": "homebridge-fhemgate",
   "displayName": "FHEM",
-  "version": "0.6.0-alpha.0",
-  "private": true,
+  "version": "0.0.0",
   "description": "a fhem platform plugin for homebridge, maintained successor of homebridge-fhem",
   "keywords": [
     "fhem",
     "homebridge",
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "homekit",
+    "supports-hap"
   ],
+  "homepage": "https://github.com/bircni/fhemgate#readme",
+  "bugs": {
+    "url": "https://github.com/bircni/fhemgate/issues"
+  },
   "license": "ISC",
   "author": {
     "name": "bircni"
@@ -20,16 +25,22 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/bircni/fhem2hb.git"
+    "url": "git+https://github.com/bircni/fhemgate.git"
   },
   "files": [
     "dist",
+    "!dist/**/*.map",
+    "!dist/**/*.d.ts",
     "config.schema.json",
+    "docs",
     "LICENSE",
     "README.md"
   ],
   "type": "module",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc -p tsconfig.build.json",
     "format": "oxfmt",
@@ -42,6 +53,7 @@
     "coverage": "vitest run --coverage",
     "coverage:e2e": "bun run build && node scripts/coverage-e2e.ts",
     "pack-smoke": "node scripts/pack-smoke.ts",
+    "release": "node scripts/release.ts",
     "verify": "bun install --frozen-lockfile && bun run format:check && bun run lint && bun run typecheck && bun run coverage && bun run build && bun run pack-smoke && vitest run --config vitest.e2e.config.ts",
     "prepublishOnly": "bun run verify"
   },

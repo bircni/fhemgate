@@ -2,4 +2,4 @@
 export const PLATFORM_NAME = 'FHEM';
 
 /** The name of this plugin as published. */
-export const PLUGIN_NAME = 'homebridge-fhem2hb';
+export const PLUGIN_NAME = 'homebridge-fhemgate';

@@ -59,6 +59,6 @@ export default function (homebridge: API): void {
   // plugin here for one that got its own name wrong and notes that the name stands for it, so a
   // config entry that says "platform": "homebridge-fhem.FHEM" is loaded from this plugin. Such an
   // entry can not be renamed: homebridge makes the uuid of every accessory from what it says.
-  // "FHEM" and "homebridge-fhem2hb.FHEM" are found as they are without it.
+  // "FHEM" and "homebridge-fhemgate.FHEM" are found as they are without it.
   homebridge.registerPlatform(OLD_PLUGIN_NAME, PLATFORM_NAME, plugin.Platform);
 }

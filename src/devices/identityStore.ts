@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import type { Logging } from 'homebridge';
 
 /** the file in the storage directory of homebridge */
-export const IDENTITIES_FILE = 'fhem2hb-identities.json';
+export const IDENTITIES_FILE = 'fhemgate-identities.json';
 
 interface Stored {
   version: 1;

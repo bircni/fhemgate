@@ -95,7 +95,7 @@ describe.skipIf(realFhemUrl !== undefined)('several FHEM platforms in one homebr
   it('runs in the homebridge the tests are to start, which loads the plugin', () => {
     // E2E_HOMEBRIDGE can name another homebridge than the one the plugin is built with
     expect(homebridge.output()).toContain(`Homebridge v${homebridgeVersion} `);
-    expect(homebridge.output()).toContain(`Loaded plugin: homebridge-fhem2hb@${version}`);
+    expect(homebridge.output()).toContain(`Loaded plugin: homebridge-fhemgate@${version}`);
   });
 
   it('starts although one platform has no server', () => {
@@ -342,7 +342,7 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
     expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
   });
 
-  it('knows the battery service by the name it had before HAP-NodeJS 2, which the README uses', async () => {
+  it('knows the battery service by the name it had before HAP-NodeJS 2, which attributes written for homebridge-fhem use', async () => {
     const { homebridge } = await start([
       lamp('e2e_p_lamp', 'a'),
       asJsonlist2({
@@ -547,12 +547,12 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
 
   it('starts the file of the identities it remembers anew when it can not read it, and says so', async () => {
     const fhem = await startStandIn([lamp('e2e_p_lamp', 'a')]);
-    const homebridge = await startHomebridge(fhem.platformConfig, { 'fhem2hb-identities.json': 'not what the plugin wrote' });
+    const homebridge = await startHomebridge(fhem.platformConfig, { 'fhemgate-identities.json': 'not what the plugin wrote' });
     started.push({ stop: () => homebridge.stop() }, { stop: () => fhem.close() });
 
     expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
-    expect(logged(homebridge, /fhem2hb-identities\.json can not be read and is started anew \(SyntaxError: /)).toHaveLength(1);
-    expect(JSON.parse(readFileSync(join(homebridge.storage, 'fhem2hb-identities.json'), 'utf8'))).toEqual({
+    expect(logged(homebridge, /fhemgate-identities\.json can not be read and is started anew \(SyntaxError: /)).toHaveLength(1);
+    expect(JSON.parse(readFileSync(join(homebridge.storage, 'fhemgate-identities.json'), 'utf8'))).toEqual({
       version: 1,
       identities: { 'e2e-e2e_p_lamp': 'e2e-e2e_p_lamp' },
     });
@@ -561,14 +561,14 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
   it('publishes the devices also when it can not write the file of the identities it remembers, and says what that means', async () => {
     const storage = mkdtempSync(join(inject('e2eDirectory'), 'homebridge-'));
     // the plugin writes the file under this name first, which now is a directory
-    mkdirSync(join(storage, 'fhem2hb-identities.json.tmp'));
+    mkdirSync(join(storage, 'fhemgate-identities.json.tmp'));
     const fhem = await startStandIn([lamp('e2e_p_lamp', 'a')]);
     const homebridge = await startHomebridge(fhem.platformConfig, {}, storage);
     started.push({ stop: () => homebridge.stop() }, { stop: () => fhem.close() });
 
     expect(names(await published(homebridge))).toEqual(['e2e_p_lamp']);
     expect(
-      logged(homebridge, /fhem2hb-identities\.json can not be written\. devices may change their identity for HomeKit on a later start \(Error: EISDIR/),
+      logged(homebridge, /fhemgate-identities\.json can not be written\. devices may change their identity for HomeKit on a later start \(Error: EISDIR/),
     ).toHaveLength(1);
   });
 
@@ -625,7 +625,7 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
 
     const { fhem, homebridge: first } = await start([hue('00:17:88:01:02:03:04:05-0b')]);
     expect(await serial(first)).toBe('00:17:88:01:02:03:04:05-0b');
-    expect(JSON.parse(readFileSync(join(first.storage, 'fhem2hb-identities.json'), 'utf8'))).toEqual({
+    expect(JSON.parse(readFileSync(join(first.storage, 'fhemgate-identities.json'), 'utf8'))).toEqual({
       version: 1,
       identities: { 'e2e-p-hue-fuuid': '00:17:88:01:02:03:04:05-0b' },
     });

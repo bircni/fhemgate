@@ -315,7 +315,7 @@ export async function startHomebridge(
     join(storage, 'config.json'),
     JSON.stringify({
       // several bridges run at the same time, each needs a name and an id of its own
-      bridge: { name: `fhem2hb e2e ${port}`, username: options.username ?? `0E:2E:2E:2E:${hex(port >> 8)}:${hex(port)}`, port, pin },
+      bridge: { name: `fhemgate e2e ${port}`, username: options.username ?? `0E:2E:2E:2E:${hex(port >> 8)}:${hex(port)}`, port, pin },
       platforms: (Array.isArray(platforms) ? platforms : [platforms]).map((platform, index) => ({
         platform: 'FHEM',
         name: index ? `FHEM ${index + 1}` : 'FHEM',

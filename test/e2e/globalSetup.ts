@@ -31,7 +31,7 @@ function homebridges(directory: string): { pid: number; stopping: boolean }[] {
 }
 
 export default function setup(project: TestProject): () => Promise<void> {
-  const directory = mkdtempSync(join(tmpdir(), 'fhem2hb-e2e-'));
+  const directory = mkdtempSync(join(tmpdir(), 'fhemgate-e2e-'));
   project.provide('e2eDirectory', directory);
 
   return async () => {

@@ -105,7 +105,7 @@ export function createWorld(options: WorldOptions = {}): World {
     state,
     storagePath: () => {
       if (storage === undefined) {
-        storage = mkdtempSync(join(tmpdir(), 'fhem2hb-test-'));
+        storage = mkdtempSync(join(tmpdir(), 'fhemgate-test-'));
         temporary.push(storage);
       }
       return storage;

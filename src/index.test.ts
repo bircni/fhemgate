@@ -39,7 +39,7 @@ describe('loading the plugin', () => {
 
     initializer(api);
 
-    expect(warned.mock.calls).toEqual([['homebridge-fhem2hb: homebridge-fhem is installed as well.']]);
+    expect(warned.mock.calls).toEqual([['homebridge-fhemgate: homebridge-fhem is installed as well.']]);
     expect(api.registerPlatform).toHaveBeenCalledOnce();
   });
 

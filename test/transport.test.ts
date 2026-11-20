@@ -926,7 +926,7 @@ describe('jsFunctions', () => {
   let storage: string;
 
   beforeEach(() => {
-    storage = mkdtempSync(join(tmpdir(), 'fhem2hb-'));
+    storage = mkdtempSync(join(tmpdir(), 'fhemgate-'));
   });
 
   afterEach(() => {

@@ -1,11 +1,11 @@
 # Moving from homebridge-fhem
 
 This is for an installation that runs [homebridge-fhem](https://github.com/justme-1968/homebridge-fhem)
-and moves to homebridge-fhem2hb. It is written against homebridge-fhem 0.5.54, the last version
+and moves to homebridge-fhemgate. It is written against homebridge-fhem 0.5.54, the last version
 on npm. If yours is older than 0.5.50, read [Coming from an older version](#coming-from-an-older-version)
 first.
 
-homebridge-fhem2hb replaces homebridge-fhem. It reads the same platform entry in `config.json`
+homebridge-fhemgate replaces homebridge-fhem. It reads the same platform entry in `config.json`
 and the same `homebridgeMapping` and `genericDeviceType` attributes in fhem. Done in the order
 below, HomeKit keeps your accessories with their rooms, names, scenes and automations.
 
@@ -33,8 +33,8 @@ migration that happens in three ways, and the steps below avoid all of them:
 2. homebridge starts while both plugins are installed. Both register the platform `FHEM`,
    homebridge loads it from neither and publishes the bridge without the fhem accessories. Its
    log says `The requested platform 'FHEM' has been registered multiple times`, and
-   homebridge-fhem2hb prints a warning that starts with
-   `homebridge-fhem2hb: homebridge-fhem is installed as well`.
+   homebridge-fhemgate prints a warning that starts with
+   `homebridge-fhemgate: homebridge-fhem is installed as well`.
 3. fhem can not be reached when homebridge starts. Like homebridge-fhem, the plugin gives up
    after the fourth failed attempt, about 20 seconds, and hands homebridge an empty list, unless
    the platform entry has `"neverTimeout": true`.
@@ -44,7 +44,7 @@ running.
 
 ## Before you start
 
-1. Check the versions. homebridge-fhem2hb needs Node 22.12 or later, 24 or 26, and homebridge
+1. Check the versions. homebridge-fhemgate needs Node 22.12 or later, 24 or 26, and homebridge
    1.8 or later, or 2.x.
 
    ```sh
@@ -73,7 +73,7 @@ running.
 
 4. Look at the `platform` value of your FHEM entry in `config.json`. It is `"FHEM"`, or, less
    common, `"homebridge-fhem.FHEM"`. **Do not change it**, whichever it is: the uuid of every
-   accessory is made from that text. homebridge-fhem2hb answers to both.
+   accessory is made from that text. homebridge-fhemgate answers to both.
 
    An entry with `_bridge` settings, a child bridge, stays as it is as well.
 
@@ -84,16 +84,16 @@ running.
 6. Back up the storage directory. For the default directory:
 
    ```sh
-   cp -a ~/.homebridge ~/.homebridge.before-fhem2hb
+   cp -a ~/.homebridge ~/.homebridge.before-fhemgate
    ```
 
    The backup holds what is needed to go back: `config.json`, `persist/` (the pairing and the
    ids of the accessories), `accessories/`, and the Eve histories in `*_persist.json`.
 
 7. Make sure fhem is running, and do not restart it between the last start with homebridge-fhem
-   and the first start with homebridge-fhem2hb. This matters for `HUEDevice` devices: their
+   and the first start with homebridge-fhemgate. This matters for `HUEDevice` devices: their
    accessory is identified by the `uniqueid` internal once the hue bridge has reported it, and by
-   the `FUUID` before. homebridge-fhem worked that out anew on every start. homebridge-fhem2hb
+   the `FUUID` before. homebridge-fhem worked that out anew on every start. homebridge-fhemgate
    writes down what it finds on its first start and keeps it from then on. In fhem,
 
    ```
@@ -105,35 +105,21 @@ running.
 
 ## Steps
 
-1. Build the package. homebridge-fhem2hb is not published to npm yet, so it is installed from a
-   tarball built from a checkout. This needs [bun](https://bun.sh).
+1. With homebridge stopped, install homebridge-fhemgate from npm the way homebridge-fhem was
+   installed. For a global installation:
 
    ```sh
-   git clone https://github.com/bircni/fhem2hb.git
-   cd fhem2hb
-   bun install --frozen-lockfile
-   bun run build
-   bun pm pack
-   ```
-
-   This writes `homebridge-fhem2hb-<version>.tgz` into the checkout. It can be copied to the
-   machine homebridge runs on, which needs npm but not bun.
-
-2. With homebridge stopped, install the tarball the way homebridge-fhem was installed. For a
-   global installation:
-
-   ```sh
-   npm install -g ./homebridge-fhem2hb-<version>.tgz
+   npm install -g homebridge-fhemgate
    ```
 
    Use `sudo` if you needed it to install homebridge-fhem. If your plugins are in a directory of
-   their own, use the command you installed homebridge-fhem with, with the path of the tarball in
-   place of the package name.
+   their own, use the command you installed homebridge-fhem with, with `homebridge-fhemgate` in
+   place of `homebridge-fhem`.
 
-   > Once the package is published, this step becomes `npm install -g homebridge-fhem2hb`, and
-   > step 1 is not needed.
+   Do not install it from the plugins page of the Homebridge UI while homebridge-fhem is still
+   installed: the UI may restart homebridge with both plugins, which is case 2 above.
 
-3. Still with homebridge stopped, uninstall homebridge-fhem from the same place.
+2. Still with homebridge stopped, uninstall homebridge-fhem from the same place.
 
    ```sh
    npm uninstall -g homebridge-fhem
@@ -142,7 +128,7 @@ running.
    Install first and uninstall second, so that there is no moment in which a start of homebridge
    would find neither plugin.
 
-4. Leave the FHEM entry of `config.json` as it is. One addition is recommended: `neverTimeout`,
+3. Leave the FHEM entry of `config.json` as it is. One addition is recommended: `neverTimeout`,
    so that a fhem that is not reachable at the start makes homebridge wait instead of publishing
    the bridge without the fhem accessories.
 
@@ -163,21 +149,25 @@ running.
    If your `auth` has keys other than `user` and `pass` (or `username` and `password`), see
    [Configuration](#configuration).
 
-5. Start homebridge.
+4. Start homebridge.
 
 ## Check afterwards
 
 In the log of homebridge:
 
-- `this is homebridge-fhem2hb <version>` shows that the new plugin was loaded.
+- `this is homebridge-fhemgate <version>` shows that the new plugin was loaded.
+- `Plugin 'homebridge-fhemgate' tried to register with an incorrect plugin identifier:
+  'homebridge-fhem'` is expected and needs no report. The plugin registers its platform under the
+  name of homebridge-fhem on purpose, so that an entry with `"platform": "homebridge-fhem.FHEM"`
+  keeps working.
 - `Fetching FHEM devices...` and `got: <n> results` show that fhem answered, with the number of
   devices you expect. The plugin logs one line per device, like `lamp is switch`. The details it
   used to log are only shown when homebridge runs with debug logging (`-D`).
-- There is no line that starts with `homebridge-fhem2hb: homebridge-fhem is installed as well`,
+- There is no line that starts with `homebridge-fhemgate: homebridge-fhem is installed as well`,
   and none with `has been registered multiple times` or `No plugin was found for the platform`.
 - Lines of the plugin with `config:` in them name a key of your entry that needs attention.
 
-In the storage directory, there is a new file `fhem2hb-identities.json`. It lists what every
+In the storage directory, there is a new file `fhemgate-identities.json`. It lists what every
 device was published as, by its `FUUID`. Keep it: with it a device stays the same accessory when
 what fhem reports about it changes.
 
@@ -286,9 +276,9 @@ Differences:
 | `persist/` | kept by homebridge. Holds the pairing and the ids of the accessories. Not touched by either plugin |
 | `<host>_<FUUID>_persist.json` | the Eve history of a device, written by fakegato-history. Same name and place as before |
 | the `jsFunctions` file | read as before |
-| `fhem2hb-identities.json` | new. What every device was first published as |
+| `fhemgate-identities.json` | new. What every device was first published as |
 
-homebridge-fhem2hb installs fakegato-history itself, as homebridge-fhem did.
+homebridge-fhemgate installs fakegato-history itself, as homebridge-fhem did.
 
 ## Coming from an older version
 
@@ -316,12 +306,12 @@ homebridge-fhem works out the same uuids, so going back keeps the accessories as
 as homebridge never starts without one of the two plugins.
 
 1. Stop homebridge.
-2. Install homebridge-fhem and uninstall homebridge-fhem2hb, in this order, the way you
+2. Install homebridge-fhem and uninstall homebridge-fhemgate, in this order, the way you
    installed them.
 
    ```sh
    npm install -g homebridge-fhem@0.5.54
-   npm uninstall -g homebridge-fhem2hb
+   npm uninstall -g homebridge-fhemgate
    ```
 
 3. Remove the keys homebridge-fhem does not know from the FHEM entry if you added any. It
@@ -329,7 +319,7 @@ as homebridge never starts without one of the two plugins.
    new plugin.
 4. Start homebridge.
 
-`fhem2hb-identities.json` can stay. homebridge-fhem does not read it, and it is right again if
+`fhemgate-identities.json` can stay. homebridge-fhem does not read it, and it is right again if
 you return.
 
 If accessories did show up as new and you want the state from before the migration: stop

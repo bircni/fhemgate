@@ -1078,7 +1078,7 @@ describe('names of services and characteristics', () => {
       Attributes: { genericDeviceType: 'switch', homebridgeMapping },
     });
 
-  it('are still known by the name HAP-NodeJS had for them before it renamed them, as in the example of the README', () => {
+  it('are still known by the name HAP-NodeJS had for them before it renamed them, as attributes written for homebridge-fhem have them', () => {
     const world = createWorld();
     const accessory = world.accessory(
       switched(
@@ -1469,7 +1469,7 @@ describe('a roller shutter', () => {
   });
 });
 
-describe('what the troubleshooting section of the README recommends', () => {
+describe('what docs/troubleshooting.md recommends', () => {
   const sensor = (battery: string, homebridgeMapping: string) =>
     device({
       Internals: { NAME: 'sensor' },
