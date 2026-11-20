@@ -572,6 +572,27 @@ describe('the reading of another device', () => {
     const [, built] = await accessoriesOf(platform);
 
     expect(temperatureOf(built as Accessory)).toBe(18.5);
+    // and fhem is asked all the same, for a change the plugin may have missed
+    await waitFor(() => fhem.commands.includes('{ReadingsVal("a_sensor","temperature","")}'), 'fhem to be asked');
+  });
+
+  it('answers a read with an event that arrived while fhem was asked for a reading it did not have yet', async () => {
+    const platform = await connect({
+      devices: [thermometer('CurrentTemperature=other:temperature,nocache=true')],
+      holds: (cmd) => cmd.includes('ReadingsVal'),
+    });
+    const accessory = await firstAccessoryOf(platform);
+    await waitFor(() => fhem.held() > 0, 'the question asked while the accessory was built');
+    fhem.release();
+    await answered();
+
+    const read = temperature(accessory).handleGetRequest();
+    await waitFor(() => fhem.held() > 0, 'the read to be held');
+    fhem.event('other-temperature', '21');
+    await waitFor(() => world.cached['other-temperature'] === '21', 'the event');
+    fhem.release();
+
+    expect(await read).toBe(21);
   });
 
   it('answers a read that waits with an error when fhem has no such reading, and asks again on the next', async () => {

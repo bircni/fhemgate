@@ -9,7 +9,7 @@ import { prepareMappings } from '../mapping/compile.ts';
 import { parseHomebridgeMapping } from '../mapping/parser.ts';
 import { commandFor } from '../mapping/toFhem.ts';
 import { reading2homekit } from '../mapping/toHomekit.ts';
-import type { CharacteristicClass, HomekitValue, Mapping, Mappings, PreparedMapping } from '../mapping/types.ts';
+import { isNocache, type CharacteristicClass, type HomekitValue, type Mapping, type Mappings, type PreparedMapping } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import type { MappedCharacteristic } from '../state/subscriptions.ts';
 import { looselyEqual } from '../util/loose.ts';
@@ -241,7 +241,7 @@ export class FhemAccessory {
           this.log.debug('  ' + characteristic_type + ' [' + (mapping.type ? mapping.type : 'thermo') + ';' + (mapping.size ? mapping.size : 1024) + ']');
         } else if (mapping.name) {
           if (characteristic_type === CustomUUIDs.Volume) {
-            this.log.debug('  Custom ' + mapping.name + ' [' + reading + ';' + (mapping.nocache ? 'not cached' : 'cached') + ']');
+            this.log.debug('  Custom ' + mapping.name + ' [' + reading + ';' + (isNocache(mapping) ? 'not cached' : 'cached') + ']');
           } else {
             this.log.debug('  Custom ' + mapping.name + ' [' + reading + ']');
           }
@@ -393,7 +393,7 @@ export class FhemAccessory {
     const cached = mapping?.cached;
     const cmd = '{ReadingsVal("' + device + '","' + reading + '","")}';
 
-    if (mapping && cached !== undefined && !('nocache' in mapping)) {
+    if (mapping && cached !== undefined && !isNocache(mapping)) {
       let defined: string | undefined = undefined;
       if (mapping.homekit2name !== undefined) {
         defined = mapping.homekit2name[cached as unknown as string];
@@ -423,45 +423,48 @@ export class FhemAccessory {
     let timedOut = false;
     const timer = setTimeout(() => {
       timedOut = true;
-      if (cached !== undefined) {
+      const known = cached ?? mapping?.default;
+      if (known !== undefined) {
         this.log.debug('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds, answering with the last value');
-        callback(undefined, cached);
+        callback(undefined, known);
       } else {
         this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
         callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
       }
     }, QUERY_TIMEOUT);
 
-    const before = this.#state.cache.get(informId);
+    const before = this.#state.eventsOf(informId);
     this.#ask(cmd, (value) => {
       clearTimeout(timer);
+      // an event that arrived while fhem was asked is newer than its answer
+      const newer = this.#state.eventsOf(informId) !== before;
       if (timedOut) {
         // the read was answered meanwhile: this is an answer nobody waits for any more
-        this.#take(informId, value, before);
-        return;
-      }
-      if (value === undefined) {
-        // fhem has no such reading: the default of the mapping, if it has one. nothing is made up
-        // from the empty answer and kept at the mapping.
-        if (mapping === undefined) {
-          callback(undefined, '');
-        } else if (mapping.default !== undefined) {
-          callback(undefined, mapping.default);
-        } else {
-          callback(1);
+        if (!newer && value !== undefined) {
+          this.#state.answer(informId, value);
         }
         return;
       }
 
-      // the read that waited gets the value as its answer, so HomeKit is not told again. an event
-      // that arrived while fhem was asked is newer, and is the answer then.
-      const newer = this.#state.cache.get(informId) !== before;
-      const answer = newer ? this.#state.cache.get(informId) : value;
-      if (!newer) {
+      // the read that waited gets the value as its answer, so HomeKit is not told again
+      if (!newer && value !== undefined) {
         this.#state.update(informId, value, true);
       }
+      const latest = newer ? this.#state.cache.get(informId) : value;
+      if (latest === undefined) {
+        // fhem has no such reading: what the mapping knows, or its default. nothing is made up
+        // from the empty answer and kept at the mapping.
+        const known = mapping ? (mapping.cached ?? mapping.default) : '';
+        if (known === undefined) {
+          callback(1);
+        } else {
+          callback(undefined, known);
+        }
+        return;
+      }
+
       // without a mapping there is nothing to convert the reading with
-      const converted = mapping ? reading2homekit(mapping, answer) : answer;
+      const converted = mapping ? reading2homekit(mapping, latest) : latest;
       if (converted === undefined) {
         callback(1);
       } else {
@@ -483,23 +486,16 @@ export class FhemAccessory {
   }
 
   /**
-   * Takes an answer nobody waits for like any value of fhem: not when it is none, and not when an
-   * event arrived meanwhile, which is newer. A characteristic that tells of the presses of a
-   * button is not told of it.
-   *
-   * @param before what the cache held when fhem was asked
+   * Asks fhem for a reading nobody waits for, and takes the answer like any value of fhem: not
+   * when it is none, and not when an event arrived meanwhile, which is newer. A characteristic
+   * that tells of the presses of a button is not told of it.
    */
-  #take(informId: string, value: string | undefined, before: unknown): void {
-    if (value !== undefined && this.#state.cache.get(informId) === before) {
-      this.#state.answer(informId, value);
-    }
-  }
-
-  /** asks fhem for a reading nobody waits for, see #take */
   #askInBackground(informId: string, cmd: string): void {
-    const before = this.#state.cache.get(informId);
+    const before = this.#state.eventsOf(informId);
     this.#ask(cmd, (value) => {
-      this.#take(informId, value, before);
+      if (value !== undefined && this.#state.eventsOf(informId) === before) {
+        this.#state.answer(informId, value);
+      }
     });
   }
 

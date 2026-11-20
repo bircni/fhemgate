@@ -5,7 +5,7 @@ import util from 'node:util';
 import type { Logging } from 'homebridge';
 import type { Jsonlist2Device } from '../devices/types.ts';
 import { looselyEqual, toInt } from '../util/loose.ts';
-import type { CharacteristicClass, HomekitValue, Mappings, PreparedMapping } from './types.ts';
+import { isNocache, type CharacteristicClass, type HomekitValue, type Mappings, type PreparedMapping } from './types.ts';
 import { resolveConverter } from './userFunctions.ts';
 
 /** the accessory the mappings belong to */
@@ -230,12 +230,8 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       if (device !== owner.device) {
         // what the plugin has seen of the reading of the other device. fhem is asked all the same,
         // and what it answers is told like any change.
-        orig = 'nocache' in mapping ? undefined : environment.cached[mapping.informId];
+        orig = isNocache(mapping) ? undefined : environment.cached[mapping.informId];
         owner.query(mapping);
-        if (orig !== undefined) {
-          // the plugin does not know when it changed: it is known as of now
-          mapping.last_update = toInt(Date.now() / 1000);
-        }
       } else if (s.Readings[reading]?.Value) {
         orig = s.Readings[reading].Value;
       }
@@ -244,7 +240,7 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         delete mapping.informId;
       } else {
         const informId = mapping.informId;
-        if (!mapping.nocache && mapping.reading && environment.cached[informId] === undefined) {
+        if (!isNocache(mapping) && mapping.reading && environment.cached[informId] === undefined) {
           environment.update(informId, orig);
         }
 

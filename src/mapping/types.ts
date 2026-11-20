@@ -61,6 +61,7 @@ export interface Mapping {
   /** the word of the reading to use, counted from 0 */
   part?: number;
   /** never answer from the cache, always ask fhem */
+  /** any value, also false or 0, switches the cache off: see isNocache */
   nocache?: unknown;
   readOnly?: unknown;
 
@@ -127,3 +128,8 @@ export type PreparedMapping = Mapping & { log: Logging };
 
 /** the mappings of an accessory by characteristic. a characteristic that is given several times holds a list. */
 export type Mappings = Record<string, Mapping | Mapping[] | undefined>;
+
+/** whether the mapping is not to be answered from the cache. nocache with any value says so. */
+export function isNocache(mapping: object): boolean {
+  return 'nocache' in mapping;
+}

@@ -17,6 +17,19 @@ function subscribed(informId: string, updateValue = vi.fn()) {
   return { mapping, updateValue };
 }
 
+describe('PluginState.eventsOf', () => {
+  it('counts the events of a reading, and no answer of fhem and no value HomeKit is not told of', () => {
+    state.update('lamp-state', 'on');
+    state.update('lamp-state', 'on');
+    state.answer('lamp-state', 'off');
+    state.update('lamp-state', 'on', true);
+
+    expect(state.eventsOf('lamp-state')).toBe(2);
+    expect(state.eventsOf('lamp-other')).toBe(0);
+    expect(state.cache.get('lamp-state')).toBe('on');
+  });
+});
+
 describe('PluginState.update', () => {
   it('keeps the reading and publishes the converted value at the characteristic without running its set handler', () => {
     const { mapping, updateValue } = subscribed('lamp-state');

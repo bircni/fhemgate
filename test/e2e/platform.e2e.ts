@@ -467,15 +467,14 @@ describe.skipIf(realFhemUrl !== undefined)('a platform', () => {
 
     expect(await page('/')).toBe('<a href="/cached">cached</a><br><a href="/subscriptions">subscriptions</a>');
 
-    // the answer is the line after the question, and empty
+    // the answer comes after the question, and is empty
     await eventually(
       'fhem to answer the question for the reading',
       () => {
         const lines = homebridge.output().split('\n');
-        const asked = lines
-          .map((line, index) => (/executing: .*ReadingsVal\(%22e2e_p_unseen%22%2C%22later%22/.test(line) ? index : -1))
-          .filter((index) => index >= 0);
-        return asked.some((index) => /\[FHEM\] {3}value: $/.test(lines[index + 1] ?? '')) ? true : undefined;
+        const asked = lines.findIndex((line) => /executing: .*ReadingsVal\(%22e2e_p_unseen%22%2C%22later%22/.test(line));
+        // other questions may be answered in between
+        return asked >= 0 && lines.slice(asked + 1).some((line) => /\[FHEM\] {3}value: $/.test(line)) ? true : undefined;
       },
       homebridge,
     );

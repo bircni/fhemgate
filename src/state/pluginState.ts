@@ -4,6 +4,7 @@ import { acceptableValue } from '../accessory/acceptable.ts';
 import { recordHistory, type HistoryService, type HistoryServiceClass } from '../accessory/history.ts';
 import type { ConnectionStatus } from '../fhem/client.ts';
 import { reading2homekit } from '../mapping/toHomekit.ts';
+import { isNocache } from '../mapping/types.ts';
 import { toInt } from '../util/loose.ts';
 import { ReadingCache } from './readingCache.ts';
 import { Subscriptions } from './subscriptions.ts';
@@ -55,10 +56,23 @@ export class PluginState {
     this.#take(informId, orig, 'answer');
   }
 
+  /**
+   * How many changes of the reading the plugin was told of, as events of fhem. An answer of
+   * fhem that was asked before the count changed is older than what the plugin knows.
+   */
+  eventsOf(informId: string): number {
+    return this.#events.get(informId) ?? 0;
+  }
+
+  readonly #events = new Map<string, number>();
+
   /** @param source an event, an answer, or a value HomeKit is not to be told of */
   #take(informId: string, orig: unknown, source: 'event' | 'answer' | 'quiet'): void {
     if (orig === undefined) {
       return;
+    }
+    if (source === 'event') {
+      this.#events.set(informId, this.eventsOf(informId) + 1);
     }
 
     // an event that repeats the value the reading has says nothing new to most characteristics.
@@ -82,7 +96,7 @@ export class PluginState {
 
         const characteristic = typeof mapping.characteristic === 'object' ? mapping.characteristic : undefined;
         const eventOnly = characteristic !== undefined && this.#isEventOnly(characteristic);
-        if ((repeated && !eventOnly && !mapping.nocache) || (source === 'answer' && eventOnly)) {
+        if ((repeated && !eventOnly && !isNocache(mapping)) || (source === 'answer' && eventOnly)) {
           return;
         }
 
