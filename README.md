@@ -22,17 +22,16 @@ justme1968 and its contributors, and retains its configuration: the platform is 
 
 ## Install
 
-If you have homebridge-fhem installed, remove it first. Then install this plugin from npm:
+Install the plugin from npm:
 
 ```sh
-npm uninstall -g homebridge-fhem
 npm install -g homebridge-fhem2hb
 ```
 
 With the [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x), search for
-`homebridge-fhem2hb` on its Plugins page and install it there. When moving from homebridge-fhem,
-follow [moving from homebridge-fhem](docs/migration.md) instead, so that HomeKit keeps your
-accessories.
+`homebridge-fhem2hb` on its Plugins page and install it there.
+
+If you use homebridge-fhem today, follow [moving from homebridge-fhem](docs/migration.md) instead.
 
 ## Configure
 
