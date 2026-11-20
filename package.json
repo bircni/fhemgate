@@ -52,7 +52,7 @@
     "oxfmt": "^0.79.0",
     "oxlint": "^1.94.0",
     "oxlint-tsgolint": "^7.0.2007",
-    "typescript": "^6",
+    "typescript": "^7.0.2",
     "vitest": "^5.1.1"
   },
   "optionalDependencies": {
@@ -62,5 +62,5 @@
     "homebridge": "^1.8.0 || ^2.0.0",
     "node": "^22.12.0 || ^24.0.0 || ^26.0.0"
   },
-  "packageManager": "bun@1.4.4"
+  "packageManager": "bun@1.4.5"
 }
