@@ -5,7 +5,7 @@ import util from 'node:util';
 import type { Logging } from 'homebridge';
 import type { Jsonlist2Device } from '../devices/types.ts';
 import { looselyEqual, toInt } from '../util/loose.ts';
-import type { CharacteristicClass, HomekitValue, Mappings, PreparedMapping } from './types.ts';
+import { isNocache, type CharacteristicClass, type HomekitValue, type Mappings, type PreparedMapping } from './types.ts';
 import { resolveConverter } from './userFunctions.ts';
 
 /** the accessory the mappings belong to */
@@ -27,6 +27,8 @@ export interface PrepareEnvironment {
   characteristics: Record<string, unknown>;
   /** the readings known so far, by `<device>-<reading>` */
   cached: Record<string, unknown>;
+  /** when those readings last changed, as the plugin learned of it, in seconds since 1970 */
+  changed: Record<string, number>;
   /** takes a reading into the cache and tells the characteristics that are subscribed to it */
   update: (informId: string, value: unknown) => void;
   /** converts a reading with a mapping */
@@ -226,19 +228,37 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       resolveConverter(mapping, 'homekit2reading', owner.jsFunctions, owner.log, allowInline);
 
       const reading = mapping.reading as string;
+      const own = device === owner.device;
+      // the time of a reading of the device itself, as fhem lists it
+      const time = own ? s.Readings[reading]?.Time : undefined;
+      const seconds = time ? toInt(new Date(time).getTime() / 1000) : undefined;
+      const listed = Number.isFinite(seconds) ? seconds : undefined;
       let orig: unknown = undefined;
-      if (device !== owner.device) {
-        orig = owner.query(mapping);
+      if (!own) {
+        // what the plugin has seen of the reading of the other device. fhem is asked all the same,
+        // and what it answers is told like any change.
+        orig = environment.cached[mapping.informId];
+        if (orig !== undefined) {
+          // fhem does not list when a reading of another device changed. when the plugin learned of
+          // it is what it knows, and keeps across the accessories built anew.
+          mapping.last_update = environment.changed[mapping.informId];
+        }
+        owner.query(mapping);
       } else if (s.Readings[reading]?.Value) {
         orig = s.Readings[reading].Value;
       }
 
-      if (orig === undefined && device === owner.device && mapping.default !== undefined) {
+      if (orig === undefined && own && mapping.default !== undefined) {
         delete mapping.informId;
       } else {
         const informId = mapping.informId;
-        if (!mapping.nocache && mapping.reading && environment.cached[informId] === undefined) {
+        if (!isNocache(mapping) && mapping.reading && environment.cached[informId] === undefined) {
           environment.update(informId, orig);
+        }
+
+        // the cache keeps when the value it holds changed, as fhem lists it
+        if (listed !== undefined && orig !== undefined && environment.cached[informId] === orig) {
+          environment.changed[informId] = listed;
         }
 
         if (mapping.characteristic || mapping.name) {
@@ -246,9 +266,8 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         }
       }
 
-      if (s.Readings[reading]?.Time) {
-        const date = new Date(s.Readings[reading].Time);
-        mapping.last_update = toInt(date.getTime() / 1000);
+      if (listed !== undefined) {
+        mapping.last_update = listed;
       }
     }
   }

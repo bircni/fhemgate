@@ -29,6 +29,31 @@ export interface DeviceIdentity {
   uuid_base: string | undefined;
 }
 
+/** the platform name homebridge-fhem was configured with, which the uuids of its accessories were made from */
+export const LEGACY_UUID_PREFIX = 'FHEM';
+
+/**
+ * The platform name the uuids of the accessories are made with: what migrateFrom says, or the
+ * one of homebridge-fhem, which most of its configurations named.
+ */
+export function uuidPrefixOf(migrateFrom: unknown): string {
+  return typeof migrateFrom === 'string' && migrateFrom.trim() !== '' ? migrateFrom.trim() : LEGACY_UUID_PREFIX;
+}
+
+/**
+ * The uuid HomeKit knows the accessory of a device by. It is made the way homebridge makes it for
+ * an accessory of a static platform, from the platform name the config entry gave, a colon, and
+ * the uuid_base or else the name. homebridge-fhem was such a platform, so with the platform name
+ * it was configured with every device gets the uuid it had there, and with it its room, name and
+ * automations.
+ *
+ * @param generate the uuid generator of HAP-NodeJS
+ * @param prefix the platform name the uuids were made with
+ */
+export function accessoryUuid(generate: (data: string) => string, prefix: string, identity: { name?: string; uuid_base?: string }): string {
+  return generate(prefix + ':' + (identity.uuid_base || identity.name));
+}
+
 /**
  * The serial number is taken from what identifies the hardware for the device types where fhem
  * knows that, so it survives when the device is deleted and defined again in fhem. For all other

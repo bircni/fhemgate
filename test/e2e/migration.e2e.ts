@@ -10,7 +10,7 @@
 //
 // the devices are of fhem modules a real fhem has only with their hardware, so this runs
 // against the stand-in only.
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, symlinkSync, writeFileSync } from 'node:fs';
 import { hostname } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
@@ -214,6 +214,63 @@ const serialNumberOf = (accessory: HapAccessory) =>
     .find((service) => service.type === hapType.AccessoryInformation)
     ?.characteristics.find((characteristic) => characteristic.type === hapType.SerialNumber)?.value;
 
+/** a plugin for homebridge, as files in its directory */
+interface PluginFiles {
+  manifest: Record<string, unknown>;
+  index: string;
+}
+
+/**
+ * Another plugin with one accessory of its own. With it the bridge is not empty when homebridge
+ * publishes it, which is when homebridge drops the ids of every accessory that is not on it.
+ */
+const otherPlugin: PluginFiles = {
+  manifest: { name: 'homebridge-e2e-other', version: '1.0.0', main: 'index.js', keywords: ['homebridge-plugin'], engines: { homebridge: '>=1.0.0' } },
+  index:
+    "module.exports = function (api) { api.registerPlatform('e2e-other', function () { this.accessories = function (callback) { " +
+    "callback([{ name: 'Other', getServices: function () { return [new api.hap.Service.Switch('Other')]; } }]); }; }); };",
+};
+
+/** what homebridge-fhem is to homebridge: a plugin that registers the platform FHEM, here without accessories */
+const homebridgeFhem: PluginFiles = {
+  manifest: { name: 'homebridge-fhem', version: '0.5.55', main: 'index.js', keywords: ['homebridge-plugin'], engines: { homebridge: '>=0.2.0' } },
+  index:
+    "module.exports = function (homebridge) { homebridge.registerPlatform('homebridge-fhem', 'FHEM', function () { this.accessories = function (callback) { callback([]); }; }); };",
+};
+
+/** a node_modules directory with this plugin as it was built and the other plugins, as npm installs them */
+function pluginsWith(others: PluginFiles[]): string {
+  const plugins = join(realpathSync(mkdtempSync(join(inject('e2eDirectory'), 'plugins-'))), 'node_modules');
+  const mine = join(plugins, 'homebridge-fhemgate');
+  mkdirSync(mine, { recursive: true });
+  cpSync(join(root, 'dist'), join(mine, 'dist'), { recursive: true });
+  cpSync(join(root, 'package.json'), join(mine, 'package.json'));
+  // what the plugin needs, as fakegato-history
+  symlinkSync(join(root, 'node_modules'), join(mine, 'node_modules'), 'dir');
+  for (const other of others) {
+    const directory = join(plugins, String(other.manifest.name));
+    mkdirSync(directory);
+    writeFileSync(join(directory, 'package.json'), JSON.stringify(other.manifest));
+    writeFileSync(join(directory, 'index.js'), other.index);
+  }
+  return plugins;
+}
+
+/** the entry for homebridge-fhem as it was, with the platform name changed and migrateFrom added, as docs/migration.md says */
+const movedEntry = (fhem: StandIn, migrateFrom: string | undefined) => ({
+  platform: 'fhemgate',
+  ...(migrateFrom === undefined ? {} : { migrateFrom }),
+  name: 'FHEM',
+  server: '127.0.0.1',
+  port: fhem.fake.port,
+  filter: 'room=HomeKit',
+  auth: { user: 'homebridge', pass: 'secret' },
+  jsFunctions: 'fhem-functions.js',
+});
+
+/** the accessories of fhem, without the one of the other plugin */
+const ofFhem = (accessories: HapAccessory[]) => accessories.filter((accessory) => accessory.name !== 'Other');
+
 /** the lines of the log of a homebridge that match */
 const logged = (homebridge: Homebridge, pattern: RegExp) =>
   homebridge
@@ -221,29 +278,22 @@ const logged = (homebridge: Homebridge, pattern: RegExp) =>
     .split('\n')
     .filter((line) => pattern.test(line));
 
-describe.skipIf(realFhemUrl !== undefined)('a homebridge that ran homebridge-fhem and now starts with this plugin', () => {
+describe.skipIf(realFhemUrl !== undefined)('a homebridge that ran homebridge-fhem and now starts with this plugin and migrateFrom', () => {
   const username = '0E:2E:2E:4D:00:01';
   let fhem: StandIn;
   let homebridge: Homebridge;
   let accessories: HapAccessory[];
   let world: World;
+  let plugins: string;
 
   beforeAll(async () => {
     fhem = await startStandIn([...migrated.map((entry) => entry.device), elsewhere], { auth: { user: 'homebridge', pass: 'secret' } });
-
-    // the entry as it was written for homebridge-fhem. the harness only adds debugPort, as the
-    // debug page would take a fixed port of this machine.
-    const config = {
-      platform: 'FHEM',
-      name: 'FHEM',
-      server: '127.0.0.1',
-      port: fhem.fake.port,
-      filter: 'room=HomeKit',
-      auth: { user: 'homebridge', pass: 'secret' },
-      jsFunctions: 'fhem-functions.js',
-    };
-    homebridge = await startHomebridge(config, {}, storageAfterHomebridgeFhem(username, 'FHEM'), { username });
-    accessories = await published(homebridge, migrated.length);
+    plugins = pluginsWith([otherPlugin]);
+    homebridge = await startHomebridge([movedEntry(fhem, 'FHEM'), { platform: 'e2e-other' }], {}, storageAfterHomebridgeFhem(username, 'FHEM'), {
+      username,
+      plugins,
+    });
+    accessories = ofFhem(await published(homebridge, migrated.length + 1));
     world = worldOf(fhem, homebridge, accessories, (name) => migrated.find((entry) => entry.device.Internals.NAME === name)?.name ?? name);
   });
 
@@ -256,17 +306,25 @@ describe.skipIf(realFhemUrl !== undefined)('a homebridge that ran homebridge-fhe
     expect(accessories.map((accessory) => accessory.name).sort()).toEqual(migrated.map((entry) => entry.name).sort());
   });
 
+  it('fetches the devices before homebridge publishes the bridge, which another plugin has an accessory on', () => {
+    const output = homebridge.output();
+    expect(output).toContain('migrateFrom: fetching the devices from fhem before homebridge publishes the bridge');
+    expect(output.indexOf('migrateFrom: fetching the devices')).toBeLessThan(output.search(/Homebridge v.* is running on port/));
+  });
+
   it('gives every accessory the id it had, so that HomeKit takes it for the accessory it knows', () => {
     expect(Object.fromEntries(accessories.map((accessory) => [accessory.name, accessory.aid]))).toEqual(
       Object.fromEntries(migrated.map((entry) => [entry.name, entry.aid])),
     );
   });
 
-  it('finds every accessory in the file of homebridge under the uuid homebridge-fhem gave it, and adds none', async () => {
+  it('finds every accessory in the file of homebridge under the uuid homebridge-fhem gave it', async () => {
     // homebridge writes the file again once it has published: what was not asked for is dropped from it
     await eventually('homebridge to keep the ids', () => (logged(homebridge, /Homebridge v.* is running on port/).length ? true : undefined), homebridge);
 
-    expect(accessoryIds(homebridge.storage, username)).toEqual(idsBefore('FHEM'));
+    expect(accessoryIds(homebridge.storage, username)).toMatchObject(idsBefore('FHEM'));
+    // and the accessory of the other plugin
+    expect(Object.keys(accessoryIds(homebridge.storage, username))).toHaveLength(migrated.length + 1);
   });
 
   it('keeps the id of a characteristic, which scenes and automations refer to', () => {
@@ -293,8 +351,12 @@ describe.skipIf(realFhemUrl !== undefined)('a homebridge that ran homebridge-fhe
     });
   });
 
-  it('loads the functions for mappings from the file in the storage directory', () => {
-    expect(world.named('Regal', 'Lightbulb', 'Brightness').value).toBe(64);
+  it('loads the functions for mappings from the file in the storage directory', async () => {
+    await eventually(
+      'the light to be built from what fhem lists',
+      async () => ((await homebridge.read(world.named('Regal', 'Lightbulb', 'Brightness'))) === 64 ? true : undefined),
+      homebridge,
+    );
   });
 
   it('finds the Eve history homebridge-fhem kept, with the openings it had counted', async () => {
@@ -334,31 +396,42 @@ describe.skipIf(realFhemUrl !== undefined)('a homebridge that ran homebridge-fhe
   });
 
   it('has nothing to warn about', () => {
-    expect(logged(homebridge, /homebridge-fhem is installed|config: auth|can not be read|has been registered multiple times/)).toEqual([]);
+    expect(logged(homebridge, /homebridge-fhem is installed|config: |can not be read|no plugin serves|configured multiple times/)).toEqual([]);
+  });
+
+  it('keeps every accessory and its id on the next start, also while fhem can not be reached, and says they do not respond', async () => {
+    await homebridge.stop();
+    await fhem.close();
+
+    homebridge = await startHomebridge([movedEntry(fhem, 'FHEM'), { platform: 'e2e-other' }], {}, homebridge.storage, { username, plugins });
+    const again = ofFhem(await published(homebridge, migrated.length + 1));
+    const restarted = worldOf(fhem, homebridge, again, (name) => migrated.find((entry) => entry.device.Internals.NAME === name)?.name ?? name);
+
+    expect(Object.fromEntries(again.map((accessory) => [accessory.name, accessory.aid]))).toEqual(
+      Object.fromEntries(migrated.map((entry) => [entry.name, entry.aid])),
+    );
+    expect(restarted.named('Wohnzimmer_Lampe', 'Switch', 'On')).toMatchObject({ aid: lamp.aid, iid: lampOn });
+    expect(await homebridge.answer(restarted.named('Wohnzimmer_Lampe', 'Switch', 'On'))).toEqual({ value: undefined, status: -70402 });
+    expect(logged(homebridge, /migrateFrom: fetching/)).toEqual([]);
+    expect(logged(homebridge, /removing /)).toEqual([]);
   });
 });
 
-describe.skipIf(realFhemUrl !== undefined)('a config entry that names homebridge-fhem as the plugin of its platform', () => {
+describe.skipIf(realFhemUrl !== undefined)('a homebridge that ran homebridge-fhem, configured with the plugin named', () => {
   const username = '0E:2E:2E:4D:00:02';
-  // with the plugin named, homebridge makes other uuids than for plain FHEM
+  // with the plugin named, homebridge made other uuids than for plain FHEM
   const platform = 'homebridge-fhem.FHEM';
   let fhem: StandIn;
   let homebridge: Homebridge;
   let accessories: HapAccessory[];
 
   beforeAll(async () => {
-    fhem = await startStandIn([...migrated.map((entry) => entry.device), elsewhere]);
-    homebridge = await startHomebridge(
-      [
-        { ...fhem.platformConfig, platform, filter: 'room=HomeKit' },
-        // a second entry, which names this plugin
-        { ...fhem.platformConfig, platform: 'homebridge-fhemgate.FHEM', filter: 'room=Keller' },
-      ],
-      {},
-      storageAfterHomebridgeFhem(username, platform),
-      { username },
-    );
-    accessories = await published(homebridge, migrated.length + 1);
+    fhem = await startStandIn([...migrated.map((entry) => entry.device), elsewhere], { auth: { user: 'homebridge', pass: 'secret' } });
+    homebridge = await startHomebridge([movedEntry(fhem, platform), { platform: 'e2e-other' }], {}, storageAfterHomebridgeFhem(username, platform), {
+      username,
+      plugins: pluginsWith([otherPlugin]),
+    });
+    accessories = ofFhem(await published(homebridge, migrated.length + 1));
   });
 
   afterAll(async () => {
@@ -366,31 +439,63 @@ describe.skipIf(realFhemUrl !== undefined)('a config entry that names homebridge
     await fhem.close();
   });
 
-  const ofFirstEntry = () => accessories.filter((accessory) => accessory.name !== 'Keller');
-
-  it('is loaded from this plugin, with every accessory under the id it had', () => {
+  it('gives every accessory the id it had, from the uuids made with that name', async () => {
     expect(idsBefore(platform)).not.toEqual(idsBefore('FHEM'));
-    expect(Object.fromEntries(ofFirstEntry().map((accessory) => [accessory.name, accessory.aid]))).toEqual(
+    expect(Object.fromEntries(accessories.map((accessory) => [accessory.name, accessory.aid]))).toEqual(
       Object.fromEntries(migrated.map((entry) => [entry.name, entry.aid])),
     );
-  });
-
-  it('keeps the uuids homebridge-fhem had under that name', async () => {
     await eventually('homebridge to keep the ids', () => (logged(homebridge, /Homebridge v.* is running on port/).length ? true : undefined), homebridge);
-
     expect(accessoryIds(homebridge.storage, username)).toMatchObject(idsBefore(platform));
   });
+});
 
-  it('does not keep an entry that names this plugin from being loaded, whose accessory is a new one', () => {
-    const cellar = accessories.find((accessory) => accessory.name === 'Keller');
+describe.skipIf(realFhemUrl !== undefined)('a homebridge that ran homebridge-fhem and now starts with this plugin without migrateFrom', () => {
+  const username = '0E:2E:2E:4D:00:03';
+  let fhem: StandIn;
+  let homebridge: Homebridge;
+  let accessories: HapAccessory[];
 
-    // the next id homebridge had to give
-    expect(cellar?.aid).toBe(60);
-    expect(accessoryIds(homebridge.storage, username)).toMatchObject({ [homebridgeUuid(upstreamIdentity(elsewhere), 'homebridge-fhemgate.FHEM')]: 60 });
+  beforeAll(async () => {
+    fhem = await startStandIn([...migrated.map((entry) => entry.device), elsewhere], { auth: { user: 'homebridge', pass: 'secret' } });
+    homebridge = await startHomebridge([movedEntry(fhem, undefined), { platform: 'e2e-other' }], {}, storageAfterHomebridgeFhem(username, 'FHEM'), {
+      username,
+      plugins: pluginsWith([otherPlugin]),
+    });
+    accessories = ofFhem(await published(homebridge, migrated.length + 1));
   });
 
-  it('says that the entry has to stay as it is', () => {
-    expect(logged(homebridge, /config: this platform is configured as "platform": "homebridge-fhem.FHEM".* leave it as it is/)).toHaveLength(1);
+  afterAll(async () => {
+    await homebridge.stop();
+    await fhem.close();
+  });
+
+  it('publishes the accessories under the uuids homebridge-fhem gave them, but too late for homebridge to keep their ids on a bridge it shares', () => {
+    expect(accessories.map((accessory) => accessory.name).sort()).toEqual(migrated.map((entry) => entry.name).sort());
+    // which is what migrateFrom is for
+    expect(accessories.map((accessory) => accessory.aid).filter((aid) => migrated.some((entry) => entry.aid === aid))).toEqual([]);
+  });
+});
+
+describe.skipIf(realFhemUrl !== undefined)('a config.json that still has the entry of homebridge-fhem', () => {
+  let fhem: StandIn;
+  let homebridge: Homebridge;
+
+  beforeAll(async () => {
+    fhem = await startStandIn([lamp.device]);
+    homebridge = await startHomebridge({ ...fhem.platformConfig, platform: 'FHEM' }, {}, undefined, { plugins: pluginsWith([]) });
+    await eventually('homebridge to be up', () => homebridge.accessories(), homebridge, 60_000);
+  });
+
+  afterAll(async () => {
+    await homebridge.stop();
+    await fhem.close();
+  });
+
+  it('is told by the plugin what the entry has to say now', () => {
+    expect(logged(homebridge, /^homebridge-fhemgate: /)).toEqual([
+      'homebridge-fhemgate: config.json has a platform "FHEM", which no plugin serves: homebridge-fhemgate answers to "platform": "fhemgate". ' +
+        'change the entry to "platform": "fhemgate", "migrateFrom": "FHEM", so that HomeKit keeps its accessories, see docs/migration.md.',
+    ]);
   });
 });
 
@@ -400,27 +505,9 @@ describe.skipIf(realFhemUrl !== undefined)('a homebridge that still has homebrid
   let plugins: string;
 
   beforeAll(async () => {
-    // both plugins in one node_modules directory, as npm installs them
-    plugins = join(realpathSync(mkdtempSync(join(inject('e2eDirectory'), 'plugins-'))), 'node_modules');
-    const mine = join(plugins, 'homebridge-fhemgate');
-    mkdirSync(mine, { recursive: true });
-    cpSync(join(root, 'dist'), join(mine, 'dist'), { recursive: true });
-    cpSync(join(root, 'package.json'), join(mine, 'package.json'));
-
-    // what homebridge-fhem is to homebridge: a plugin that registers the platform FHEM
-    const old = join(plugins, 'homebridge-fhem');
-    mkdirSync(old);
-    writeFileSync(
-      join(old, 'package.json'),
-      JSON.stringify({ name: 'homebridge-fhem', version: '0.5.55', main: 'index.js', keywords: ['homebridge-plugin'], engines: { homebridge: '>=0.2.0' } }),
-    );
-    writeFileSync(
-      join(old, 'index.js'),
-      "module.exports = function (homebridge) { homebridge.registerPlatform('homebridge-fhem', 'FHEM', function () { this.accessories = function (callback) { callback([]); }; }); };",
-    );
-
+    plugins = pluginsWith([homebridgeFhem]);
     fhem = await startStandIn([lamp.device]);
-    homebridge = await startHomebridge(fhem.platformConfig, {}, undefined, { plugins });
+    homebridge = await startHomebridge([fhem.platformConfig, { platform: 'FHEM' }], {}, undefined, { plugins });
     await eventually('homebridge to be up', () => homebridge.accessories(), homebridge, 60_000);
   });
 
@@ -429,17 +516,16 @@ describe.skipIf(realFhemUrl !== undefined)('a homebridge that still has homebrid
     await fhem.close();
   });
 
-  it('is told by homebridge only that the platform was registered twice, and gets no accessory of fhem', async () => {
-    expect(logged(homebridge, /The requested platform 'FHEM' has been registered multiple times/)).toHaveLength(1);
-    expect(await homebridge.accessories()).toEqual([]);
-    expect(fhem.fake.requests).toEqual([]);
+  it('runs both, as each has a platform name of its own', async () => {
+    expect(logged(homebridge, /registered multiple times|configured multiple times/)).toEqual([]);
+    expect((await published(homebridge)).map((accessory) => accessory.name)).toEqual(['Stehlampe']);
   });
 
-  it('is told by the plugin where homebridge-fhem is, what follows and what to do', () => {
+  it('is told by the plugin where homebridge-fhem is and what to do', () => {
     const lines = logged(homebridge, /^homebridge-fhemgate: /);
 
     expect(lines).toHaveLength(1);
-    expect(lines[0]).toContain(`homebridge-fhem is installed as well, in ${join(plugins, 'homebridge-fhem')}.`);
+    expect(lines[0]).toContain(`homebridge-fhem is installed as well, in ${join(plugins, 'homebridge-fhem')}, and both have a platform in config.json.`);
     expect(lines[0]).toContain('uninstall homebridge-fhem');
   });
 });

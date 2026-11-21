@@ -18,18 +18,12 @@ const api = () =>
   }) as unknown as API;
 
 describe('FhemPlatform', () => {
-  it('has no connection and no accessories without a server', async () => {
+  it('has no connection without a server', () => {
     const log = createLog();
     const plugin: Plugin = { state: new PluginState(hap), storagePath: () => '/nonexistent', debugServers: new Map() };
-    const platform = new FhemPlatform(log as unknown as Logging, { platform: 'FHEM', debugPort: false }, api(), plugin);
-    const answered = vi.fn();
-
-    platform.accessories(answered);
+    const platform = new FhemPlatform(log as unknown as Logging, { platform: 'fhemgate', debugPort: false }, api(), plugin);
 
     expect(platform.servers[0]?.connection).toBeUndefined();
-    await vi.waitFor(() => {
-      expect(answered).toHaveBeenCalledWith([]);
-    });
     expect(log.lines).toEqual(['error incomplete configuration ']);
   });
 
@@ -37,7 +31,7 @@ describe('FhemPlatform', () => {
     const plugin: Plugin = { state: new PluginState(hap), storagePath: () => '/nonexistent', debugServers: new Map() };
     const log = createLog();
 
-    const platform = new FhemPlatform(log as unknown as Logging, { platform: 'FHEM', debugPort: debugPort as false }, api(), plugin);
+    const platform = new FhemPlatform(log as unknown as Logging, { platform: 'fhemgate', debugPort: debugPort as false }, api(), plugin);
 
     expect(platform.config.debugPort).toBe(debugPort);
     expect(plugin.debugServers.size).toBe(0);
@@ -52,7 +46,7 @@ describe('FhemPlatform', () => {
     await new Promise((resolve) => probe.close(resolve));
     const log = createLog();
 
-    const config = { platform: 'FHEM', debugPort, debugHost: '127.0.0.1' };
+    const config = { platform: 'fhemgate', debugPort, debugHost: '127.0.0.1' };
     const platform = new FhemPlatform(log as unknown as Logging, config, api(), plugin);
     const server = plugin.debugServers.get(debugPort);
     const second = new FhemPlatform(log as unknown as Logging, config, api(), plugin);
@@ -80,7 +74,7 @@ describe('FhemPlatform', () => {
     await new Promise((resolve) => probe.close(resolve));
     const log = createLog();
 
-    const platform = new FhemPlatform(log as unknown as Logging, { platform: 'FHEM', debugPort }, api(), plugin);
+    const platform = new FhemPlatform(log as unknown as Logging, { platform: 'fhemgate', debugPort }, api(), plugin);
     const server = plugin.debugServers.get(debugPort);
     await new Promise((resolve) => server?.once('listening', resolve));
 
@@ -94,7 +88,7 @@ describe('FhemPlatform', () => {
     const plugin: Plugin = { state: new PluginState(hap), storagePath: () => '/nonexistent', debugServers: new Map() };
     const log = createLog();
 
-    const platform = new FhemPlatform(log as unknown as Logging, { platform: 'FHEM', debugPort: 'yes' as unknown as number }, api(), plugin);
+    const platform = new FhemPlatform(log as unknown as Logging, { platform: 'fhemgate', debugPort: 'yes' as unknown as number }, api(), plugin);
 
     expect(platform.config.debugPort).toBe('yes');
     expect(plugin.debugServers.size).toBe(0);
@@ -106,7 +100,7 @@ describe('FhemPlatform', () => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
       const plugin: Plugin = { state: new PluginState(hap), storagePath: () => '/nonexistent', debugServers: new Map() };
       const log = createLog();
-      const platform = new FhemPlatform(log as unknown as Logging, { platform: 'FHEM', debugPort: false, ...config }, api(), plugin);
+      const platform = new FhemPlatform(log as unknown as Logging, { platform: 'fhemgate', debugPort: false, ...config }, api(), plugin);
       return { platform, log };
     };
 
@@ -140,8 +134,8 @@ describe('the plugin', () => {
     const plugin = createPlugin(api());
     const log = createLog() as unknown as Logging;
 
-    const first = new plugin.Platform(log, { platform: 'FHEM', debugPort: false }, api());
-    const second = new plugin.Platform(log, { platform: 'FHEM', debugPort: false }, api());
+    const first = new plugin.Platform(log, { platform: 'fhemgate', debugPort: false }, api());
+    const second = new plugin.Platform(log, { platform: 'fhemgate', debugPort: false }, api());
     plugin.state.subscriptions.subscribe({ device: 'lamp', mappings: {}, historyService: undefined }, 'lamp-state');
     first.shutdown();
 
@@ -150,12 +144,13 @@ describe('the plugin', () => {
     expect(plugin.state.subscriptions.byInformId['lamp-state']?.[0]?.accessory.shutdown).toBe(true);
   });
 
-  it('registers its platform under the name FHEM, as the plugin homebridge-fhem did', () => {
+  it('registers its platform as fhemgate, and under no other name', () => {
     const homebridge = api();
 
     createPluginFor(homebridge);
 
-    expect(homebridge.registerPlatform).toHaveBeenCalledWith('homebridge-fhem', 'FHEM', expect.any(Function));
+    expect(homebridge.registerPlatform).toHaveBeenCalledOnce();
+    expect(homebridge.registerPlatform).toHaveBeenCalledWith('fhemgate', expect.any(Function));
   });
 });
 

@@ -130,8 +130,9 @@ const rules: Rule[] = [
  * recognised. Nothing is logged for a device that is left out on purpose beyond a note.
  */
 export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, state: PluginState): Detection {
+  // an empty type names none
   let genericType = s.Attributes.genericDeviceType;
-  if (genericType === undefined) {
+  if (!genericType) {
     genericType = s.Attributes.genericDisplayType;
   }
 
@@ -142,7 +143,7 @@ export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, stat
 
   target.service_name = genericType;
 
-  if ((s.Internals.TYPE === 'structure' || s.Internals.TYPE === 'SVG' || s.Internals.TYPE === 'THRESHOLD') && genericType === undefined) {
+  if ((s.Internals.TYPE === 'structure' || s.Internals.TYPE === 'SVG' || s.Internals.TYPE === 'THRESHOLD') && !genericType) {
     target.log.info('ignoring ' + s.Internals.NAME + ' (' + s.Internals.TYPE + ') without genericDeviceType');
     return 'ignored';
   }
@@ -163,7 +164,7 @@ export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, stat
     }
   }
 
-  if (target.service_name === undefined) {
+  if (!target.service_name) {
     target.log.error(s.Internals.NAME + ': no service type detected');
     return 'undetected';
   }

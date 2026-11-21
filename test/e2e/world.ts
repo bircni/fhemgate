@@ -1,4 +1,5 @@
 // a fhem with dummy devices and a homebridge that publishes them, and how a test looks at the two
+import { setTimeout as sleep } from 'node:timers/promises';
 import type { FakeFhemOptions } from '../support/fhemweb.ts';
 import type { FhemDevice } from '../support/types.ts';
 import { startFhemWith, startStandIn, type DummyDevice, type FhemUnderTest, type StandIn } from './fhem.ts';
@@ -14,7 +15,8 @@ export async function eventually<T>(
   homebridge?: Homebridge,
   milliseconds = 20_000,
 ): Promise<T> {
-  const deadline = Date.now() + milliseconds;
+  // the clock of a busy machine may jump: only a monotonic one measures how long was waited
+  const deadline = performance.now() + milliseconds;
   for (;;) {
     let result: T | undefined;
     try {
@@ -25,7 +27,7 @@ export async function eventually<T>(
     if (result !== undefined) {
       return result;
     }
-    if (Date.now() > deadline) {
+    if (performance.now() > deadline) {
       throw new Error(`timed out waiting for ${what}.${said(homebridge)}`);
     }
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -43,6 +45,25 @@ export function published(homebridge: Homebridge, atLeast = 1): Promise<HapAcces
     homebridge,
     60_000,
   );
+}
+
+/**
+ * Resolves once homebridge has logged nothing new for a second, or after twenty seconds: the
+ * platform publishes the accessories as soon as fhem listed the devices, and what fhem answers
+ * then comes in a moment later.
+ */
+export async function quiet(homebridge: Homebridge): Promise<void> {
+  const until = performance.now() + 20_000;
+  let before = -1;
+  for (let now = homebridge.logSize(); now !== before; now = homebridge.logSize()) {
+    if (performance.now() > until) {
+      // a real fhem can send events all the time. what the tests then see is what has arrived so far.
+      process.stderr.write('homebridge did not stop logging for a second within twenty seconds\n');
+      return;
+    }
+    before = now;
+    await sleep(1000);
+  }
 }
 
 /** the services of the accessories other than the accessory information, by accessory name */
@@ -67,7 +88,11 @@ export interface World {
   characteristic(device: string, service: string, type: string, name?: string): HapCharacteristic;
   /** the same, with service and characteristic given by their names in HomeKit or Eve */
   named(device: string, service: TypeName, type: TypeName, name?: string): HapCharacteristic;
-  /** the types of the characteristics of the service, without its name, in the order they are published in */
+  /**
+   * The types of the characteristics of the service, without its name, in the order of their
+   * ids. HomeKit knows them by the ids. HAP-NodeJS lists them in another order for a moment
+   * after an accessory was added to a bridge that is published already.
+   */
   characteristicsOf(device: string, service: string, name?: string): string[];
   /** resolves once a read of the characteristic answers the value */
   becomes(target: HapCharacteristic, value: number | string): Promise<void>;
@@ -117,7 +142,9 @@ export function worldOf(fhem: FhemUnderTest, homebridge: Homebridge, accessories
     characteristicsOf: (device, service, name) =>
       world
         .service(device, service, name)
-        .characteristics.map((characteristic) => characteristic.type)
+        .characteristics.slice()
+        .sort((a, b) => a.iid - b.iid)
+        .map((characteristic) => characteristic.type)
         .filter((type) => type !== hapType.Name),
 
     async becomes(target, value) {
@@ -193,7 +220,10 @@ async function startWorldFor<Fhem extends FhemUnderTest>(
   }
 
   const homebridge = await startHomebridge({ ...fhem.platformConfig, ...options.platform }, options.files);
-  const accessories = await published(homebridge, options.publishes ?? devices.length);
+  await published(homebridge, options.publishes ?? devices.length);
+  await quiet(homebridge);
+  // listed again: the list homebridge published with holds the values from before fhem answered
+  const accessories = await homebridge.readAll(await homebridge.accessories());
   await homebridge.subscribe(notifying(accessories));
 
   // HomeKit is told the siriName of a device as the name of its accessory, or its alias, or the name it has in fhem

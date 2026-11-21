@@ -1,7 +1,7 @@
 // starts a real homebridge that loads the built plugin, and talks to it the way a HomeKit
 // controller does. homebridge runs in insecure mode, which lets it be asked without pairing.
 import { spawn } from 'node:child_process';
-import { closeSync, existsSync, mkdtempSync, openSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, mkdtempSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { connect, createServer, type Socket } from 'node:net';
 import { join } from 'node:path';
 import { inject } from 'vitest';
@@ -188,6 +188,15 @@ export interface Homebridge {
   output(): string;
   /** the accessories homebridge publishes, without the bridge itself. rejects while homebridge is not up yet. */
   accessories(): Promise<HapAccessory[]>;
+  /**
+   * The accessories, with the values homebridge answers a controller that reads every
+   * characteristic, which asks the plugin. What it lists with the accessories may be what the
+   * characteristics held a moment ago: HAP-NodeJS asks the plugin for that only when it was not
+   * asked for its accessories in the last five seconds.
+   */
+  readAll(accessories: HapAccessory[]): Promise<HapAccessory[]>;
+  /** how long the log is, in bytes */
+  logSize(): number;
   /** the value homebridge answers a controller that reads the characteristic. undefined if the read is answered with an error. */
   read(characteristic: HapCharacteristic): Promise<unknown>;
   /** what homebridge answers a controller that reads the characteristic: the value, or the HAP status of the error */
@@ -317,7 +326,7 @@ export async function startHomebridge(
       // several bridges run at the same time, each needs a name and an id of its own
       bridge: { name: `fhemgate e2e ${port}`, username: options.username ?? `0E:2E:2E:2E:${hex(port >> 8)}:${hex(port)}`, port, pin },
       platforms: (Array.isArray(platforms) ? platforms : [platforms]).map((platform, index) => ({
-        platform: 'FHEM',
+        platform: 'fhemgate',
         name: index ? `FHEM ${index + 1}` : 'FHEM',
         // the debug page of the plugin would take a fixed port of this machine
         debugPort: false,
@@ -355,15 +364,38 @@ export async function startHomebridge(
   const notifications: HapNotification[] = [];
   const listeners: Socket[] = [];
 
-  const answer: Homebridge['answer'] = async ({ aid, iid }) => {
-    const response = await fetch(`${hap}/characteristics?id=${aid}.${iid}`);
-    const { characteristics } = (await response.json()) as { characteristics: { value?: unknown; status?: number }[] };
-    return { value: characteristics[0]?.value, status: characteristics[0]?.status };
+  /** what homebridge answers a controller that reads the characteristics, in their order */
+  const read = async (characteristics: HapCharacteristic[]) => {
+    const response = await fetch(`${hap}/characteristics?id=${characteristics.map(({ aid, iid }) => `${aid}.${iid}`).join(',')}`);
+    const answered = (await response.json()) as { characteristics: { aid: number; iid: number; value?: unknown; status?: number }[] };
+    const byId = new Map(answered.characteristics.map((each) => [`${each.aid}.${each.iid}`, each]));
+    return characteristics.map(({ aid, iid }) => byId.get(`${aid}.${iid}`));
+  };
+
+  const answer: Homebridge['answer'] = async (characteristic) => {
+    const [answered] = await read([characteristic]);
+    return { value: answered?.value, status: answered?.status };
   };
 
   return {
     storage,
     output,
+    logSize: () => statSync(logFile).size,
+
+    async readAll(accessories) {
+      const readable = accessories.flatMap((accessory) =>
+        accessory.services.flatMap((service) => service.characteristics.filter((characteristic) => characteristic.perms?.includes('pr'))),
+      );
+      const answers = await read(readable);
+      readable.forEach((characteristic, index) => {
+        const answered = answers[index];
+        // a read that fails leaves what is listed, as a controller shows it
+        if (answered && !answered.status) {
+          characteristic.value = answered.value;
+        }
+      });
+      return accessories;
+    },
 
     async accessories() {
       const response = await fetch(`${hap}/accessories`);

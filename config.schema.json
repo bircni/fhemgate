@@ -1,5 +1,5 @@
 {
-  "pluginAlias": "FHEM",
+  "pluginAlias": "fhemgate",
   "pluginType": "platform",
   "headerDisplay": "HomeKit support for the FHEM home automation system. See the [documentation](https://github.com/bircni/fhemgate#documentation) for all options, device types and the homebridgeMapping attribute.",
   "footerDisplay": "Find out more about FHEM on its [project page](https://fhem.de).",
@@ -12,8 +12,8 @@
         "type": "string",
         "title": "Name",
         "required": false,
-        "default": "FHEM",
-        "placeholder": "e.g. FHEM",
+        "default": "fhemgate",
+        "placeholder": "e.g. fhemgate",
         "description": "Name for this FHEM connection."
       },
 
@@ -111,7 +111,7 @@
         "title": "Never give up",
         "required": false,
         "default": false,
-        "description": "never timeout if trying to reconnect"
+        "description": "not needed any more: fhem is tried for as long as homebridge runs, and the accessories stay meanwhile."
       },
 
       "allowInlineFunctions": {
@@ -126,7 +126,7 @@
         "type": "array",
         "title": "More FHEM servers",
         "required": false,
-        "description": "more fhem to publish the devices of, each with the fields above. a device that two of them list is published by the one that comes first.",
+        "description": "more fhem to publish the devices of, each with the fields above. device names have to differ between them: a device two of them list is published by one of them only.",
         "items": {
           "type": "object",
           "properties": {
@@ -215,7 +215,7 @@
               "title": "Never give up",
               "required": false,
               "default": false,
-              "description": "never timeout if trying to reconnect"
+              "description": "not needed any more: fhem is tried for as long as homebridge runs, and the accessories stay meanwhile."
             },
             "allowInlineFunctions": {
               "type": "boolean",
@@ -226,6 +226,14 @@
             }
           }
         }
+      },
+
+      "migrateFrom": {
+        "type": "string",
+        "title": "Moving from homebridge-fhem",
+        "required": false,
+        "enum": ["FHEM", "homebridge-fhem.FHEM", "homebridge-fhemgate.FHEM"],
+        "description": "only when this entry was a platform of homebridge-fhem: what it said for platform. the accessories keep their rooms, scenes and automations in HomeKit. see docs/migration.md."
       },
 
       "debugPort": {

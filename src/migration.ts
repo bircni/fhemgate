@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import type { ConnectionConfig } from './config.ts';
+import { LEGACY_UUID_PREFIX } from './devices/identity.ts';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.ts';
 
 /** the plugin this one replaces. it registers the platform FHEM as well. */
@@ -33,44 +34,53 @@ export function findOldPlugin(pluginRoot: string): string | undefined {
   return manifest?.name === OLD_PLUGIN_NAME ? directory : undefined;
 }
 
+/** the platform names of homebridge-fhem, as a config.json can give them */
+const OLD_PLATFORMS = new Set([LEGACY_UUID_PREFIX, OLD_PLUGIN_NAME + '.' + LEGACY_UUID_PREFIX, PLUGIN_NAME + '.' + LEGACY_UUID_PREFIX]);
+
 /**
- * What is wrong with how the plugin is installed, for the log. Asked once, when homebridge loads
- * the plugin.
+ * What is wrong with the configuration of homebridge, for the log. Asked once, when homebridge
+ * loads the plugin.
  *
- * Two plugins that register the platform FHEM make homebridge load a platform that is configured
- * as `"platform": "FHEM"` from neither of them. It then starts without the accessories of fhem,
- * and HomeKit forgets them. homebridge only says that the platform was registered twice, so this
- * says what that means and what to do.
+ * A config entry for homebridge-fhem keeps its platform name, `FHEM`, when this plugin replaces
+ * it. Without homebridge-fhem no plugin serves it, and homebridge only says that it found no
+ * plugin for it. So this says what the entry has to look like now.
  *
  * @param pluginRoot the directory this plugin is installed in
  * @param configPath the config.json of homebridge
  */
 export function installationWarnings(pluginRoot: string, configPath: string): string[] {
-  const oldPlugin = findOldPlugin(pluginRoot);
-  if (oldPlugin === undefined) {
+  const config = readJson(configPath) as { disabledPlugins?: unknown; platforms?: unknown } | null | undefined;
+  const platforms = (Array.isArray(config?.platforms) ? (config.platforms as ({ platform?: unknown } | null)[]) : []).map((platform) => platform?.platform);
+  const old = platforms.filter((name): name is string => typeof name === 'string' && OLD_PLATFORMS.has(name));
+  if (old.length === 0) {
     return [];
   }
 
-  // a config.json that can not be read is taken for one that is affected
-  const config = readJson(configPath) as { disabledPlugins?: unknown; platforms?: unknown } | null | undefined;
-  if (config) {
-    // homebridge itself leaves a disabled plugin out when it looks for the plugin of a platform
-    if (Array.isArray(config.disabledPlugins) && config.disabledPlugins.includes(OLD_PLUGIN_NAME)) {
-      return [];
-    }
-    // a platform that names its plugin, as `homebridge-fhem.FHEM`, is loaded from that plugin
-    const platforms = Array.isArray(config.platforms) ? (config.platforms as ({ platform?: unknown } | null)[]) : [];
-    if (!platforms.some((platform) => platform?.platform === PLATFORM_NAME)) {
-      return [];
-    }
+  // homebridge itself leaves a disabled plugin out when it looks for the plugin of a platform
+  const disabled = Array.isArray(config?.disabledPlugins) && config.disabledPlugins.includes(OLD_PLUGIN_NAME);
+  const oldPlugin = disabled ? undefined : findOldPlugin(pluginRoot);
+  // homebridge-fhem serves what does not name this plugin
+  const unserved = oldPlugin === undefined ? old : old.filter((name) => name.startsWith(PLUGIN_NAME + '.'));
+  if (oldPlugin !== undefined && unserved.length === 0) {
+    return platforms.includes(PLATFORM_NAME)
+      ? [
+          `${OLD_PLUGIN_NAME} is installed as well, in ${oldPlugin}, and both have a platform in config.json. ` +
+            'a device both publish has the same identity, and homebridge publishes it only once. ' +
+            `uninstall ${OLD_PLUGIN_NAME} and remove its platform from config.json, see docs/migration.md.`,
+        ]
+      : [];
   }
 
-  return [
-    `${OLD_PLUGIN_NAME} is installed as well, in ${oldPlugin}. ` +
-      `both plugins register the platform ${PLATFORM_NAME}, and homebridge loads a platform that is configured as "platform": "${PLATFORM_NAME}" from neither of them: ` +
-      'it starts without the accessories of fhem, and HomeKit forgets them with their rooms, scenes and automations. ' +
-      `stop homebridge, uninstall ${OLD_PLUGIN_NAME} and start homebridge again. ${PLUGIN_NAME} replaces it and reads the same configuration.`,
-  ];
+  const several =
+    unserved.length > 1
+      ? ' homebridge runs one fhemgate platform per bridge: merge the entries of one bridge into one, with the others as its connections.'
+      : '';
+  return unserved.map(
+    (name) =>
+      `config.json has a platform "${name}", which no plugin serves: ${PLUGIN_NAME} answers to "platform": "${PLATFORM_NAME}". ` +
+      `change the entry to "platform": "${PLATFORM_NAME}", "migrateFrom": "${name}", so that HomeKit keeps its accessories, see docs/migration.md.` +
+      several,
+  );
 }
 
 /** a line for the log of a platform */
@@ -92,6 +102,13 @@ export interface ConfigFinding {
  */
 export function connectionFindings(config: ConnectionConfig): ConfigFinding[] {
   const findings: ConfigFinding[] = [];
+
+  if (config.neverTimeout !== undefined) {
+    findings.push({
+      level: 'info',
+      text: 'config: neverTimeout is not needed any more and can be removed. fhem is tried for as long as homebridge runs, and the accessories stay meanwhile.',
+    });
+  }
 
   const auth = config.auth as Record<string, unknown> | null | undefined;
   if (auth && typeof auth === 'object') {
@@ -120,20 +137,17 @@ export function connectionFindings(config: ConnectionConfig): ConfigFinding[] {
   return findings;
 }
 
-/**
- * What the name a platform was configured under means. The plugin registers its platform under
- * the name of homebridge-fhem as well, see index.ts.
- */
-export function platformFindings(platform: unknown): ConfigFinding[] {
+/** what the options of the platform itself say that is worth a line in the log */
+export function platformFindings(config: { migrateFrom?: unknown }): ConfigFinding[] {
   const findings: ConfigFinding[] = [];
-  if (typeof platform === 'string' && platform.startsWith(OLD_PLUGIN_NAME + '.')) {
+  const migrateFrom = config.migrateFrom;
+  if (migrateFrom !== undefined && !(typeof migrateFrom === 'string' && OLD_PLATFORMS.has(migrateFrom.trim()))) {
     findings.push({
-      level: 'info',
+      level: 'warn',
       text:
-        `config: this platform is configured as "platform": "${platform}", which names ${OLD_PLUGIN_NAME}. ${PLUGIN_NAME} answers to that name. ` +
-        'leave it as it is: homebridge makes the identity of every accessory from it, and with another name HomeKit takes them all for new ones.',
+        `config: migrateFrom is ${JSON.stringify(migrateFrom)}, which is no platform name of ${OLD_PLUGIN_NAME}. ` +
+        'it is "FHEM", or what config.json said for "platform" before. the identities of the accessories are made with it all the same.',
     });
   }
-
   return findings;
 }

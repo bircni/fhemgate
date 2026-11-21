@@ -1,7 +1,7 @@
 // the long poll: one request to fhem that stays open and carries every event as a line
 import type { PluginState } from '../state/pluginState.ts';
 import { ct2rgb, rgb2hsv, xyY2rgb, type Hsv } from '../util/color.ts';
-import { describeError, isCertificateError, requestOptions, type ConnectionStatus, type FhemConnection } from './client.ts';
+import { csrfTokenOf, describeError, requestOptions, type ConnectionStatus, type FhemConnection } from './client.ts';
 import { get, getText, type GetRequest, type HttpResponse } from './http.ts';
 import { commandUrl, longpollUrl, parseEventLine, reconnectDelayAfterEnd, retryDelayAfterError } from './protocol.ts';
 
@@ -34,19 +34,32 @@ export function idleTimeout(reopened: number): number {
   return Math.min(LONGPOLL_IDLE_TIMEOUT * 2 ** reopened, LONGPOLL_IDLE_TIMEOUT_MAX);
 }
 
+/** the status of the long poll of a fhem, with what it starts as */
+function connectionStatus(state: PluginState, url: string): ConnectionStatus {
+  return (state.longpoll[url] ??= { connects: 0, disconnects: 0, received_total: 0, reachable: false });
+}
+
+// who is told that FHEMWEB answered, by the status of the long poll. two connections to one fhem share it.
+const listeners = new WeakMap<ConnectionStatus, Set<() => void>>();
+
 /**
  * Opens the long poll to the fhem of the connection, unless there is one already, and keeps it
- * open: when it ends or fails it is opened again after a pause that grows with every attempt.
- * A fhem that was never reached is given up after the fourth failure, unless the connection
- * says never to. A fhem that refuses user and password, or whose certificate is not accepted,
- * is tried again for as long as that is so.
+ * open: when it ends or fails it is opened again after a pause that grows with every attempt,
+ * for as long as homebridge runs.
  *
  * A long poll nothing arrives on is checked: see watchSilence below.
  *
- * @param onConnected called every time FHEMWEB has answered the request
+ * @param onConnected called every time FHEMWEB has answered the request, also when the long
+ *   poll was opened for another connection to the same fhem
  */
 export function startLongpoll(state: PluginState, connection: FhemConnection, onConnected: () => void): void {
-  const status: ConnectionStatus = (state.longpoll[connection.base_url] ??= { connects: 0, disconnects: 0, received_total: 0 });
+  const status = connectionStatus(state, connection.base_url);
+  let told = listeners.get(status);
+  if (told === undefined) {
+    told = new Set();
+    listeners.set(status, told);
+  }
+  told.add(onConnected);
 
   if (status.connected) {
     return;
@@ -105,21 +118,14 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
 
   let silence: ReturnType<typeof setTimeout> | undefined;
 
-  /** the long poll failed: it is tried again after a pause, or given up if fhem was never reached */
+  /** the long poll failed: it is tried again after a pause */
   const failed = (err: Error): void => {
     clearTimeout(silence);
     status.connected = false;
+    status.reachable = false;
 
     status.disconnects++;
     const timeout = retryDelayAfterError(status.disconnects);
-
-    // a certificate that is not accepted is no reason to give up: the platform would hand
-    // homebridge no accessories, and HomeKit would forget the ones it has
-    if (!connection.neverTimeout && timeout > 10000 && !state.csrfToken[connection.base_url] && !isCertificateError(err)) {
-      connection.log.error('longpoll error: ' + describeError(err) + ', retrys exhausted');
-      connection.dead = true;
-      return;
-    }
 
     connection.log.error('longpoll error: ' + describeError(err) + ', retry in: ' + timeout + 'msec');
     setTimeout(() => {
@@ -222,16 +228,19 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
           return;
         }
 
-        const token = response.headers['x-fhem-csrftoken'];
-        state.csrfToken[connection.base_url] = token ? String(token) : '';
+        state.csrfToken[connection.base_url] = csrfTokenOf(response);
+        status.reachable = true;
 
         watchSilence();
-        onConnected();
+        for (const listener of told) {
+          listener();
+        }
       },
 
       onEnd: () => {
         clearTimeout(silence);
         status.connected = false;
+        status.reachable = false;
 
         status.disconnects++;
 

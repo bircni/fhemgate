@@ -1,9 +1,10 @@
 import type { Characteristic } from '@homebridge/hap-nodejs';
 import type { HAP } from 'homebridge';
 import { acceptableValue } from '../accessory/acceptable.ts';
-import { recordHistory, type HistoryServiceClass } from '../accessory/history.ts';
+import { recordHistory, type HistoryService, type HistoryServiceClass } from '../accessory/history.ts';
 import type { ConnectionStatus } from '../fhem/client.ts';
 import { reading2homekit } from '../mapping/toHomekit.ts';
+import { isNocache, type PreparedMapping } from '../mapping/types.ts';
 import { toInt } from '../util/loose.ts';
 import { ReadingCache } from './readingCache.ts';
 import { Subscriptions } from './subscriptions.ts';
@@ -28,6 +29,16 @@ export class PluginState {
   /** the history service of the fakegato-history package for this homebridge, if the package is installed */
   historyServiceClass?: HistoryServiceClass;
 
+  /**
+   * The histories of each device, by its FUUID and their type. An accessory that is built again for a device takes
+   * the history it had, also after it was removed and comes back: fakegato-history keeps one writer per file and
+   * has no way to stop one.
+   */
+  readonly histories = new Map<string, Map<string, HistoryService>>();
+
+  /** how many values of each reading were taken that are no answers, see changesOf */
+  readonly #changes = new Map<string, number>();
+
   constructor(readonly hap: HAP) {}
 
   /**
@@ -37,8 +48,60 @@ export class PluginState {
    * @param noUpdate keep the value in the cache and at the mappings, but do not tell HomeKit
    */
   update(informId: string, orig: unknown, noUpdate?: boolean): void {
+    this.#take(informId, orig, noUpdate ? 'quiet' : 'event');
+  }
+
+  /**
+   * What fhem answered when it was asked for a reading, which is no change that happened: as an
+   * update, but a characteristic that tells of the presses of a button is not told of it.
+   */
+  answer(informId: string, orig: unknown): void {
+    this.#take(informId, orig, 'answer');
+  }
+
+  /** What fhem answered to a read from HomeKit, which gets it as its answer: as an answer, but HomeKit is not told. */
+  answerRead(informId: string, orig: unknown): void {
+    this.#take(informId, orig, 'read');
+  }
+
+  /**
+   * Forgets a reading fhem answered it no longer has: its value and when it changed, and what the
+   * mapping that was read and those that follow the reading know of it, which is their default
+   * now. HomeKit learns of it when it reads them. Like any answer of fhem, a later one counts:
+   * this is no change that overtakes an answer asked for before.
+   */
+  forget(informId: string, read?: PreparedMapping): void {
+    delete this.cache.values[informId];
+    delete this.cache.changed[informId];
+    const mappings = (this.subscriptions.byInformId[informId] ?? []).map((subscription) => subscription.mapping);
+    [...mappings, read].forEach((mapping) => {
+      if (typeof mapping === 'object') {
+        mapping.cached = mapping.default;
+      }
+    });
+  }
+
+  /**
+   * How many values of the reading the plugin took that are no answers of fhem it asked for: the
+   * events of fhem, and the values the plugin sets itself, such as the colour HomeKit was given.
+   * An answer of fhem that was asked before the count changed is older than what the plugin knows.
+   */
+  changesOf(informId: string): number {
+    return this.#changes.get(informId) ?? 0;
+  }
+
+  /**
+   * @param source an event, a value the plugin sets itself and HomeKit is not told of, an answer of
+   * fhem, or one to a read from HomeKit, which is not told of it either
+   */
+  #take(informId: string, orig: unknown, source: 'event' | 'quiet' | 'answer' | 'read'): void {
     if (orig === undefined) {
       return;
+    }
+    const now = toInt(Date.now() / 1000);
+    const answered = source === 'answer' || source === 'read';
+    if (!answered) {
+      this.#changes.set(informId, this.changesOf(informId) + 1);
     }
 
     // an event that repeats the value the reading has says nothing new to most characteristics.
@@ -48,6 +111,7 @@ export class PluginState {
 
     if (!repeated) {
       this.cache.values[informId] = orig;
+      this.cache.changed[informId] = now;
       // logged where the first characteristic that follows the reading logs
       // eslint-disable-next-line @typescript-eslint/no-base-to-string -- readings are text. what else is cached is printed as it comes.
       subscriptions?.find((subscription) => subscription.mapping)?.mapping?.log.debug('caching: ' + informId + ': ' + String(orig));
@@ -62,11 +126,11 @@ export class PluginState {
 
         const characteristic = typeof mapping.characteristic === 'object' ? mapping.characteristic : undefined;
         const eventOnly = characteristic !== undefined && this.#isEventOnly(characteristic);
-        if (repeated && !eventOnly && !mapping.nocache) {
+        if ((repeated && !eventOnly && !isNocache(mapping)) || (answered && eventOnly)) {
           return;
         }
 
-        mapping.last_update = toInt(Date.now() / 1000);
+        mapping.last_update = now;
 
         const value = reading2homekit(mapping, orig);
         if (value === undefined) {
@@ -78,7 +142,7 @@ export class PluginState {
           recordHistory(accessory, accessory.historyService, mapping, value, this);
         }
 
-        if (!noUpdate && characteristic) {
+        if ((source === 'event' || source === 'answer') && characteristic) {
           const accepted = acceptableValue(characteristic, value);
           if (accepted === undefined) {
             mapping.log.debug(informId + ': ' + String(value) + ' is no value for ' + characteristic.displayName + ', which keeps the one it has');

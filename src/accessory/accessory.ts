@@ -9,7 +9,7 @@ import { prepareMappings } from '../mapping/compile.ts';
 import { parseHomebridgeMapping } from '../mapping/parser.ts';
 import { commandFor } from '../mapping/toFhem.ts';
 import { reading2homekit } from '../mapping/toHomekit.ts';
-import type { CharacteristicClass, HomekitValue, Mapping, Mappings, PreparedMapping } from '../mapping/types.ts';
+import { isNocache, type CharacteristicClass, type HomekitValue, type Mapping, type Mappings, type PreparedMapping } from '../mapping/types.ts';
 import type { PluginState } from '../state/pluginState.ts';
 import type { MappedCharacteristic } from '../state/subscriptions.ts';
 import { looselyEqual } from '../util/loose.ts';
@@ -143,6 +143,10 @@ export class FhemAccessory {
   declare shutdown?: boolean;
 
   readonly #state: PluginState;
+  /** the url of the FHEMWEB of the connection, none for an accessory of no fhem the plugin talks to */
+  get #baseUrl(): string | undefined {
+    return (this.connection as { base_url?: string } | undefined)?.base_url;
+  }
   readonly #execute: Execute;
   #services?: Service[];
   /** when fhem was last asked for a reading that is cached, by the id of the reading */
@@ -197,7 +201,7 @@ export class FhemAccessory {
     this.#logMappings(s);
 
     const identities = platform.identities;
-    const baseUrl = (platform.connection as { base_url?: string } | undefined)?.base_url;
+    const baseUrl = this.#baseUrl;
     Object.assign(
       this,
       deviceIdentity(
@@ -210,6 +214,7 @@ export class FhemAccessory {
     prepareMappings(this, s, {
       characteristics: state.hap.Characteristic as unknown as Record<string, unknown>,
       cached: state.cache.values,
+      changed: state.cache.changed,
       update: (informId, value) => {
         state.update(informId, value);
       },
@@ -237,7 +242,7 @@ export class FhemAccessory {
           this.log.debug('  ' + characteristic_type + ' [' + (mapping.type ? mapping.type : 'thermo') + ';' + (mapping.size ? mapping.size : 1024) + ']');
         } else if (mapping.name) {
           if (characteristic_type === CustomUUIDs.Volume) {
-            this.log.debug('  Custom ' + mapping.name + ' [' + reading + ';' + (mapping.nocache ? 'not cached' : 'cached') + ']');
+            this.log.debug('  Custom ' + mapping.name + ' [' + reading + ';' + (isNocache(mapping) ? 'not cached' : 'cached') + ']');
           } else {
             this.log.debug('  Custom ' + mapping.name + ' [' + reading + ']');
           }
@@ -335,6 +340,16 @@ export class FhemAccessory {
   }
 
   /**
+   * Whether the fhem of the accessory answers. HomeKit is told that the device does not respond
+   * while it does not: a value from before could be wrong by now, and a command would be lost.
+   * An accessory of no fhem the plugin talks to is taken for reachable.
+   */
+  isReachable(): boolean {
+    const url = this.#baseUrl;
+    return url === undefined || this.#state.longpoll[url]?.reachable === true;
+  }
+
+  /**
    * The value of the characteristic of the mapping: from the cache of the mapping, or from fhem
    * for a mapping that is not cached. Answers the callback, and returns the value if it was cached.
    *
@@ -379,7 +394,7 @@ export class FhemAccessory {
     const cached = mapping?.cached;
     const cmd = '{ReadingsVal("' + device + '","' + reading + '","")}';
 
-    if (mapping && cached !== undefined && !('nocache' in mapping)) {
+    if (mapping && cached !== undefined && !isNocache(mapping)) {
       let defined: string | undefined = undefined;
       if (mapping.homekit2name !== undefined) {
         defined = mapping.homekit2name[cached as unknown as string];
@@ -401,40 +416,83 @@ export class FhemAccessory {
 
     // HomeKit is not left waiting when fhem takes its time: it gets the value last seen, or an
     // error if there never was one, and the answer of fhem is published when it comes
+    if (callback === undefined) {
+      this.#askInBackground(informId, cmd);
+      return undefined;
+    }
+
     let timedOut = false;
-    const timer =
-      callback &&
-      setTimeout(() => {
-        timedOut = true;
-        if (cached !== undefined) {
-          this.log.debug('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds, answering with the last value');
-          callback(undefined, cached);
-        } else {
-          this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
-          callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
-        }
-      }, QUERY_TIMEOUT);
+    const timer = setTimeout(() => {
+      timedOut = true;
+      if (cached !== undefined) {
+        this.log.debug('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds, answering with the last value');
+        callback(undefined, cached);
+      } else {
+        this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
+        callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
+      }
+    }, QUERY_TIMEOUT);
 
-    this.execute(cmd, (result) => {
+    this.#ask(informId, cmd, (value, newer) => {
       clearTimeout(timer);
-      const value = result.replace(/[\r\n]/g, '');
-      this.log.debug('  value: ' + value);
+      if (value === undefined && !newer) {
+        // a read asked fhem, which no longer has the reading: what the plugin knew of it is gone,
+        // so that no later read falls back to it. a background check of a cached value does not
+        // forget it, as fhem answers the same for a reading whose value is empty.
+        this.#state.forget(informId, mapping);
+      }
+      if (timedOut) {
+        // the read was answered meanwhile: this is an answer nobody waits for any more
+        this.#takeInBackground(informId, value, newer);
+        return;
+      }
 
-      // the read that waited gets the value as its answer. one that was answered meanwhile is
-      // told with an update like any change in fhem.
-      this.#state.update(informId, value, !timedOut);
-
-      if (callback !== undefined && !timedOut) {
-        // without a mapping there is nothing to convert the reading with
-        const converted = mapping ? reading2homekit(mapping, value) : value;
-        if (converted === undefined) {
-          callback(1);
-        } else {
-          callback(undefined, converted);
-        }
+      // the read that waited gets the value as its answer, so HomeKit is not told again
+      if (!newer && value !== undefined) {
+        this.#state.answerRead(informId, value);
+      }
+      const latest = newer ? this.#state.cache.get(informId) : value;
+      // when fhem has no such reading, the default of the mapping: not a value it had before,
+      // which would hide that the reading is gone. without a mapping there is nothing to convert.
+      const answer = latest === undefined ? (mapping ? mapping.default : '') : mapping ? reading2homekit(mapping, latest) : latest;
+      if (answer === undefined) {
+        callback(1);
+      } else {
+        callback(undefined, answer as HomekitValue);
       }
     });
     return undefined;
+  }
+
+  /**
+   * Asks fhem for a reading. The answer is undefined when fhem has no such reading: it answers
+   * with nothing then. It is newer when the reading changed
+   * while fhem was asked, by an event or a value the plugin set itself: see changesOf.
+   */
+  #ask(informId: string, cmd: string, answered: (value: string | undefined, newer: boolean) => void): void {
+    const before = this.#state.changesOf(informId);
+    this.execute(cmd, (result) => {
+      this.log.debug('  value: ' + result);
+      answered(result === '' ? undefined : result, this.#state.changesOf(informId) !== before);
+    });
+  }
+
+  /** asks fhem for a reading nobody waits for, see #takeInBackground */
+  #askInBackground(informId: string, cmd: string): void {
+    this.#ask(informId, cmd, (value, newer) => {
+      this.#takeInBackground(informId, value, newer);
+    });
+  }
+
+  /**
+   * Takes an answer nobody waits for like any value of fhem: not when it is none, and not when an
+   * event arrived meanwhile. A characteristic that tells of the presses of a button is not told
+   * of it.
+   */
+  #takeInBackground(informId: string, value: string | undefined, newer: boolean): void {
+    if (!newer && value !== undefined) {
+      this.#state.answer(informId, value);
+    }
   }
 
   /**
@@ -450,16 +508,7 @@ export class FhemAccessory {
       return;
     }
     this.#refreshed.set(informId, now);
-
-    const before = this.#state.cache.get(informId);
-    this.execute(cmd, (result) => {
-      const value = result.replace(/[\r\n]/g, '');
-      // fhem answers with nothing for a reading it does not have. and an event that arrived while
-      // fhem was asked is newer than the answer.
-      if (value !== '' && this.#state.cache.get(informId) === before) {
-        this.#state.update(informId, value);
-      }
-    });
+    this.#askInBackground(informId, cmd);
   }
 
   isInRoom(room: string | undefined): boolean {

@@ -437,6 +437,7 @@ const logged = (pattern: RegExp) =>
     .split('\n')
     .filter((line) => pattern.test(line));
 
+// what homebridge answers a controller that reads each characteristic once it has listed the accessories
 describe('what homebridge publishes', () => {
   it.each<[string, TypeName, string | undefined, TypeName, number]>([
     // the range of the reading is cut to minValue and maxValue
@@ -666,7 +667,7 @@ describe('a read of a characteristic', () => {
 
   it('is answered from what the plugin has seen, and fhem is asked in the background once a minute at most', async () => {
     const temperature = world.named('e2e_m_parts', 'TemperatureSensor', 'CurrentTemperature');
-    // homebridge read every characteristic when it listed the accessories, which was the first read of this minute
+    // homebridge read every characteristic when it first listed the accessories, which was the first read of this minute
     const before = asked('e2e_m_parts');
     expect(before).toBeGreaterThan(0);
 
@@ -681,14 +682,14 @@ describe('a read of a characteristic', () => {
     expect(logged(/e2e_m_failing-level reading2homekit: Error: boom/).length).toBeGreaterThan(0);
   });
 
-  it('of the last activation of a contact fails before fhem was heard about its reading, and is answered from then on', async () => {
+  it('of the last activation of a contact is answered once fhem was heard about its reading', async () => {
     const lastActivation = world.named('e2e_m_unseen', 'ContactSensor', 'LastActivation');
 
-    // homebridge read it when it listed the accessories, before fhem had answered for the reading
-    expect(logged(/e2e-m-unseen: Custom LastActivation characteristic: last update unknown/)).toHaveLength(1);
-
     await world.notifies(world.named('e2e_m_unseen', 'ContactSensor', 'ContactSensorState'), 1, () => world.fhem.change('e2e_m_unseen', 'door', 'open'));
-    expect(await world.homebridge.answer(lastActivation)).toEqual({ value: 0 });
+    // the seconds from the start of the history to the change, which may be one when the second turns between them
+    const { value, status } = await world.homebridge.answer(lastActivation);
+    expect(status).toBeUndefined();
+    expect([0, 1]).toContain(value);
   });
 
   it('asks fhem every time for a mapping with nocache', async () => {
@@ -756,10 +757,10 @@ describe('a value HomeKit writes', () => {
   });
 
   it('waits half a second at least, also when the delay of the mapping is shorter', async () => {
-    const started = Date.now();
+    const started = performance.now();
     await world.homebridge.write(world.named('e2e_m_quick', 'Lightbulb', 'Brightness'), 60);
     await world.fhem.wasSet('e2e_m_quick', 'bright 60', 'bright', '60');
-    const waited = Date.now() - started;
+    const waited = performance.now() - started;
 
     // timers of node may be a millisecond early
     expect(waited).toBeGreaterThanOrEqual(495);

@@ -199,8 +199,7 @@ describe('connecting', () => {
 
     world.platform({ server: 'fhem.invalid' }, { on });
 
-    expect(on).toHaveBeenCalledOnce();
-    expect(on.mock.calls[0]?.[0]).toBe('shutdown');
+    expect(on.mock.calls.map(([event]) => event as unknown)).toEqual(['shutdown', 'didFinishLaunching']);
   });
 });
 
@@ -218,7 +217,7 @@ describe('authentication', () => {
     fhem = await startFakeFhem({ auth: { user: 'fhem', pass: 'secret' } });
     world = createWorld();
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
-    const platform = world.platform({ server: '127.0.0.1', port: fhem.port });
+    world.platform({ server: '127.0.0.1', port: fhem.port });
     const refusal = (pause: number) =>
       `error longpoll refused by fhem with 401 Unauthorized: authentication failed. check user and password (auth) of the platform. retry in: ${pause}msec`;
 
@@ -239,7 +238,6 @@ describe('authentication', () => {
     expect(world.log.errors().at(-1)).toBe(refusal(18000));
     expect(fhem.requests.every((request) => request.url.includes('inform='))).toBe(true);
     expect(world.csrfToken[baseUrl()]).toBeUndefined();
-    expect(platform.servers[0]?.connection?.dead).toBeUndefined();
     expect(world.longpoll[baseUrl()]).toMatchObject({ connected: false, connects: 6, disconnects: 6 });
   });
 
@@ -412,33 +410,6 @@ describe('devices', () => {
     expect(first?.getServices().map((service) => service.constructor.name)).toEqual(['AccessoryInformation', 'Lightbulb']);
   });
 
-  const lamps = (count: number) =>
-    Array.from({ length: count }, (_, index) => {
-      const name = `lamp_${String(index).padStart(3, '0')}`;
-      return { Name: name, ...device({ Internals: { NAME: name, FUUID: `fuuid-${index}` }, Readings: { state: 'on' }, PossibleSets: 'on off' }) };
-    });
-
-  it('warns when it publishes more accessories than a HomeKit bridge takes, and says what to do', async () => {
-    const platform = await connect({ devices: lamps(150) }, { filter: 'room=HomeKit' });
-    world.log.clear();
-
-    expect(await accessoriesOf(platform)).toHaveLength(150);
-
-    expect(world.log.lines.filter((line) => line.startsWith('warn '))).toEqual([
-      'warn the filter room=HomeKit selects 150 devices that are published. a HomeKit bridge takes 149 accessories at most, and HomeKit refuses a bridge with more. ' +
-        'narrow the filter, or split the devices over several FHEM platforms with different filters and run each as a child bridge.',
-    ]);
-  });
-
-  it('does not warn about as many accessories as a HomeKit bridge takes', async () => {
-    const platform = await connect({ devices: lamps(149) });
-    world.log.clear();
-
-    expect(await accessoriesOf(platform)).toHaveLength(149);
-
-    expect(world.log.lines.filter((line) => line.startsWith('warn '))).toEqual([]);
-  });
-
   it('asks for all devices without a filter', async () => {
     const platform = await connect();
 
@@ -546,6 +517,201 @@ describe('devices', () => {
 
     expect(accessories).toHaveLength(1);
     expect(fhem.requests.at(-1)?.url).toContain('fwcsrf=csrf_fake_token');
+  });
+});
+
+describe('the reading of another device', () => {
+  const thermometer = (mapping: string, name = 'heating') => ({
+    Name: name,
+    ...device({ Internals: { NAME: name }, Readings: { state: 'ok' }, Attributes: { genericDeviceType: 'thermometer', homebridgeMapping: mapping } }),
+  });
+  const temperature = (accessory: Accessory) =>
+    characteristicOf(serviceOf(accessory.getServices(), 'TemperatureSensor'), hap.Characteristic.CurrentTemperature);
+  const temperatureOf = (accessory: Accessory) => temperature(accessory).value;
+  const answered = (value = '') => waitFor(() => world.log.debugLines.some((line) => line.includes('value: ' + value)), 'fhem to answer');
+  /** a thermometer of a reading of another device whose questions fhem holds, once the first is answered */
+  async function held(readings: Record<string, string> = {}): Promise<Accessory> {
+    const platform = await connect({
+      devices: [thermometer('CurrentTemperature=other:temperature,nocache=true')],
+      readings,
+      holds: (cmd) => cmd.includes('ReadingsVal'),
+    });
+    const accessory = await firstAccessoryOf(platform);
+    await waitFor(() => fhem.held() > 0, 'the question asked while the accessory was built');
+    fhem.release();
+    await answered(readings['other temperature']);
+    return accessory;
+  }
+
+  it('is shown to HomeKit once fhem answered the question for it, which nobody waits for', async () => {
+    const platform = await connect({ devices: [thermometer('CurrentTemperature=other:temperature')], readings: { 'other temperature': '18.5' } });
+    const accessory = await firstAccessoryOf(platform);
+
+    await waitFor(() => temperatureOf(accessory) === 18.5, 'the answer to be shown');
+  });
+
+  it('is not made up when fhem has no such reading', async () => {
+    const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature')] }));
+    await answered();
+
+    expect(temperatureOf(accessory)).toBe(0);
+    expect(world.cached['other-temperature']).toBeUndefined();
+  });
+
+  it('keeps an event that arrived while fhem was asked, which is newer', async () => {
+    const platform = await connect({
+      devices: [thermometer('CurrentTemperature=other:temperature')],
+      readings: { 'other temperature': '18.5' },
+      holds: (cmd) => cmd.includes('ReadingsVal'),
+    });
+    const accessory = await firstAccessoryOf(platform);
+    fhem.event('other-temperature', '21');
+    await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
+
+    fhem.release();
+    await answered('18.5');
+
+    expect(temperatureOf(accessory)).toBe(21);
+  });
+
+  it('starts with what the plugin has seen of the reading, when the other device was built first', async () => {
+    const sensor = {
+      Name: 'a_sensor',
+      ...device({ Internals: { NAME: 'a_sensor' }, Readings: { temperature: '18.5' }, Attributes: { genericDeviceType: 'thermometer' } }),
+    };
+    const heating = thermometer('CurrentTemperature=a_sensor:temperature', 'b_heating');
+    const platform = await connect({ devices: [sensor, heating], readings: { 'a_sensor temperature': '18.5' } });
+
+    const [, built] = await accessoriesOf(platform);
+
+    expect(temperatureOf(built as Accessory)).toBe(18.5);
+    // and fhem is asked all the same, for a change the plugin may have missed
+    await waitFor(() => fhem.commands.includes('{ReadingsVal("a_sensor","temperature","")}'), 'fhem to be asked');
+  });
+
+  it('answers a read that waits with an error when fhem has no such reading, and asks again on the next', async () => {
+    const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature')] }));
+    const asked = () => fhem.commands.filter((cmd) => cmd.includes('ReadingsVal("other","temperature"')).length;
+    // the question asked while the accessory was built
+    await answered();
+    const before = asked();
+
+    await expect(temperature(accessory).handleGetRequest()).rejects.toBeDefined();
+    await expect(temperature(accessory).handleGetRequest()).rejects.toBeDefined();
+
+    expect(world.cached['other-temperature']).toBeUndefined();
+    expect(asked()).toBe(before + 2);
+  });
+
+  it('takes an answer that comes after the read gave up waiting like one nobody waits for', async () => {
+    const accessory = await held({ 'other temperature': '18.5' });
+    const answers = () => world.log.debugLines.filter((line) => line.includes('value: 18.5')).length;
+    const before = answers();
+
+    // fhem takes longer than a read waits
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const read = temperature(accessory).handleGetRequest();
+      await waitFor(() => fhem.held() > 0, 'the read to be held');
+      vi.advanceTimersByTime(2000);
+      await read;
+    } finally {
+      vi.useRealTimers();
+    }
+    expect(world.log.debugLines.some((line) => line.includes('query: no answer from fhem for other-temperature within 2 seconds'))).toBe(true);
+    fhem.event('other-temperature', '21');
+    await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
+    fhem.release();
+    await waitFor(() => answers() === before + 1, 'fhem to answer the read');
+
+    expect(temperatureOf(accessory)).toBe(21);
+  });
+
+  it.each([
+    ['an older value', { 'other temperature': '18.5' }],
+    ['nothing, as it has no such reading yet', {}],
+  ])('answers a read that waits with an event that arrived while fhem was asked, when fhem answers %s', async (_, readings) => {
+    const accessory = await held(readings);
+
+    const read = temperature(accessory).handleGetRequest();
+    await waitFor(() => fhem.held() > 0, 'the read to be held');
+    fhem.event('other-temperature', '21');
+    await waitFor(() => world.cached['other-temperature'] === '21', 'the event');
+    fhem.release();
+
+    expect(await read).toBe(21);
+    expect(world.cached['other-temperature']).toBe('21');
+  });
+
+  it('answers a read with an error, not the value it had, when fhem no longer has the reading', async () => {
+    const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature,nocache=true')] }));
+    fhem.event('other-temperature', '21');
+    await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
+
+    await expect(temperature(accessory).handleGetRequest()).rejects.toBeDefined();
+  });
+
+  it('forgets the value of a reading fhem no longer has, also for a read fhem does not answer in time', async () => {
+    const accessory = await held();
+    fhem.event('other-temperature', '21');
+    await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
+    const gone = temperature(accessory).handleGetRequest();
+    await waitFor(() => fhem.held() > 0, 'the read to be held');
+    fhem.release();
+    await expect(gone).rejects.toBeDefined();
+    // also for the accessories built anew, which start from the cache
+    expect(world.cached['other-temperature']).toBeUndefined();
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const late = temperature(accessory).handleGetRequest();
+      await waitFor(() => fhem.held() > 0, 'the read to be held');
+      vi.advanceTimersByTime(2000);
+      await expect(late).rejects.toBeDefined();
+    } finally {
+      vi.useRealTimers();
+      fhem.release();
+    }
+  });
+
+  it('forgets the value of a reading when fhem answers late that it no longer has it', async () => {
+    const accessory = await held();
+    fhem.event('other-temperature', '21');
+    await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const read = temperature(accessory).handleGetRequest();
+      await waitFor(() => fhem.held() > 0, 'the read to be held');
+      vi.advanceTimersByTime(2000);
+      expect(await read).toBe(21);
+    } finally {
+      vi.useRealTimers();
+    }
+    fhem.release();
+    await waitFor(() => world.cached['other-temperature'] === undefined, 'the reading to be forgotten');
+  });
+
+  it('answers a read with the default of the mapping when fhem has no such reading', async () => {
+    const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature,nocache=true,default=5')] }));
+
+    expect(await temperature(accessory).handleGetRequest()).toBe(5);
+  });
+
+  it('tells HomeKit of no press of a button when fhem answers for it', async () => {
+    const platform = await connect({
+      devices: [thermometer('CurrentTemperature=state ProgrammableSwitchEvent=other:button,values=/.*/:SINGLE_PRESS')],
+      readings: { 'other button': 'pressed' },
+    });
+    const button = characteristicOf(
+      serviceOf((await firstAccessoryOf(platform)).getServices(), 'TemperatureSensor'),
+      hap.Characteristic.ProgrammableSwitchEvent,
+    );
+    const told = vi.fn();
+    button.on('change', told);
+    await answered('pressed');
+
+    expect(told).not.toHaveBeenCalled();
   });
 });
 
@@ -733,14 +899,14 @@ describe('reconnecting', () => {
     expect(fhem.commands.filter((cmd) => cmd.startsWith('{$defs{siri}'))).toHaveLength(1);
   });
 
-  it('gives up after four failed attempts when it never reached fhem', async () => {
+  it('keeps trying to reach a fhem it never reached', async () => {
     fhem = await startFakeFhem();
     const port = fhem.port;
     await fhem.close();
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     world = createWorld();
 
-    const platform = world.platform({ server: '127.0.0.1', port });
+    world.platform({ server: '127.0.0.1', port });
     for (const attempt of [1, 2, 3]) {
       await waitFor(() => world.log.errors().length === attempt, `attempt ${attempt}`);
       vi.runOnlyPendingTimers();
@@ -751,10 +917,8 @@ describe('reconnecting', () => {
       'error longpoll error: (error), retry in: 3000msec',
       'error longpoll error: (error), retry in: 6000msec',
       'error longpoll error: (error), retry in: 9000msec',
-      'error longpoll error: (error), retrys exhausted',
+      'error longpoll error: (error), retry in: 12000msec',
     ]);
-    expect(platform.servers[0]?.connection?.dead).toBe(true);
-    expect(await accessoriesOf(platform)).toEqual([]);
   });
 
   it('does not give up on a fhem whose certificate it does not trust, and says what to do', async () => {
@@ -769,7 +933,7 @@ describe('reconnecting', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     world = createWorld();
 
-    const platform = world.platform({ server: '127.0.0.1', port: (server.address() as AddressInfo).port, ssl: true, rejectUnauthorized: true });
+    world.platform({ server: '127.0.0.1', port: (server.address() as AddressInfo).port, ssl: true, rejectUnauthorized: true });
     for (const attempt of [1, 2, 3, 4, 5]) {
       await waitFor(() => world.log.errors().length === attempt, `attempt ${attempt}`);
       vi.runOnlyPendingTimers();
@@ -782,24 +946,22 @@ describe('reconnecting', () => {
           `or set rejectUnauthorized to false for the platform), retry in: ${pause}msec`,
       ),
     );
-    expect(platform.servers[0]?.connection?.dead).toBeUndefined();
   });
 
-  it('keeps trying with neverTimeout', async () => {
+  it('waits half a minute at most between two attempts', async () => {
     fhem = await startFakeFhem();
     const port = fhem.port;
     await fhem.close();
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     world = createWorld();
 
-    const platform = world.platform({ server: '127.0.0.1', port, neverTimeout: true });
+    world.platform({ server: '127.0.0.1', port });
     for (const attempt of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) {
       await waitFor(() => world.log.errors().length === attempt, `attempt ${attempt}`);
       vi.runOnlyPendingTimers();
     }
 
     expect(world.log.errors().at(-1)).toMatch(/retry in: 30000msec$/);
-    expect(platform.servers[0]?.connection?.dead).toBeUndefined();
   });
 });
 

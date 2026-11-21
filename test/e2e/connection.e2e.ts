@@ -33,10 +33,7 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that can not be reached when 
   beforeAll(async () => {
     deadPort = await freePort();
     latePort = await freePort();
-    patient = await startHomebridge([
-      { server: '127.0.0.1', port: deadPort },
-      { server: '127.0.0.1', port: latePort, neverTimeout: true },
-    ]);
+    patient = await startHomebridge({ server: '127.0.0.1', port: deadPort, connections: [{ server: '127.0.0.1', port: latePort, neverTimeout: true }] });
     stops.push(() => patient.stop());
   });
 
@@ -53,7 +50,8 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that can not be reached when 
 
     // the first attempt can meet whoever had the port a moment ago, so the wait is not part of what is looked for
     await says(homebridge, new RegExp(`longpoll error: Error: connect ECONNREFUSED 127\\.0\\.0\\.1:${port}, retry in: \\d+msec`));
-    await expect(homebridge.accessories()).rejects.toThrow('fetch failed');
+    // the bridge is published meanwhile, without accessories as homebridge has none of it yet
+    expect(await homebridge.accessories()).toEqual([]);
 
     const fhem = await startStandIn([lamp('e2e_c_late')], { port });
     stops.push(() => fhem.close());
@@ -91,20 +89,21 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that can not be reached when 
     expect((await published(homebridge)).map((accessory) => accessory.name)).toEqual(['e2e_c_back']);
   });
 
-  it('is given up after the fourth failed attempt, unless the platform is told never to', async () => {
-    await says(patient, new RegExp(`ECONNREFUSED 127\\.0\\.0\\.1:${deadPort}, retrys exhausted`));
-    // three, six and nine seconds were waited before
-    expect(logged(patient, new RegExp(`:${deadPort}, retry in: `)).map((line) => line.replace(/^.*retry in: /, ''))).toEqual([
-      '3000msec',
-      '6000msec',
-      '9000msec',
-    ]);
+  it('is tried for as long as homebridge runs, with neverTimeout or without', async () => {
+    for (const port of [deadPort, latePort]) {
+      await says(patient, new RegExp(`ECONNREFUSED 127\\.0\\.0\\.1:${port}, retry in: 12000msec`));
+      // three, six and nine seconds were waited before
+      expect(
+        logged(patient, new RegExp(`:${port}, retry in: `))
+          .slice(0, 3)
+          .map((line) => line.replace(/^.*retry in: /, '')),
+      ).toEqual(['3000msec', '6000msec', '9000msec']);
+    }
+    expect(logged(patient, /retrys exhausted/)).toEqual([]);
+    expect(logged(patient, /config: neverTimeout is not needed any more and can be removed\./)).toHaveLength(1);
 
-    await says(patient, new RegExp(`ECONNREFUSED 127\\.0\\.0\\.1:${latePort}, retry in: 12000msec`));
-    expect(logged(patient, new RegExp(`:${latePort}, retrys exhausted`))).toEqual([]);
-
-    // homebridge still waits for the platform that does not give up
-    await expect(patient.accessories()).rejects.toThrow('fetch failed');
+    // the bridge is published meanwhile
+    expect(await patient.accessories()).toEqual([]);
 
     const fhem = await startStandIn([lamp('e2e_c_patient')], { port: latePort });
     stops.push(() => fhem.close());
@@ -265,16 +264,13 @@ describe.skipIf(realFhemUrl !== undefined)('a fhem that homebridge is connected 
   });
 
   describe('when fhem is away', () => {
-    it('reports a command that could not be sent, without the csrf token', async () => {
+    it('answers HomeKit that its devices do not respond, and sends no command', async () => {
       await world.fhem.close();
+      await says(world.homebridge, /longpoll (error: .*, retry in: 3000msec|ended, reconnect in: )/);
 
+      expect(await world.homebridge.answer(on('e2e_c_other'))).toEqual({ value: undefined, status: -70402 });
       await world.homebridge.write(on('e2e_c_other'), true);
-
-      await says(
-        world.homebridge,
-        /There was a problem connecting to FHEM \(http:\/\/127\.0\.0\.1:\d+\/fhem\?cmd=set%20e2e_c_other%20on&fwcsrf=\*\*\*&XHR=1\):Error: connect ECONNREFUSED/,
-      );
-      expect(world.homebridge.output()).not.toContain('csrf_fake_token');
+      expect(logged(world.homebridge, /cmd=set%20e2e_c_other%20on/)).toEqual([]);
     });
   });
 

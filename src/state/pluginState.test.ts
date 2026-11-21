@@ -17,6 +17,63 @@ function subscribed(informId: string, updateValue = vi.fn()) {
   return { mapping, updateValue };
 }
 
+describe('PluginState.changesOf', () => {
+  it('counts the events of a reading and the values the plugin sets itself, and no answer of fhem, also not to a read', () => {
+    state.update('lamp-state', 'on');
+    state.update('lamp-state', 'on');
+    state.answer('lamp-state', 'off');
+    state.answerRead('lamp-state', 'standby');
+    state.update('lamp-state', 'on', true);
+
+    expect(state.changesOf('lamp-state')).toBe(3);
+    expect(state.changesOf('lamp-other')).toBe(0);
+    expect(state.cache.get('lamp-state')).toBe('on');
+  });
+
+  it('notes when a value changed, and not when it is repeated', () => {
+    vi.useFakeTimers({ now: new Date('2026-01-01T00:00:00Z') });
+    state.update('lamp-state', 'on');
+    vi.setSystemTime(new Date('2026-01-01T00:01:00Z'));
+    state.answer('lamp-state', 'on');
+
+    expect(state.cache.changed['lamp-state']).toBe(Date.parse('2026-01-01T00:00:00Z') / 1000);
+    vi.useRealTimers();
+  });
+});
+
+describe('PluginState.forget', () => {
+  it('forgets the value and when it changed, and what the mapping that was read and those that follow it know', () => {
+    const { mapping } = subscribed('lamp-state');
+    mapping.default = 'off';
+    const read = { cached: 'on', default: 'standby' } as unknown as PreparedMapping;
+    state.update('lamp-state', 'on');
+    const changes = state.changesOf('lamp-state');
+    const time = mapping.last_update;
+
+    state.forget('lamp-state', read);
+
+    expect(state.cache.get('lamp-state')).toBeUndefined();
+    expect(state.cache.changed['lamp-state']).toBeUndefined();
+    expect(mapping.cached).toBe('off');
+    expect(read.cached).toBe('standby');
+    // like any answer of fhem: no change that overtakes an answer asked for before, and the last
+    // activation Eve shows stays
+    expect(state.changesOf('lamp-state')).toBe(changes);
+    expect(mapping.last_update).toBe(time);
+  });
+});
+
+describe('PluginState.answerRead', () => {
+  it('keeps the answer to a read without telling HomeKit', () => {
+    const { updateValue } = subscribed('lamp-state');
+
+    state.answerRead('lamp-state', 'on');
+
+    expect(state.cache.get('lamp-state')).toBe('on');
+    expect(updateValue).not.toHaveBeenCalled();
+  });
+});
+
 describe('PluginState.update', () => {
   it('keeps the reading and publishes the converted value at the characteristic without running its set handler', () => {
     const { mapping, updateValue } = subscribed('lamp-state');

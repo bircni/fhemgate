@@ -2,10 +2,15 @@ import { describe, expect, it, vi } from 'vitest';
 import * as hap from '@homebridge/hap-nodejs';
 import { createLog } from '../../test/support/log.ts';
 import type { Jsonlist2Device } from '../devices/types.ts';
+import { toInt } from '../util/loose.ts';
 import { prepareMappings, type MappingOwner, type PrepareEnvironment } from './compile.ts';
 import type { CharacteristicClass, Mapping, Mappings } from './types.ts';
 
-function prepare(mappings: Mappings, device: Partial<Jsonlist2Device> = {}) {
+function prepare(
+  mappings: Mappings,
+  device: Partial<Jsonlist2Device> = {},
+  known: Pick<PrepareEnvironment, 'cached' | 'changed'> = { cached: {}, changed: {} },
+) {
   const log = createLog();
   const characteristics = hap.Characteristic as unknown as Record<string, unknown>;
   const owner: MappingOwner = {
@@ -15,7 +20,16 @@ function prepare(mappings: Mappings, device: Partial<Jsonlist2Device> = {}) {
     query: vi.fn(),
     characteristicOfName: (name) => characteristics[name.split('#').pop() ?? ''] as CharacteristicClass | undefined,
   };
-  const environment: PrepareEnvironment = { characteristics, cached: {}, update: vi.fn(), reading2homekit: vi.fn() };
+  const environment: PrepareEnvironment = {
+    characteristics,
+    ...known,
+    update: vi.fn((informId: string, value: unknown) => {
+      if (value !== undefined) {
+        known.cached[informId] = value;
+      }
+    }),
+    reading2homekit: vi.fn(),
+  };
   const s: Jsonlist2Device = { Internals: { NAME: 'dev', TYPE: 'dummy' }, Readings: {}, Attributes: {}, PossibleSets: '', PossibleAttrs: '', ...device };
 
   prepareMappings(owner, s, environment);
@@ -99,6 +113,46 @@ describe('prepareMappings', () => {
 
     expect(owner.query).toHaveBeenCalledWith(mapping);
     expect(mapping.informId).toBe('other-level');
+  });
+
+  it('takes when a reading of another device changed from what the plugin learned, as fhem does not list it', () => {
+    const mapping: Mapping = { device: 'other', reading: 'state' };
+    const uncached: Mapping = { device: 'other', reading: 'state', nocache: true };
+    const unseen: Mapping = { device: 'other', reading: 'level' };
+
+    prepare(
+      { ContactSensorState: mapping, On: uncached, Brightness: unseen },
+      { Readings: { state: { Value: 'closed', Time: '2026-01-01 00:00:00' } } },
+      { cached: { 'other-state': 'open' }, changed: { 'other-state': 1234 } },
+    );
+
+    // not the time of the reading of the same name of the device itself. nocache says how a read
+    // is answered, not what the plugin knows.
+    expect(mapping.last_update).toBe(1234);
+    expect(uncached.last_update).toBe(1234);
+    expect(unseen.last_update).toBeUndefined();
+  });
+
+  it('keeps the time fhem lists also when the value was cached before, from another device that follows the reading', () => {
+    const known = { cached: { 'dev-state': 'on' } as Record<string, unknown>, changed: { 'dev-state': 99 } as Record<string, number> };
+
+    prepare({ On: {} }, { Readings: { state: { Value: 'on', Time: '2026-01-01 00:00:00' } } }, known);
+
+    expect(known.changed['dev-state']).toBe(toInt(new Date('2026-01-01 00:00:00').getTime() / 1000));
+  });
+
+  it('takes no time fhem lists that is none', () => {
+    const mapping: Mapping = {};
+    const { environment } = prepare({ On: mapping }, { Readings: { state: { Value: 'on', Time: 'soon' } } });
+
+    expect(environment.changed['dev-state']).toBeUndefined();
+    expect(mapping.last_update).toBeUndefined();
+  });
+
+  it('keeps the time fhem lists for a reading of the device itself in the cache', () => {
+    const { environment } = prepare({ On: {} }, { Readings: { state: { Value: 'on', Time: '2026-01-01 00:00:00' } } });
+
+    expect(environment.changed['dev-state']).toBe(toInt(new Date('2026-01-01 00:00:00').getTime() / 1000));
   });
 
   it('gives a mapping with only a default no id for events', () => {

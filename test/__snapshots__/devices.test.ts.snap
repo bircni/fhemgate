@@ -29166,7 +29166,6 @@ exports[`mapping/other-device > is detected 1`] = `
       "cmdOn": "on",
       "device": "lampe",
       "informId": "lampe-state",
-      "last_update": 1786881600,
       "reading": "state",
       "valueOff": "/off|A0|000000/",
     },

@@ -158,8 +158,22 @@ export function addHistoryService(accessory: FhemAccessory, state: PluginState, 
     return;
   }
 
+  // the file of the history is named after the FUUID, see services.ts. devices without one share
+  // a file, and get a history service each.
+  const ofDevice = accessory.fuuid === undefined ? undefined : state.histories.get(accessory.fuuid);
+  const kept = ofDevice?.get(type);
+  if (kept) {
+    log.debug('  FakeGatoHistory service for ' + service_name + ' as it was');
+    accessory.historyService = kept;
+    services.push(kept);
+    return;
+  }
+
   log.debug('  FakeGatoHistory service with type ' + type + ' for ' + service_name);
   const historyService = new state.historyServiceClass(type, accessory, { size: mapping.size ? mapping.size : 1024, storage: 'fs' });
+  if (accessory.fuuid !== undefined) {
+    state.histories.set(accessory.fuuid, (ofDevice ?? new Map<string, HistoryService>()).set(type, historyService));
+  }
   accessory.historyService = historyService;
   services.push(historyService);
 
@@ -306,8 +320,9 @@ export function addEveCharacteristics(
         return;
       }
 
-      // an empty history is started with the current state
-      if (historyService.getInitialTime() === undefined) {
+      // an empty history is started with the current state. one that is still being read from disk
+      // only seems empty.
+      if (historyService.isHistoryLoaded() && historyService.getInitialTime() === undefined) {
         const entry = { time: mapping.last_update, status: mapping.cached };
         mapping.log.debug('      adding history entry ' + util.inspect(entry));
         historyService.addEntry(entry);
