@@ -195,10 +195,10 @@ async function realFhem(address: string, dummies: DummyDevice[], room: string): 
   return {
     platformConfig: { server: url.hostname, port: Number(url.port || 80), webname: url.pathname.replace(/^\/|\/$/g, ''), filter: `room=${room}` },
     wasSet: async (device, _command, reading, value) => {
-      const deadline = Date.now() + 15_000;
+      const deadline = performance.now() + 15_000;
       let shown = '';
       while ((shown = await command(`{ReadingsVal("${device}","${reading}","")}`)) !== value) {
-        if (Date.now() > deadline) {
+        if (performance.now() > deadline) {
           throw new Error(`${reading} of ${device} in fhem did not become "${value}", it is "${shown}"`);
         }
         await new Promise((resolve) => setTimeout(resolve, 100));

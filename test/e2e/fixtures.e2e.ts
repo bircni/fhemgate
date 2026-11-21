@@ -84,9 +84,9 @@ describe.skipIf(realFhemUrl !== undefined).each(groups.map((group, index) => ({ 
     fhem = await startStandIn(group);
     homebridge = await startHomebridge({ ...fhem.platformConfig, jsFunctions: 'functions.cjs' }, { 'functions.cjs': jsFunctions });
 
-    const deadline = Date.now() + 60_000;
+    const deadline = performance.now() + 60_000;
     let published: Record<string, string[]> = {};
-    while (Object.keys(published).length < Object.keys(built).length && Date.now() < deadline) {
+    while (Object.keys(published).length < Object.keys(built).length && performance.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, 250));
       const accessories = await homebridge.accessories().catch(() => []);
       published = Object.fromEntries(
@@ -141,9 +141,9 @@ describe.skipIf(realFhemUrl !== undefined)('a device whose mappings give two ser
     fhem = await startStandIn([...devices(SKIPS_A_MAPPING), ...lamp]);
     homebridge = await startHomebridge(fhem.platformConfig);
 
-    const deadline = Date.now() + 60_000;
+    const deadline = performance.now() + 60_000;
     let names: string[] = [];
-    while (names.length < 2 && Date.now() < deadline) {
+    while (names.length < 2 && performance.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, 250));
       names = (await homebridge.accessories().catch(() => [])).map((accessory) => accessory.name).sort();
     }

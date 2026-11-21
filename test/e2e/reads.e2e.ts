@@ -73,13 +73,13 @@ describe.skipIf(realFhemUrl !== undefined)('a read of a characteristic that fhem
     changeSilently('e2e_r_quick', 'temp', '16.5');
     hold('e2e_r_quick');
 
-    const started = Date.now();
+    const started = performance.now();
     const read = world.homebridge.answer(temperature('e2e_r_quick'));
     await asked();
     release();
 
     expect(await read).toEqual({ value: 16.5 });
-    expect(Date.now() - started).toBeLessThan(1900);
+    expect(performance.now() - started).toBeLessThan(1900);
     expect(logged(/no answer from fhem for e2e_r_quick-temp/)).toEqual([]);
   });
 
@@ -88,9 +88,9 @@ describe.skipIf(realFhemUrl !== undefined)('a read of a characteristic that fhem
     changeSilently('e2e_r_asked', 'temp', '17');
     hold('e2e_r_asked');
 
-    const started = Date.now();
+    const started = performance.now();
     expect(await world.homebridge.answer(target)).toEqual({ value: 15 });
-    const waited = Date.now() - started;
+    const waited = performance.now() - started;
 
     expect(waited).toBeGreaterThanOrEqual(1950);
     // well before homebridge calls the plugin slow, which it does after three seconds
@@ -110,9 +110,9 @@ describe.skipIf(realFhemUrl !== undefined)('a read of a characteristic that fhem
     changeSilently('e2e_r_unseen', 'later', '21.5');
     hold('e2e_r_unseen');
 
-    const started = Date.now();
+    const started = performance.now();
     expect(await world.homebridge.answer(target)).toEqual({ status: OPERATION_TIMED_OUT });
-    const waited = Date.now() - started;
+    const waited = performance.now() - started;
 
     expect(waited).toBeGreaterThanOrEqual(1950);
     expect(waited).toBeLessThan(2900);

@@ -15,7 +15,8 @@ export async function eventually<T>(
   homebridge?: Homebridge,
   milliseconds = 20_000,
 ): Promise<T> {
-  const deadline = Date.now() + milliseconds;
+  // the clock of a busy machine may jump: only a monotonic one measures how long was waited
+  const deadline = performance.now() + milliseconds;
   for (;;) {
     let result: T | undefined;
     try {
@@ -26,7 +27,7 @@ export async function eventually<T>(
     if (result !== undefined) {
       return result;
     }
-    if (Date.now() > deadline) {
+    if (performance.now() > deadline) {
       throw new Error(`timed out waiting for ${what}.${said(homebridge)}`);
     }
     await new Promise((resolve) => setTimeout(resolve, 100));

@@ -44,8 +44,8 @@ export default function setup(project: TestProject): () => Promise<void> {
 
     // homebridge ends itself five seconds after the signal at the latest. only then has node
     // written the coverage of the process, if that is being collected.
-    const deadline = Date.now() + 15_000;
-    while (left.some(({ pid }) => isRunning(pid)) && Date.now() < deadline) {
+    const deadline = performance.now() + 15_000;
+    while (left.some(({ pid }) => isRunning(pid)) && performance.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 

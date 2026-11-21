@@ -757,10 +757,10 @@ describe('a value HomeKit writes', () => {
   });
 
   it('waits half a second at least, also when the delay of the mapping is shorter', async () => {
-    const started = Date.now();
+    const started = performance.now();
     await world.homebridge.write(world.named('e2e_m_quick', 'Lightbulb', 'Brightness'), 60);
     await world.fhem.wasSet('e2e_m_quick', 'bright 60', 'bright', '60');
-    const waited = Date.now() - started;
+    const waited = performance.now() - started;
 
     // timers of node may be a millisecond early
     expect(waited).toBeGreaterThanOrEqual(495);
