@@ -651,6 +651,27 @@ describe('the reading of another device', () => {
     await expect(temperature(accessory).handleGetRequest()).rejects.toBeDefined();
   });
 
+  it('forgets the value of a reading fhem no longer has, also for a read fhem does not answer in time', async () => {
+    const accessory = await held();
+    fhem.event('other-temperature', '21');
+    await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
+    const gone = temperature(accessory).handleGetRequest();
+    await waitFor(() => fhem.held() > 0, 'the read to be held');
+    fhem.release();
+    await expect(gone).rejects.toBeDefined();
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const late = temperature(accessory).handleGetRequest();
+      await waitFor(() => fhem.held() > 0, 'the read to be held');
+      vi.advanceTimersByTime(2000);
+      await expect(late).rejects.toBeDefined();
+    } finally {
+      vi.useRealTimers();
+      fhem.release();
+    }
+  });
+
   it('answers a read with the default of the mapping when fhem has no such reading', async () => {
     const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature,nocache=true,default=5')] }));
 

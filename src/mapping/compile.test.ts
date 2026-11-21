@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as hap from '@homebridge/hap-nodejs';
 import { createLog } from '../../test/support/log.ts';
 import type { Jsonlist2Device } from '../devices/types.ts';
+import { toInt } from '../util/loose.ts';
 import { prepareMappings, type MappingOwner, type PrepareEnvironment } from './compile.ts';
 import type { CharacteristicClass, Mapping, Mappings } from './types.ts';
 
@@ -107,17 +108,26 @@ describe('prepareMappings', () => {
 
   it('takes when a reading of another device changed from what the plugin learned, as fhem does not list it', () => {
     const mapping: Mapping = { device: 'other', reading: 'state' };
-    const own: Mapping = { device: 'other', reading: 'state', nocache: true };
+    const uncached: Mapping = { device: 'other', reading: 'state', nocache: true };
+    const unseen: Mapping = { device: 'other', reading: 'level' };
 
     prepare(
-      { ContactSensorState: mapping, On: own },
+      { ContactSensorState: mapping, On: uncached, Brightness: unseen },
       { Readings: { state: { Value: 'closed', Time: '2026-01-01 00:00:00' } } },
       { cached: { 'other-state': 'open' }, changed: { 'other-state': 1234 } },
     );
 
+    // not the time of the reading of the same name of the device itself. nocache says how a read
+    // is answered, not what the plugin knows.
     expect(mapping.last_update).toBe(1234);
-    // not the time of the reading of the same name of the device itself, nor one that is not cached
-    expect(own.last_update).toBeUndefined();
+    expect(uncached.last_update).toBe(1234);
+    expect(unseen.last_update).toBeUndefined();
+  });
+
+  it('keeps the time fhem lists for a reading of the device itself in the cache', () => {
+    const { environment } = prepare({ On: {} }, { Readings: { state: { Value: 'on', Time: '2026-01-01 00:00:00' } } });
+
+    expect(environment.changed['dev-state']).toBe(toInt(new Date('2026-01-01 00:00:00').getTime() / 1000));
   });
 
   it('gives a mapping with only a default no id for events', () => {

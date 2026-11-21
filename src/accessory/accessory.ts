@@ -446,6 +446,10 @@ export class FhemAccessory {
         this.#state.update(informId, value, true);
       }
       const latest = newer ? this.#state.cache.get(informId) : value;
+      if (latest === undefined && mapping) {
+        // nor does a read that fhem does not answer in time fall back to it
+        mapping.cached = mapping.default;
+      }
       // when fhem has no such reading, the default of the mapping: not a value it had before,
       // which would hide that the reading is gone. without a mapping there is nothing to convert.
       const answer = latest === undefined ? (mapping ? mapping.default : '') : mapping ? reading2homekit(mapping, latest) : latest;
@@ -464,10 +468,10 @@ export class FhemAccessory {
    * reading arrived while fhem was asked, which is newer than the answer.
    */
   #ask(informId: string, cmd: string, answered: (value: string | undefined, newer: boolean) => void): void {
-    const before = this.#state.eventsOf(informId);
+    const before = this.#state.changesOf(informId);
     this.execute(cmd, (result) => {
       this.log.debug('  value: ' + result);
-      answered(result === '' ? undefined : result, this.#state.eventsOf(informId) !== before);
+      answered(result === '' ? undefined : result, this.#state.changesOf(informId) !== before);
     });
   }
 

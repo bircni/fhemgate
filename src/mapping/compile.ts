@@ -229,11 +229,14 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
 
       const reading = mapping.reading as string;
       const own = device === owner.device;
+      // the time of a reading of the device itself, as fhem lists it
+      const time = own ? s.Readings[reading]?.Time : undefined;
+      const listed = time ? toInt(new Date(time).getTime() / 1000) : undefined;
       let orig: unknown = undefined;
       if (!own) {
         // what the plugin has seen of the reading of the other device. fhem is asked all the same,
         // and what it answers is told like any change.
-        orig = isNocache(mapping) ? undefined : environment.cached[mapping.informId];
+        orig = environment.cached[mapping.informId];
         if (orig !== undefined) {
           // fhem does not list when a reading of another device changed. when the plugin learned of
           // it is what it knows, and keeps across the accessories built anew.
@@ -250,6 +253,9 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         const informId = mapping.informId;
         if (!isNocache(mapping) && mapping.reading && environment.cached[informId] === undefined) {
           environment.update(informId, orig);
+          if (listed !== undefined) {
+            environment.changed[informId] = listed;
+          }
         }
 
         if (mapping.characteristic || mapping.name) {
@@ -257,10 +263,8 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         }
       }
 
-      // the time of a reading of the device itself, as fhem lists it
-      if (own && s.Readings[reading]?.Time) {
-        const date = new Date(s.Readings[reading].Time);
-        mapping.last_update = toInt(date.getTime() / 1000);
+      if (listed !== undefined) {
+        mapping.last_update = listed;
       }
     }
   }

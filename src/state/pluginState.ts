@@ -36,8 +36,8 @@ export class PluginState {
    */
   readonly histories = new Map<string, Map<string, HistoryService>>();
 
-  /** how many events of each reading arrived, see eventsOf */
-  readonly #events = new Map<string, number>();
+  /** how many values of each reading were taken that are no answers, see changesOf */
+  readonly #changes = new Map<string, number>();
 
   constructor(readonly hap: HAP) {}
 
@@ -60,11 +60,12 @@ export class PluginState {
   }
 
   /**
-   * How many changes of the reading the plugin was told of, as events of fhem. An answer of
-   * fhem that was asked before the count changed is older than what the plugin knows.
+   * How many values of the reading the plugin took that are no answers of fhem it asked for: the
+   * events of fhem, and the values the plugin sets itself, such as the colour HomeKit was given.
+   * An answer of fhem that was asked before the count changed is older than what the plugin knows.
    */
-  eventsOf(informId: string): number {
-    return this.#events.get(informId) ?? 0;
+  changesOf(informId: string): number {
+    return this.#changes.get(informId) ?? 0;
   }
 
   /** @param source an event, an answer, or a value HomeKit is not to be told of */
@@ -73,8 +74,8 @@ export class PluginState {
       return;
     }
     const now = toInt(Date.now() / 1000);
-    if (source === 'event') {
-      this.#events.set(informId, this.eventsOf(informId) + 1);
+    if (source !== 'answer') {
+      this.#changes.set(informId, this.changesOf(informId) + 1);
     }
 
     // an event that repeats the value the reading has says nothing new to most characteristics.
