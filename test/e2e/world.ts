@@ -221,6 +221,7 @@ async function startWorldFor<Fhem extends FhemUnderTest>(
   const homebridge = await startHomebridge({ ...fhem.platformConfig, ...options.platform }, options.files);
   await published(homebridge, options.publishes ?? devices.length);
   await quiet(homebridge);
+  // listed again: the list homebridge published with holds the values from before fhem answered
   const accessories = await homebridge.readAll(await homebridge.accessories());
   await homebridge.subscribe(notifying(accessories));
 

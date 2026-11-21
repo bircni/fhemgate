@@ -5,7 +5,11 @@ import type { Jsonlist2Device } from '../devices/types.ts';
 import { prepareMappings, type MappingOwner, type PrepareEnvironment } from './compile.ts';
 import type { CharacteristicClass, Mapping, Mappings } from './types.ts';
 
-function prepare(mappings: Mappings, device: Partial<Jsonlist2Device> = {}, known: Pick<PrepareEnvironment, 'cached' | 'changed'> = { cached: {} }) {
+function prepare(
+  mappings: Mappings,
+  device: Partial<Jsonlist2Device> = {},
+  known: Pick<PrepareEnvironment, 'cached' | 'changed'> = { cached: {}, changed: {} },
+) {
   const log = createLog();
   const characteristics = hap.Characteristic as unknown as Record<string, unknown>;
   const owner: MappingOwner = {

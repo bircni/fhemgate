@@ -30,7 +30,7 @@ describe('PluginState.eventsOf', () => {
   });
 
   it('notes when a value changed, and not when it is repeated', () => {
-    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'));
+    vi.useFakeTimers({ now: new Date('2026-01-01T00:00:00Z') });
     state.update('lamp-state', 'on');
     vi.setSystemTime(new Date('2026-01-01T00:01:00Z'));
     state.answer('lamp-state', 'on');

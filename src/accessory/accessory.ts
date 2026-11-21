@@ -433,16 +433,11 @@ export class FhemAccessory {
       }
     }, QUERY_TIMEOUT);
 
-    const before = this.#state.eventsOf(informId);
-    this.#ask(cmd, (value) => {
+    this.#ask(informId, cmd, (value, newer) => {
       clearTimeout(timer);
-      // an event that arrived while fhem was asked is newer than its answer
-      const newer = this.#state.eventsOf(informId) !== before;
       if (timedOut) {
         // the read was answered meanwhile: this is an answer nobody waits for any more
-        if (!newer && value !== undefined) {
-          this.#state.answer(informId, value);
-        }
+        this.#takeInBackground(informId, value, newer);
         return;
       }
 
@@ -451,24 +446,13 @@ export class FhemAccessory {
         this.#state.update(informId, value, true);
       }
       const latest = newer ? this.#state.cache.get(informId) : value;
-      if (latest === undefined) {
-        // fhem has no such reading: the default of the mapping, not a value it had before, which
-        // would hide that the reading is gone. nothing is made up from the empty answer and kept.
-        const known = mapping ? mapping.default : '';
-        if (known === undefined) {
-          callback(1);
-        } else {
-          callback(undefined, known);
-        }
-        return;
-      }
-
-      // without a mapping there is nothing to convert the reading with
-      const converted = mapping ? reading2homekit(mapping, latest) : latest;
-      if (converted === undefined) {
+      // when fhem has no such reading, the default of the mapping: not a value it had before,
+      // which would hide that the reading is gone. without a mapping there is nothing to convert.
+      const answer = latest === undefined ? (mapping ? mapping.default : '') : mapping ? reading2homekit(mapping, latest) : latest;
+      if (answer === undefined) {
         callback(1);
       } else {
-        callback(undefined, converted as HomekitValue);
+        callback(undefined, answer as HomekitValue);
       }
     });
     return undefined;
@@ -476,27 +460,33 @@ export class FhemAccessory {
 
   /**
    * Asks fhem for a reading. The answer is undefined when fhem has no such reading: it answers
-   * with nothing then, which is no value of the reading.
+   * with nothing then, which is no value of the reading. It is newer when an event of the
+   * reading arrived while fhem was asked, which is newer than the answer.
    */
-  #ask(cmd: string, answered: (value: string | undefined) => void): void {
+  #ask(informId: string, cmd: string, answered: (value: string | undefined, newer: boolean) => void): void {
+    const before = this.#state.eventsOf(informId);
     this.execute(cmd, (result) => {
       this.log.debug('  value: ' + result);
-      answered(result === '' ? undefined : result);
+      answered(result === '' ? undefined : result, this.#state.eventsOf(informId) !== before);
+    });
+  }
+
+  /** asks fhem for a reading nobody waits for, see #takeInBackground */
+  #askInBackground(informId: string, cmd: string): void {
+    this.#ask(informId, cmd, (value, newer) => {
+      this.#takeInBackground(informId, value, newer);
     });
   }
 
   /**
-   * Asks fhem for a reading nobody waits for, and takes the answer like any value of fhem: not
-   * when it is none, and not when an event arrived meanwhile, which is newer. A characteristic
-   * that tells of the presses of a button is not told of it.
+   * Takes an answer nobody waits for like any value of fhem: not when it is none, and not when an
+   * event arrived meanwhile. A characteristic that tells of the presses of a button is not told
+   * of it.
    */
-  #askInBackground(informId: string, cmd: string): void {
-    const before = this.#state.eventsOf(informId);
-    this.#ask(cmd, (value) => {
-      if (value !== undefined && this.#state.eventsOf(informId) === before) {
-        this.#state.answer(informId, value);
-      }
-    });
+  #takeInBackground(informId: string, value: string | undefined, newer: boolean): void {
+    if (!newer && value !== undefined) {
+      this.#state.answer(informId, value);
+    }
   }
 
   /**

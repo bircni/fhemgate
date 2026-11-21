@@ -529,6 +529,19 @@ describe('the reading of another device', () => {
     characteristicOf(serviceOf(accessory.getServices(), 'TemperatureSensor'), hap.Characteristic.CurrentTemperature);
   const temperatureOf = (accessory: Accessory) => temperature(accessory).value;
   const answered = (value = '') => waitFor(() => world.log.debugLines.some((line) => line.includes('value: ' + value)), 'fhem to answer');
+  /** a thermometer of a reading of another device whose questions fhem holds, once the first is answered */
+  async function held(readings: Record<string, string> = {}): Promise<Accessory> {
+    const platform = await connect({
+      devices: [thermometer('CurrentTemperature=other:temperature,nocache=true')],
+      readings,
+      holds: (cmd) => cmd.includes('ReadingsVal'),
+    });
+    const accessory = await firstAccessoryOf(platform);
+    await waitFor(() => fhem.held() > 0, 'the question asked while the accessory was built');
+    fhem.release();
+    await answered(readings['other temperature']);
+    return accessory;
+  }
 
   it('is shown to HomeKit once fhem answered the question for it, which nobody waits for', async () => {
     const platform = await connect({ devices: [thermometer('CurrentTemperature=other:temperature')], readings: { 'other temperature': '18.5' } });
@@ -576,25 +589,6 @@ describe('the reading of another device', () => {
     await waitFor(() => fhem.commands.includes('{ReadingsVal("a_sensor","temperature","")}'), 'fhem to be asked');
   });
 
-  it('answers a read with an event that arrived while fhem was asked for a reading it did not have yet', async () => {
-    const platform = await connect({
-      devices: [thermometer('CurrentTemperature=other:temperature,nocache=true')],
-      holds: (cmd) => cmd.includes('ReadingsVal'),
-    });
-    const accessory = await firstAccessoryOf(platform);
-    await waitFor(() => fhem.held() > 0, 'the question asked while the accessory was built');
-    fhem.release();
-    await answered();
-
-    const read = temperature(accessory).handleGetRequest();
-    await waitFor(() => fhem.held() > 0, 'the read to be held');
-    fhem.event('other-temperature', '21');
-    await waitFor(() => world.cached['other-temperature'] === '21', 'the event');
-    fhem.release();
-
-    expect(await read).toBe(21);
-  });
-
   it('answers a read that waits with an error when fhem has no such reading, and asks again on the next', async () => {
     const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature')] }));
     const asked = () => fhem.commands.filter((cmd) => cmd.includes('ReadingsVal("other","temperature"')).length;
@@ -610,41 +604,34 @@ describe('the reading of another device', () => {
   });
 
   it('takes an answer that comes after the read gave up waiting like one nobody waits for', async () => {
-    const platform = await connect({
-      devices: [thermometer('CurrentTemperature=other:temperature,nocache=true')],
-      readings: { 'other temperature': '18.5' },
-      holds: (cmd) => cmd.includes('ReadingsVal'),
-    });
-    const accessory = await firstAccessoryOf(platform);
-    await waitFor(() => fhem.held() > 0, 'the question asked while the accessory was built');
-    fhem.release();
-    await answered('18.5');
-
+    const accessory = await held({ 'other temperature': '18.5' });
     const answers = () => world.log.debugLines.filter((line) => line.includes('value: 18.5')).length;
     const before = answers();
 
     // fhem takes longer than a read waits
-    await temperature(accessory).handleGetRequest();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const read = temperature(accessory).handleGetRequest();
+      await waitFor(() => fhem.held() > 0, 'the read to be held');
+      vi.advanceTimersByTime(2000);
+      await read;
+    } finally {
+      vi.useRealTimers();
+    }
     expect(world.log.debugLines.some((line) => line.includes('query: no answer from fhem for other-temperature within 2 seconds'))).toBe(true);
     fhem.event('other-temperature', '21');
     await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
-    await waitFor(() => fhem.held() > 0, 'the read to be held');
     fhem.release();
     await waitFor(() => answers() === before + 1, 'fhem to answer the read');
 
     expect(temperatureOf(accessory)).toBe(21);
-  }, 10_000);
+  });
 
-  it('answers a read that waits with an event that arrived while fhem was asked, which is newer', async () => {
-    const platform = await connect({
-      devices: [thermometer('CurrentTemperature=other:temperature,nocache=true')],
-      readings: { 'other temperature': '18.5' },
-      holds: (cmd) => cmd.includes('ReadingsVal'),
-    });
-    const accessory = await firstAccessoryOf(platform);
-    await waitFor(() => fhem.held() > 0, 'the question asked while the accessory was built');
-    fhem.release();
-    await answered('18.5');
+  it.each([
+    ['an older value', { 'other temperature': '18.5' }],
+    ['nothing, as it has no such reading yet', {}],
+  ])('answers a read that waits with an event that arrived while fhem was asked, when fhem answers %s', async (_, readings) => {
+    const accessory = await held(readings);
 
     const read = temperature(accessory).handleGetRequest();
     await waitFor(() => fhem.held() > 0, 'the read to be held');

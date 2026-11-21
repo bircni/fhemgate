@@ -36,6 +36,9 @@ export class PluginState {
    */
   readonly histories = new Map<string, Map<string, HistoryService>>();
 
+  /** how many events of each reading arrived, see eventsOf */
+  readonly #events = new Map<string, number>();
+
   constructor(readonly hap: HAP) {}
 
   /**
@@ -64,13 +67,12 @@ export class PluginState {
     return this.#events.get(informId) ?? 0;
   }
 
-  readonly #events = new Map<string, number>();
-
   /** @param source an event, an answer, or a value HomeKit is not to be told of */
   #take(informId: string, orig: unknown, source: 'event' | 'answer' | 'quiet'): void {
     if (orig === undefined) {
       return;
     }
+    const now = toInt(Date.now() / 1000);
     if (source === 'event') {
       this.#events.set(informId, this.eventsOf(informId) + 1);
     }
@@ -82,7 +84,7 @@ export class PluginState {
 
     if (!repeated) {
       this.cache.values[informId] = orig;
-      this.cache.changed[informId] = toInt(Date.now() / 1000);
+      this.cache.changed[informId] = now;
       // logged where the first characteristic that follows the reading logs
       // eslint-disable-next-line @typescript-eslint/no-base-to-string -- readings are text. what else is cached is printed as it comes.
       subscriptions?.find((subscription) => subscription.mapping)?.mapping?.log.debug('caching: ' + informId + ': ' + String(orig));
@@ -101,7 +103,7 @@ export class PluginState {
           return;
         }
 
-        mapping.last_update = toInt(Date.now() / 1000);
+        mapping.last_update = now;
 
         const value = reading2homekit(mapping, orig);
         if (value === undefined) {

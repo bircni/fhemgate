@@ -28,7 +28,7 @@ export interface PrepareEnvironment {
   /** the readings known so far, by `<device>-<reading>` */
   cached: Record<string, unknown>;
   /** when those readings last changed, as the plugin learned of it, in seconds since 1970 */
-  changed?: Record<string, number>;
+  changed: Record<string, number>;
   /** takes a reading into the cache and tells the characteristics that are subscribed to it */
   update: (informId: string, value: unknown) => void;
   /** converts a reading with a mapping */
@@ -228,22 +228,23 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       resolveConverter(mapping, 'homekit2reading', owner.jsFunctions, owner.log, allowInline);
 
       const reading = mapping.reading as string;
+      const own = device === owner.device;
       let orig: unknown = undefined;
-      if (device !== owner.device) {
+      if (!own) {
         // what the plugin has seen of the reading of the other device. fhem is asked all the same,
         // and what it answers is told like any change.
         orig = isNocache(mapping) ? undefined : environment.cached[mapping.informId];
         if (orig !== undefined) {
           // fhem does not list when a reading of another device changed. when the plugin learned of
           // it is what it knows, and keeps across the accessories built anew.
-          mapping.last_update = environment.changed?.[mapping.informId];
+          mapping.last_update = environment.changed[mapping.informId];
         }
         owner.query(mapping);
       } else if (s.Readings[reading]?.Value) {
         orig = s.Readings[reading].Value;
       }
 
-      if (orig === undefined && device === owner.device && mapping.default !== undefined) {
+      if (orig === undefined && own && mapping.default !== undefined) {
         delete mapping.informId;
       } else {
         const informId = mapping.informId;
@@ -257,7 +258,7 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       }
 
       // the time of a reading of the device itself, as fhem lists it
-      if (device === owner.device && s.Readings[reading]?.Time) {
+      if (own && s.Readings[reading]?.Time) {
         const date = new Date(s.Readings[reading].Time);
         mapping.last_update = toInt(date.getTime() / 1000);
       }
