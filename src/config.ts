@@ -5,8 +5,12 @@ import type { HttpAuth } from './fhem/http.ts';
 
 const require = createRequire(import.meta.url);
 
-export interface FhemPlatformConfig extends PlatformConfig {
-  /** host name or address of fhem. the platform does nothing without it. */
+/** the port of FHEMWEB when the configuration names none */
+export const DEFAULT_PORT = 8083;
+
+/** how one fhem is reached and which of its devices are published */
+export interface ConnectionConfig {
+  /** host name or address of fhem. nothing is published from a connection without it. */
   server?: string;
   /** the port of FHEMWEB, 8083 if not given */
   port?: number | string;
@@ -36,6 +40,15 @@ export interface FhemPlatformConfig extends PlatformConfig {
    * attributes of fhem devices and runs inside homebridge.
    */
   allowInlineFunctions?: boolean;
+}
+
+/** a FHEM entry in the config.json of homebridge: the first fhem, more fhem, and what is not about one of them */
+export interface FhemPlatformConfig extends PlatformConfig, ConnectionConfig {
+  /**
+   * More fhem to publish the devices of, each configured like the entry itself. A device that
+   * two of them list is published by the one that comes first, the entry itself before these.
+   */
+  connections?: ConnectionConfig[];
   /**
    * The port of a web page that shows what the plugin has cached and who is subscribed to what.
    * 8282 if not given, or 8283 when that is taken. There is no such page with false or 0.
@@ -43,6 +56,16 @@ export interface FhemPlatformConfig extends PlatformConfig {
   debugPort?: number | false;
   /** the address the debug page is served on, e.g. `127.0.0.1` for this machine only. all addresses of the machine if not given. */
   debugHost?: string;
+}
+
+/**
+ * The fhem of a FHEM entry: the entry itself, unless it names no server and lists connections,
+ * and then the connections. Entries of the list that are no object are left out.
+ */
+export function connectionConfigs(config: FhemPlatformConfig): ConnectionConfig[] {
+  const connections: unknown = config.connections;
+  const listed = Array.isArray(connections) ? connections.filter((each): each is ConnectionConfig => typeof each === 'object' && each !== null) : [];
+  return config.server === undefined && listed.length ? listed : [config, ...listed];
 }
 
 /** whether an option that is on unless the configuration says otherwise was switched off: with false, or with text or a number that says so */
@@ -78,12 +101,12 @@ function wantsSsl(ssl: unknown, log: Logging): boolean {
 }
 
 /** the url of FHEMWEB for the configuration */
-export function baseUrl(config: FhemPlatformConfig, log: Logging): string {
+export function baseUrl(config: ConnectionConfig, log: Logging): string {
   let base_url = 'http://';
   if (wantsSsl(config.ssl, log)) {
     base_url = 'https://';
   }
-  base_url += config.server + ':' + (config.port || 8083);
+  base_url += config.server + ':' + String(config.port || DEFAULT_PORT);
 
   if (config.webname) {
     base_url += '/' + config.webname;

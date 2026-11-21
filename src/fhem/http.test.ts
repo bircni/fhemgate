@@ -169,6 +169,10 @@ describe('get', () => {
     });
 
     const events: string[] = [];
+    let aborted: () => void = () => undefined;
+    const abort = new Promise<void>((resolve) => {
+      aborted = resolve;
+    });
     const request = get(
       url,
       {},
@@ -176,11 +180,14 @@ describe('get', () => {
         onData: (chunk) => {
           events.push(`data ${chunk.toString().trim()}`);
           request.abort();
+          aborted();
         },
         onEnd: () => events.push('end'),
         onError: () => events.push('error'),
       },
     );
+    // the rest of the answer comes 20 milliseconds after the first part, which may itself take a while on a busy machine
+    await abort;
     await new Promise((resolve) => setTimeout(resolve, 60));
 
     expect(events).toEqual(['data one']);

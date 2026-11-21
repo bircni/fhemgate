@@ -5,7 +5,7 @@ import * as hap from '@homebridge/hap-nodejs';
 import type { API, Logging } from 'homebridge';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createLog } from '../test/support/log.ts';
-import { configFindings, findOldPlugin, installationWarnings } from './migration.ts';
+import { connectionFindings, findOldPlugin, installationWarnings, platformFindings } from './migration.ts';
 import { FhemPlatform, type Plugin } from './platform.ts';
 import { PluginState } from './state/pluginState.ts';
 
@@ -134,11 +134,11 @@ describe('installationWarnings', () => {
   });
 });
 
-describe('configFindings', () => {
-  const findings = (auth: unknown) => configFindings({ platform: 'FHEM', server: 'fhem', auth: auth as never });
+describe('connectionFindings', () => {
+  const findings = (auth: unknown) => connectionFindings({ server: 'fhem', auth: auth as never });
 
   it('finds nothing in a configuration this plugin acts on completely', () => {
-    expect(configFindings({ platform: 'FHEM' })).toEqual([]);
+    expect(connectionFindings({})).toEqual([]);
     expect(findings({ user: 'homebridge', pass: 'secret' })).toEqual([]);
     expect(findings({ username: 'homebridge', password: 'secret' })).toEqual([]);
     expect(findings(null)).toEqual([]);
@@ -176,9 +176,9 @@ describe('configFindings', () => {
   });
 });
 
-describe('configFindings for a platform that names its plugin', () => {
+describe('platformFindings for a platform that names its plugin', () => {
   it('notes that an entry that names homebridge-fhem has to stay as it is', () => {
-    const found = configFindings({ platform: 'homebridge-fhem.FHEM', server: 'fhem' });
+    const found = platformFindings('homebridge-fhem.FHEM');
 
     expect(found).toHaveLength(1);
     expect(found[0]?.level).toBe('info');
@@ -187,8 +187,8 @@ describe('configFindings for a platform that names its plugin', () => {
   });
 
   it('has nothing to say about an entry that names this plugin or no plugin', () => {
-    expect(configFindings({ platform: 'homebridge-fhemgate.FHEM' })).toEqual([]);
-    expect(configFindings({ platform: 'FHEM' })).toEqual([]);
+    expect(platformFindings('homebridge-fhemgate.FHEM')).toEqual([]);
+    expect(platformFindings('FHEM')).toEqual([]);
   });
 });
 
@@ -225,7 +225,7 @@ describe('a platform', () => {
       plugin(),
     );
 
-    expect(platform.connection).toBeUndefined();
+    expect(platform.servers[0]?.connection).toBeUndefined();
 
     expect(log.lines).toEqual(['error incomplete configuration ']);
   });
