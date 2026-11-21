@@ -306,6 +306,28 @@ describe('devices', () => {
     }
   });
 
+  it('takes no event of a device a second fhem lists under the name of one the first published', async () => {
+    const other = await startFakeFhem({ devices: [{ Name: 'lamp', ...lamp() }] });
+    try {
+      const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }] }, { connections: [{ server: '127.0.0.1', port: other.port }] });
+      const [published] = await accessoriesOf(platform);
+      const on = characteristicOf(serviceOf((published as Accessory).getServices(), 'Switch'), hap.Characteristic.On);
+      await waitFor(() => other.commands.some((cmd) => cmd.startsWith('jsonlist2')), 'the second fhem to be listed');
+
+      other.event('lamp-state', 'off');
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(on.value).toBe(true);
+      expect(world.cached['lamp-state']).toBe('on');
+
+      fhem.event('lamp-state', 'off');
+      await waitFor(() => on.value === false, 'the event of the first fhem');
+    } finally {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      await other.close();
+      vi.useRealTimers();
+    }
+  });
+
   it('leaves out the device behind a harmony hub also when its genericDisplayType names a service', async () => {
     const hub = device({ Internals: { NAME: 'hub', TYPE: 'harmony', id: '7' }, Attributes: { genericDisplayType: 'switch' }, Readings: { state: 'on' } });
     const platform = await connect({

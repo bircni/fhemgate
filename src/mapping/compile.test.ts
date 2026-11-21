@@ -145,7 +145,7 @@ describe('prepareMappings', () => {
     const mapping: Mapping = {};
     const { environment } = prepare({ On: mapping }, { Readings: { state: { Value: 'on', Time: 'soon' } } });
 
-    expect(environment.changed['dev-state']).not.toBeNaN();
+    expect(environment.changed['dev-state']).toBeUndefined();
     expect(mapping.last_update).toBeUndefined();
   });
 

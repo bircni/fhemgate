@@ -6,6 +6,8 @@ import type { Mapping, Mappings, PreparedMapping } from '../mapping/types.ts';
 export interface SubscribedAccessory {
   /** the name of the fhem device */
   device?: string;
+  /** the connection to the fhem the device is of */
+  connection?: unknown;
   mappings: Mappings;
   historyService?: HistoryService;
   /** set once the history was saved for the shutdown of homebridge */

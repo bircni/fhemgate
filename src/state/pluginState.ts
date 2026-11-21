@@ -4,7 +4,7 @@ import { acceptableValue } from '../accessory/acceptable.ts';
 import { recordHistory, type HistoryService, type HistoryServiceClass } from '../accessory/history.ts';
 import type { ConnectionStatus } from '../fhem/client.ts';
 import { reading2homekit } from '../mapping/toHomekit.ts';
-import { isNocache } from '../mapping/types.ts';
+import { isNocache, type PreparedMapping } from '../mapping/types.ts';
 import { toInt } from '../util/loose.ts';
 import { ReadingCache } from './readingCache.ts';
 import { Subscriptions } from './subscriptions.ts';
@@ -65,18 +65,18 @@ export class PluginState {
   }
 
   /**
-   * Forgets a reading fhem no longer has: its value, when it changed, and what the mappings that
-   * follow it know of it, which is their default now. That is a change: an answer asked for
-   * before it does not bring the reading back.
+   * Forgets a reading fhem answered it no longer has: its value and when it changed, and what the
+   * mapping that was read and those that follow the reading know of it, which is their default
+   * now. HomeKit learns of it when it reads them. Like any answer of fhem, a later one counts:
+   * this is no change that overtakes an answer asked for before.
    */
-  forget(informId: string): void {
+  forget(informId: string, read?: PreparedMapping): void {
     delete this.cache.values[informId];
     delete this.cache.changed[informId];
-    this.#changes.set(informId, this.changesOf(informId) + 1);
-    this.subscriptions.byInformId[informId]?.forEach((subscription) => {
-      if (typeof subscription.mapping === 'object') {
-        subscription.mapping.cached = subscription.mapping.default;
-        delete subscription.mapping.last_update;
+    const mappings = (this.subscriptions.byInformId[informId] ?? []).map((subscription) => subscription.mapping);
+    [...mappings, read].forEach((mapping) => {
+      if (typeof mapping === 'object') {
+        mapping.cached = mapping.default;
       }
     });
   }

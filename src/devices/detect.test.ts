@@ -47,6 +47,12 @@ describe('detectMappings', () => {
     expect(log).toEqual(['info ignoring dev']);
   });
 
+  it('skips a device whose genericDeviceType is empty, which names no service', () => {
+    const { detected } = detect({ Attributes: { genericDeviceType: '' } });
+
+    expect(detected).toBe('undetected');
+  });
+
   it('skips a device nothing is recognised of', () => {
     const { detected, target, log } = detect({});
 

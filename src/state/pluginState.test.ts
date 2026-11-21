@@ -42,19 +42,35 @@ describe('PluginState.changesOf', () => {
 });
 
 describe('PluginState.forget', () => {
-  it('forgets the value, when it changed and what the mappings know, which is a change', () => {
+  it('forgets the value and when it changed, and what the mapping that was read and those that follow it know', () => {
     const { mapping } = subscribed('lamp-state');
     mapping.default = 'off';
+    const read = { cached: 'on', default: 'standby' } as unknown as PreparedMapping;
     state.update('lamp-state', 'on');
-    const before = state.changesOf('lamp-state');
+    const changes = state.changesOf('lamp-state');
+    const time = mapping.last_update;
 
-    state.forget('lamp-state');
+    state.forget('lamp-state', read);
 
     expect(state.cache.get('lamp-state')).toBeUndefined();
     expect(state.cache.changed['lamp-state']).toBeUndefined();
     expect(mapping.cached).toBe('off');
-    expect(mapping.last_update).toBeUndefined();
-    expect(state.changesOf('lamp-state')).toBe(before + 1);
+    expect(read.cached).toBe('standby');
+    // like any answer of fhem: no change that overtakes an answer asked for before, and the last
+    // activation Eve shows stays
+    expect(state.changesOf('lamp-state')).toBe(changes);
+    expect(mapping.last_update).toBe(time);
+  });
+});
+
+describe('PluginState.answerRead', () => {
+  it('keeps the answer to a read without telling HomeKit', () => {
+    const { updateValue } = subscribed('lamp-state');
+
+    state.answerRead('lamp-state', 'on');
+
+    expect(state.cache.get('lamp-state')).toBe('on');
+    expect(updateValue).not.toHaveBeenCalled();
   });
 });
 

@@ -163,7 +163,7 @@ export function detectMappings(target: DetectionTarget, s: Jsonlist2Device, stat
     }
   }
 
-  if (target.service_name === undefined) {
+  if (!target.service_name) {
     target.log.error(s.Internals.NAME + ': no service type detected');
     return 'undetected';
   }
