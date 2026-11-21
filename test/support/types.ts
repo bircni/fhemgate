@@ -1,6 +1,7 @@
 // the shapes the tests work with. they describe the plugin as it is today: an accessory per
 // fhem device, holding one mapping per homekit characteristic.
 import type { Characteristic, Service } from '@homebridge/hap-nodejs';
+import type { Skipped } from '../../src/accessory/accessory.ts';
 
 /** a device as fhem's jsonlist2 reports it */
 export interface FhemDevice {
@@ -42,6 +43,7 @@ export type QueryCallback = (error?: unknown, value?: unknown) => void;
 export interface Accessory {
   mappings: Record<string, Mapping | Mapping[] | undefined>;
   service_name?: string;
+  skipped?: Skipped;
   name?: string;
   alias?: string;
   siriName?: string;

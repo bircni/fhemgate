@@ -296,7 +296,7 @@ export class FhemPlatform implements StaticPlatformPlugin {
               continue;
             }
 
-            if (accessory.service_name) {
+            if (accessory.skipped === undefined) {
               accessory.fhem = this;
 
               if (!accessory.isInScope('siri')) {

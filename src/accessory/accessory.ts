@@ -1,7 +1,7 @@
 import util from 'node:util';
 import type { Characteristic, Service } from '@homebridge/hap-nodejs';
 import type { Logging } from 'homebridge';
-import { detectMappings, reviseMappings } from '../devices/detect.ts';
+import { detectMappings, reviseMappings, type Detection } from '../devices/detect.ts';
 import { deviceIdentity } from '../devices/identity.ts';
 import { identityKey, type IdentityStore } from '../devices/identityStore.ts';
 import type { Jsonlist2Device } from '../devices/types.ts';
@@ -45,6 +45,12 @@ export const QUERY_TIMEOUT = 2000;
 
 /** milliseconds in which fhem is asked at most once for a reading that HomeKit reads from the cache */
 export const READ_REFRESH_INTERVAL = 60 * 1000;
+
+/**
+ * Why a device fhem listed is no accessory: listed twice, without readings or attributes, left
+ * out on purpose (`ignored`), or nothing was recognised of it (`undetected`).
+ */
+export type Skipped = 'duplicate' | 'noReadings' | 'noAttributes' | Exclude<Detection, 'detected'>;
 
 /** a service with the name it was created under, which the plugin keeps at the service */
 export type NamedService = Service & { service_name?: string };
@@ -95,8 +101,8 @@ function classOfName(classes: Record<string, unknown>, renamed: Record<string, s
  * One fhem device as a HomeKit accessory. homebridge asks it for its services once and from
  * then on talks to the characteristics of those.
  *
- * An accessory that was created for a device that is not to be published has no
- * `service_name`. The platform does not hand such an accessory to homebridge.
+ * An accessory that was created for a device that is not to be published says why in
+ * `skipped`. The platform does not hand such an accessory to homebridge.
  */
 export class FhemAccessory {
   declare log: Logging;
@@ -105,6 +111,8 @@ export class FhemAccessory {
 
   /** what the device is: a genericDeviceType value or the name of a HomeKit service */
   declare service_name?: string;
+  /** why the device was turned down when the accessory was made for it. the platform may still leave out one that was not. */
+  declare skipped?: Skipped;
   declare mappings: Mappings;
   /** the HomeKit category of the accessory, if the homebridgeMapping attribute names one */
   declare category?: number;
@@ -150,17 +158,20 @@ export class FhemAccessory {
 
     if (state.subscriptions.publishedAccessory(s.Internals.NAME)) {
       this.log.warn(s.Internals.NAME + ' is already published');
+      this.skipped = 'duplicate';
       return;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- fhem does report devices without them
     if (!s.Readings) {
       this.log.error('ignoring ' + s.Internals.NAME + ' (' + s.Internals.TYPE + ') without readings');
+      this.skipped = 'noReadings';
       return;
     }
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- as above
     if (!s.Attributes) {
       this.log.error('ignoring ' + s.Internals.NAME + ' (' + s.Internals.TYPE + ') without attributes');
+      this.skipped = 'noAttributes';
       return;
     }
 
@@ -169,7 +180,9 @@ export class FhemAccessory {
       // and is published all the same
     }
 
-    if (!detectMappings(this, s, state)) {
+    const detection = detectMappings(this, s, state);
+    if (detection !== 'detected') {
+      this.skipped = detection;
       return;
     }
 

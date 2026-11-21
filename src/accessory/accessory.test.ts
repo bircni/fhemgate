@@ -35,7 +35,7 @@ describe('FhemAccessory', () => {
     const { accessory } = create({ ...lamp, Attributes: { genericDeviceType: 'ignore' } });
 
     expect(accessory.service_name).toBeUndefined();
-    expect(Object.keys(accessory)).toEqual(['log', 'connection', 'jsFunctions']);
+    expect(Object.keys(accessory)).toEqual(['log', 'connection', 'jsFunctions', 'skipped']);
   });
 
   it('keeps the state of the plugin and the way to fhem to itself', () => {

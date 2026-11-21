@@ -42,7 +42,7 @@ describe('detectMappings', () => {
   it('skips a device that is to be ignored before it has mappings', () => {
     const { detected, target, log } = detect({ PossibleSets: 'on off', Attributes: { genericDeviceType: 'ignore' } });
 
-    expect(detected).toBe(false);
+    expect(detected).toBe('ignored');
     expect(target.mappings).toBeUndefined();
     expect(log).toEqual(['info ignoring dev']);
   });
@@ -50,7 +50,7 @@ describe('detectMappings', () => {
   it('skips a device nothing is recognised of', () => {
     const { detected, target, log } = detect({});
 
-    expect(detected).toBe(false);
+    expect(detected).toBe('undetected');
     expect(target.mappings).toEqual({});
     expect(log).toEqual(['error dev: no service type detected']);
   });
@@ -58,7 +58,7 @@ describe('detectMappings', () => {
   it('skips the device behind a harmony hub without a word', () => {
     const { detected, log } = detect({ TYPE: 'harmony', Internals: { NAME: 'dev', TYPE: 'harmony', id: '1' }, PossibleSets: 'on off' });
 
-    expect(detected).toBe(false);
+    expect(detected).toBe('ignored');
     expect(log).toEqual([]);
   });
 
