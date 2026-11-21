@@ -142,8 +142,8 @@ connection `"allowInlineFunctions": false` that is to refuse JavaScript.
 
 An entry without `server` publishes only the devices of its connections. Device names have to
 differ between them: a device whose name another FHEM of the entry already published is left out,
-with `<name> is already published` in the log. Its events do not reach the device of the same name
-the other FHEM published.
+with `<name> is already published` in the log. The plugin knows readings and their events by device
+name only, so the events of that device still reach the one of the same name that was published.
 
 Homebridge runs the platform once per bridge, so all FHEM servers of one bridge are one entry
 with `connections`. Two connections can talk to the same FHEM with different filters; they share

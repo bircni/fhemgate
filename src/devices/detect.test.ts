@@ -53,6 +53,11 @@ describe('detectMappings', () => {
     expect(detected).toBe('undetected');
   });
 
+  it('takes the genericDisplayType when the genericDeviceType is empty, and ignores a structure then', () => {
+    expect(detect({ Attributes: { genericDeviceType: '', genericDisplayType: 'switch' } }).target.service_name).toBe('switch');
+    expect(detect({ TYPE: 'structure', Attributes: { genericDeviceType: '' } }).detected).toBe('ignored');
+  });
+
   it('skips a device nothing is recognised of', () => {
     const { detected, target, log } = detect({});
 

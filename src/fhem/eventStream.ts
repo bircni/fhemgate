@@ -75,11 +75,6 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
   let input = '';
   const decoder = new TextDecoder();
 
-  const ofThisFhem = (other: unknown): boolean => {
-    const baseUrl = (other as { base_url?: string } | undefined)?.base_url;
-    return baseUrl === undefined || baseUrl === connection.base_url;
-  };
-
   /** takes one line of the stream to the characteristics that are subscribed to its reading */
   const handleLine = (line: string, lastEventTime: number): void => {
     const event = parseEventLine(line, connection.log);
@@ -87,10 +82,8 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
       return;
     }
 
-    // only for the devices of this fhem: a device of the same name another fhem of the entry
-    // published is another device
-    const subscriptions = state.subscriptions.byInformId[event.informId]?.filter((subscription) => ofThisFhem(subscription.accessory.connection));
-    if (!subscriptions?.length) {
+    const subscriptions = state.subscriptions.byInformId[event.informId];
+    if (!subscriptions) {
       return;
     }
 
