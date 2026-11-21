@@ -5,6 +5,8 @@
  */
 export class ReadingCache {
   readonly values: Record<string, unknown> = {};
+  /** when each value last changed, in seconds since 1970, as the plugin learned of it */
+  readonly changed: Record<string, number> = {};
 
   get(informId: string): unknown {
     return this.values[informId];

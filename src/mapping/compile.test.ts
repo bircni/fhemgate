@@ -5,7 +5,7 @@ import type { Jsonlist2Device } from '../devices/types.ts';
 import { prepareMappings, type MappingOwner, type PrepareEnvironment } from './compile.ts';
 import type { CharacteristicClass, Mapping, Mappings } from './types.ts';
 
-function prepare(mappings: Mappings, device: Partial<Jsonlist2Device> = {}) {
+function prepare(mappings: Mappings, device: Partial<Jsonlist2Device> = {}, known: Pick<PrepareEnvironment, 'cached' | 'changed'> = { cached: {} }) {
   const log = createLog();
   const characteristics = hap.Characteristic as unknown as Record<string, unknown>;
   const owner: MappingOwner = {
@@ -15,7 +15,7 @@ function prepare(mappings: Mappings, device: Partial<Jsonlist2Device> = {}) {
     query: vi.fn(),
     characteristicOfName: (name) => characteristics[name.split('#').pop() ?? ''] as CharacteristicClass | undefined,
   };
-  const environment: PrepareEnvironment = { characteristics, cached: {}, update: vi.fn(), reading2homekit: vi.fn() };
+  const environment: PrepareEnvironment = { characteristics, ...known, update: vi.fn(), reading2homekit: vi.fn() };
   const s: Jsonlist2Device = { Internals: { NAME: 'dev', TYPE: 'dummy' }, Readings: {}, Attributes: {}, PossibleSets: '', PossibleAttrs: '', ...device };
 
   prepareMappings(owner, s, environment);
@@ -99,6 +99,21 @@ describe('prepareMappings', () => {
 
     expect(owner.query).toHaveBeenCalledWith(mapping);
     expect(mapping.informId).toBe('other-level');
+  });
+
+  it('takes when a reading of another device changed from what the plugin learned, as fhem does not list it', () => {
+    const mapping: Mapping = { device: 'other', reading: 'state' };
+    const own: Mapping = { device: 'other', reading: 'state', nocache: true };
+
+    prepare(
+      { ContactSensorState: mapping, On: own },
+      { Readings: { state: { Value: 'closed', Time: '2026-01-01 00:00:00' } } },
+      { cached: { 'other-state': 'open' }, changed: { 'other-state': 1234 } },
+    );
+
+    expect(mapping.last_update).toBe(1234);
+    // not the time of the reading of the same name of the device itself, nor one that is not cached
+    expect(own.last_update).toBeUndefined();
   });
 
   it('gives a mapping with only a default no id for events', () => {

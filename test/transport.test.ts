@@ -656,6 +656,14 @@ describe('the reading of another device', () => {
     expect(world.cached['other-temperature']).toBe('21');
   });
 
+  it('answers a read with an error, not the value it had, when fhem no longer has the reading', async () => {
+    const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature,nocache=true')] }));
+    fhem.event('other-temperature', '21');
+    await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
+
+    await expect(temperature(accessory).handleGetRequest()).rejects.toBeDefined();
+  });
+
   it('answers a read with the default of the mapping when fhem has no such reading', async () => {
     const accessory = await firstAccessoryOf(await connect({ devices: [thermometer('CurrentTemperature=other:temperature,nocache=true,default=5')] }));
 

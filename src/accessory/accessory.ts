@@ -214,6 +214,7 @@ export class FhemAccessory {
     prepareMappings(this, s, {
       characteristics: state.hap.Characteristic as unknown as Record<string, unknown>,
       cached: state.cache.values,
+      changed: state.cache.changed,
       update: (informId, value) => {
         state.update(informId, value);
       },
@@ -423,10 +424,9 @@ export class FhemAccessory {
     let timedOut = false;
     const timer = setTimeout(() => {
       timedOut = true;
-      const known = cached ?? mapping?.default;
-      if (known !== undefined) {
+      if (cached !== undefined) {
         this.log.debug('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds, answering with the last value');
-        callback(undefined, known);
+        callback(undefined, cached);
       } else {
         this.log.error('query: no answer from fhem for ' + informId + ' within ' + QUERY_TIMEOUT / 1000 + ' seconds');
         callback(this.#state.hap.HAPStatus.OPERATION_TIMED_OUT);
@@ -452,9 +452,9 @@ export class FhemAccessory {
       }
       const latest = newer ? this.#state.cache.get(informId) : value;
       if (latest === undefined) {
-        // fhem has no such reading: what the mapping knows, or its default. nothing is made up
-        // from the empty answer and kept at the mapping.
-        const known = mapping ? (mapping.cached ?? mapping.default) : '';
+        // fhem has no such reading: the default of the mapping, not a value it had before, which
+        // would hide that the reading is gone. nothing is made up from the empty answer and kept.
+        const known = mapping ? mapping.default : '';
         if (known === undefined) {
           callback(1);
         } else {

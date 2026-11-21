@@ -82,6 +82,7 @@ export class PluginState {
 
     if (!repeated) {
       this.cache.values[informId] = orig;
+      this.cache.changed[informId] = toInt(Date.now() / 1000);
       // logged where the first characteristic that follows the reading logs
       // eslint-disable-next-line @typescript-eslint/no-base-to-string -- readings are text. what else is cached is printed as it comes.
       subscriptions?.find((subscription) => subscription.mapping)?.mapping?.log.debug('caching: ' + informId + ': ' + String(orig));

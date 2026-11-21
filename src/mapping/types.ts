@@ -60,8 +60,7 @@ export interface Mapping {
   threshold?: number;
   /** the word of the reading to use, counted from 0 */
   part?: number;
-  /** never answer from the cache, always ask fhem */
-  /** any value, also false or 0, switches the cache off: see isNocache */
+  /** never answer from the cache, always ask fhem. any value, also false or 0, says so: see isNocache */
   nocache?: unknown;
   readOnly?: unknown;
 
