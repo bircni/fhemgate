@@ -18,10 +18,11 @@ function subscribed(informId: string, updateValue = vi.fn()) {
 }
 
 describe('PluginState.changesOf', () => {
-  it('counts the events of a reading and the values the plugin sets itself, and no answer of fhem', () => {
+  it('counts the events of a reading and the values the plugin sets itself, and no answer of fhem, also not to a read', () => {
     state.update('lamp-state', 'on');
     state.update('lamp-state', 'on');
     state.answer('lamp-state', 'off');
+    state.answerRead('lamp-state', 'standby');
     state.update('lamp-state', 'on', true);
 
     expect(state.changesOf('lamp-state')).toBe(3);

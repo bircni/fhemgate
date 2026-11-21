@@ -659,6 +659,8 @@ describe('the reading of another device', () => {
     await waitFor(() => fhem.held() > 0, 'the read to be held');
     fhem.release();
     await expect(gone).rejects.toBeDefined();
+    // also for the accessories built anew, which start from the cache
+    expect(world.cached['other-temperature']).toBeUndefined();
 
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     try {
@@ -670,6 +672,24 @@ describe('the reading of another device', () => {
       vi.useRealTimers();
       fhem.release();
     }
+  });
+
+  it('forgets the value of a reading when fhem answers late that it no longer has it', async () => {
+    const accessory = await held();
+    fhem.event('other-temperature', '21');
+    await waitFor(() => temperatureOf(accessory) === 21, 'the event to be shown');
+
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const read = temperature(accessory).handleGetRequest();
+      await waitFor(() => fhem.held() > 0, 'the read to be held');
+      vi.advanceTimersByTime(2000);
+      expect(await read).toBe(21);
+    } finally {
+      vi.useRealTimers();
+    }
+    fhem.release();
+    await waitFor(() => world.cached['other-temperature'] === undefined, 'the reading to be forgotten');
   });
 
   it('answers a read with the default of the mapping when fhem has no such reading', async () => {

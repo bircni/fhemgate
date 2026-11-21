@@ -59,6 +59,25 @@ export class PluginState {
     this.#take(informId, orig, 'answer');
   }
 
+  /** What fhem answered to a read from HomeKit, which gets it as its answer: as an answer, but HomeKit is not told. */
+  answerRead(informId: string, orig: unknown): void {
+    this.#take(informId, orig, 'read');
+  }
+
+  /**
+   * Forgets a reading fhem no longer has: its value, when it changed, and what the mappings that
+   * follow it know of it, which is their default now.
+   */
+  forget(informId: string): void {
+    delete this.cache.values[informId];
+    delete this.cache.changed[informId];
+    this.subscriptions.byInformId[informId]?.forEach((subscription) => {
+      if (typeof subscription.mapping === 'object') {
+        subscription.mapping.cached = subscription.mapping.default;
+      }
+    });
+  }
+
   /**
    * How many values of the reading the plugin took that are no answers of fhem it asked for: the
    * events of fhem, and the values the plugin sets itself, such as the colour HomeKit was given.
@@ -68,13 +87,17 @@ export class PluginState {
     return this.#changes.get(informId) ?? 0;
   }
 
-  /** @param source an event, an answer, or a value HomeKit is not to be told of */
-  #take(informId: string, orig: unknown, source: 'event' | 'answer' | 'quiet'): void {
+  /**
+   * @param source an event, a value the plugin sets itself and HomeKit is not told of, an answer of
+   * fhem, or one to a read from HomeKit, which is not told of it either
+   */
+  #take(informId: string, orig: unknown, source: 'event' | 'quiet' | 'answer' | 'read'): void {
     if (orig === undefined) {
       return;
     }
     const now = toInt(Date.now() / 1000);
-    if (source !== 'answer') {
+    const answered = source === 'answer' || source === 'read';
+    if (!answered) {
       this.#changes.set(informId, this.changesOf(informId) + 1);
     }
 
@@ -100,7 +123,7 @@ export class PluginState {
 
         const characteristic = typeof mapping.characteristic === 'object' ? mapping.characteristic : undefined;
         const eventOnly = characteristic !== undefined && this.#isEventOnly(characteristic);
-        if ((repeated && !eventOnly && !isNocache(mapping)) || (source === 'answer' && eventOnly)) {
+        if ((repeated && !eventOnly && !isNocache(mapping)) || (answered && eventOnly)) {
           return;
         }
 
@@ -116,7 +139,7 @@ export class PluginState {
           recordHistory(accessory, accessory.historyService, mapping, value, this);
         }
 
-        if (source !== 'quiet' && characteristic) {
+        if ((source === 'event' || source === 'answer') && characteristic) {
           const accepted = acceptableValue(characteristic, value);
           if (accepted === undefined) {
             mapping.log.debug(informId + ': ' + String(value) + ' is no value for ' + characteristic.displayName + ', which keeps the one it has');

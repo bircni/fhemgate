@@ -231,7 +231,8 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
       const own = device === owner.device;
       // the time of a reading of the device itself, as fhem lists it
       const time = own ? s.Readings[reading]?.Time : undefined;
-      const listed = time ? toInt(new Date(time).getTime() / 1000) : undefined;
+      const seconds = time ? toInt(new Date(time).getTime() / 1000) : undefined;
+      const listed = Number.isFinite(seconds) ? seconds : undefined;
       let orig: unknown = undefined;
       if (!own) {
         // what the plugin has seen of the reading of the other device. fhem is asked all the same,
@@ -253,9 +254,11 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
         const informId = mapping.informId;
         if (!isNocache(mapping) && mapping.reading && environment.cached[informId] === undefined) {
           environment.update(informId, orig);
-          if (listed !== undefined) {
-            environment.changed[informId] = listed;
-          }
+        }
+
+        // the cache keeps when the value it holds changed, as fhem lists it
+        if (listed !== undefined && orig !== undefined && environment.cached[informId] === orig) {
+          environment.changed[informId] = listed;
         }
 
         if (mapping.characteristic || mapping.name) {

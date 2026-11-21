@@ -435,6 +435,12 @@ export class FhemAccessory {
 
     this.#ask(informId, cmd, (value, newer) => {
       clearTimeout(timer);
+      if (value === undefined && !newer) {
+        // a read asked fhem, which no longer has the reading: what the plugin knew of it is gone,
+        // so that no later read falls back to it. a background check of a cached value does not
+        // forget it, as fhem answers the same for a reading whose value is empty.
+        this.#state.forget(informId);
+      }
       if (timedOut) {
         // the read was answered meanwhile: this is an answer nobody waits for any more
         this.#takeInBackground(informId, value, newer);
@@ -443,13 +449,9 @@ export class FhemAccessory {
 
       // the read that waited gets the value as its answer, so HomeKit is not told again
       if (!newer && value !== undefined) {
-        this.#state.update(informId, value, true);
+        this.#state.answerRead(informId, value);
       }
       const latest = newer ? this.#state.cache.get(informId) : value;
-      if (latest === undefined && mapping) {
-        // nor does a read that fhem does not answer in time fall back to it
-        mapping.cached = mapping.default;
-      }
       // when fhem has no such reading, the default of the mapping: not a value it had before,
       // which would hide that the reading is gone. without a mapping there is nothing to convert.
       const answer = latest === undefined ? (mapping ? mapping.default : '') : mapping ? reading2homekit(mapping, latest) : latest;
@@ -464,8 +466,8 @@ export class FhemAccessory {
 
   /**
    * Asks fhem for a reading. The answer is undefined when fhem has no such reading: it answers
-   * with nothing then, which is no value of the reading. It is newer when an event of the
-   * reading arrived while fhem was asked, which is newer than the answer.
+   * with nothing then. It is newer when the reading changed
+   * while fhem was asked, by an event or a value the plugin set itself: see changesOf.
    */
   #ask(informId: string, cmd: string, answered: (value: string | undefined, newer: boolean) => void): void {
     const before = this.#state.changesOf(informId);

@@ -20,7 +20,16 @@ function prepare(
     query: vi.fn(),
     characteristicOfName: (name) => characteristics[name.split('#').pop() ?? ''] as CharacteristicClass | undefined,
   };
-  const environment: PrepareEnvironment = { characteristics, ...known, update: vi.fn(), reading2homekit: vi.fn() };
+  const environment: PrepareEnvironment = {
+    characteristics,
+    ...known,
+    update: vi.fn((informId: string, value: unknown) => {
+      if (value !== undefined) {
+        known.cached[informId] = value;
+      }
+    }),
+    reading2homekit: vi.fn(),
+  };
   const s: Jsonlist2Device = { Internals: { NAME: 'dev', TYPE: 'dummy' }, Readings: {}, Attributes: {}, PossibleSets: '', PossibleAttrs: '', ...device };
 
   prepareMappings(owner, s, environment);
@@ -122,6 +131,22 @@ describe('prepareMappings', () => {
     expect(mapping.last_update).toBe(1234);
     expect(uncached.last_update).toBe(1234);
     expect(unseen.last_update).toBeUndefined();
+  });
+
+  it('keeps the time fhem lists also when the value was cached before, from another device that follows the reading', () => {
+    const known = { cached: { 'dev-state': 'on' } as Record<string, unknown>, changed: { 'dev-state': 99 } as Record<string, number> };
+
+    prepare({ On: {} }, { Readings: { state: { Value: 'on', Time: '2026-01-01 00:00:00' } } }, known);
+
+    expect(known.changed['dev-state']).toBe(toInt(new Date('2026-01-01 00:00:00').getTime() / 1000));
+  });
+
+  it('takes no time fhem lists that is none', () => {
+    const mapping: Mapping = {};
+    const { environment } = prepare({ On: mapping }, { Readings: { state: { Value: 'on', Time: 'soon' } } });
+
+    expect(environment.changed['dev-state']).not.toBeNaN();
+    expect(mapping.last_update).toBeUndefined();
   });
 
   it('keeps the time fhem lists for a reading of the device itself in the cache', () => {
