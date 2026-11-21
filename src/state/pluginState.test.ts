@@ -41,6 +41,23 @@ describe('PluginState.changesOf', () => {
   });
 });
 
+describe('PluginState.forget', () => {
+  it('forgets the value, when it changed and what the mappings know, which is a change', () => {
+    const { mapping } = subscribed('lamp-state');
+    mapping.default = 'off';
+    state.update('lamp-state', 'on');
+    const before = state.changesOf('lamp-state');
+
+    state.forget('lamp-state');
+
+    expect(state.cache.get('lamp-state')).toBeUndefined();
+    expect(state.cache.changed['lamp-state']).toBeUndefined();
+    expect(mapping.cached).toBe('off');
+    expect(mapping.last_update).toBeUndefined();
+    expect(state.changesOf('lamp-state')).toBe(before + 1);
+  });
+});
+
 describe('PluginState.update', () => {
   it('keeps the reading and publishes the converted value at the characteristic without running its set handler', () => {
     const { mapping, updateValue } = subscribed('lamp-state');

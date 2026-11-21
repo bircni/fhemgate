@@ -440,6 +440,10 @@ export class FhemAccessory {
         // so that no later read falls back to it. a background check of a cached value does not
         // forget it, as fhem answers the same for a reading whose value is empty.
         this.#state.forget(informId);
+        if (mapping) {
+          // also when it follows the reading no longer, or never did
+          mapping.cached = mapping.default;
+        }
       }
       if (timedOut) {
         // the read was answered meanwhile: this is an answer nobody waits for any more

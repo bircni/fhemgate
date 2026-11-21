@@ -66,14 +66,17 @@ export class PluginState {
 
   /**
    * Forgets a reading fhem no longer has: its value, when it changed, and what the mappings that
-   * follow it know of it, which is their default now.
+   * follow it know of it, which is their default now. That is a change: an answer asked for
+   * before it does not bring the reading back.
    */
   forget(informId: string): void {
     delete this.cache.values[informId];
     delete this.cache.changed[informId];
+    this.#changes.set(informId, this.changesOf(informId) + 1);
     this.subscriptions.byInformId[informId]?.forEach((subscription) => {
       if (typeof subscription.mapping === 'object') {
         subscription.mapping.cached = subscription.mapping.default;
+        delete subscription.mapping.last_update;
       }
     });
   }
