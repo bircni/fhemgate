@@ -7,7 +7,7 @@ A [Homebridge](https://homebridge.io) platform plugin that publishes the devices
 [FHEM](https://fhem.de) installation to HomeKit. It follows the events of FHEM over a long poll, so
 HomeKit shows a change as soon as FHEM reports it.
 
-This project is based on [homebridge-fhem](https://github.com/justme-1968/homebridge-fhem) by
+> This project is based on [homebridge-fhem](https://github.com/justme-1968/homebridge-fhem) by
 justme1968 and its contributors. The `homebridgeMapping` and `genericDeviceType` attributes work as
 before, and so does the configuration, under the platform name `fhemgate`. HomeKit keeps the
 accessories of homebridge-fhem with their rooms and automations: see
