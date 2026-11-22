@@ -246,6 +246,7 @@ selects them. A HomeKit bridge takes 149 accessories; the plugin logs a warning 
 | In `homebridgeMapping` | Before | Now |
 |---|---|---|
 | `invert` without a value, e.g. `CurrentPosition=position,invert` | taken as the name of the reading | switches the inversion on |
+| `invert=false`, `readOnly=false`, `nocache=0` | switched the parameter on | switch it off. Any other value but an empty one switches it on |
 | a JSON mapping that spans several lines | not recognised as JSON | recognised |
 | `valid=` with names of values | the name was handed to HomeKit | the number is. Entries that are no value are dropped with an error, the list is sorted by number |
 | a mapping with only `default=` | subscribed to a reading named `undefined` | has no reading and answers its default |

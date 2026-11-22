@@ -60,7 +60,7 @@ export interface Mapping {
   threshold?: number;
   /** the word of the reading to use, counted from 0 */
   part?: number;
-  /** never answer from the cache, always ask fhem. any value, also false or 0, says so: see isNocache */
+  /** never answer from the cache, always ask fhem. see switchedOn for the values that say so */
   nocache?: unknown;
   readOnly?: unknown;
 
@@ -128,7 +128,42 @@ export type PreparedMapping = Mapping & { log: Logging };
 /** the mappings of an accessory by characteristic. a characteristic that is given several times holds a list. */
 export type Mappings = Record<string, Mapping | Mapping[] | undefined>;
 
-/** whether the mapping is not to be answered from the cache. nocache with any value says so. */
+/**
+ * Whether the value of a parameter that is on or off, like `invert`, `readOnly` or `nocache`,
+ * switches it on. Missing, `false`, `0` and empty text switch it off, anything else on.
+ */
+export function switchedOn(value: unknown): boolean {
+  if (value === undefined || value === null) {
+    return false;
+  }
+  if (typeof value === 'string') {
+    const text = value.trim().toLowerCase();
+    return text !== '' && text !== 'false' && text !== '0';
+  }
+  return value !== false && value !== 0;
+}
+
+/** the parameters of a mapping that are on or off */
+const SWITCHES = ['invert', 'readOnly', 'nocache'] as const;
+
+/**
+ * Makes the parameters of a mapping that are on or off true when they are switched on, and
+ * removes them when they are switched off, so that what reads them needs to know no more than
+ * that. See switchedOn.
+ */
+export function settleSwitches(mapping: Mapping): void {
+  for (const name of SWITCHES) {
+    if (name in mapping) {
+      if (switchedOn(mapping[name])) {
+        mapping[name] = true;
+      } else {
+        delete mapping[name];
+      }
+    }
+  }
+}
+
+/** whether the mapping is not to be answered from the cache */
 export function isNocache(mapping: object): boolean {
-  return 'nocache' in mapping;
+  return switchedOn((mapping as { nocache?: unknown }).nocache);
 }

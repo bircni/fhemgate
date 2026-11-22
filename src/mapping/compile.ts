@@ -5,7 +5,7 @@ import util from 'node:util';
 import type { Logging } from 'homebridge';
 import type { Jsonlist2Device } from '../devices/types.ts';
 import { looselyEqual, toInt } from '../util/loose.ts';
-import { isNocache, type CharacteristicClass, type HomekitValue, type Mappings, type PreparedMapping } from './types.ts';
+import { isNocache, settleSwitches, type CharacteristicClass, type HomekitValue, type Mappings, type PreparedMapping } from './types.ts';
 import { resolveConverter } from './userFunctions.ts';
 
 /** the accessory the mappings belong to */
@@ -61,6 +61,8 @@ export function prepareMappings(owner: MappingOwner, s: Jsonlist2Device, environ
     const mappings = (Array.isArray(entry) ? entry : [entry]) as PreparedMapping[];
 
     for (const mapping of mappings) {
+      settleSwitches(mapping);
+
       let device = owner.device;
       if (mapping.device === undefined) {
         mapping.device = device;
