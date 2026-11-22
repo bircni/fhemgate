@@ -76,6 +76,7 @@ address of the host. FHEMWEB also has to accept connections from the address Hom
 | `longpoll refused by fhem with 401 ...: authentication failed` | user and password in [`auth`](configuration.md#password). The plugin keeps trying, so a corrected password in FHEM is picked up. |
 | `the certificate of fhem is not trusted` | with `ssl` and without `auth` the certificate of FHEM is checked. One that FHEM made itself needs `"rejectUnauthorized": false`, see [https](configuration.md#https). |
 | `There was a problem connecting to FHEM` | a single command or read failed. The address is in the line. |
+| `no answer within 30 seconds` or `no answer within 60 seconds` | FHEM took the request but did not answer: a command within 30 seconds, the list of devices within a minute. FHEM is busy or hangs, often in a blocking command of another module. The list of devices is asked for again. |
 
 ## Homebridge starts before FHEM, or FHEM is away
 

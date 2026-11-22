@@ -508,6 +508,32 @@ describe('devices', () => {
     expect(answered.mock.calls[0]?.[0]).toHaveLength(1);
   });
 
+  it('asks again when fhem takes the request for the devices and does not answer within a minute', async () => {
+    let hang = true;
+    const platform = await connect({ devices: [{ Name: 'lamp', ...lamp() }], holds: (cmd) => cmd === 'jsonlist2' && hang });
+    const answered = vi.fn();
+    world.log.clear();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+    platform.accessories(answered);
+    await waitFor(() => fhem.held() === 1, 'the request to be held');
+    vi.advanceTimersByTime(59_999);
+    expect(world.log.errors()).toEqual([]);
+
+    vi.advanceTimersByTime(1);
+    await waitFor(() => world.log.errors().length === 3, 'the failure');
+    expect(world.log.errors()).toEqual([
+      'error There was a problem connecting to FHEM',
+      'error   Error: no answer within 60 seconds',
+      'error fetching the devices failed for the 1. time, trying again in: 3000msec',
+    ]);
+
+    hang = false;
+    vi.advanceTimersByTime(3000);
+    await waitFor(() => answered.mock.calls.length > 0, 'the accessories');
+    expect(answered.mock.calls[0]?.[0]).toMatchObject([{ name: 'lamp' }]);
+  });
+
   it('waits for the csrf token before it asks', async () => {
     fhem = await startFakeFhem({ devices: [{ Name: 'lamp', ...lamp() }] });
     world = createWorld();
@@ -1121,6 +1147,28 @@ describe('commands', () => {
     expect(world.log.lines.map(withoutPort)).toEqual([
       'log There was a problem connecting to FHEM (http://127.0.0.1:PORT/fhem?cmd=boom&fwcsrf=***&XHR=1).',
       'log   500: Internal Server Error',
+    ]);
+    expect(answered).not.toHaveBeenCalled();
+  });
+
+  it('reports a command fhem takes and never answers after 30 seconds, and does not answer the caller', async () => {
+    const platform = await connect();
+    const answered = vi.fn();
+    fhem.options.hangs = true;
+    world.log.clear();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+    platform.servers[0]?.execute('set lamp off', answered);
+    await waitFor(() => fhem.commands.at(-1) === 'set lamp off', 'the command');
+    vi.advanceTimersByTime(29_999);
+    expect(world.log.lines).toEqual([]);
+
+    vi.advanceTimersByTime(1);
+    await waitFor(() => world.log.lines.length === 2, 'the report');
+
+    expect(world.log.lines.map(withoutPort)).toEqual([
+      'log There was a problem connecting to FHEM (http://127.0.0.1:PORT/fhem?cmd=set%20lamp%20off&fwcsrf=***&XHR=1).',
+      'log There was a problem connecting to FHEM (http://127.0.0.1:PORT/fhem?cmd=set%20lamp%20off&fwcsrf=***&XHR=1):Error: no answer within 30 seconds',
     ]);
     expect(answered).not.toHaveBeenCalled();
   });
