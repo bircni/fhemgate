@@ -1261,6 +1261,39 @@ describe('a characteristic that is given by its uuid', () => {
   ])('can only be read when its mapping %s', (_what, parameters) => {
     expect(custom(parameters).characteristic.props.perms).toEqual(['pr', 'ev']);
   });
+
+  it.each(['readOnly=false', 'readOnly=0', 'readOnly=', 'readOnly=FALSE'])('can be written when its mapping says %s', (parameter) => {
+    const { world, characteristic } = custom('cmd=buzzer,' + parameter);
+
+    expect(characteristic.props.perms).toEqual(['pr', 'pw', 'ev']);
+    write(characteristic, true);
+    expect(world.sent).toEqual(['set fan buzzer true']);
+  });
+
+  it.each([
+    ['invert', true],
+    ['invert=true', true],
+    ['invert=1', true],
+    ['invert=false', false],
+    ['invert=0', false],
+    ['invert=', false],
+  ])('with %s shows the reading off as %s', (parameter, value) => {
+    expect(read(custom(parameter).characteristic).value).toBe(value);
+  });
+
+  it.each([
+    ['nocache=0', true],
+    ['nocache=false', true],
+    ['nocache=1', false],
+    ['nocache=true', false],
+  ])('with %s is answered from the cache: %s', (parameter, fromCache) => {
+    vi.useFakeTimers();
+    try {
+      expect(read(custom(parameter).characteristic).answered).toBe(fromCache);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
 
 describe('the modes a thermostat offers', () => {

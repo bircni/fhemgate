@@ -130,8 +130,8 @@ The conversions are applied in this order:
 
 Things to know:
 
-- `nocache`, `invert` and `readOnly` are switched on by any value, also by `false` or `0`. Leave
-  the parameter out to switch it off.
+- `nocache`, `invert` and `readOnly` are switched off by `false`, `0` or an empty value, and on by
+  any other value. `invert` alone switches it on.
 - A reading value that starts with `set-` or `set_` is ignored: the device has not confirmed the
   command yet.
 - A value none of the `values` matches, with no `default`, is ignored and reported once in the log
