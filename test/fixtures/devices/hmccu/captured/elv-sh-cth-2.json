@@ -1,0 +1,96 @@
+{
+  "Name": "elv_sh_cth_2",
+  "PossibleSets": "clear defaults:reset,update,old,forceReset readingFilter:multiple-strict,ACTUAL_TEMPERATURE,HUMIDITY,ACTUAL_TEMPERATURE_STATUS,HUMIDITY_STATUS config",
+  "PossibleAttrs": "alias comment eventMap group room suppressReading userattr userReadings verbose IODev ccucalculate ccuflags ccureadingfilter ccureadingformat ccureadingname ccuSetOnChange ccuReadingPrefix ccuscaleval ccuverify ccuget devStateFlags disable hmstatevals statevals substitute substexcl stripnumber traceFilter event-aggregator event-min-interval event-on-change-reading event-on-update-reading oldreadings stateFormat timestamp-on-change-reading statedatapoint controldatapoint ASC WB WB_map building cmdIcon devStateIcon devStateIcon devStateStyle feuerAlarmRelevant floor forceEvents genericDeviceType homebridgeMapping homebridgeName icon mqttAlias mqttDefaults mqttDisable mqttForward mqttPublish mqttSubscribe presentCycle presentReading roomName siriName sortby structexclude webCmd webCmdLabel widgetOverride",
+  "Internals": {
+    "NAME": "elv_sh_cth_2",
+    "TYPE": "HMCCUCHN",
+    "DEF": "000ABC00000015:1",
+    "FUUID": "7f000000-f33f-0000-0000-000000000022",
+    "STATE": "temperature",
+    "IODev": "ccu",
+    "ccuaddr": "000ABC00000015:1",
+    "ccuname": "elv_sh_cth_2",
+    "ccudevstate": "active",
+    "ccuif": "HmIP-RF",
+    "ccurolestate": "CLIMATE_TRANSCEIVER",
+    "ccusubtype": "CTH",
+    "ccutype": "ELV-SH-CTH",
+    "chntype": "?",
+    "firmware": "1.0.10",
+    "readonly": "no"
+  },
+  "Readings": {
+    "ACTUAL_TEMPERATURE": {
+      "Value": "20.1",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "ACTUAL_TEMPERATURE_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "HUMIDITY": {
+      "Value": "34",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "HUMIDITY_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "IODev": {
+      "Value": "ccu",
+      "Time": "2026-11-07 10:05:53"
+    },
+    "activity": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "devstate": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "hmstate": {
+      "Value": "20.1",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "humidity": {
+      "Value": "34",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "humidity_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "measured-temp": {
+      "Value": "20.1",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "rssidevice": {
+      "Value": "-92",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "rssipeer": {
+      "Value": "N/A",
+      "Time": "2026-10-25 10:33:08"
+    },
+    "state": {
+      "Value": "20.1",
+      "Time": "2026-11-22 15:52:39"
+    },
+    "voltage": {
+      "Value": "2.6",
+      "Time": "2026-11-22 15:52:39"
+    }
+  },
+  "Attributes": {
+    "alias": "elv sh cth 2",
+    "ccureadingname": "HUMIDITY:+humidity",
+    "genericDeviceType": "thermometer",
+    "room": "HomeKit",
+    "stateFormat": "temperature"
+  }
+}

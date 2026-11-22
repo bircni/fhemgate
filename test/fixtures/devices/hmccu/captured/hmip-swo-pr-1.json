@@ -1,0 +1,600 @@
+{
+  "Name": "hmip_swo_pr_1",
+  "PossibleSets": "clear defaults:reset,update,old,forceReset readingFilter:multiple-strict,RAIN_COUNTER_OVERFLOW,WIND_SPEED_STATUS,ACTUAL_TEMPERATURE_STATUS,WIND_DIR_RANGE_STATUS,RAIN_COUNTER,SUNSHINE_THRESHOLD_OVERRUN,WIND_DIR_STATUS,ACTUAL_TEMPERATURE,ILLUMINATION,HUMIDITY_STATUS,SUNSHINEDURATION_OVERFLOW,HUMIDITY,RAINING,WIND_THRESHOLD_OVERRUN,SUNSHINEDURATION,WIND_DIR,RAIN_COUNTER_STATUS,WIND_SPEED,ILLUMINATION_STATUS,WIND_DIR_RANGE config",
+  "PossibleAttrs": "alias comment eventMap group room suppressReading userattr userReadings verbose IODev ccucalculate ccuflags ccureadingfilter ccureadingformat ccureadingname ccuSetOnChange ccuReadingPrefix ccuscaleval ccuverify ccuget devStateFlags disable hmstatevals statevals substitute substexcl stripnumber traceFilter event-aggregator event-min-interval event-on-change-reading event-on-update-reading oldreadings stateFormat timestamp-on-change-reading statedatapoint controldatapoint ASC WB WB_map building cmdIcon devStateIcon devStateIcon devStateStyle feuerAlarmRelevant floor forceEvents genericDeviceType homebridgeMapping homebridgeName icon mqttAlias mqttDefaults mqttDisable mqttForward mqttPublish mqttSubscribe presentCycle presentReading roomName siriName sortby structexclude webCmd webCmdLabel widgetOverride",
+  "Internals": {
+    "NAME": "hmip_swo_pr_1",
+    "TYPE": "HMCCUCHN",
+    "DEF": "000ABC00000019:1",
+    "FUUID": "7f000000-f33f-0000-0000-000000000027",
+    "STATE": "ok\nalive\nbat ok\n14 km/h ⬈ |\n85 % |\n3.1 °C |\n7763 Lux",
+    "IODev": "ccu",
+    "ccuaddr": "000ABC00000019:1",
+    "ccuname": "hmip_swo_pr_1",
+    "ccudevstate": "active",
+    "ccuif": "HmIP-RF",
+    "ccurolestate": "WEATHER_TRANSMIT",
+    "ccusubtype": "SWO-PR",
+    "ccutype": "HmIP-SWO-PR",
+    "chntype": "?",
+    "firmware": "1.2.8",
+    "readonly": "no"
+  },
+  "Readings": {
+    "ACTUAL_TEMPERATURE": {
+      "Value": "3.1",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "ACTUAL_TEMPERATURE_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "CONFIG_PENDING": {
+      "Value": "false",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "DUTY_CYCLE": {
+      "Value": "false",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "ERROR_CODE": {
+      "Value": "0",
+      "Time": "2026-11-22 15:45:25"
+    },
+    "ERROR_WIND_COMMUNICATION": {
+      "Value": "false",
+      "Time": "2026-11-22 15:45:25"
+    },
+    "ERROR_WIND_NORTH": {
+      "Value": "false",
+      "Time": "2026-11-22 15:45:25"
+    },
+    "HUMIDITY": {
+      "Value": "85",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "HUMIDITY_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "ILLUMINATION": {
+      "Value": "337.4",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "ILLUMINATION_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "IODev": {
+      "Value": "ccu",
+      "Time": "2026-11-07 10:05:54"
+    },
+    "LOW_BAT": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "RAINING": {
+      "Value": "false",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "RAIN_COUNTER": {
+      "Value": "140.7",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "RAIN_COUNTER_OVERFLOW": {
+      "Value": "false",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "RAIN_COUNTER_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "RSSI_DEVICE": {
+      "Value": "-68",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "RSSI_PEER": {
+      "Value": "N/A",
+      "Time": "2026-10-25 10:33:07"
+    },
+    "SUNSHINEDURATION": {
+      "Value": "21",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "SUNSHINEDURATION_OVERFLOW": {
+      "Value": "true",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "SUNSHINE_THRESHOLD_OVERRUN": {
+      "Value": "false",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "TEMPERATURE_OUT_OF_RANGE": {
+      "Value": "false",
+      "Time": "2026-11-22 15:45:25"
+    },
+    "UNREACH": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "UPDATE_PENDING": {
+      "Value": "false",
+      "Time": "2026-10-25 10:33:07"
+    },
+    "WIND_DIR": {
+      "Value": "52.5",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "WIND_DIR_RANGE": {
+      "Value": "33.8",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "WIND_DIR_RANGE_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "WIND_DIR_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "WIND_SPEED": {
+      "Value": "7.5",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "WIND_SPEED_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "WIND_THRESHOLD_OVERRUN": {
+      "Value": "false",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "absoluteHumidity": {
+      "Value": "5.1",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "activity": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "brightness": {
+      "Value": "7763",
+      "Time": "2026-11-20 14:19:01"
+    },
+    "devstate": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "dewpoint": {
+      "Value": "0.8",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "hmstate": {
+      "Value": "3.1",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "humidity": {
+      "Value": "85",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "lastRain": {
+      "Value": "2026-11-20 13:13:09",
+      "Time": "2026-11-20 13:13:09"
+    },
+    "rain": {
+      "Value": "20.945",
+      "Time": "2026-09-02 08:13:39"
+    },
+    "rain.av1h": {
+      "Value": "0.0",
+      "Time": "2026-11-21 09:27:47"
+    },
+    "rssidevice": {
+      "Value": "-68",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "rssipeer": {
+      "Value": "N/A",
+      "Time": "2026-10-25 10:33:07"
+    },
+    "statBrightnessDay": {
+      "Value": "Min: 7763 Avg: 7763 Max: 7763",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statBrightnessDayLast": {
+      "Value": "Min: 7763 Avg: 7763 Max: 7763",
+      "Time": "2026-11-21 23:59:55"
+    },
+    "statBrightnessHour": {
+      "Value": "Min: 7763 Avg: 7763 Max: 7763",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statBrightnessHourLast": {
+      "Value": "Min: 7763 Avg: 7763 Max: 7763",
+      "Time": "2026-11-22 14:59:55"
+    },
+    "statBrightnessMonth": {
+      "Value": "Min: 0 Avg: 1857 Max: 19620",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statBrightnessMonthLast": {
+      "Value": "Min: 0 Avg: 2749 Max: 21200",
+      "Time": "2026-10-31 23:59:55"
+    },
+    "statBrightnessYear": {
+      "Value": "Min: 0 Avg: 817 Max: 25990",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statBrightnessYearLast": {
+      "Value": "Min: 0 Avg: 66 Max: 219",
+      "Time": "2025-12-31 23:59:55"
+    },
+    "statHumidityDay": {
+      "Value": "Min: 85 Avg: 89 Max: 91",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statHumidityDayLast": {
+      "Value": "Min: 67 Avg: 80 Max: 88",
+      "Time": "2026-11-21 23:59:55"
+    },
+    "statHumidityMonth": {
+      "Value": "Min: 51 Avg: 82 Max: 93",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statHumidityMonthLast": {
+      "Value": "Min: 37 Avg: 76 Max: 91",
+      "Time": "2026-10-31 23:59:55"
+    },
+    "statHumidityYear": {
+      "Value": "Min: 19 Avg: 71 Max: 94",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statHumidityYearLast": {
+      "Value": "Min: 24 Avg: 76 Max: 95",
+      "Time": "2025-12-31 23:59:55"
+    },
+    "statRain": {
+      "Value": "Hour: 0.000 Day: 0.000 Month: 0.000 Year: 200.897",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statRainDay": {
+      "Value": "0.000",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statRainDayLast": {
+      "Value": "0.000",
+      "Time": "2026-11-21 23:59:55"
+    },
+    "statRainHour": {
+      "Value": "0.000",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statRainHourLast": {
+      "Value": "0.000",
+      "Time": "2026-11-22 14:59:55"
+    },
+    "statRainLast": {
+      "Value": "Hour: 0.000 Day: 0.000 Month: 0.000 Year: ",
+      "Time": "2026-11-22 14:59:55"
+    },
+    "statRainMonth": {
+      "Value": "0.000",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statRainMonthLast": {
+      "Value": "0.000",
+      "Time": "2026-10-31 23:59:55"
+    },
+    "statRainYear": {
+      "Value": "Min: 707.115 Avg: 707.115 Max: 707.115 (since: 2021-07-13_10:25:41 )",
+      "Time": "2021-07-13 10:28:06"
+    },
+    "statTemperature": {
+      "Value": "Hour: 0.2 Day: 4.8 Month: 197.0 Year: 5076.2",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statTemperatureDay": {
+      "Value": "4.8",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statTemperatureDayAvg": {
+      "Value": "2.4",
+      "Time": "2022-02-06 15:54:21"
+    },
+    "statTemperatureDayAvgLast": {
+      "Value": "2.6",
+      "Time": "2022-02-05 23:59:55"
+    },
+    "statTemperatureDayLast": {
+      "Value": "7.1",
+      "Time": "2026-11-21 23:59:55"
+    },
+    "statTemperatureDayMax": {
+      "Value": "6.0",
+      "Time": "2022-02-06 15:54:21"
+    },
+    "statTemperatureDayMaxLast": {
+      "Value": "4.6",
+      "Time": "2022-02-05 23:59:55"
+    },
+    "statTemperatureDayMin": {
+      "Value": "0.2",
+      "Time": "2022-02-06 15:54:21"
+    },
+    "statTemperatureDayMinLast": {
+      "Value": "-0.3",
+      "Time": "2022-02-05 23:59:55"
+    },
+    "statTemperatureHour": {
+      "Value": "Min: 5.5 Avg: 5.8 Max: 6.0",
+      "Time": "2022-02-06 15:54:21"
+    },
+    "statTemperatureHourLast": {
+      "Value": "Min: 5.0 Avg: 5.2 Max: 5.5",
+      "Time": "2022-02-06 14:59:55"
+    },
+    "statTemperatureLast": {
+      "Value": "Hour: 0.3 Day: 7.1 Month: 402.2 Year: 5366.3",
+      "Time": "2026-11-22 14:59:55"
+    },
+    "statTemperatureMonth": {
+      "Value": "Min: -1.1 Avg: 3.5 Max: 8.7",
+      "Time": "2022-02-06 15:54:21"
+    },
+    "statTemperatureMonthAvg": {
+      "Value": "3.5",
+      "Time": "2022-02-06 15:54:21"
+    },
+    "statTemperatureMonthAvgLast": {
+      "Value": "2.9",
+      "Time": "2022-01-31 23:59:55"
+    },
+    "statTemperatureMonthLast": {
+      "Value": "Min: -2.8 Avg: 2.9 Max: 14.8",
+      "Time": "2022-01-31 23:59:55"
+    },
+    "statTemperatureMonthMax": {
+      "Value": "8.7",
+      "Time": "2022-02-06 15:54:21"
+    },
+    "statTemperatureMonthMaxLast": {
+      "Value": "14.8",
+      "Time": "2022-01-31 23:59:55"
+    },
+    "statTemperatureMonthMin": {
+      "Value": "-1.1",
+      "Time": "2022-02-06 15:54:21"
+    },
+    "statTemperatureMonthMinLast": {
+      "Value": "-2.8",
+      "Time": "2022-01-31 23:59:55"
+    },
+    "statTemperatureYear": {
+      "Value": "Min: -11.3 Avg: 8.4 Max: 35.7",
+      "Time": "2022-02-06 15:54:21"
+    },
+    "statTemperatureYearLast": {
+      "Value": "Min: -5.8 Avg: 11.4 Max: 34.2 (since:  )",
+      "Time": "2020-12-31 23:59:55"
+    },
+    "statWindSpeedDay": {
+      "Value": "Min: 0.0 Avg: 5.2 Max: 19.3",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedDayLast": {
+      "Value": "Min: 0.0 Avg: 2.6 Max: 38.8",
+      "Time": "2026-11-21 23:59:55"
+    },
+    "statWindSpeedDayMax": {
+      "Value": "19.3",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedDayMaxLast": {
+      "Value": "38.8",
+      "Time": "2026-11-21 23:59:55"
+    },
+    "statWindSpeedHour": {
+      "Value": "Min: 6.1 Avg: 8.2 Max: 11.5",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedHourLast": {
+      "Value": "Min: 0.0 Avg: 9.9 Max: 15.4",
+      "Time": "2026-11-22 14:59:55"
+    },
+    "statWindSpeedHourMax": {
+      "Value": "11.5",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedHourMaxLast": {
+      "Value": "15.4",
+      "Time": "2026-11-22 14:59:55"
+    },
+    "statWindSpeedMonth": {
+      "Value": "Min: 0.0 Avg: 6.5 Max: 43.0",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedMonthLast": {
+      "Value": "Min: 0.0 Avg: 8.9 Max: 49.2",
+      "Time": "2026-10-31 23:59:55"
+    },
+    "statWindSpeedMonthMax": {
+      "Value": "43.0",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedMonthMaxLast": {
+      "Value": "49.2",
+      "Time": "2026-10-31 23:59:55"
+    },
+    "statWindSpeedYear": {
+      "Value": "Min: 0.0 Avg: 8.2 Max: 52.8",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedYearLast": {
+      "Value": "Min: 0.0 Avg: 8.5 Max: 51.1",
+      "Time": "2025-12-31 23:59:55"
+    },
+    "statWindSpeedYearMax": {
+      "Value": "52.8",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedkmhDay": {
+      "Value": "Min: 14 Avg: 14 Max: 14",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedkmhDayLast": {
+      "Value": "Min: 14 Avg: 14 Max: 14",
+      "Time": "2026-11-21 23:59:55"
+    },
+    "statWindSpeedkmhDayMax": {
+      "Value": "14",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedkmhDayMaxLast": {
+      "Value": "14",
+      "Time": "2026-11-21 23:59:55"
+    },
+    "statWindSpeedkmhHour": {
+      "Value": "Min: 14 Avg: 14 Max: 14",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedkmhHourLast": {
+      "Value": "Min: 14 Avg: 14 Max: 14",
+      "Time": "2026-11-22 14:59:55"
+    },
+    "statWindSpeedkmhHourMax": {
+      "Value": "14",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedkmhHourMaxLast": {
+      "Value": "14",
+      "Time": "2026-11-22 14:59:55"
+    },
+    "statWindSpeedkmhMonth": {
+      "Value": "Min: 0 Avg: 7 Max: 43",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedkmhMonthLast": {
+      "Value": "Min: 0 Avg: 0 Max: 49",
+      "Time": "2026-10-31 23:59:55"
+    },
+    "statWindSpeedkmhMonthMax": {
+      "Value": "43",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedkmhMonthMaxLast": {
+      "Value": "49",
+      "Time": "2026-10-31 23:59:55"
+    },
+    "statWindSpeedkmhYear": {
+      "Value": "Min: 0 Avg: 1 Max: 56",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "statWindSpeedkmhYearLast": {
+      "Value": "Min: 0 Avg: 9 Max: 212 (since: 2020-02-09_22:29:48 )",
+      "Time": "2020-12-31 23:59:55"
+    },
+    "statWindSpeedkmhYearMax": {
+      "Value": "56",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "state": {
+      "Value": "3.1",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "svHmIPRainCounterToday_6672": {
+      "Value": "0.9",
+      "Time": "2026-10-25 10:33:07"
+    },
+    "svHmIPRainCounterYesterday_6672": {
+      "Value": "9.7",
+      "Time": "2026-10-25 10:33:07"
+    },
+    "svHmIPSunshineCounterToday_6672": {
+      "Value": "0.0",
+      "Time": "2026-10-25 10:33:07"
+    },
+    "svHmIPSunshineCounterYesterday_6672": {
+      "Value": "453.0",
+      "Time": "2026-10-25 10:33:07"
+    },
+    "tempWindChill": {
+      "Value": "6.6",
+      "Time": "2026-11-20 14:19:01"
+    },
+    "temperature": {
+      "Value": "3.1",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "temperature_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "vapourPressure": {
+      "Value": "6.5",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "windDirRange": {
+      "Value": "67.5",
+      "Time": "2026-09-02 08:13:39"
+    },
+    "windDirection": {
+      "Value": "52.5",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "windDirectionIcon": {
+      "Value": "⬈",
+      "Time": "2026-11-20 14:19:01"
+    },
+    "windDirectionText": {
+      "Value": "WSW",
+      "Time": "2026-11-20 14:19:01"
+    },
+    "windDirection_RANGE": {
+      "Value": "33.8",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "windDirection_RANGE_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "windDirection_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "windSpeed": {
+      "Value": "7.5",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "windSpeed_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:55:32"
+    },
+    "windSpeedkmh": {
+      "Value": "14",
+      "Time": "2026-11-20 14:19:01"
+    },
+    "windSpeedkmh.av": {
+      "Value": "19.116",
+      "Time": "2026-11-20 14:19:01"
+    },
+    "windSpeedms": {
+      "Value": "3.9",
+      "Time": "2026-11-20 14:19:01"
+    },
+    "windStrengthBft": {
+      "Value": "3",
+      "Time": "2026-11-20 14:19:01"
+    }
+  },
+  "Attributes": {
+    "alias": "hmip swo pr 1",
+    "ccuflags": "showMasterReadings,showDeviceReadings",
+    "ccureadingname": "ACTUAL_TEMPERATURE:+temperature;WIND_SPEED:+windSpeed;WIND_DIR:+windDirection",
+    "room": "HomeKit",
+    "stateFormat": "devstate\nactivity\nbat battery\nwindSpeedkmh km/h windDirectionIcon |\nhumidity % |\ntemperature °C |\nbrightness Lux"
+  }
+}
