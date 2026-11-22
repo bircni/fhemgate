@@ -63,15 +63,28 @@ export function requestOptions(connection: Pick<FhemConnection, 'auth' | 'reject
 }
 
 /**
+ * Milliseconds fhem has to answer a command. A fhem that takes the connection and never answers
+ * would keep it open for ever, and the command would never be reported as failed.
+ */
+export const COMMAND_TIMEOUT = 30_000;
+
+/**
+ * Milliseconds fhem has to list its devices. After that the list is asked for again, as after
+ * any other failure. jsonlist2 of a large installation on a slow machine takes some seconds.
+ */
+export const DEVICE_LIST_TIMEOUT = 60_000;
+
+/**
  * Runs a command in fhem. The callback gets the answer without line breaks. It is not called
- * when fhem can not be reached or refuses the command, which is only logged.
+ * when fhem can not be reached, refuses the command or does not answer within COMMAND_TIMEOUT,
+ * which is only logged.
  */
 export function execute(state: PluginState, log: Logging, connection: FhemConnection, cmd: string, callback?: (result: string) => void): void {
   const url = commandUrl(connection.base_url, cmd, state.csrfToken[connection.base_url]);
   const shown = withoutToken(url);
   log.debug('  executing: ' + shown);
 
-  getText(url, { ...requestOptions(connection), gzip: true }, (err, response, result) => {
+  getText(url, { ...requestOptions(connection), gzip: true, timeout: COMMAND_TIMEOUT }, (err, response, result) => {
     if (!err && response?.statusCode === 200) {
       if (callback) {
         callback((result as string).replace(/[\r\n]/g, ''));
@@ -103,7 +116,7 @@ export function fetchDevices(
   const url = devicesUrl(connection.base_url, filter, state.csrfToken[connection.base_url]);
   log.info('fetching: ' + withoutToken(url));
 
-  getText(url, { ...requestOptions(connection), gzip: true }, (err, response, body) => {
+  getText(url, { ...requestOptions(connection), gzip: true, timeout: DEVICE_LIST_TIMEOUT }, (err, response, body) => {
     callback(err, response, deviceList(body));
   });
 }
