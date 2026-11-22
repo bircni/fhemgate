@@ -1,0 +1,114 @@
+{
+  "Name": "hmip_drsi4_1",
+  "PossibleSets": "clear defaults:reset,update,old,forceReset readingFilter:multiple-strict,WEEK_PROGRAM_CHANNEL_LOCKS,PROCESS,STATE,SECTION,SECTION_STATUS,STATE,SECTION,PROCESS,SECTION_STATUS,SECTION_STATUS,STATE,SECTION,PROCESS,PROCESS,SECTION,STATE,SECTION_STATUS,UPDATE_PENDING,INSTALL_TEST,ERROR_POWER_FAILURE,ERROR_OVERHEAT,UNREACH,ERROR_CODE,ACTUAL_TEMPERATURE,RSSI_DEVICE,CONFIG_PENDING,DUTY_CYCLE,RSSI_PEER,OPERATING_VOLTAGE,OPERATING_VOLTAGE_STATUS,PRESS_LONG_START,PRESS_SHORT,PRESS_LONG_RELEASE,PRESS_LONG,STATE,PROCESS,SECTION_STATUS,STATE,SECTION,SECTION_STATUS,SECTION,STATE,PROCESS,SECTION_STATUS,PROCESS,SECTION,STATE,SECTION,STATE,SECTION_STATUS,PROCESS,STATE,SECTION,PROCESS,SECTION_STATUS,PROCESS,SECTION,STATE,SECTION_STATUS,PROCESS,SECTION_STATUS,STATE,SECTION,STATE,SECTION,PROCESS,SECTION_STATUS,PROCESS,SECTION_STATUS,STATE,SECTION,SECTION,STATE,SECTION_STATUS,PROCESS,PRESS_LONG_START,PRESS_SHORT,PRESS_LONG,STATE,PRESS_LONG_RELEASE,SECTION_STATUS,STATE,SECTION,PROCESS,PRESS_LONG_RELEASE,PRESS_LONG,STATE,PRESS_LONG_START,PRESS_SHORT,PRESS_SHORT,PRESS_LONG_START,PRESS_LONG_RELEASE,STATE,PRESS_LONG,STATE,SECTION,PROCESS,SECTION_STATUS config datapoint on-till off:noArg toggle:noArg on:noArg on-for-timer on-till off:noArg toggle:noArg on:noArg on-for-timer on-till off:noArg toggle:noArg on:noArg on-for-timer on-till off:noArg toggle:noArg on:noArg on-for-timer on-till off:noArg toggle:noArg on:noArg on-for-timer on-till off:noArg toggle:noArg on:noArg on-for-timer on-till off:noArg toggle:noArg on:noArg on-for-timer on-till off:noArg toggle:noArg on:noArg on-for-timer on-till off:noArg toggle:noArg on:noArg on-for-timer on-till off:noArg toggle:noArg on:noArg on-for-timer",
+  "PossibleAttrs": "alias comment eventMap group room suppressReading userattr userReadings verbose IODev ccuaggregate ccucalculate ccuflags ccureadingfilter ccureadingformat ccureadingname ccuSetOnChange ccuReadingPrefix devStateFlags ccuget ccuscaleval ccuverify disable hmstatevals statevals substexcl substitute statechannel controlchannel stripnumber traceFilter event-aggregator event-min-interval event-on-change-reading event-on-update-reading oldreadings stateFormat timestamp-on-change-reading statedatapoint controldatapoint ASC WB WB_map building cmdIcon devStateIcon devStateIcon devStateStyle feuerAlarmRelevant floor forceEvents genericDeviceType homebridgeMapping homebridgeName icon mqttAlias mqttDefaults mqttDisable mqttForward mqttPublish mqttSubscribe presentCycle presentReading roomName siriName sortby structexclude webCmd webCmdLabel widgetOverride",
+  "Internals": {
+    "NAME": "hmip_drsi4_1",
+    "TYPE": "HMCCUDEV",
+    "DEF": "000ABC00000008  sd=17.STATE cd=18.STATE",
+    "FUUID": "7f000000-f33f-0000-0000-000000000012",
+    "STATE": "off",
+    "IODev": "ccu",
+    "ccuaddr": "000ABC00000008",
+    "ccuname": "hmip_drsi4_1",
+    "ccudevstate": "active",
+    "ccuif": "HmIP-RF",
+    "ccurolectrl": "SWITCH_VIRTUAL_RECEIVER",
+    "ccurolestate": "SWITCH_TRANSMITTER",
+    "ccusubtype": "DRSI4",
+    "ccutype": "HmIP-DRSI4",
+    "firmware": "3.2.0",
+    "readonly": "no"
+  },
+  "Readings": {
+    "1.STATE": {
+      "Value": "false",
+      "Time": "2026-11-22 14:55:21"
+    },
+    "17.PROCESS": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "17.SECTION": {
+      "Value": "0",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "17.SECTION_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "17.STATE": {
+      "Value": "off",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "18.PROCESS": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "18.SECTION": {
+      "Value": "0",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "18.SECTION_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "18.STATE": {
+      "Value": "off",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "2.STATE": {
+      "Value": "false",
+      "Time": "2026-11-22 14:55:21"
+    },
+    "3.STATE": {
+      "Value": "false",
+      "Time": "2026-11-22 14:55:21"
+    },
+    "4.STATE": {
+      "Value": "false",
+      "Time": "2026-11-22 14:55:21"
+    },
+    "IODev": {
+      "Value": "ccu",
+      "Time": "2026-11-07 10:05:53"
+    },
+    "activity": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:02:10"
+    },
+    "control": {
+      "Value": "off",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "devstate": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:02:10"
+    },
+    "hmstate": {
+      "Value": "off",
+      "Time": "2026-11-22 15:02:10"
+    },
+    "rssidevice": {
+      "Value": "-71",
+      "Time": "2026-11-22 15:02:10"
+    },
+    "rssipeer": {
+      "Value": "-60",
+      "Time": "2026-11-22 09:37:46"
+    },
+    "state": {
+      "Value": "off",
+      "Time": "2026-11-22 14:55:22"
+    },
+    "voltage": {
+      "Value": "0.0",
+      "Time": "2026-10-25 10:33:08"
+    }
+  },
+  "Attributes": {
+    "alias": "hmip drsi4 1",
+    "ccureadingfilter": "1,17,18,2,3,4..*",
+    "room": "HomeKit"
+  }
+}

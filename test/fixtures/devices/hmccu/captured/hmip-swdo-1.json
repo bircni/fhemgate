@@ -1,0 +1,92 @@
+{
+  "Name": "hmip_swdo_1",
+  "PossibleSets": "clear defaults:reset,update,old,forceReset readingFilter:multiple-strict,STATE config",
+  "PossibleAttrs": "alias comment eventMap group room suppressReading userattr userReadings verbose IODev ccucalculate ccuflags ccureadingfilter ccureadingformat ccureadingname ccuSetOnChange ccuReadingPrefix ccuscaleval ccuverify ccuget devStateFlags disable hmstatevals statevals substitute substexcl stripnumber traceFilter event-aggregator event-min-interval event-on-change-reading event-on-update-reading oldreadings stateFormat timestamp-on-change-reading statedatapoint controldatapoint ASC WB WB_map building cmdIcon devStateIcon devStateIcon devStateStyle feuerAlarmRelevant floor forceEvents genericDeviceType homebridgeMapping homebridgeName icon mqttAlias mqttDefaults mqttDisable mqttForward mqttPublish mqttSubscribe presentCycle presentReading roomName siriName sortby structexclude webCmd webCmdLabel widgetOverride structexclude",
+  "Internals": {
+    "NAME": "hmip_swdo_1",
+    "TYPE": "HMCCUCHN",
+    "DEF": "000ABC00000003:1",
+    "FUUID": "7f000000-f33f-0000-0000-000000000004",
+    "STATE": "ok\nclosed",
+    "IODev": "ccu",
+    "ccuaddr": "000ABC00000003:1",
+    "ccuname": "hmip_swdo_1",
+    "ccudevstate": "active",
+    "ccuif": "HmIP-RF",
+    "ccurolestate": "SHUTTER_CONTACT",
+    "ccusubtype": "SWD",
+    "ccutype": "HMIP-SWDO",
+    "chntype": "?",
+    "firmware": "1.18.10",
+    "readonly": "no"
+  },
+  "Readings": {
+    "D-firmware": {
+      "Value": "2.1",
+      "Time": "from archivexx"
+    },
+    "D-serialNr": {
+      "Value": "SER0000001",
+      "Time": "from archivexx"
+    },
+    "IODev": {
+      "Value": "ccu",
+      "Time": "2026-11-07 10:05:53"
+    },
+    "STATE": {
+      "Value": "closed",
+      "Time": "2026-11-22 15:36:07"
+    },
+    "activity": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:36:07"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:36:07"
+    },
+    "contact": {
+      "Value": "closed",
+      "Time": "2026-11-22 15:36:07"
+    },
+    "devstate": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:36:07"
+    },
+    "hmstate": {
+      "Value": "closed",
+      "Time": "2026-11-22 15:36:07"
+    },
+    "peerList": {
+      "Value": "other_device",
+      "Time": "2026-04-07 11:18:36"
+    },
+    "rssidevice": {
+      "Value": "-59",
+      "Time": "2026-11-22 15:36:07"
+    },
+    "rssipeer": {
+      "Value": "N/A",
+      "Time": "2026-10-25 10:33:08"
+    },
+    "sabotage": {
+      "Value": "false",
+      "Time": "2026-11-22 15:36:07"
+    },
+    "state": {
+      "Value": "closed",
+      "Time": "2026-11-22 15:36:07"
+    },
+    "voltage": {
+      "Value": "1.2",
+      "Time": "2026-11-22 15:36:07"
+    }
+  },
+  "Attributes": {
+    "alias": "hmip swdo 1",
+    "ccureadingname": "STATE:+contact",
+    "room": "HomeKit",
+    "stateFormat": "battery\nstate",
+    "subType": "virtual"
+  }
+}

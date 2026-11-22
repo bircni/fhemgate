@@ -1,0 +1,177 @@
+{
+  "Name": "hmip_drbli4_1",
+  "PossibleSets": "clear defaults:reset,update,old,forceReset readingFilter:multiple-strict,PRESS_LONG,STATE,PRESS_LONG_RELEASE,PRESS_LONG_START,PRESS_SHORT,LEVEL_2_STATUS,SECTION_STATUS,LEVEL_STATUS,LEVEL,ACTIVITY_STATE,SECTION,LEVEL_2,PROCESS,LEVEL_2,PROCESS,SECTION,ACTIVITY_STATE,LEVEL,LEVEL_STATUS,SECTION_STATUS,LEVEL_2_STATUS,ACTIVITY_STATE,SECTION,PROCESS,LEVEL_2,LEVEL_2_STATUS,LEVEL,LEVEL_STATUS,SECTION_STATUS,LEVEL,LEVEL_STATUS,SECTION_STATUS,LEVEL_2_STATUS,PROCESS,LEVEL_2,ACTIVITY_STATE,SECTION,LEVEL_2_STATUS,LEVEL_STATUS,LEVEL,SECTION_STATUS,ACTIVITY_STATE,SECTION,LEVEL_2,PROCESS,ACTIVITY_STATE,SECTION,LEVEL_2,PROCESS,LEVEL_2_STATUS,SECTION_STATUS,LEVEL,LEVEL_STATUS,UPDATE_PENDING,INSTALL_TEST,ERROR_POWER_FAILURE,ERROR_OVERHEAT,UNREACH,ERROR_CODE,RSSI_DEVICE,ACTUAL_TEMPERATURE,CONFIG_PENDING,DUTY_CYCLE,RSSI_PEER,OPERATING_VOLTAGE,OPERATING_VOLTAGE_STATUS,LEVEL_2,PROCESS,SECTION,ACTIVITY_STATE,SECTION_STATUS,LEVEL_STATUS,LEVEL,LEVEL_2_STATUS,LEVEL_2,PROCESS,ACTIVITY_STATE,SECTION,SECTION_STATUS,LEVEL,LEVEL_STATUS,LEVEL_2_STATUS,LEVEL_2_STATUS,LEVEL,LEVEL_STATUS,SECTION_STATUS,ACTIVITY_STATE,SECTION,LEVEL_2,PROCESS,ACTIVITY_STATE,SECTION,LEVEL_2,PROCESS,LEVEL_2_STATUS,LEVEL_STATUS,LEVEL,SECTION_STATUS,PRESS_LONG,STATE,PRESS_LONG_RELEASE,PRESS_LONG_START,PRESS_SHORT,WEEK_PROGRAM_CHANNEL_LOCKS,PRESS_SHORT,PRESS_LONG_START,PRESS_LONG_RELEASE,STATE,PRESS_LONG,PRESS_LONG_RELEASE,STATE,PRESS_LONG,PRESS_SHORT,PRESS_LONG_START,LEVEL,LEVEL_STATUS,SECTION_STATUS,LEVEL_2_STATUS,PROCESS,LEVEL_2,SECTION,ACTIVITY_STATE,LEVEL_STATUS,LEVEL,SECTION_STATUS,LEVEL_2_STATUS,PROCESS,LEVEL_2,ACTIVITY_STATE,SECTION,PRESS_LONG_START,PRESS_SHORT,PRESS_LONG,STATE,PRESS_LONG_RELEASE,LEVEL_STATUS,LEVEL,SECTION_STATUS,LEVEL_2_STATUS,PROCESS,LEVEL_2,ACTIVITY_STATE,SECTION,STATE,PRESS_LONG,PRESS_LONG_RELEASE,PRESS_SHORT,PRESS_LONG_START,PRESS_LONG_RELEASE,STATE,PRESS_LONG,PRESS_SHORT,PRESS_LONG_START,LEVEL_2_STATUS,LEVEL,LEVEL_STATUS,SECTION_STATUS,SECTION,ACTIVITY_STATE,LEVEL_2,PROCESS,PRESS_LONG_START,PRESS_SHORT,PRESS_LONG_RELEASE,PRESS_LONG,STATE,LEVEL_2_STATUS,SECTION_STATUS,LEVEL,LEVEL_STATUS,SECTION,ACTIVITY_STATE,LEVEL_2,PROCESS,LEVEL_2,PROCESS,ACTIVITY_STATE,SECTION,SECTION_STATUS,LEVEL_STATUS,LEVEL,LEVEL_2_STATUS config datapoint up oldLevel:noArg pct allLevels close:noArg stop:noArg closeSlats:noArg open:noArg openSlats:noArg toggle:noArg down pctSlats",
+  "PossibleAttrs": "alias comment eventMap group room suppressReading userattr userReadings verbose IODev ccuaggregate ccucalculate ccuflags ccureadingfilter ccureadingformat ccureadingname ccuSetOnChange ccuReadingPrefix devStateFlags ccuget ccuscaleval ccuverify disable hmstatevals statevals substexcl substitute statechannel controlchannel stripnumber traceFilter event-aggregator event-min-interval event-on-change-reading event-on-update-reading oldreadings stateFormat timestamp-on-change-reading statedatapoint controldatapoint ASC WB WB_map building cmdIcon devStateIcon devStateIcon devStateStyle feuerAlarmRelevant floor forceEvents genericDeviceType homebridgeMapping homebridgeName icon mqttAlias mqttDefaults mqttDisable mqttForward mqttPublish mqttSubscribe presentCycle presentReading roomName siriName sortby structexclude webCmd webCmdLabel widgetOverride ASC_Adv ASC_Antifreeze ASC_Antifreeze_Pos ASC_AutoAstroModeEvening ASC_AutoAstroModeEveningHorizon ASC_AutoAstroModeMorning ASC_AutoAstroModeMorningHorizon ASC_BlockingTime_afterManual ASC_BlockingTime_beforeDayOpen ASC_BlockingTime_beforeNightClose ASC_BrightnessSensor ASC_Closed_Pos ASC_ComfortOpen_Pos ASC_CommandTemplate ASC_Down ASC_DriveUpMaxDuration ASC_Drive_Delay ASC_Drive_DelayStart ASC_ExternalTrigger ASC_GuestRoom ASC_LockOut ASC_LockOut_Cmd ASC_Mode_Down ASC_Mode_Up ASC_Open_Pos ASC_Partymode ASC_Pos_Reading ASC_PrivacyDownValue_beforeNightClose ASC_PrivacyDown_Pos ASC_PrivacyUpValue_beforeDayOpen ASC_PrivacyUp_Pos ASC_RainProtection ASC_Roommate_Device ASC_Roommate_Reading ASC_Self_Defense_AbsentDelay ASC_Self_Defense_Mode ASC_Shading_BetweenTheTime ASC_Shading_InOutAzimuth ASC_Shading_MinMax_Elevation ASC_Shading_Min_OutsideTemperature ASC_Shading_Mode ASC_Shading_Pos ASC_Shading_StateChange_SunnyCloudy ASC_Shading_WaitingPeriod ASC_Shutter_IdleDetection ASC_ShuttersPlace ASC_SlatPosCmd_SlatDevice ASC_Sleep_Pos ASC_TempSensor ASC_Time_Down_Early ASC_Time_Down_Late ASC_Time_Up_Early ASC_Time_Up_Late ASC_Time_Up_WE_Holiday ASC_Up ASC_Ventilate_Pos ASC_Ventilate_Window_Open ASC_WiggleValue ASC_WindParameters ASC_WindProtection ASC_WindowRec ASC_WindowRec_PosAfterDayClosed ASC_WindowRec_subType",
+  "Internals": {
+    "NAME": "hmip_drbli4_1",
+    "TYPE": "HMCCUDEV",
+    "DEF": "000ABC00000011 sd=9.LEVEL cd=10.LEVEL",
+    "FUUID": "7f000000-f33f-0000-0000-000000000015",
+    "STATE": "STABLE\nmanual\n100",
+    "IODev": "ccu",
+    "ccuaddr": "000ABC00000011",
+    "ccuname": "hmip_drbli4_1",
+    "ccudevstate": "active",
+    "ccuif": "HmIP-RF",
+    "ccurolectrl": "BLIND_VIRTUAL_RECEIVER",
+    "ccurolestate": "BLIND_TRANSMITTER",
+    "ccusubtype": "DRBLI4",
+    "ccutype": "HmIP-DRBLI4",
+    "firmware": "1.10.16",
+    "readonly": "no"
+  },
+  "Readings": {
+    "1.STATE": {
+      "Value": "false",
+      "Time": "2026-11-22 15:21:44"
+    },
+    "10.ACTIVITY_STATE": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "10.LEVEL": {
+      "Value": "open",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "10.LEVEL_2": {
+      "Value": "",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "10.LEVEL_2_STATUS": {
+      "Value": "UNKNOWN",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "10.LEVEL_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "10.PROCESS": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "10.SECTION": {
+      "Value": "4",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "10.SECTION_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "2.STATE": {
+      "Value": "false",
+      "Time": "2026-11-22 15:21:44"
+    },
+    "9.ACTIVITY_STATE": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "9.LEVEL": {
+      "Value": "open",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "9.LEVEL_2": {
+      "Value": "",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "9.LEVEL_2_STATUS": {
+      "Value": "UNKNOWN",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "9.LEVEL_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "9.PROCESS": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "9.SECTION": {
+      "Value": "",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "9.SECTION_STATUS": {
+      "Value": "UNKNOWN",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "ASC_Enable": {
+      "Value": "on",
+      "Time": "2025-11-24 10:13:33"
+    },
+    "ASC_ShadingMessage": {
+      "Value": "INFO: current shading status is 'out' - next check in 0.5m",
+      "Time": "2026-11-22 15:56:51"
+    },
+    "ASC_ShuttersLastDrive": {
+      "Value": "manual",
+      "Time": "2026-11-21 12:24:41"
+    },
+    "ASC_Time_DriveDown": {
+      "Value": "22.11.2026 - 16:38",
+      "Time": "2026-11-22 07:34:29"
+    },
+    "ASC_Time_DriveUp": {
+      "Value": "23.11.2026 - 07:35",
+      "Time": "2026-11-22 07:34:29"
+    },
+    "IODev": {
+      "Value": "ccu",
+      "Time": "2026-11-07 10:05:53"
+    },
+    "activity": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:21:46"
+    },
+    "associatedWith": {
+      "Value": "other_device",
+      "Time": "2026-11-07 10:06:06"
+    },
+    "control": {
+      "Value": "open",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "devstate": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:21:46"
+    },
+    "hmstate": {
+      "Value": "open",
+      "Time": "2026-11-22 15:21:46"
+    },
+    "level": {
+      "Value": "open",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "pct": {
+      "Value": "100",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "pctSlats": {
+      "Value": "",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "rssidevice": {
+      "Value": "-71",
+      "Time": "2026-11-22 15:21:46"
+    },
+    "rssipeer": {
+      "Value": "-75",
+      "Time": "2026-11-18 22:21:15"
+    },
+    "state": {
+      "Value": "open",
+      "Time": "2026-11-22 15:21:45"
+    },
+    "voltage": {
+      "Value": "0.0",
+      "Time": "2026-10-25 10:33:07"
+    }
+  },
+  "Attributes": {
+    "alias": "hmip drbli4 1",
+    "ccureadingfilter": "1,2,9,10..*",
+    "genericDeviceType": "blind",
+    "room": "HomeKit",
+    "stateFormat": "10.PROCESS\nASC_ShuttersLastDrive\npct",
+    "substexcl": "pct"
+  }
+}

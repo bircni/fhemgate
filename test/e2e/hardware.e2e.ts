@@ -20,15 +20,16 @@ function fixture(id: string, change: (device: FhemDevice) => void = () => {}): F
 }
 
 // HomeMatic IP devices behind a CCU, one of every kind the HMCCU detection knows. several of
-// the fixtures share their hardware address, which is the serial number, so each gets its own.
+// the written fixtures share their hardware address, which is the serial number, so each gets its
+// own. the captured ones keep theirs, which differ already.
 const hmccuDevices: FhemDevice[] = [
   'hmip-ps-switch',
   'hmip-ps-switch-datapoint-only',
   'hmip-address-reading-format',
-  'hmip-outlet-generic-type',
+  'captured/hmip-fsm-1',
   'hmip-psm-power',
   'hmip-bsm-device',
-  'hmip-bdt-dimmer',
+  'captured/hmip-rgbw-7',
   'hmip-dimmer-datapoint-only',
   'hmip-broll-shutter',
   'hmip-broll-datapoint-only',
@@ -37,7 +38,7 @@ const hmccuDevices: FhemDevice[] = [
   'hmip-etrv-thermostat',
   'hmip-etrv-datapoint-only',
   'hmip-wth-wall-thermostat',
-  'hmip-swdo-contact',
+  'captured/hmip-swdo-1',
   'hmip-srh-handle',
   'hmip-smi-motion',
   'hmip-spi-presence',
@@ -45,7 +46,9 @@ const hmccuDevices: FhemDevice[] = [
   'hmip-swd-leak',
 ].map((name, index) =>
   fixture(`hmccu/${name}`, (device) => {
-    device.Internals.DEF = `CCU 000E2E${String(index).padStart(8, '0')}:1`;
+    if (!name.startsWith('captured/')) {
+      device.Internals.DEF = `CCU 000E2E${String(index).padStart(8, '0')}:1`;
+    }
   }),
 );
 
@@ -230,7 +233,8 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['hmip_ps_switch', 'Switch', undefined, 'StatusLowBattery', 0],
       ['hmip_ps_switch_datapoint_only', 'Switch', undefined, 'On', 1],
       ['hmip_address_reading_format', 'Switch', undefined, 'On', 0],
-      ['hmip_outlet_generic_type', 'Outlet', undefined, 'On', 1],
+      // a real HmIP-FSM that genericDeviceType makes a light
+      ['hmip_fsm_1', 'Lightbulb', undefined, 'On', 1],
       ['hmip_psm_power', 'Switch', undefined, 'On', 1],
       ['hmip_psm_power', 'Switch', undefined, 'Power', 42.5],
       // the ccu reports milliampere and watt hours
@@ -240,9 +244,8 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       // a HMCCUDEV with the same datapoint on several channels: the controldatapoint attribute picks channel 4
       ['hmip_bsm_device', 'Switch', undefined, 'On', 1],
       ['hmip_bsm_device', 'Switch', undefined, 'Power', 12],
-      // LEVEL runs from 0 to 1
-      ['hmip_bdt_dimmer', 'Lightbulb', undefined, 'On', 1],
-      ['hmip_bdt_dimmer', 'Lightbulb', undefined, 'Brightness', 60],
+      // a real HmIP-RGBW that is off
+      ['hmip_rgbw_7', 'Lightbulb', undefined, 'Brightness', 0],
       ['hmip_dimmer_datapoint_only', 'Lightbulb', undefined, 'On', 0],
       ['hmip_dimmer_datapoint_only', 'Lightbulb', undefined, 'Brightness', 0],
       ['hmip_broll_shutter', 'WindowCovering', undefined, 'CurrentPosition', 35],
@@ -270,9 +273,10 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['hmip_wth_wall_thermostat', 'Thermostat', undefined, 'CurrentTemperature', 21.1],
       ['hmip_wth_wall_thermostat', 'Thermostat', undefined, 'CurrentRelativeHumidity', 48],
       ['hmip_wth_wall_thermostat', 'Thermostat', undefined, 'TargetHeatingCoolingState', 1],
-      ['hmip_swdo_contact', 'ContactSensor', undefined, 'ContactSensorState', 0],
-      ['hmip_swdo_contact', 'ContactSensor', undefined, 'CurrentDoorState', 1],
-      ['hmip_swdo_contact', 'ContactSensor', undefined, 'StatusLowBattery', 1],
+      // a real HmIP-SWDO that is closed, with its battery ok
+      ['hmip_swdo_1', 'ContactSensor', undefined, 'ContactSensorState', 0],
+      ['hmip_swdo_1', 'ContactSensor', undefined, 'CurrentDoorState', 1],
+      ['hmip_swdo_1', 'ContactSensor', undefined, 'StatusLowBattery', 0],
       // a window handle that is turned to open
       ['hmip_srh_handle', 'ContactSensor', undefined, 'ContactSensorState', 1],
       ['hmip_smi_motion', 'MotionSensor', undefined, 'MotionDetected', 1],
@@ -368,10 +372,11 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['hmip_ps_switch', 'Switch', undefined, 'On', true, 'on'],
       ['hmip_ps_switch_datapoint_only', 'Switch', undefined, 'On', false, 'datapoint 3.STATE false'],
       ['hmip_address_reading_format', 'Switch', undefined, 'On', true, 'on'],
-      ['hmip_outlet_generic_type', 'Outlet', undefined, 'On', false, 'off'],
+      // the stand-in does not report back what a set changes, and the device is on already
+      ['hmip_fsm_1', 'Lightbulb', undefined, 'On', true, 'on'],
       ['hmip_bsm_device', 'Switch', undefined, 'On', false, 'off'],
-      ['hmip_bdt_dimmer', 'Lightbulb', undefined, 'Brightness', 30, 'pct 30'],
-      ['hmip_bdt_dimmer', 'Lightbulb', undefined, 'On', false, 'off'],
+      ['hmip_rgbw_7', 'Lightbulb', undefined, 'Brightness', 30, 'pct 30'],
+      ['hmip_rgbw_7', 'Lightbulb', undefined, 'On', false, 'off'],
       // the datapoint takes the level from 0 to 1
       ['hmip_dimmer_datapoint_only', 'Lightbulb', undefined, 'Brightness', 50, 'datapoint 4.LEVEL 0.5'],
       ['hmip_dimmer_datapoint_only', 'Lightbulb', undefined, 'On', false, 'datapoint 4.LEVEL 0'],
@@ -459,8 +464,9 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       // a reading that is named with the address of the device at the ccu
       ['hmip_address_reading_format', '000E1A2B3C4D5E:3.STATE', '0', 'Switch', undefined, 'On', 0],
       ['hmip_address_reading_format', '000E1A2B3C4D5E:3.STATE', 'true', 'Switch', undefined, 'On', 1],
-      ['hmip_outlet_generic_type', '3.STATE', '1', 'Outlet', undefined, 'On', 1],
-      ['hmip_outlet_generic_type', '3.STATE', 'false', 'Outlet', undefined, 'On', 0],
+      // the real HmIP-FSM reports on and off in its state reading
+      ['hmip_fsm_1', 'state', 'off', 'Lightbulb', undefined, 'On', 0],
+      ['hmip_fsm_1', 'state', 'on', 'Lightbulb', undefined, 'On', 1],
       ['hmip_psm_power', 'POWER', '100.5', 'Switch', undefined, 'Power', 100.5],
       ['hmip_psm_power', 'CURRENT', '500', 'Switch', undefined, 'Current', 0.5],
       ['hmip_psm_power', 'VOLTAGE', '229.8', 'Switch', undefined, 'Voltage', 229.8],
@@ -468,8 +474,6 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['hmip_bsm_device', '4.STATE', '1', 'Switch', undefined, 'On', 1],
       ['hmip_bsm_device', '4.STATE', 'false', 'Switch', undefined, 'On', 0],
       ['hmip_bsm_device', '6.POWER', '7.5', 'Switch', undefined, 'Power', 7.5],
-      ['hmip_bdt_dimmer', '4.LEVEL', '0.25', 'Lightbulb', undefined, 'Brightness', 25],
-      ['hmip_bdt_dimmer', '4.LEVEL', '0.0', 'Lightbulb', undefined, 'Brightness', 0],
       ['hmip_dimmer_datapoint_only', '4.LEVEL', '1.0', 'Lightbulb', undefined, 'Brightness', 100],
       ['hmip_dimmer_datapoint_only', '4.LEVEL', '0.0', 'Lightbulb', undefined, 'On', 0],
       ['hmip_broll_shutter', '4.LEVEL', '0.8', 'WindowCovering', undefined, 'CurrentPosition', 80],
@@ -494,9 +498,9 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['hmip_wth_wall_thermostat', '1.HUMIDITY', '55', 'Thermostat', undefined, 'CurrentRelativeHumidity', 55],
       ['hmip_wth_wall_thermostat', '1.CONTROL_MODE', 'MANU-MODE', 'Thermostat', undefined, 'TargetHeatingCoolingState', 1],
       ['hmip_wth_wall_thermostat', '1.CONTROL_MODE', 'AUTO-MODE', 'Thermostat', undefined, 'TargetHeatingCoolingState', 3],
-      ['hmip_swdo_contact', '1.STATE', '1', 'ContactSensor', undefined, 'ContactSensorState', 1],
-      ['hmip_swdo_contact', '1.STATE', '0', 'ContactSensor', undefined, 'CurrentDoorState', 1],
-      ['hmip_swdo_contact', '0.LOW_BAT', '0', 'ContactSensor', undefined, 'StatusLowBattery', 0],
+      // the real HmIP-SWDO reports open and closed in its state reading
+      ['hmip_swdo_1', 'state', 'open', 'ContactSensor', undefined, 'ContactSensorState', 1],
+      ['hmip_swdo_1', 'state', 'closed', 'ContactSensor', undefined, 'ContactSensorState', 0],
       // the handle is closed, then tilted
       ['hmip_srh_handle', '1.STATE', '0', 'ContactSensor', undefined, 'ContactSensorState', 0],
       ['hmip_srh_handle', '1.STATE', '1', 'ContactSensor', undefined, 'ContactSensorState', 1],
@@ -517,14 +521,14 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
     });
 
     it('of a HMCCU level that is no number changes nothing', async () => {
-      const brightness = world.named('hmip_bdt_dimmer', 'Lightbulb', 'Brightness');
+      const brightness = world.named('hmip_dimmer_datapoint_only', 'Lightbulb', 'Brightness');
       const tilt = world.named('hmip_bbl_venetian', 'WindowCovering', 'CurrentHorizontalTiltAngle');
       const before = world.homebridge.notifications().length;
 
-      await world.fhem.change('hmip_bdt_dimmer', '4.LEVEL', 'unknown');
+      await world.fhem.change('hmip_dimmer_datapoint_only', '4.LEVEL', 'unknown');
       await world.fhem.change('hmip_bbl_venetian', '4.LEVEL_2', 'unknown');
       // the events after them have arrived, so they have as well
-      await world.notifies(brightness, 40, () => world.fhem.change('hmip_bdt_dimmer', '4.LEVEL', '0.4'));
+      await world.notifies(brightness, 40, () => world.fhem.change('hmip_dimmer_datapoint_only', '4.LEVEL', '0.4'));
       await world.notifies(tilt, 0, () => world.fhem.change('hmip_bbl_venetian', '4.LEVEL_2', '0.5'));
 
       const told = (target: { aid: number; iid: number }) =>

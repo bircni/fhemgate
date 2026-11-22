@@ -1,0 +1,76 @@
+{
+  "Name": "hmip_fci6_2",
+  "PossibleSets": "clear defaults:reset,update,old,forceReset readingFilter:multiple-strict,PRESS_LONG_START,PRESS_SHORT,PRESS_LONG,STATE,PRESS_LONG_RELEASE config",
+  "PossibleAttrs": "alias comment eventMap group room suppressReading userattr userReadings verbose IODev ccucalculate ccuflags ccureadingfilter ccureadingformat ccureadingname ccuSetOnChange ccuReadingPrefix ccuscaleval ccuverify ccuget devStateFlags disable hmstatevals statevals substitute substexcl stripnumber traceFilter event-aggregator event-min-interval event-on-change-reading event-on-update-reading oldreadings stateFormat timestamp-on-change-reading statedatapoint controldatapoint ASC WB WB_map building cmdIcon devStateIcon devStateIcon devStateStyle feuerAlarmRelevant floor forceEvents genericDeviceType homebridgeMapping homebridgeName icon mqttAlias mqttDefaults mqttDisable mqttForward mqttPublish mqttSubscribe presentCycle presentReading roomName siriName sortby structexclude webCmd webCmdLabel widgetOverride",
+  "Internals": {
+    "NAME": "hmip_fci6_2",
+    "TYPE": "HMCCUCHN",
+    "DEF": "000ABC00000017:3",
+    "FUUID": "7f000000-f33f-0000-0000-000000000025",
+    "STATE": "ok\nclosed",
+    "IODev": "ccu",
+    "ccuaddr": "000ABC00000017:3",
+    "ccuname": "hmip_fci6_2",
+    "ccudevstate": "active",
+    "ccuif": "HmIP-RF",
+    "ccurolestate": "MULTI_MODE_INPUT_TRANSMITTER",
+    "ccusubtype": "FCI6",
+    "ccutype": "HmIP-FCI6",
+    "chntype": "?",
+    "firmware": "1.0.18",
+    "readonly": "no"
+  },
+  "Readings": {
+    "IODev": {
+      "Value": "ccu",
+      "Time": "2026-11-07 10:05:54"
+    },
+    "STATE": {
+      "Value": "false",
+      "Time": "2026-11-22 15:32:16"
+    },
+    "activity": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:32:16"
+    },
+    "battery": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:32:16"
+    },
+    "contact": {
+      "Value": "closed",
+      "Time": "2026-11-22 14:16:08"
+    },
+    "devstate": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:32:16"
+    },
+    "hmstate": {
+      "Value": "false",
+      "Time": "2026-11-22 15:32:16"
+    },
+    "rssidevice": {
+      "Value": "-63",
+      "Time": "2026-11-22 15:32:16"
+    },
+    "rssipeer": {
+      "Value": "N/A",
+      "Time": "2026-10-25 10:33:07"
+    },
+    "state": {
+      "Value": "false",
+      "Time": "2026-11-22 15:32:16"
+    },
+    "voltage": {
+      "Value": "2.7",
+      "Time": "2026-11-22 15:32:16"
+    }
+  },
+  "Attributes": {
+    "alias": "hmip fci6 2",
+    "genericDeviceType": "contact",
+    "homebridgeMapping": "ContactSensorState=contact,values=closed:CONTACT_DETECTED;open:CONTACT_NOT_DETECTED\nCurrentDoorState=contact,values=closed:CLOSED;open:OPEN",
+    "room": "HomeKit",
+    "stateFormat": "battery\ncontact"
+  }
+}

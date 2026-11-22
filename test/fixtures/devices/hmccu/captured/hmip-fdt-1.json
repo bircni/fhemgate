@@ -1,0 +1,144 @@
+{
+  "Name": "hmip_fdt_1",
+  "PossibleSets": "clear defaults:reset,update,old,forceReset readingFilter:multiple-strict,SECTION,ACTIVITY_STATE,PROCESS,LEVEL,LEVEL_STATUS,SECTION_STATUS,WEEK_PROGRAM_CHANNEL_LOCKS,LEVEL,LEVEL_STATUS,SECTION_STATUS,PROCESS,SECTION,ACTIVITY_STATE,LEVEL_STATUS,LEVEL,SECTION_STATUS,ACTIVITY_STATE,SECTION,PROCESS,CONFIG_PENDING,ERROR_UPDATE,DUTY_CYCLE,ERROR_OVERLOAD,RSSI_DEVICE,ACTUAL_TEMPERATURE,ACTUAL_TEMPERATURE_STATUS,OPERATING_VOLTAGE,RSSI_PEER,OPERATING_VOLTAGE_STATUS,UPDATE_PENDING,ERROR_CODE,UNREACH,INSTALL_TEST,ERROR_OVERHEAT,PROCESS,SECTION,ACTIVITY_STATE,SECTION_STATUS,LEVEL,LEVEL_STATUS config datapoint down toggle:noArg on:noArg on-for-timer on-till level pct oldLevel:noArg off:noArg up progMode:AUTO_MODE_WITHOUT_RESET,AUTO_MODE_WITH_RESET,MANU_MODE",
+  "PossibleAttrs": "alias comment eventMap group room suppressReading userattr userReadings verbose IODev ccuaggregate ccucalculate ccuflags ccureadingfilter ccureadingformat ccureadingname ccuSetOnChange ccuReadingPrefix devStateFlags ccuget ccuscaleval ccuverify disable hmstatevals statevals substexcl substitute statechannel controlchannel stripnumber traceFilter event-aggregator event-min-interval event-on-change-reading event-on-update-reading oldreadings stateFormat timestamp-on-change-reading statedatapoint controldatapoint ASC WB WB_map building cmdIcon devStateIcon devStateIcon devStateStyle feuerAlarmRelevant floor forceEvents genericDeviceType homebridgeMapping homebridgeName icon mqttAlias mqttDefaults mqttDisable mqttForward mqttPublish mqttSubscribe presentCycle presentReading roomName siriName sortby structexclude webCmd webCmdLabel widgetOverride",
+  "Internals": {
+    "NAME": "hmip_fdt_1",
+    "TYPE": "HMCCUDEV",
+    "DEF": "000ABC00000018  sd=1.LEVEL cd=2.LEVEL",
+    "FUUID": "7f000000-f33f-0000-0000-000000000026",
+    "STATE": "off",
+    "IODev": "ccu",
+    "ccuaddr": "000ABC00000018",
+    "ccuname": "hmip_fdt_1",
+    "ccudevstate": "active",
+    "ccuif": "HmIP-RF",
+    "ccurolectrl": "DIMMER_VIRTUAL_RECEIVER",
+    "ccurolestate": "DIMMER_TRANSMITTER",
+    "ccusubtype": "FDT",
+    "ccutype": "HmIP-FDT",
+    "firmware": "2.2.4",
+    "readonly": "no"
+  },
+  "Readings": {
+    "1.ACTIVITY_STATE": {
+      "Value": "UNKNOWN",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "1.LEVEL": {
+      "Value": "off",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "1.LEVEL_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "1.PROCESS": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "1.SECTION": {
+      "Value": "",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "1.SECTION_STATUS": {
+      "Value": "UNKNOWN",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "2.ACTIVITY_STATE": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "2.LEVEL": {
+      "Value": "off",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "2.LEVEL_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "2.PROCESS": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "2.SECTION": {
+      "Value": "0",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "2.SECTION_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "5.WEEK_PROGRAM_CHANNEL_LOCKS": {
+      "Value": "0",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "D-firmware": {
+      "Value": "2.6",
+      "Time": "1900-01-01 00:00:01"
+    },
+    "D-serialNr": {
+      "Value": "SER0000004",
+      "Time": "1900-01-01 00:00:01"
+    },
+    "IODev": {
+      "Value": "ccu",
+      "Time": "2026-11-07 10:05:54"
+    },
+    "activity": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "control": {
+      "Value": "off",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "devstate": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:35:42"
+    },
+    "hmstate": {
+      "Value": "off",
+      "Time": "2026-11-22 15:35:42"
+    },
+    "level": {
+      "Value": "0",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "pct": {
+      "Value": "0",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "peerList": {
+      "Value": "6B022001,6B022002,6B022003",
+      "Time": "2026-09-10 13:41:12"
+    },
+    "progMode": {
+      "Value": "0",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "rssidevice": {
+      "Value": "-73",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "rssipeer": {
+      "Value": "-59",
+      "Time": "2026-10-29 19:26:48"
+    },
+    "state": {
+      "Value": "off",
+      "Time": "2026-11-22 15:35:41"
+    },
+    "voltage": {
+      "Value": "0.0",
+      "Time": "2026-10-25 10:33:08"
+    }
+  },
+  "Attributes": {
+    "alias": "hmip fdt 1",
+    "ccureadingfilter": "1,2,5..*",
+    "room": "HomeKit",
+    "subType": "virtual",
+    "substexcl": "pct|level"
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "Name": "hmip_mod_ho_1",
+  "PossibleSets": "clear defaults:reset,update,old,forceReset readingFilter:multiple-strict,DOOR_STATE,SECTION,PROCESS,ERROR_CODE,SECTION_STATUS config datapoint open:noArg ventilate:noArg stop:noArg close:noArg",
+  "PossibleAttrs": "alias comment eventMap group room suppressReading userattr userReadings verbose IODev ccucalculate ccuflags ccureadingfilter ccureadingformat ccureadingname ccuSetOnChange ccuReadingPrefix ccuscaleval ccuverify ccuget devStateFlags disable hmstatevals statevals substitute substexcl stripnumber traceFilter event-aggregator event-min-interval event-on-change-reading event-on-update-reading oldreadings stateFormat timestamp-on-change-reading statedatapoint controldatapoint ASC WB WB_map building cmdIcon devStateIcon devStateIcon devStateStyle feuerAlarmRelevant floor forceEvents genericDeviceType homebridgeMapping homebridgeName icon mqttAlias mqttDefaults mqttDisable mqttForward mqttPublish mqttSubscribe presentCycle presentReading roomName siriName sortby structexclude webCmd webCmdLabel widgetOverride",
+  "Internals": {
+    "NAME": "hmip_mod_ho_1",
+    "TYPE": "HMCCUCHN",
+    "DEF": "000ABC00000016:1",
+    "FUUID": "7f000000-f33f-0000-0000-000000000023",
+    "STATE": "closed",
+    "IODev": "ccu",
+    "ccuaddr": "000ABC00000016:1",
+    "ccuname": "hmip_mod_ho_1",
+    "ccudevstate": "active",
+    "ccuif": "HmIP-RF",
+    "ccurolectrl": "DOOR_RECEIVER",
+    "ccurolestate": "DOOR_RECEIVER",
+    "ccusubtype": "MOD-HO",
+    "ccutype": "HmIP-MOD-HO",
+    "chntype": "?",
+    "firmware": "1.0.16",
+    "readonly": "no"
+  },
+  "Readings": {
+    "CONFIG_PENDING": {
+      "Value": "false",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "DOOR_STATE": {
+      "Value": "CLOSED",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "DUTY_CYCLE": {
+      "Value": "false",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "ERROR_CODE": {
+      "Value": "0",
+      "Time": "2026-10-25 10:33:08"
+    },
+    "INSTALL_TEST": {
+      "Value": "true",
+      "Time": "2026-03-23 17:49:10"
+    },
+    "IODev": {
+      "Value": "ccu",
+      "Time": "2026-11-07 10:05:54"
+    },
+    "OPERATING_VOLTAGE": {
+      "Value": "0.0",
+      "Time": "2026-10-25 10:33:08"
+    },
+    "OPERATING_VOLTAGE_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-10-25 10:33:08"
+    },
+    "PROCESS": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "RSSI_DEVICE": {
+      "Value": "-63",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "RSSI_PEER": {
+      "Value": "N/A",
+      "Time": "2026-10-25 10:33:08"
+    },
+    "SECTION": {
+      "Value": "0",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "SECTION_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "UNREACH": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "UPDATE_PENDING": {
+      "Value": "false",
+      "Time": "2026-10-25 10:33:08"
+    },
+    "activity": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "devstate": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "hmstate": {
+      "Value": "CLOSED",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "rssidevice": {
+      "Value": "-63",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "rssipeer": {
+      "Value": "N/A",
+      "Time": "2026-10-25 10:33:08"
+    },
+    "state": {
+      "Value": "CLOSED",
+      "Time": "2026-11-22 15:04:54"
+    },
+    "stateCombined": {
+      "Value": "closed",
+      "Time": "2026-11-22 14:17:11"
+    },
+    "voltage": {
+      "Value": "0.0",
+      "Time": "2026-10-25 10:33:08"
+    }
+  },
+  "Attributes": {
+    "alias": "hmip mod ho 1",
+    "ccuflags": "showMasterReadings,showLinkReadings,showDeviceReadings",
+    "genericDeviceType": "garage",
+    "homebridgeMapping": "CurrentDoorState=DOOR_STATE,values=CLOSED:1;OPEN:0\nTargetDoorState=DOOR_STATE,values=CLOSED:1;OPEN:0,cmds=OPEN:open;CLOSED:close",
+    "room": "HomeKit",
+    "stateFormat": "stateCombined"
+  }
+}

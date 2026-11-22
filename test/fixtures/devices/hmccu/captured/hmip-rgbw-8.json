@@ -1,0 +1,136 @@
+{
+  "Name": "hmip_rgbw_8",
+  "PossibleSets": "clear defaults:reset,update,old,forceReset readingFilter:multiple-strict,DIM2WARM_STATE,SATURATION_STATUS,HUE_STATUS,HUE,SATURATION,SECTION,ACTIVITY_STATE,COLOR_TEMPERATURE_STATUS,PROCESS,COLOR_TEMPERATURE,HUMAN_CENTRIC_LIGHT_STATE,SECTION_STATUS,LEVEL_STATUS,LEVEL config datapoint up off:noArg pct on-till level color on-for-timer on:noArg toggle:noArg down",
+  "PossibleAttrs": "alias comment eventMap group room suppressReading userattr userReadings verbose IODev ccucalculate ccuflags ccureadingfilter ccureadingformat ccureadingname ccuSetOnChange ccuReadingPrefix ccuscaleval ccuverify ccuget devStateFlags disable hmstatevals statevals substitute substexcl stripnumber traceFilter event-aggregator event-min-interval event-on-change-reading event-on-update-reading oldreadings stateFormat timestamp-on-change-reading statedatapoint controldatapoint ASC WB WB_map building cmdIcon devStateIcon devStateIcon devStateStyle feuerAlarmRelevant floor forceEvents genericDeviceType homebridgeMapping homebridgeName icon mqttAlias mqttDefaults mqttDisable mqttForward mqttPublish mqttSubscribe presentCycle presentReading roomName siriName sortby structexclude webCmd webCmdLabel widgetOverride lightSceneParamsToSave lightSceneRestoreOnlyIfChanged",
+  "Internals": {
+    "NAME": "hmip_rgbw_8",
+    "TYPE": "HMCCUCHN",
+    "DEF": "000ABC00000007:2",
+    "FUUID": "7f000000-f33f-0000-0000-000000000011",
+    "STATE": "off",
+    "IODev": "ccu",
+    "ccuaddr": "000ABC00000007:2",
+    "ccuname": "hmip_rgbw_8",
+    "ccudevstate": "active",
+    "ccuif": "HmIP-RF",
+    "ccurolectrl": "UNIVERSAL_LIGHT_RECEIVER",
+    "ccurolestate": "UNIVERSAL_LIGHT_RECEIVER",
+    "ccusubtype": "RGBW",
+    "ccutype": "HmIP-RGBW",
+    "chntype": "?",
+    "firmware": "1.0.62",
+    "readonly": "no"
+  },
+  "Readings": {
+    "ACTIVITY_STATE": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "COLOR_TEMPERATURE": {
+      "Value": "2950",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "COLOR_TEMPERATURE_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "DIM2WARM_STATE": {
+      "Value": "true",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "EFFECT": {
+      "Value": "NO_EFFECT",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "HUE": {
+      "Value": "",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "HUE_STATUS": {
+      "Value": "UNKNOWN",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "HUMAN_CENTRIC_LIGHT_STATE": {
+      "Value": "false",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "IODev": {
+      "Value": "ccu",
+      "Time": "2026-11-07 10:05:53"
+    },
+    "LEVEL": {
+      "Value": "off",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "LEVEL_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "PROCESS": {
+      "Value": "STABLE",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "SATURATION": {
+      "Value": "0",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "SATURATION_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "SECTION": {
+      "Value": "0",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "SECTION_STATUS": {
+      "Value": "NORMAL",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "activity": {
+      "Value": "alive",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "control": {
+      "Value": "off",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "devstate": {
+      "Value": "ok",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "hmstate": {
+      "Value": "off",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "pct": {
+      "Value": "0",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "pct_STATUS": {
+      "Value": "0",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "rssidevice": {
+      "Value": "-78",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "rssipeer": {
+      "Value": "N/A",
+      "Time": "2026-10-25 10:33:07"
+    },
+    "state": {
+      "Value": "off",
+      "Time": "2026-11-22 15:49:53"
+    },
+    "voltage": {
+      "Value": "0.0",
+      "Time": "2026-10-25 10:33:07"
+    }
+  },
+  "Attributes": {
+    "alias": "hmip rgbw 8",
+    "ccureadingname": "LEVEL:+pct",
+    "room": "HomeKit",
+    "substexcl": "pct|level"
+  }
+}

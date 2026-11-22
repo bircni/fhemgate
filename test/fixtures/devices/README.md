@@ -10,6 +10,11 @@ cover the branches of the detection, but a real device may report more readings 
 values. Replace a file with a real `jsonlist2` result whenever one is available, with names,
 addresses and serial numbers changed.
 
+`hmccu/captured/` holds devices captured from a real installation behind a CCU, with their
+readings and the HMCCU attributes that shape them as they were. Only what identifies the
+installation was replaced: names, aliases, rooms, addresses, serial numbers and FUUIDs. Attributes
+that neither the plugin nor the shape of the readings depend on were left out.
+
 The directories group the devices by what they are meant to be detected as. `mapping/` holds
 devices whose `homebridgeMapping` attribute is the point of the fixture, and `ignored/` those
 the plugin does not expose.
