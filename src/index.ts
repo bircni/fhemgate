@@ -11,21 +11,37 @@ import { PluginState } from './state/pluginState.ts';
 const require = createRequire(import.meta.url);
 
 /**
+ * The class of fakegato-history for the Eve history, or none when it is not installed or fails
+ * to load. The plugin then runs without the history: an error that reaches homebridge here keeps
+ * the plugin from loading, and with it every accessory.
+ *
+ * @param load loads a module, as `require` does
+ */
+export function loadHistoryService(homebridge: API, load: (id: string) => unknown = require): HistoryServiceClass | undefined {
+  try {
+    return (load('fakegato-history') as (homebridge: API) => HistoryServiceClass)(homebridge);
+  } catch (e) {
+    if ((e as { code?: string }).code === 'MODULE_NOT_FOUND') {
+      console.log('error: fakegato-history not installed');
+    } else {
+      console.error(PLUGIN_NAME + ': fakegato-history failed to load, the plugin runs without the Eve history: ' + String(e));
+    }
+    return undefined;
+  }
+}
+
+/**
  * The state of the plugin for a homebridge, and a platform class that is bound to it.
  * Loads fakegato-history for the Eve history if it is installed.
+ *
+ * @param load loads a module, as `require` does
  */
-export function createPlugin(homebridge: API): Plugin & { Platform: new (log: Logging, config: FhemPlatformConfig, api: API) => FhemPlatform } {
+export function createPlugin(
+  homebridge: API,
+  load?: (id: string) => unknown,
+): Plugin & { Platform: new (log: Logging, config: FhemPlatformConfig, api: API) => FhemPlatform } {
   const state = new PluginState(homebridge.hap);
-
-  try {
-    state.historyServiceClass = (require('fakegato-history') as (homebridge: API) => HistoryServiceClass)(homebridge);
-  } catch (e) {
-    if ((e as { code?: string }).code !== 'MODULE_NOT_FOUND') {
-      throw e;
-    }
-
-    console.log('error: fakegato-history not installed');
-  }
+  state.historyServiceClass = loadHistoryService(homebridge, load);
 
   const plugin: Plugin = { state, storagePath: () => homebridge.user.storagePath(), debugServers: new Map() };
 

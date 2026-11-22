@@ -144,6 +144,29 @@ describe('the plugin', () => {
     expect(plugin.state.subscriptions.byInformId['lamp-state']?.[0]?.accessory.shutdown).toBe(true);
   });
 
+  it('runs without the Eve history when fakegato-history is installed but fails to load', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const broken = (): never => {
+      throw new SyntaxError('Unexpected token in fakegato-history');
+    };
+
+    const plugin = createPlugin(api(), broken);
+
+    expect(plugin.state.historyServiceClass).toBeUndefined();
+    expect(error).toHaveBeenCalledWith(expect.stringContaining('fakegato-history failed to load'));
+    error.mockRestore();
+  });
+
+  it('runs without the Eve history when fakegato-history fails while it is set up', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const failing = () => () => {
+      throw new Error('no storage');
+    };
+
+    expect(createPlugin(api(), failing).state.historyServiceClass).toBeUndefined();
+    error.mockRestore();
+  });
+
   it('registers its platform as fhemgate, and under no other name', () => {
     const homebridge = api();
 

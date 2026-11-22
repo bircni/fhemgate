@@ -159,4 +159,5 @@ different filters and run each as a child bridge. See
 | `... value ... not handled in values` | A reading has a value the `values` of its mapping do not cover. Add it, or a `default`. |
 | `JavaScript in a mapping is refused, as allowInlineFunctions is false for this platform` | See [who is trusted](configuration.md#who-is-trusted). |
 | `fakegato-history not installed` | See [history](history.md). |
+| `fakegato-history failed to load, the plugin runs without the Eve history` | fakegato-history is installed but broken. Install it again, see [history](history.md). |
 | `debug server on port ...: Error: listen EADDRINUSE` | The port of the [debug page](configuration.md#debug-page) is taken. Set another `debugPort`, or `false`. |
