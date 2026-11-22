@@ -46,3 +46,5 @@ A plug with a `power` reading then records its power.
   the same device is skipped, with a line in the log.
 - If the log has `fakegato-history not installed`, the optional dependency was left out when the
   plugin was installed. Install `fakegato-history` next to the plugin.
+- If the log has `fakegato-history failed to load`, it is installed but broken, and the line says
+  why. The plugin runs without the history until it is installed again.
