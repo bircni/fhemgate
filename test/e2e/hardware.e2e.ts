@@ -244,7 +244,8 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       // a HMCCUDEV with the same datapoint on several channels: the controldatapoint attribute picks channel 4
       ['hmip_bsm_device', 'Switch', undefined, 'On', 1],
       ['hmip_bsm_device', 'Switch', undefined, 'Power', 12],
-      // a real HmIP-RGBW that is off
+      // a real HmIP-RGBW that is off: HMCCU says off in LEVEL, and 0 in the pct reading it is read from
+      ['hmip_rgbw_7', 'Lightbulb', undefined, 'On', 0],
       ['hmip_rgbw_7', 'Lightbulb', undefined, 'Brightness', 0],
       ['hmip_dimmer_datapoint_only', 'Lightbulb', undefined, 'On', 0],
       ['hmip_dimmer_datapoint_only', 'Lightbulb', undefined, 'Brightness', 0],
@@ -498,6 +499,9 @@ describe.skipIf(realFhemUrl !== undefined)('devices of other fhem modules', () =
       ['hmip_wth_wall_thermostat', '1.HUMIDITY', '55', 'Thermostat', undefined, 'CurrentRelativeHumidity', 55],
       ['hmip_wth_wall_thermostat', '1.CONTROL_MODE', 'MANU-MODE', 'Thermostat', undefined, 'TargetHeatingCoolingState', 1],
       ['hmip_wth_wall_thermostat', '1.CONTROL_MODE', 'AUTO-MODE', 'Thermostat', undefined, 'TargetHeatingCoolingState', 3],
+      // the real HmIP-RGBW is read from pct, which is the level in percent
+      ['hmip_rgbw_7', 'pct', '60', 'Lightbulb', undefined, 'Brightness', 60],
+      ['hmip_rgbw_7', 'pct', '0', 'Lightbulb', undefined, 'On', 0],
       // the real HmIP-SWDO reports open and closed in its state reading
       ['hmip_swdo_1', 'state', 'open', 'ContactSensor', undefined, 'ContactSensorState', 1],
       ['hmip_swdo_1', 'state', 'closed', 'ContactSensor', undefined, 'ContactSensorState', 0],

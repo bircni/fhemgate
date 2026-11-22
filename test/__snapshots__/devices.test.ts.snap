@@ -11590,7 +11590,7 @@ exports[`hmccu/captured/hmip-broll-1 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000013",
   "homekit_uuid": "e768bf09-54ab-4395-bc5f-63fb6ba4f474",
   "log": [
-    "info hmip_broll_1 (HmIP-BROLL/?) mapped as HMCCU blind; LEVEL=level x100; STATE=state",
+    "info hmip_broll_1 (HmIP-BROLL/?) mapped as HMCCU blind; LEVEL=pct x1; STATE=state",
     "log hmip_broll_1 is blind",
   ],
   "mappings": {
@@ -12076,7 +12076,7 @@ exports[`hmccu/captured/hmip-broll-2-1 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000014",
   "homekit_uuid": "50a7c1f8-e87d-443d-9ad3-ca10aff166f5",
   "log": [
-    "info hmip_broll_2_1 (HmIP-BROLL-2/?) mapped as HMCCU blind; LEVEL=level x100; STATE=state",
+    "info hmip_broll_2_1 (HmIP-BROLL-2/?) mapped as HMCCU blind; LEVEL=pct x1; STATE=state",
     "log hmip_broll_2_1 is blind",
   ],
   "mappings": {
@@ -12540,7 +12540,7 @@ exports[`hmccu/captured/hmip-broll-2-2 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000017",
   "homekit_uuid": "48bb6d49-b276-40c7-aa1a-a8e06a9f9edb",
   "log": [
-    "info hmip_broll_2_2 (HmIP-BROLL-2/?) mapped as HMCCU blind; LEVEL=level x100; STATE=state",
+    "info hmip_broll_2_2 (HmIP-BROLL-2/?) mapped as HMCCU blind; LEVEL=pct x1; STATE=state",
     "log hmip_broll_2_2 is blind",
   ],
   "mappings": {
@@ -12983,7 +12983,7 @@ exports[`hmccu/captured/hmip-broll-2-3 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000019",
   "homekit_uuid": "7a3053d5-c68b-4b43-927c-2874fa0e3749",
   "log": [
-    "info hmip_broll_2_3 (HmIP-BROLL-2/?) mapped as HMCCU blind; LEVEL=level x100; STATE=state",
+    "info hmip_broll_2_3 (HmIP-BROLL-2/?) mapped as HMCCU blind; LEVEL=pct x1; STATE=state",
     "log hmip_broll_2_3 is blind",
   ],
   "mappings": {
@@ -13474,7 +13474,7 @@ exports[`hmccu/captured/hmip-drbli4-1 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000015",
   "homekit_uuid": "0a286af9-402f-45ac-9f82-03324de34cd4",
   "log": [
-    "info hmip_drbli4_1 (HmIP-DRBLI4/?) mapped as HMCCU blind; LEVEL=level x100; STATE=state",
+    "info hmip_drbli4_1 (HmIP-DRBLI4/?) mapped as HMCCU blind; LEVEL=pct x1; STATE=state",
     "log hmip_drbli4_1 is blind",
   ],
   "mappings": {
@@ -14009,7 +14009,7 @@ exports[`hmccu/captured/hmip-drbli4-2 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000016",
   "homekit_uuid": "c94fca7f-5759-4846-9e6c-e10a61c64ff2",
   "log": [
-    "info hmip_drbli4_2 (HmIP-DRBLI4/?) mapped as HMCCU blind; LEVEL=level x100; STATE=state",
+    "info hmip_drbli4_2 (HmIP-DRBLI4/?) mapped as HMCCU blind; LEVEL=pct x1; STATE=state",
     "log hmip_drbli4_2 is blind",
   ],
   "mappings": {
@@ -14544,7 +14544,7 @@ exports[`hmccu/captured/hmip-drbli4-3 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000018",
   "homekit_uuid": "fe740a97-85eb-4451-8a34-8fa3b35eb745",
   "log": [
-    "info hmip_drbli4_3 (HmIP-DRBLI4/?) mapped as HMCCU blind; LEVEL=level x100; STATE=state",
+    "info hmip_drbli4_3 (HmIP-DRBLI4/?) mapped as HMCCU blind; LEVEL=pct x1; STATE=state",
     "log hmip_drbli4_3 is blind",
   ],
   "mappings": {
@@ -15706,11 +15706,16 @@ exports[`hmccu/captured/hmip-fci6-2 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-fdt-1 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -15750,8 +15755,8 @@ exports[`hmccu/captured/hmip-fdt-1 > converts readings 1`] = `
     ""7" <- "motion 7 T: 21.5"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -15900,7 +15905,7 @@ exports[`hmccu/captured/hmip-fdt-1 > gets its services 1`] = `
   ],
   "subscriptions": {
     "hmip_fdt_1-D-firmware": 1,
-    "hmip_fdt_1-level": 2,
+    "hmip_fdt_1-pct": 2,
     "hmip_fdt_1-voltage": 1,
   },
 }
@@ -15914,7 +15919,7 @@ exports[`hmccu/captured/hmip-fdt-1 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000026",
   "homekit_uuid": "c1e3b408-bd15-4675-b79d-395cf69dbdd6",
   "log": [
-    "info hmip_fdt_1 (HmIP-FDT/?) mapped as HMCCU light; LEVEL=level x100; STATE=state",
+    "info hmip_fdt_1 (HmIP-FDT/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_fdt_1 is light",
   ],
   "mappings": {
@@ -15926,11 +15931,11 @@ exports[`hmccu/captured/hmip-fdt-1 > is detected 1`] = `
       "delay": true,
       "device": "hmip_fdt_1",
       "homekit2reading": "[function]",
-      "informId": "hmip_fdt_1-level",
+      "informId": "hmip_fdt_1-pct",
       "last_update": 1795361741,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "level",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -15962,10 +15967,10 @@ exports[`hmccu/captured/hmip-fdt-1 > is detected 1`] = `
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_fdt_1",
-      "informId": "hmip_fdt_1-level",
+      "informId": "hmip_fdt_1-pct",
       "last_update": 1795361741,
-      "reading": "level",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-FDT",
@@ -16029,10 +16034,13 @@ exports[`hmccu/captured/hmip-fdt-1 > updates characteristics 1`] = `
     "Firmware Revision="21.5" <- "21.5" "closed" "open"",
     "Firmware Revision="8000" <- "ff8000" """,
   ],
-  "hmip_fdt_1-level": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_fdt_1-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_fdt_1-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -16624,11 +16632,16 @@ exports[`hmccu/captured/hmip-mod-ho-1 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-rgbw-1 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -16648,8 +16661,8 @@ exports[`hmccu/captured/hmip-rgbw-1 > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -16758,7 +16771,7 @@ exports[`hmccu/captured/hmip-rgbw-1 > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -16797,7 +16810,7 @@ exports[`hmccu/captured/hmip-rgbw-1 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hmip_rgbw_1-LEVEL": 2,
+    "hmip_rgbw_1-pct": 2,
     "hmip_rgbw_1-voltage": 1,
   },
 }
@@ -16811,22 +16824,23 @@ exports[`hmccu/captured/hmip-rgbw-1 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000002",
   "homekit_uuid": "9141433c-6242-48a4-9cc9-68674aca7fdc",
   "log": [
-    "info hmip_rgbw_1 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=LEVEL x100; STATE=state",
+    "info hmip_rgbw_1 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_rgbw_1 is light",
   ],
   "mappings": {
     "Brightness": {
+      "cached": 0,
       "characteristic": "class Brightness",
       "characteristic_type": "Brightness",
       "cmd": "pct",
       "delay": true,
       "device": "hmip_rgbw_1",
       "homekit2reading": "[function]",
-      "informId": "hmip_rgbw_1-LEVEL",
+      "informId": "hmip_rgbw_1-pct",
       "last_update": 1795362034,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "LEVEL",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -16842,16 +16856,16 @@ exports[`hmccu/captured/hmip-rgbw-1 > is detected 1`] = `
       "reading": "voltage",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_rgbw_1",
-      "informId": "hmip_rgbw_1-LEVEL",
+      "informId": "hmip_rgbw_1-pct",
       "last_update": 1795362034,
-      "reading": "LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-RGBW",
@@ -16903,10 +16917,13 @@ exports[`hmccu/captured/hmip-rgbw-1 > sends commands 1`] = `
 
 exports[`hmccu/captured/hmip-rgbw-1 > updates characteristics 1`] = `
 {
-  "hmip_rgbw_1-LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_rgbw_1-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_rgbw_1-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -16921,11 +16938,16 @@ exports[`hmccu/captured/hmip-rgbw-1 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-rgbw-2 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -16945,8 +16967,8 @@ exports[`hmccu/captured/hmip-rgbw-2 > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -17055,7 +17077,7 @@ exports[`hmccu/captured/hmip-rgbw-2 > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -17094,7 +17116,7 @@ exports[`hmccu/captured/hmip-rgbw-2 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hmip_rgbw_2-LEVEL": 2,
+    "hmip_rgbw_2-pct": 2,
     "hmip_rgbw_2-voltage": 1,
   },
 }
@@ -17108,22 +17130,23 @@ exports[`hmccu/captured/hmip-rgbw-2 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000003",
   "homekit_uuid": "fcd4a179-4cf1-4a41-9797-4ed37803ed3c",
   "log": [
-    "info hmip_rgbw_2 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=LEVEL x100; STATE=state",
+    "info hmip_rgbw_2 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_rgbw_2 is light",
   ],
   "mappings": {
     "Brightness": {
+      "cached": 0,
       "characteristic": "class Brightness",
       "characteristic_type": "Brightness",
       "cmd": "pct",
       "delay": true,
       "device": "hmip_rgbw_2",
       "homekit2reading": "[function]",
-      "informId": "hmip_rgbw_2-LEVEL",
+      "informId": "hmip_rgbw_2-pct",
       "last_update": 1795362034,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "LEVEL",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -17139,16 +17162,16 @@ exports[`hmccu/captured/hmip-rgbw-2 > is detected 1`] = `
       "reading": "voltage",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_rgbw_2",
-      "informId": "hmip_rgbw_2-LEVEL",
+      "informId": "hmip_rgbw_2-pct",
       "last_update": 1795362034,
-      "reading": "LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-RGBW",
@@ -17200,10 +17223,13 @@ exports[`hmccu/captured/hmip-rgbw-2 > sends commands 1`] = `
 
 exports[`hmccu/captured/hmip-rgbw-2 > updates characteristics 1`] = `
 {
-  "hmip_rgbw_2-LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_rgbw_2-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_rgbw_2-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -17218,11 +17244,16 @@ exports[`hmccu/captured/hmip-rgbw-2 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-rgbw-3 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -17242,8 +17273,8 @@ exports[`hmccu/captured/hmip-rgbw-3 > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -17352,7 +17383,7 @@ exports[`hmccu/captured/hmip-rgbw-3 > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -17391,7 +17422,7 @@ exports[`hmccu/captured/hmip-rgbw-3 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hmip_rgbw_3-LEVEL": 2,
+    "hmip_rgbw_3-pct": 2,
     "hmip_rgbw_3-voltage": 1,
   },
 }
@@ -17405,22 +17436,23 @@ exports[`hmccu/captured/hmip-rgbw-3 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000006",
   "homekit_uuid": "31020a9c-edf6-4e07-9e4d-472e4c5fd92b",
   "log": [
-    "info hmip_rgbw_3 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=LEVEL x100; STATE=state",
+    "info hmip_rgbw_3 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_rgbw_3 is light",
   ],
   "mappings": {
     "Brightness": {
+      "cached": 0,
       "characteristic": "class Brightness",
       "characteristic_type": "Brightness",
       "cmd": "pct",
       "delay": true,
       "device": "hmip_rgbw_3",
       "homekit2reading": "[function]",
-      "informId": "hmip_rgbw_3-LEVEL",
+      "informId": "hmip_rgbw_3-pct",
       "last_update": 1795361879,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "LEVEL",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -17436,16 +17468,16 @@ exports[`hmccu/captured/hmip-rgbw-3 > is detected 1`] = `
       "reading": "voltage",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_rgbw_3",
-      "informId": "hmip_rgbw_3-LEVEL",
+      "informId": "hmip_rgbw_3-pct",
       "last_update": 1795361879,
-      "reading": "LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-RGBW",
@@ -17497,10 +17529,13 @@ exports[`hmccu/captured/hmip-rgbw-3 > sends commands 1`] = `
 
 exports[`hmccu/captured/hmip-rgbw-3 > updates characteristics 1`] = `
 {
-  "hmip_rgbw_3-LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_rgbw_3-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_rgbw_3-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -17515,11 +17550,16 @@ exports[`hmccu/captured/hmip-rgbw-3 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-rgbw-4 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -17539,8 +17579,8 @@ exports[`hmccu/captured/hmip-rgbw-4 > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -17649,7 +17689,7 @@ exports[`hmccu/captured/hmip-rgbw-4 > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -17688,7 +17728,7 @@ exports[`hmccu/captured/hmip-rgbw-4 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hmip_rgbw_4-LEVEL": 2,
+    "hmip_rgbw_4-pct": 2,
     "hmip_rgbw_4-voltage": 1,
   },
 }
@@ -17702,22 +17742,23 @@ exports[`hmccu/captured/hmip-rgbw-4 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000007",
   "homekit_uuid": "e61235fb-880b-4834-9edb-faae104e2ffa",
   "log": [
-    "info hmip_rgbw_4 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=LEVEL x100; STATE=state",
+    "info hmip_rgbw_4 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_rgbw_4 is light",
   ],
   "mappings": {
     "Brightness": {
+      "cached": 0,
       "characteristic": "class Brightness",
       "characteristic_type": "Brightness",
       "cmd": "pct",
       "delay": true,
       "device": "hmip_rgbw_4",
       "homekit2reading": "[function]",
-      "informId": "hmip_rgbw_4-LEVEL",
+      "informId": "hmip_rgbw_4-pct",
       "last_update": 1795361879,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "LEVEL",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -17733,16 +17774,16 @@ exports[`hmccu/captured/hmip-rgbw-4 > is detected 1`] = `
       "reading": "voltage",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_rgbw_4",
-      "informId": "hmip_rgbw_4-LEVEL",
+      "informId": "hmip_rgbw_4-pct",
       "last_update": 1795361879,
-      "reading": "LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-RGBW",
@@ -17794,10 +17835,13 @@ exports[`hmccu/captured/hmip-rgbw-4 > sends commands 1`] = `
 
 exports[`hmccu/captured/hmip-rgbw-4 > updates characteristics 1`] = `
 {
-  "hmip_rgbw_4-LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_rgbw_4-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_rgbw_4-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -17812,11 +17856,16 @@ exports[`hmccu/captured/hmip-rgbw-4 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-rgbw-5 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -17836,8 +17885,8 @@ exports[`hmccu/captured/hmip-rgbw-5 > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -17946,7 +17995,7 @@ exports[`hmccu/captured/hmip-rgbw-5 > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -17985,7 +18034,7 @@ exports[`hmccu/captured/hmip-rgbw-5 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hmip_rgbw_5-LEVEL": 2,
+    "hmip_rgbw_5-pct": 2,
     "hmip_rgbw_5-voltage": 1,
   },
 }
@@ -17999,22 +18048,23 @@ exports[`hmccu/captured/hmip-rgbw-5 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000008",
   "homekit_uuid": "32713678-d054-49b3-95a5-e5cf6df3da0c",
   "log": [
-    "info hmip_rgbw_5 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=LEVEL x100; STATE=state",
+    "info hmip_rgbw_5 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_rgbw_5 is light",
   ],
   "mappings": {
     "Brightness": {
+      "cached": 0,
       "characteristic": "class Brightness",
       "characteristic_type": "Brightness",
       "cmd": "pct",
       "delay": true,
       "device": "hmip_rgbw_5",
       "homekit2reading": "[function]",
-      "informId": "hmip_rgbw_5-LEVEL",
+      "informId": "hmip_rgbw_5-pct",
       "last_update": 1795362034,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "LEVEL",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -18030,16 +18080,16 @@ exports[`hmccu/captured/hmip-rgbw-5 > is detected 1`] = `
       "reading": "voltage",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_rgbw_5",
-      "informId": "hmip_rgbw_5-LEVEL",
+      "informId": "hmip_rgbw_5-pct",
       "last_update": 1795362034,
-      "reading": "LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-RGBW",
@@ -18091,10 +18141,13 @@ exports[`hmccu/captured/hmip-rgbw-5 > sends commands 1`] = `
 
 exports[`hmccu/captured/hmip-rgbw-5 > updates characteristics 1`] = `
 {
-  "hmip_rgbw_5-LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_rgbw_5-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_rgbw_5-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -18109,11 +18162,16 @@ exports[`hmccu/captured/hmip-rgbw-5 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-rgbw-6 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -18133,8 +18191,8 @@ exports[`hmccu/captured/hmip-rgbw-6 > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -18243,7 +18301,7 @@ exports[`hmccu/captured/hmip-rgbw-6 > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -18282,7 +18340,7 @@ exports[`hmccu/captured/hmip-rgbw-6 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hmip_rgbw_6-LEVEL": 2,
+    "hmip_rgbw_6-pct": 2,
     "hmip_rgbw_6-voltage": 1,
   },
 }
@@ -18296,22 +18354,23 @@ exports[`hmccu/captured/hmip-rgbw-6 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000009",
   "homekit_uuid": "a5d1e5d5-61a3-41e7-962c-4b21e9057014",
   "log": [
-    "info hmip_rgbw_6 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=LEVEL x100; STATE=state",
+    "info hmip_rgbw_6 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_rgbw_6 is light",
   ],
   "mappings": {
     "Brightness": {
+      "cached": 0,
       "characteristic": "class Brightness",
       "characteristic_type": "Brightness",
       "cmd": "pct",
       "delay": true,
       "device": "hmip_rgbw_6",
       "homekit2reading": "[function]",
-      "informId": "hmip_rgbw_6-LEVEL",
+      "informId": "hmip_rgbw_6-pct",
       "last_update": 1795363013,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "LEVEL",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -18327,16 +18386,16 @@ exports[`hmccu/captured/hmip-rgbw-6 > is detected 1`] = `
       "reading": "voltage",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_rgbw_6",
-      "informId": "hmip_rgbw_6-LEVEL",
+      "informId": "hmip_rgbw_6-pct",
       "last_update": 1795363013,
-      "reading": "LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-RGBW",
@@ -18388,10 +18447,13 @@ exports[`hmccu/captured/hmip-rgbw-6 > sends commands 1`] = `
 
 exports[`hmccu/captured/hmip-rgbw-6 > updates characteristics 1`] = `
 {
-  "hmip_rgbw_6-LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_rgbw_6-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_rgbw_6-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -18406,11 +18468,16 @@ exports[`hmccu/captured/hmip-rgbw-6 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-rgbw-7 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -18430,8 +18497,8 @@ exports[`hmccu/captured/hmip-rgbw-7 > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -18540,7 +18607,7 @@ exports[`hmccu/captured/hmip-rgbw-7 > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -18579,7 +18646,7 @@ exports[`hmccu/captured/hmip-rgbw-7 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hmip_rgbw_7-LEVEL": 2,
+    "hmip_rgbw_7-pct": 2,
     "hmip_rgbw_7-voltage": 1,
   },
 }
@@ -18593,22 +18660,23 @@ exports[`hmccu/captured/hmip-rgbw-7 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000010",
   "homekit_uuid": "de553cfc-b2b7-4383-a98d-1ddd552f0cb8",
   "log": [
-    "info hmip_rgbw_7 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=LEVEL x100; STATE=state",
+    "info hmip_rgbw_7 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_rgbw_7 is light",
   ],
   "mappings": {
     "Brightness": {
+      "cached": 0,
       "characteristic": "class Brightness",
       "characteristic_type": "Brightness",
       "cmd": "pct",
       "delay": true,
       "device": "hmip_rgbw_7",
       "homekit2reading": "[function]",
-      "informId": "hmip_rgbw_7-LEVEL",
+      "informId": "hmip_rgbw_7-pct",
       "last_update": 1795362593,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "LEVEL",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -18624,16 +18692,16 @@ exports[`hmccu/captured/hmip-rgbw-7 > is detected 1`] = `
       "reading": "voltage",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_rgbw_7",
-      "informId": "hmip_rgbw_7-LEVEL",
+      "informId": "hmip_rgbw_7-pct",
       "last_update": 1795362593,
-      "reading": "LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-RGBW",
@@ -18685,10 +18753,13 @@ exports[`hmccu/captured/hmip-rgbw-7 > sends commands 1`] = `
 
 exports[`hmccu/captured/hmip-rgbw-7 > updates characteristics 1`] = `
 {
-  "hmip_rgbw_7-LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_rgbw_7-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_rgbw_7-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -18703,11 +18774,16 @@ exports[`hmccu/captured/hmip-rgbw-7 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-rgbw-8 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -18727,8 +18803,8 @@ exports[`hmccu/captured/hmip-rgbw-8 > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -18837,7 +18913,7 @@ exports[`hmccu/captured/hmip-rgbw-8 > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -18876,7 +18952,7 @@ exports[`hmccu/captured/hmip-rgbw-8 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hmip_rgbw_8-LEVEL": 2,
+    "hmip_rgbw_8-pct": 2,
     "hmip_rgbw_8-voltage": 1,
   },
 }
@@ -18890,22 +18966,23 @@ exports[`hmccu/captured/hmip-rgbw-8 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000011",
   "homekit_uuid": "cfeef4eb-93af-473d-9db9-2225ed2b7161",
   "log": [
-    "info hmip_rgbw_8 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=LEVEL x100; STATE=state",
+    "info hmip_rgbw_8 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_rgbw_8 is light",
   ],
   "mappings": {
     "Brightness": {
+      "cached": 0,
       "characteristic": "class Brightness",
       "characteristic_type": "Brightness",
       "cmd": "pct",
       "delay": true,
       "device": "hmip_rgbw_8",
       "homekit2reading": "[function]",
-      "informId": "hmip_rgbw_8-LEVEL",
+      "informId": "hmip_rgbw_8-pct",
       "last_update": 1795362593,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "LEVEL",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -18921,16 +18998,16 @@ exports[`hmccu/captured/hmip-rgbw-8 > is detected 1`] = `
       "reading": "voltage",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_rgbw_8",
-      "informId": "hmip_rgbw_8-LEVEL",
+      "informId": "hmip_rgbw_8-pct",
       "last_update": 1795362593,
-      "reading": "LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-RGBW",
@@ -18982,10 +19059,13 @@ exports[`hmccu/captured/hmip-rgbw-8 > sends commands 1`] = `
 
 exports[`hmccu/captured/hmip-rgbw-8 > updates characteristics 1`] = `
 {
-  "hmip_rgbw_8-LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_rgbw_8-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_rgbw_8-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -19000,11 +19080,16 @@ exports[`hmccu/captured/hmip-rgbw-8 > updates characteristics 1`] = `
 exports[`hmccu/captured/hmip-rgbw-9 > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
-    "35 <- "0.35"",
-    "46 <- "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
+    "1 <- "1"",
+    "2 <- "2"",
+    "3 <- "3"",
+    "20 <- "20"",
+    "50 <- "50"",
+    "99 <- "99"",
+    "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "E863F10A-079E-48FF-8F27-9C2605A29F52": [
     "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
@@ -19024,8 +19109,8 @@ exports[`hmccu/captured/hmip-rgbw-9 > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -19134,7 +19219,7 @@ exports[`hmccu/captured/hmip-rgbw-9 > gets its services 1`] = `
             ],
           },
           "uuid": "00000025-0000-1000-8000-0026BB765291",
-          "value": true,
+          "value": false,
         },
         {
           "name": "Brightness",
@@ -19173,7 +19258,7 @@ exports[`hmccu/captured/hmip-rgbw-9 > gets its services 1`] = `
     },
   ],
   "subscriptions": {
-    "hmip_rgbw_9-LEVEL": 2,
+    "hmip_rgbw_9-pct": 2,
     "hmip_rgbw_9-voltage": 1,
   },
 }
@@ -19187,22 +19272,23 @@ exports[`hmccu/captured/hmip-rgbw-9 > is detected 1`] = `
   "fuuid": "7f000000-f33f-0000-0000-000000000020",
   "homekit_uuid": "99fba86e-3fd8-43df-b986-791545aa00f4",
   "log": [
-    "info hmip_rgbw_9 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=LEVEL x100; STATE=state",
+    "info hmip_rgbw_9 (HmIP-RGBW/?) mapped as HMCCU light; LEVEL=pct x1; STATE=state",
     "log hmip_rgbw_9 is light",
   ],
   "mappings": {
     "Brightness": {
+      "cached": 0,
       "characteristic": "class Brightness",
       "characteristic_type": "Brightness",
       "cmd": "pct",
       "delay": true,
       "device": "hmip_rgbw_9",
       "homekit2reading": "[function]",
-      "informId": "hmip_rgbw_9-LEVEL",
+      "informId": "hmip_rgbw_9-pct",
       "last_update": 1795362034,
-      "levelFactor": 100,
+      "levelFactor": 1,
       "levelWriteFactor": 1,
-      "reading": "LEVEL",
+      "reading": "pct",
       "reading2homekit": "[function]",
     },
     "E863F10A-079E-48FF-8F27-9C2605A29F52": {
@@ -19218,16 +19304,16 @@ exports[`hmccu/captured/hmip-rgbw-9 > is detected 1`] = `
       "reading": "voltage",
     },
     "On": {
-      "cached": true,
+      "cached": false,
       "characteristic": "class On",
       "characteristic_type": "On",
       "cmdOff": "off",
       "cmdOn": "on",
       "device": "hmip_rgbw_9",
-      "informId": "hmip_rgbw_9-LEVEL",
+      "informId": "hmip_rgbw_9-pct",
       "last_update": 1795362034,
-      "reading": "LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "reading": "pct",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-RGBW",
@@ -19279,10 +19365,13 @@ exports[`hmccu/captured/hmip-rgbw-9 > sends commands 1`] = `
 
 exports[`hmccu/captured/hmip-rgbw-9 > updates characteristics 1`] = `
 {
-  "hmip_rgbw_9-LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+  "hmip_rgbw_9-pct": [
+    "On=true Brightness=100 <- "on" "100" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=1 <- "1"",
+    "On=true Brightness=50 <- "50"",
+    "On=true Brightness=22 <- "21.5"",
+    "On=true Brightness=0 <- "closed"",
   ],
   "hmip_rgbw_9-voltage": [
     "Voltage=0 <- "on" "off" "0"",
@@ -20622,10 +20711,10 @@ exports[`hmccu/hmip-bbl-venetian > converts readings 1`] = `
     "-8 <- "0.4573,0.41"",
   ],
   "CurrentPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
   "PositionState": [
@@ -20642,10 +20731,10 @@ exports[`hmccu/hmip-bbl-venetian > converts readings 1`] = `
     "-8 <- "0.4573,0.41"",
   ],
   "TargetPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
 }
@@ -21003,8 +21092,8 @@ exports[`hmccu/hmip-bbl-venetian > updates characteristics 1`] = `
     "Position State=1 <- "1"",
   ],
   "hmip_bbl_venetian-4.LEVEL": [
-    "Current Position=100 Target Position=100 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
-    "Current Position=0 Target Position=0 <- "0"",
+    "Current Position=100 Target Position=100 <- "on" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "Current Position=0 Target Position=0 <- "off" "0" "closed"",
   ],
   "hmip_bbl_venetian-4.LEVEL_2": [
     "Current Horizontal Tilt Angle=0 Target Horizontal Tilt Angle=0 <- "on" "off"",
@@ -21017,15 +21106,15 @@ exports[`hmccu/hmip-bbl-venetian > updates characteristics 1`] = `
 exports[`hmccu/hmip-bdt-by-type > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -21203,7 +21292,7 @@ exports[`hmccu/hmip-bdt-by-type > is detected 1`] = `
       "informId": "hmip_bdt_by_type-4.LEVEL",
       "last_update": 1786881600,
       "reading": "4.LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-BDT",
@@ -21253,9 +21342,9 @@ exports[`hmccu/hmip-bdt-by-type > sends commands 1`] = `
 exports[`hmccu/hmip-bdt-by-type > updates characteristics 1`] = `
 {
   "hmip_bdt_by_type-4.LEVEL": [
-    "On=true Brightness=20 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=true Brightness=100 <- "on" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=0 <- "closed"",
   ],
 }
 `;
@@ -21288,17 +21377,17 @@ exports[`hmccu/hmip-blind-without-level > is detected 1`] = `
 exports[`hmccu/hmip-broll-by-type > converts readings 1`] = `
 {
   "CurrentPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
   "TargetPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
 }
@@ -21538,9 +21627,8 @@ exports[`hmccu/hmip-broll-by-type > sends commands 1`] = `
 exports[`hmccu/hmip-broll-by-type > updates characteristics 1`] = `
 {
   "hmip_broll_by_type-4.LEVEL": [
-    "Current Position=20 Target Position=20 <- "on" "off"",
-    "Current Position=0 Target Position=0 <- "0"",
-    "Current Position=100 Target Position=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Current Position=100 Target Position=100 <- "on" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "Current Position=0 Target Position=0 <- "off" "0" "closed"",
   ],
 }
 `;
@@ -21548,17 +21636,17 @@ exports[`hmccu/hmip-broll-by-type > updates characteristics 1`] = `
 exports[`hmccu/hmip-broll-datapoint-only > converts readings 1`] = `
 {
   "CurrentPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
   "TargetPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
 }
@@ -21798,9 +21886,8 @@ exports[`hmccu/hmip-broll-datapoint-only > sends commands 1`] = `
 exports[`hmccu/hmip-broll-datapoint-only > updates characteristics 1`] = `
 {
   "hmip_broll_datapoint_only-4.LEVEL": [
-    "Current Position=50 Target Position=50 <- "on" "off"",
-    "Current Position=0 Target Position=0 <- "0"",
-    "Current Position=100 Target Position=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Current Position=100 Target Position=100 <- "on" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "Current Position=0 Target Position=0 <- "off" "0" "closed"",
   ],
 }
 `;
@@ -21808,17 +21895,17 @@ exports[`hmccu/hmip-broll-datapoint-only > updates characteristics 1`] = `
 exports[`hmccu/hmip-broll-not-controllable > converts readings 1`] = `
 {
   "CurrentPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
   "TargetPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
 }
@@ -22059,9 +22146,8 @@ exports[`hmccu/hmip-broll-not-controllable > sends commands 1`] = `
 exports[`hmccu/hmip-broll-not-controllable > updates characteristics 1`] = `
 {
   "hmip_broll_not_controllable-4.LEVEL": [
-    "Current Position=50 Target Position=50 <- "on" "off"",
-    "Current Position=0 Target Position=0 <- "0"",
-    "Current Position=100 Target Position=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Current Position=100 Target Position=100 <- "on" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "Current Position=0 Target Position=0 <- "off" "0" "closed"",
   ],
 }
 `;
@@ -22069,16 +22155,16 @@ exports[`hmccu/hmip-broll-not-controllable > updates characteristics 1`] = `
 exports[`hmccu/hmip-broll-scaled > converts readings 1`] = `
 {
   "CurrentPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "0.35" "000000" "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
     "1 <- "1"",
     "2 <- "2"",
     "3 <- "3"",
     "20 <- "20"",
     "50 <- "50"",
     "99 <- "99"",
-    "100 <- "100" "254" "1500"",
     "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "PositionState": [
     "2 <- "on" "off" "ON" "0" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
@@ -22087,16 +22173,16 @@ exports[`hmccu/hmip-broll-scaled > converts readings 1`] = `
     "undefined <- "set-on" "set_off" """,
   ],
   "TargetPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "0.35" "000000" "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
     "1 <- "1"",
     "2 <- "2"",
     "3 <- "3"",
     "20 <- "20"",
     "50 <- "50"",
     "99 <- "99"",
-    "100 <- "100" "254" "1500"",
     "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
 }
 `;
@@ -22377,12 +22463,11 @@ exports[`hmccu/hmip-broll-scaled > updates characteristics 1`] = `
     "Position State=1 <- "1"",
   ],
   "hmip_broll_scaled-4.LEVEL": [
-    "Current Position=35 Target Position=35 <- "on" "off"",
-    "Current Position=0 Target Position=0 <- "0"",
+    "Current Position=100 Target Position=100 <- "on" "100" "open" "ff8000" """,
+    "Current Position=0 Target Position=0 <- "off" "0" "closed"",
     "Current Position=1 Target Position=1 <- "1"",
     "Current Position=50 Target Position=50 <- "50"",
-    "Current Position=100 Target Position=100 <- "100"",
-    "Current Position=22 Target Position=22 <- "21.5" "closed" "open" "ff8000" """,
+    "Current Position=22 Target Position=22 <- "21.5"",
   ],
 }
 `;
@@ -22390,10 +22475,10 @@ exports[`hmccu/hmip-broll-scaled > updates characteristics 1`] = `
 exports[`hmccu/hmip-broll-shutter > converts readings 1`] = `
 {
   "CurrentPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
   "PositionState": [
@@ -22403,10 +22488,10 @@ exports[`hmccu/hmip-broll-shutter > converts readings 1`] = `
     "undefined <- "set-on" "set_off" """,
   ],
   "TargetPosition": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
 }
@@ -22688,9 +22773,8 @@ exports[`hmccu/hmip-broll-shutter > updates characteristics 1`] = `
     "Position State=1 <- "1"",
   ],
   "hmip_broll_shutter-4.LEVEL": [
-    "Current Position=35 Target Position=35 <- "on" "off"",
-    "Current Position=0 Target Position=0 <- "0"",
-    "Current Position=100 Target Position=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "Current Position=100 Target Position=100 <- "on" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "Current Position=0 Target Position=0 <- "off" "0" "closed"",
   ],
 }
 `;
@@ -22969,15 +23053,15 @@ exports[`hmccu/hmip-contact-without-state > is detected 1`] = `
 exports[`hmccu/hmip-dimmer-datapoint-only > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -23155,7 +23239,7 @@ exports[`hmccu/hmip-dimmer-datapoint-only > is detected 1`] = `
       "informId": "hmip_dimmer_datapoint_only-4.LEVEL",
       "last_update": 1786881600,
       "reading": "4.LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "HmIP-PDT",
@@ -23205,9 +23289,9 @@ exports[`hmccu/hmip-dimmer-datapoint-only > sends commands 1`] = `
 exports[`hmccu/hmip-dimmer-datapoint-only > updates characteristics 1`] = `
 {
   "hmip_dimmer_datapoint_only-4.LEVEL": [
-    "On=true Brightness=0 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=true Brightness=100 <- "on" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=0 <- "closed"",
   ],
 }
 `;
@@ -23946,10 +24030,10 @@ exports[`hmccu/hmip-etrv-thermostat > converts readings 1`] = `
     "0.4573 <- "0.4573,0.41"",
   ],
   "E863F12E-079E-48FF-8F27-9C2605A29F52": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
   "StatusLowBattery": [
@@ -24443,9 +24527,9 @@ exports[`hmccu/hmip-etrv-thermostat > updates characteristics 1`] = `
     "Current Temperature=21.5 <- "21.5" "closed" "open" "ff8000" """,
   ],
   "hmip_etrv_thermostat-1.LEVEL": [
-    "Current Heating Cooling State=1 Actuation=25 <- "on" "off"",
+    "Current Heating Cooling State=1 Actuation=100 <- "on" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "Current Heating Cooling State=1 Actuation=0 <- "off" "closed"",
     "Current Heating Cooling State=0 Actuation=0 <- "0"",
-    "Current Heating Cooling State=1 Actuation=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
   ],
   "hmip_etrv_thermostat-1.SET_POINT_MODE": [
     "Target Heating Cooling State=1 <- "on" "off" "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
@@ -24693,15 +24777,15 @@ exports[`hmccu/hmip-leak-without-reading > is detected 1`] = `
 exports[`hmccu/hmip-light-by-level-and-pct > converts readings 1`] = `
 {
   "Brightness": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "000000"",
-    "100 <- "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5"",
+    "100 <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "open"",
+    "0 <- "off" "0" "-5" "closed" "Closed" "000000"",
     "35 <- "0.35"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
     "46 <- "0.4573,0.41"",
   ],
   "On": [
-    "true <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "false <- "0"",
+    "true <- "on" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
+    "false <- "off" "0"",
     "undefined <- "set-on" "set_off"",
   ],
 }
@@ -24879,7 +24963,7 @@ exports[`hmccu/hmip-light-by-level-and-pct > is detected 1`] = `
       "informId": "hmip_light_by_level_and_pct-1.LEVEL",
       "last_update": 1786881600,
       "reading": "1.LEVEL",
-      "valueOff": "/^0(\\.0*)?$/",
+      "valueOff": "/^(0(\\.0*)?|[Oo]ff|OFF)$/",
     },
   },
   "model": "X",
@@ -24929,9 +25013,9 @@ exports[`hmccu/hmip-light-by-level-and-pct > sends commands 1`] = `
 exports[`hmccu/hmip-light-by-level-and-pct > updates characteristics 1`] = `
 {
   "hmip_light_by_level_and_pct-1.LEVEL": [
-    "On=true Brightness=40 <- "on" "off"",
-    "On=false Brightness=0 <- "0"",
-    "On=true Brightness=100 <- "1" "50" "100" "21.5" "closed" "open" "ff8000" """,
+    "On=true Brightness=100 <- "on" "1" "50" "100" "21.5" "open" "ff8000" """,
+    "On=false Brightness=0 <- "off" "0"",
+    "On=true Brightness=0 <- "closed"",
   ],
 }
 `;
@@ -28717,16 +28801,16 @@ exports[`hmccu/hmip-thermostat-with-off > converts readings 1`] = `
     "undefined <- "set-on" "set_off" """,
   ],
   "E863F12E-079E-48FF-8F27-9C2605A29F52": [
-    "undefined <- "on" "off" "ON" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
-    "0 <- "0" "-5" "0.35" "000000" "0.4573,0.41"",
+    "100 <- "on" "ON" "100" "254" "1500" "open"",
+    "0 <- "off" "0" "-5" "0.35" "closed" "Closed" "000000" "0.4573,0.41"",
     "1 <- "1"",
     "2 <- "2"",
     "3 <- "3"",
     "20 <- "20"",
     "50 <- "50"",
     "99 <- "99"",
-    "100 <- "100" "254" "1500"",
     "22 <- "21.5"",
+    "undefined <- "dim 50" "dim50%" "present" "absent" "locked" "ok" "low" "A0" "ff8000" "set-on" "set_off" "true" "false" "PLAYING" "opening" "up:on" "auto" "manual" "home" "TV" "short" "motion 7 T: 21.5" """,
   ],
   "TargetHeatingCoolingState": [
     "1 <- "on" "off" "ON" "1" "2" "3" "20" "50" "99" "100" "254" "1500" "21.5" "-5" "0.35" "dim 50" "dim50%" "closed" "open" "Closed" "present" "absent" "locked" "ok" "low" "A0" "000000" "ff8000" "0.4573,0.41" "true" "false" "PLAYING" "opening" "up:on" "manual" "home" "TV" "short" "motion 7 T: 21.5"",
@@ -29141,12 +29225,12 @@ exports[`hmccu/hmip-thermostat-with-off > updates characteristics 1`] = `
     "Target Heating Cooling State=3 <- "0"",
   ],
   "hmip_thermostat_with_off-1.LEVEL": [
-    "Current Heating Cooling State=1 Actuation=0 <- "on" "off"",
+    "Current Heating Cooling State=1 Actuation=100 <- "on" "100" "open" "ff8000" """,
+    "Current Heating Cooling State=1 Actuation=0 <- "off" "closed"",
     "Current Heating Cooling State=0 Actuation=0 <- "0"",
     "Current Heating Cooling State=1 Actuation=1 <- "1"",
     "Current Heating Cooling State=1 Actuation=50 <- "50"",
-    "Current Heating Cooling State=1 Actuation=100 <- "100"",
-    "Current Heating Cooling State=1 Actuation=22 <- "21.5" "closed" "open" "ff8000" """,
+    "Current Heating Cooling State=1 Actuation=22 <- "21.5"",
   ],
   "hmip_thermostat_with_off-1.SET_POINT_TEMPERATURE": [
     "Target Temperature=22 <- "on" "off"",

@@ -172,8 +172,8 @@ readings of CUL_HM, so HomeMatic IP devices are detected automatically:
 | Type | Datapoints | Set command |
 | --- | --- | --- |
 | switch, outlet | `STATE` | `on` and `off`, else `datapoint <ch>.STATE` |
-| dimmer | `LEVEL` | `pct`, else `datapoint <ch>.LEVEL` |
-| blind, shutter | `LEVEL`, `LEVEL_2`, `ACTIVITY_STATE` or `DIRECTION` | `pct`, else `datapoint <ch>.LEVEL` |
+| dimmer | `pct` or `LEVEL` | `pct`, else `datapoint <ch>.LEVEL` |
+| blind, shutter | `pct` or `LEVEL`, `LEVEL_2`, `ACTIVITY_STATE` or `DIRECTION` | `pct`, else `datapoint <ch>.LEVEL` |
 | thermostat | `SET_POINT_TEMPERATURE`, `ACTUAL_TEMPERATURE`, `HUMIDITY`, `LEVEL`, `CONTROL_MODE` or `SET_POINT_MODE` | `desired-temp`, else `datapoint <ch>.SET_POINT_TEMPERATURE` |
 | contact | `STATE` | read only |
 | motion | `MOTION`, `ILLUMINATION` | read only |
@@ -189,6 +189,11 @@ readings of CUL_HM, so HomeMatic IP devices are detected automatically:
   `attr <device> controldatapoint <channel>.<datapoint>`.
 - `LEVEL` is a datapoint from 0.0 to 1.0 and is scaled to 0 to 100 for HomeKit. If
   `attr <device> ccuscaleval` already scales it, that is detected and it is not scaled twice.
+- HMCCU puts words into `LEVEL` at the ends of its range, as the state values of the device say:
+  `off` or `closed` is taken for 0, `on` or `open` for the full level.
+- A dimmer or blind that is set with `pct` and has a `pct` reading, as
+  `attr <device> ccureadingname LEVEL:+pct` makes one, is read from `pct` instead of `LEVEL`. It is
+  the level in percent and stays a number.
 - Venetian blinds report the slat position as `LEVEL_2`. It is shown as a horizontal tilt angle
   from -90 (slats closed) to 90 (slats open). Use `homebridgeMapping` for blinds with vertical
   slats.

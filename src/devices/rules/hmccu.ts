@@ -90,8 +90,25 @@ export function hmccuScalesLevel(s: Jsonlist2Device): boolean {
   return false;
 }
 
+/**
+ * The words HMCCU puts into a level reading in place of its ends, as the state values of the
+ * device say: a light that is off has the LEVEL off, a blind that is open has the LEVEL open.
+ */
+const LEVEL_WORDS: Record<string, number> = { off: 0, closed: 0, on: 1, open: 1 };
+
+/** a level that is a word in place of a number, as 0 or 1, the ends of the datapoint */
+function levelOfWord(orig: string): number | undefined {
+  return LEVEL_WORDS[orig.trim().toLowerCase()];
+}
+
 // LEVEL is a 0.0-1.0 datapoint, HomeKit wants 0-100
 function level2homekit(mapping: Mapping, orig: string): number | undefined {
+  const word = levelOfWord(orig);
+  if (word !== undefined) {
+    // the end of the range, whatever the reading is scaled to
+    return word * 100;
+  }
+
   let value = parseFloat(orig);
   if (isNaN(value)) {
     return undefined;
@@ -120,6 +137,12 @@ function level2tilt(mapping: Mapping, orig: string): number | undefined {
 
 function tilt2level(mapping: Mapping, orig: number): number {
   return Math.round(((orig + 90) / 1.8 / (mapping.levelWriteFactor as number)) * 1000) / 1000;
+}
+
+/** the level reading of a light or blind and its scale, as the log line names them */
+function levelShown(s: Jsonlist2Device, sets: string, LEVEL: string, levelFactor: number): string {
+  const PCT = sets.match(/(^| )pct\b/) ? hmccuReading(s, 'pct') : undefined;
+  return PCT ? PCT + ' x1' : LEVEL + ' x' + levelFactor;
 }
 
 /**
@@ -213,6 +236,12 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
     const levelCmd = usePct ? 'pct' : 'datapoint ' + hmccuDatapoint(s, LEVEL, 'LEVEL');
     const writeFactor = usePct ? 1 : levelFactor;
 
+    // a pct reading, as ccureadingname makes one, is the level in percent and stays a number
+    // where HMCCU puts a word into LEVEL. it is read where the device is set by pct as well.
+    const PCT = usePct ? hmccuReading(s, 'pct') : undefined;
+    const levelReading = PCT ?? LEVEL;
+    const readFactor = PCT ? 1 : levelFactor;
+
     if (!usePct && !sets.match(/(^| )datapoint\b/)) {
       log.warn(s.Internals.NAME + ': neither set pct nor set datapoint available, ' + type + ' will not be controllable');
     }
@@ -220,8 +249,8 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
     if (type === 'blind') {
       accessory.service_name = 'blind';
 
-      const currentPosition: Mapping = { reading: LEVEL, levelFactor: levelFactor };
-      const targetPosition: Mapping = { reading: LEVEL, cmd: levelCmd, delay: true, levelFactor: levelFactor, levelWriteFactor: writeFactor };
+      const currentPosition: Mapping = { reading: levelReading, levelFactor: readFactor };
+      const targetPosition: Mapping = { reading: levelReading, cmd: levelCmd, delay: true, levelFactor: readFactor, levelWriteFactor: writeFactor };
       accessory.mappings.CurrentPosition = currentPosition;
       accessory.mappings.TargetPosition = targetPosition;
 
@@ -263,7 +292,8 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
     } else {
       accessory.service_name = 'light';
 
-      const on: Mapping = { reading: LEVEL, valueOff: '/^0(\\.0*)?$/' };
+      // off is 0, also as the word HMCCU puts into LEVEL for it
+      const on: Mapping = { reading: levelReading, valueOff: '/^(0(\\.0*)?|[Oo]ff|OFF)$/' };
       accessory.mappings.On = on;
       if (hasOnOff) {
         on.cmdOn = 'on';
@@ -274,7 +304,7 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
         on.cmdOff = 'datapoint ' + dp + ' 0';
       }
 
-      const brightness: Mapping = { reading: LEVEL, cmd: levelCmd, delay: true, levelFactor: levelFactor, levelWriteFactor: writeFactor };
+      const brightness: Mapping = { reading: levelReading, cmd: levelCmd, delay: true, levelFactor: readFactor, levelWriteFactor: writeFactor };
       accessory.mappings.Brightness = brightness;
       brightness.reading2homekit = level2homekit.bind(null, brightness);
       brightness.homekit2reading = homekit2level.bind(null, brightness);
@@ -449,7 +479,7 @@ export function hmccuMappings(accessory: DetectionTarget, s: Jsonlist2Device, ge
       (ccurole || '?') +
       ') mapped as HMCCU ' +
       type +
-      (LEVEL ? '; LEVEL=' + LEVEL + ' x' + levelFactor : '') +
+      (LEVEL ? '; LEVEL=' + levelShown(s, sets, LEVEL, levelFactor) : '') +
       (STATE ? '; STATE=' + STATE : '') +
       (SETPOINT ? '; setpoint=' + SETPOINT : ''),
   );
