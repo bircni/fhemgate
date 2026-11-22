@@ -875,6 +875,23 @@ describe('reconnecting', () => {
     expect(world.longpoll[baseUrl()]).toMatchObject({ connected: true, connects: 2 });
   });
 
+  it('reconnects 200 milliseconds after every end of a stream that carried events, also from a FHEMWEB without csrf token', async () => {
+    const platform = await connect({ csrfToken: undefined, devices: [{ Name: 'lamp', ...lamp() }] });
+    (await firstAccessoryOf(platform)).getServices();
+
+    for (const [round, value] of ['off', 'on', 'off'].entries()) {
+      fhem.event('lamp-state', value);
+      await waitFor(() => world.cached['lamp-state'] === value, 'the event');
+      world.log.clear();
+
+      fhem.endStreams();
+      await waitFor(() => fhem.streams.length === round + 2, 'the next long poll');
+
+      // the checks after the reconnect before log as well, in no fixed order
+      expect(world.log.lines.filter((line) => line.startsWith('error longpoll ended'))).toEqual(['error longpoll ended, reconnect in: 200msec']);
+    }
+  });
+
   it('looks at the attributes again after every reconnect, and for the siri device as long as there is none', async () => {
     await connect();
     fhem.endStreams();

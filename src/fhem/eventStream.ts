@@ -115,6 +115,8 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
 
   // set when FHEMWEB answers that user and password are missing or wrong
   let refused: HttpResponse | undefined;
+  // set when FHEMWEB answers the long poll as it should. with or without a csrf token, fhem was reached then.
+  let answered = false;
 
   let silence: ReturnType<typeof setTimeout> | undefined;
 
@@ -217,7 +219,7 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
         input = input.substring(offset);
         offset = 0;
 
-        if (state.csrfToken[connection.base_url]) {
+        if (answered) {
           status.disconnects = 0;
         }
       },
@@ -230,6 +232,7 @@ export function startLongpoll(state: PluginState, connection: FhemConnection, on
 
         state.csrfToken[connection.base_url] = csrfTokenOf(response);
         status.reachable = true;
+        answered = response.statusCode === 200;
 
         watchSilence();
         for (const listener of told) {
