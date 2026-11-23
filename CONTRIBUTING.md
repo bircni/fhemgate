@@ -65,11 +65,12 @@ and write its accessories the way a HomeKit controller does, and are notified by
 | `mappings.e2e.ts` | what the `homebridgeMapping` attribute can say, one device per feature |
 | `history.e2e.ts` | the Eve history with the real fakegato-history |
 | `hardware.e2e.ts` | device types of other fhem modules, and the `eventMap` attribute |
+| `hmccu.e2e.ts` | HomeMatic IP devices behind a CCU, written and captured from an installation |
 | `platform.e2e.ts` | the options of the platform, several fhem in one entry, the 149 accessories of a bridge |
 | `connection.e2e.ts` | a fhem that is not there, restarts, or sends events in pieces |
 | `migration.e2e.ts` | a storage directory as homebridge-fhem left it, on a bridge with an accessory of another plugin: with `migrateFrom` the accessories keep their ids, also on the next start while fhem is away, and without it they do not; an old entry, both plugins installed |
 | `reads.e2e.ts` | a fhem that takes its time to answer what HomeKit reads |
-| `refresh.e2e.ts` | the reading fhem is asked for in the background, once a minute at most. takes that minute. |
+| `refresh.e2e.ts` | the reading fhem is asked for in the background, once a minute at most |
 | `fixtures.e2e.ts` | every device fixture: is what homebridge publishes what the plugin builds? |
 
 The devices of the first four are dummy devices. With `E2E_FHEM_URL` set to the url of a FHEMWEB,
@@ -89,8 +90,11 @@ E2E_HOMEBRIDGE=/tmp/homebridge-1.8.0/node_modules/homebridge bun run test:e2e
 
 The files run side by side, each with a fhem and a homebridge of its own. A homebridge takes up
 to five seconds to end, which the tests do not wait for: the run ends once the last one is gone.
-A test that has to wait long goes into a file of its own, like the one in `refresh.e2e.ts`, so
-that the run takes no longer than that wait.
+The run takes as long as its slowest file, so a file that grows long is split, as
+`hardware.e2e.ts` and `hmccu.e2e.ts` are. A test that has to wait long goes into a file of its
+own. A wait for the clock does not have to be real: `homebridge.passTime` moves the clock of
+homebridge on, as `refresh.e2e.ts` does for its minute. A homebridge also ends by itself when the
+test run that started it is gone, so a run that was killed leaves none behind.
 
 ## Behaviour is pinned by tests
 

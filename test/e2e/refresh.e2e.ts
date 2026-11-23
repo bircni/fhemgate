@@ -1,6 +1,6 @@
 // a read of a characteristic is answered from what the plugin has seen, and fhem is asked in
-// the background whether that still holds, at most once a minute for a reading. the tests wait
-// for that minute to pass, so this file takes a little longer than a minute and holds nothing else.
+// the background whether that still holds, at most once a minute for a reading. the tests move
+// the clock of homebridge on by a minute rather than wait for it to pass.
 //
 // the readings change in the stand-in without an event, as when the long poll missed one, so
 // these tests do not run against a real fhem.
@@ -11,8 +11,6 @@ import { eventually, startStandInWorld, type World } from './world.ts';
 
 describe.skipIf(realFhemUrl !== undefined)('a read of a characteristic that is answered from what the plugin has seen', () => {
   let world: World & { fhem: StandIn };
-  /** when homebridge listed the accessories, which read every characteristic: the first read of the minute */
-  let listed: number;
 
   const thermometer = (name: string) =>
     asJsonlist2({
@@ -49,16 +47,11 @@ describe.skipIf(realFhemUrl !== undefined)('a read of a characteristic that is a
   /** long enough for homebridge to take an answer fhem has sent */
   const settled = () => new Promise((resolve) => setTimeout(resolve, 500));
 
-  const minuteIsOver = async () => {
-    const left = listed + 60_500 - Date.now();
-    if (left > 0) {
-      await new Promise((resolve) => setTimeout(resolve, left));
-    }
-  };
+  /** a minute passes since homebridge listed the accessories, which read every characteristic, or since the last minute passed */
+  const minuteIsOver = () => world.homebridge.passTime(60_500);
 
   beforeAll(async () => {
     world = await startStandInWorld([thermometer('e2e_f_missed'), thermometer('e2e_f_event'), thermometer('e2e_f_gone')]);
-    listed = Date.now();
   });
 
   afterAll(async () => {

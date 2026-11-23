@@ -2,22 +2,14 @@
 // range. the device is the captured HmIP-RGBW, which also has a pct reading through its
 // ccureadingname attribute.
 import { describe, expect, it } from 'vitest';
-import { fixtureDevices } from '../support/devices.ts';
+import { fixtureDevice } from '../support/devices.ts';
 import { characteristicOf, serviceOf } from '../support/homekit.ts';
 import { createWorld } from '../support/subject.ts';
 import type { FhemDevice, Mapping } from '../support/types.ts';
 
-function captured(id: string): FhemDevice {
-  const found = fixtureDevices().find((fixture) => fixture.id === id);
-  if (!found) {
-    throw new Error(`there is no fixture ${id}`);
-  }
-  return found.load();
-}
-
 /** the captured light with its readings set, and the reading for the level that HMCCU makes */
 function rgbw(readings: Record<string, string>, change: (device: FhemDevice) => void = () => {}) {
-  const device = captured('hmccu/captured/hmip-rgbw-7');
+  const device = fixtureDevice('hmccu/captured/hmip-rgbw-7');
   for (const [name, value] of Object.entries(readings)) {
     device.Readings[name] = { Value: value, Time: '2026-11-22 18:00:00' };
   }

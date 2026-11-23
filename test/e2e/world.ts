@@ -30,7 +30,7 @@ export async function eventually<T>(
     if (performance.now() > deadline) {
       throw new Error(`timed out waiting for ${what}.${said(homebridge)}`);
     }
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 20));
   }
 }
 
