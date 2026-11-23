@@ -3,7 +3,7 @@
 // what a write sends to fhem and how an event arrives in HomeKit.
 //
 // the devices are dummy devices, so the same test runs against the stand-in and against a real
-// fhem (set E2E_FHEM_URL). device types that need their hardware are in hardware.e2e.ts.
+// fhem (set E2E_FHEM_URL). device types that need their hardware are in hardware.e2e.ts and hmccu.e2e.ts.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { DummyDevice } from './fhem.ts';
 import { uuids, type TypeName } from './homebridge.ts';

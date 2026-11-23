@@ -62,3 +62,19 @@ export function fixtureDevices(): Fixture[] {
       load: () => JSON.parse(readFileSync(path, 'utf8')) as FhemDevice,
     }));
 }
+
+/**
+ * The device of a fixture, as fhem lists it.
+ *
+ * @param id family/name, without the extension
+ * @param change what to change about the device first
+ */
+export function fixtureDevice(id: string, change: (device: FhemDevice) => void = () => {}): FhemDevice {
+  const found = fixtureDevices().find((candidate) => candidate.id === id);
+  if (!found) {
+    throw new Error(`there is no fixture ${id}`);
+  }
+  const loaded = found.load();
+  change(loaded);
+  return loaded;
+}

@@ -18,6 +18,8 @@ const homebridgePackage = process.env.E2E_HOMEBRIDGE || join(root, 'node_modules
 const homebridgeManifest = JSON.parse(readFileSync(join(homebridgePackage, 'package.json'), 'utf8')) as { version: string; bin: { homebridge: string } };
 // homebridge 1 names the file it is started with differently than homebridge 2 does
 const homebridgeBin = join(homebridgePackage, homebridgeManifest.bin.homebridge);
+/** loaded into homebridge first: it lets a test move the clock on, and ends homebridge when the test run is gone */
+const preload = join(import.meta.dirname, 'preload.ts');
 
 /** the version of the homebridge the tests start */
 export const homebridgeVersion = homebridgeManifest.version;
@@ -213,6 +215,8 @@ export interface Homebridge {
    * five seconds more to end, which is only waited for with `untilExited`.
    */
   stop(options?: { untilExited?: boolean }): Promise<void>;
+  /** moves the clock of homebridge on, as if that much time had passed, and waits until homebridge took it */
+  passTime(milliseconds: number): Promise<void>;
 }
 
 /** whether nothing listens on this port, on any address of this machine */
@@ -344,10 +348,14 @@ export async function startHomebridge(
     env.NODE_V8_COVERAGE = process.env.E2E_V8_COVERAGE;
   }
   const flags = options.debug === false ? [] : ['-D'];
-  const child = spawn(process.execPath, [homebridgeBin, '-I', '-Q', ...flags, '-U', storage, '-P', options.plugins ?? root, '--strict-plugin-resolution'], {
-    env,
-    stdio: ['ignore', log, log],
-  });
+  const child = spawn(
+    process.execPath,
+    ['--import', preload, homebridgeBin, '-I', '-Q', ...flags, '-U', storage, '-P', options.plugins ?? root, '--strict-plugin-resolution'],
+    {
+      env,
+      stdio: ['ignore', log, log],
+    },
+  );
   closeSync(log);
 
   const pidFile = join(storage, 'pid');
@@ -363,6 +371,7 @@ export async function startHomebridge(
   const output = () => readFileSync(logFile, 'utf8');
   const notifications: HapNotification[] = [];
   const listeners: Socket[] = [];
+  let ahead = 0;
 
   /** what homebridge answers a controller that reads the characteristics, in their order */
   const read = async (characteristics: HapCharacteristic[]) => {
@@ -454,6 +463,20 @@ export async function startHomebridge(
     notifications: () => notifications,
 
     exited: () => exited,
+
+    async passTime(milliseconds) {
+      ahead += milliseconds;
+      writeFileSync(join(storage, 'clock'), String(ahead));
+      child.kill('SIGUSR2');
+      const took = `e2e clock is ${ahead} ms ahead`;
+      const deadline = performance.now() + 5000;
+      while (!output().includes(took)) {
+        if (performance.now() > deadline) {
+          throw new Error(`homebridge did not move its clock on by ${milliseconds} ms`);
+        }
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      }
+    },
 
     async stop({ untilExited = false } = {}) {
       for (const listener of listeners) {
